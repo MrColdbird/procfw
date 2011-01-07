@@ -300,6 +300,7 @@ int printk(char *fmt, ...)
 			if (printk_memory_log_ptr != printk_memory_log) {
 				// flush debug output
 				sceIoWrite(fd, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
+				sceIoWrite(kout, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
 				memset(printk_memory_log, 0, sizeof(printk_memory_log));
 				printk_memory_log_ptr = printk_memory_log;
 			}

@@ -6,6 +6,8 @@
 #include <pspiofilemgr.h>
 #include <stdio.h>
 #include <string.h>
+#include "main.h"
+#include "loadexec_patch.h"
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
@@ -26,6 +28,7 @@ void fill_vram(u32 color)
 static int test_thread(SceSize args, void *argp)
 {
 	sceKernelDelayThread(5*1000000L);
+	patch_sceLoadExec();
 	printk("Is all my word recorded?\n");
 
 	sceKernelExitDeleteThread(0);

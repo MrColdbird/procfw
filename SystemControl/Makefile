@@ -1,5 +1,7 @@
 TARGET = systemctrl
-OBJS = main.o $(PRO_HOME)/Imports/SysMemForKernel.o
+OBJS = main.o loadexec_patch.o 
+IMPORTS = $(PRO_HOME)/Common/utils.o $(PRO_HOME)/Imports/SysMemForKernel.o $(PRO_HOME)/Imports/LoadCoreForKernel.o
+OBJS += $(IMPORTS)
 
 INCDIR = $(PRO_HOME)/Common/ $(PRO_HOME)/include/
 CFLAGS = -Os -G0 -Wall -fno-pic

@@ -42,17 +42,27 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	return 0;
 }
 
-// 6.35 PRO
-static u8 new_version_str[] = {
-	0x36, 0x00, 0x2e, 0x00, 0x33, 0x00, 0x35, 0x00, 0x20, 0x00, 0x50, 0x00, 0x52, 0x00, 0x4F, 0x00, 0x00, 0x00
-};
+static inline void ascii2utf16(char *dest, const char *src)
+{
+	while(*src != '\0') {
+		*dest++ = *src;
+		*dest++ = '\0';
+		src++;
+	}
+
+	*dest++ = '\0';
+	*dest++ = '\0';
+}
 
 static void patch_sysconf_plugin_module(u32 text_addr)
 {
 	void *p;
+	char str[20];
+
+	sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
 
 	p = (void*)(text_addr + 0x2A1FC);
-	memcpy(p, new_version_str, sizeof(new_version_str));
+	ascii2utf16(p, str);
 
 	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr+0x18F3C); // lui $v0, 
 	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr+0x18F40); // or $v0, $v0, 

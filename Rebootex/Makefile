@@ -1,6 +1,3 @@
-all:
-	make -C Rebootex_bin
-
 TARGET = Rebootex
 OBJS = main.o $(PRO_HOME)/Common/utils.o
 

@@ -120,7 +120,7 @@ int install_cfw(void)
 	char modpath[80];
 	char destpath[512];
 
-	sprintf(modpath, "systemctrl.prx", psp_model+1);
+	sprintf(modpath, "systemctrl.prx");
 	sprintf(destpath, "flash0:/kd/%s", modpath);
 
 	ret = copy_file(modpath, destpath);
@@ -142,6 +142,8 @@ int install_cfw(void)
 			break;
 	}
 
+	return 0;
+
 exit:
 	printf("Copy file error (0x%08x)! Install aborted.\n", ret);
 
@@ -157,7 +159,7 @@ void start_reboot(int mode)
 	int delay = 0;
 	char modpath[80];
 
-	sprintf(modpath, "rebootex_0%dg.prx", psp_model+1);
+	sprintf(modpath, "rebootex.prx");
 	modid = kuKernelLoadModule(modpath, 0, 0);
 
 	if (modid >= 0) {
@@ -187,8 +189,8 @@ int main(int argc, char *argv[])
 	pspDebugScreenInit();
 	fw_version = sceKernelDevkitVersion();
 	
-	if (fw_version != 0x06030610) {
-		printf("This program requires 5.03 Sorry.\n");
+	if (fw_version != 0x06030510) {
+		printf("This program requires 6.35 Sorry.\n");
 		goto exit;
 	}
 

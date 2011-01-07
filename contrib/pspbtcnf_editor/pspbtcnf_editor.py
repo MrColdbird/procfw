@@ -61,7 +61,7 @@ def add_prx_to_bootconf(srcfn, before_modname, modname, modflag):
 	if signature != BTCNF_MAGIC or nmodules <= 0 or nmodes <= 0:
 		raise Exception("Bad bootconf") 
 
-	bootconf = bootconf + modname.encode()
+	bootconf = bootconf + modname.encode() + b'\0'
 	modnameend += len(modname) + 1
 
 	i=0

@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
-#include "loadexec_patch.h"
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"

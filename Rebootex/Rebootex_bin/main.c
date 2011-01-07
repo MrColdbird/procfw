@@ -37,7 +37,7 @@ typedef struct _btcnf_module
 int rebootmodule_open = 0;
 
 //rtm data
-char * loadrebootmoduleafter = NULL;
+char * loadrebootmodulebefore = NULL;
 char * rebootmodule = NULL;
 int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
@@ -178,13 +178,13 @@ void load_default_configure(void)
 {
 	rebootex_conf *reboot = (void*)(REBOOTEX_CONFIG_START + 0x20);
 
-	_memset((void*)REBOOTEX_CONFIG_START, 0, 256);
+	_memset((void*)reboot, 0, sizeof(*reboot));
 	reboot->magic = 0xC01DB15D;
 }
 
 void load_configure(void)
 {
-	loadrebootmoduleafter = *(int *)(REBOOTEX_CONFIG_START + 0x10);
+	loadrebootmodulebefore = *(int *)(REBOOTEX_CONFIG_START + 0x10);
 	rebootmodule = (char *)(*(int *)(REBOOTEX_CONFIG_START + 0x14));
 	size_rebootmodule = *(int *)(REBOOTEX_CONFIG_START + 0x18);
 	rebootmoduleflags = *(int *)(REBOOTEX_CONFIG_START + 0x1C);
@@ -424,9 +424,93 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 
 int _UnpackBootConfig(char * buffer, int length)
 {
-	_memcpy(buffer, pspbtjnf, size_pspbtjnf);
+	int addsize, result;
 
-	return size_pspbtjnf;
+	_memcpy(buffer, pspbtjnf, size_pspbtjnf);
+	result = size_pspbtjnf;
+
+	//reboot variable set
+	if(loadrebootmodulebefore)
+	{
+		//add reboot prx entry
+		addsize = AddPRX(buffer, loadrebootmodulebefore, "/rtm.prx", rebootmoduleflags);
+
+		//add size modification
+		if(addsize > 0) result += addsize;
+	}
+
+	return result;
+}
+
+int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
+{
+	//cast header
+	_btcnf_header * header = (_btcnf_header *)buffer;
+
+	//valid boot config
+	if(header->signature == BTCNF_MAGIC)
+	{
+		//valid number of modules
+		if(header->nmodules > 0)
+		{
+			//valid number of modes
+			if(header->nmodes > 0)
+			{
+				//add module name
+				header->modnameend += _strcpy(buffer + header->modnameend, prxname);
+
+				//cast module list
+				_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+				//iterate modules
+				int modnum = 0; for(; modnum < header->nmodules; modnum++)
+				{
+					//found module name
+					if(_strcmp(buffer + header->modnamestart + module[modnum].module_path, insertbefore) == 0)
+					{
+						//stop search
+						break;
+					}
+				}
+
+				//found module
+				if(modnum < header->nmodules)
+				{
+					//add custom module
+					_btcnf_module newmod; _memset(&newmod, 0, sizeof(newmod));
+					newmod.module_path = header->modnameend - _strlen(prxname) - 1 - header->modnamestart;
+					newmod.flags = 0x80010000 | (flags & 0xFFFF);
+					_memmove(&module[modnum + 1], &module[modnum + 0], buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
+					_memcpy(&module[modnum + 0], &newmod, sizeof(newmod));
+					header->nmodules++;
+					header->modnamestart += sizeof(newmod);
+					header->modnameend += sizeof(newmod);
+
+					//make mode include our module
+					int modenum = 0; for(; modenum < header->nmodes; modenum++)
+					{
+						//increase module range
+						*(unsigned short *)(buffer + header->modestart + modenum * 32) += 1;
+					}
+
+					//return size modificator
+					return _strlen(prxname) + 1 + sizeof(_btcnf_module);
+				}
+
+				//module not found
+				return -4;
+			}
+
+			//invalid number of modes
+			return -3;
+		}
+
+		//invalid number of modules
+		return -2;
+	}
+
+	//invalid magic value
+	return -1;
 }
 
 #if 0

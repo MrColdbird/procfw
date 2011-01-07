@@ -117,13 +117,13 @@ void usage(void)
 int install_cfw(void)
 {
 	int ret;
-	char modpath[80];
-	char destpath[512];
 
-	sprintf(modpath, "systemctrl.prx");
-	sprintf(destpath, "flash0:/kd/%s", modpath);
+	ret = copy_file("systemctrl.prx", "flash0:/kd/systemctrl.prx");
 
-	ret = copy_file(modpath, destpath);
+	if (ret != 0)
+		goto exit;
+
+	ret = copy_file("vshctrl.prx", "flash0:/kd/vshctrl.prx");
 
 	if (ret != 0)
 		goto exit;

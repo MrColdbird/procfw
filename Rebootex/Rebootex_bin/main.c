@@ -67,6 +67,7 @@ int _memset(unsigned char * buffer, unsigned char value, unsigned int length);
 int _sceBootLfatOpen(char * filename);
 int _sceBootLfatRead(char * buffer, int length);
 int _sceBootLfatClose (void);
+int _UnpackBootConfig(char * buffer, int length);
 
 //loadcore replacements
 int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize);
@@ -149,6 +150,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patches[4]);
 	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patches[5]);
 	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patches[6]);
+	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patches[7]);
 	_sw(0x03E00008, REBOOT_START + patches[8]); // jr $ra
 	_sw(0x24020001, REBOOT_START + patches[9]); // li $v0, 1
 	_sw(0, REBOOT_START + patches[10]);
@@ -301,9 +303,6 @@ int _memset(unsigned char * buffer, unsigned char value, unsigned int length)
 	return result;
 }
 
-static char *p_sctrl;
-static int size_sctrl;
-
 static char *p_rmod;
 static int size_rmod;
 
@@ -330,10 +329,6 @@ int _sceBootLfatRead(char * buffer, int length)
 
 int _sceBootLfatOpen(char * filename)
 {
-	if(_strcmp(filename, "/kd/pspbtcnf.bin") == 0) {
-		filename[9] = 'j';
-	}
-
 	//load on reboot module open
 	if(_strcmp(filename, "/rtm.prx") == 0)
 	{
@@ -425,6 +420,13 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 
 	//call module_start
 	return module_bootstart(arg1, arg2, arg3);
+}
+
+int _UnpackBootConfig(char * buffer, int length)
+{
+	_memcpy(buffer, pspbtjnf, size_pspbtjnf);
+
+	return size_pspbtjnf;
 }
 
 #if 0

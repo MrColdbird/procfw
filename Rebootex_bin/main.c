@@ -1,6 +1,5 @@
 #include <pspsdk.h>
 #include "utils.h"
-#include "rebootex_config.h"
 #include "pspbtjnf.h"
 
 #define REBOOT_START 0x88600000
@@ -82,7 +81,6 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 //reboot function
 void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
 
-void load_default_configure(void);
 void load_configure(void);
 
 //reboot replacement
@@ -161,7 +159,6 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	_sw(0x02A0E821, REBOOT_START + patches[15]); // move $sp, $s5
 	_sw(0, REBOOT_START + patches[16]);
 
-	load_default_configure();
 	load_configure();
 
 	//initializing global variables
@@ -172,14 +169,6 @@ void main(int arg1, int arg2, int arg3, int arg4)
 
 	//reboot psp
 	reboot(arg1, arg2, arg3, arg4);
-}
-
-void load_default_configure(void)
-{
-	rebootex_conf *reboot = (void*)(REBOOTEX_CONFIG_START + 0x20);
-
-	_memset((void*)reboot, 0, sizeof(*reboot));
-	reboot->magic = 0xC01DB15D;
 }
 
 void load_configure(void)

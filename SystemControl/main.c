@@ -42,7 +42,7 @@ int module_start(SceSize args, void* argp)
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	
-	printk_init();
+	printk_init(NULL);
 	printk("SystemControl: model 0%dg FW 0x%08X\n", psp_model+1, psp_fw_version);
 
 	if ( 0 ) {

@@ -2,7 +2,7 @@
 #define PRINTK_H
 
 #ifdef DEBUG
-int printk_init(void);
+int printk_init(const char* filename);
 int printk(char *fmt, ...)__attribute__((format (printf, 1, 2)));
 int printk_lock(void);
 int printk_unlock(void);

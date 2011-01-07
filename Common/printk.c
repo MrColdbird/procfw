@@ -268,6 +268,7 @@ int vsnprintf(char *buf, int size, char *fmt, va_list args)
 }
 
 static char printk_buf[128];
+static const char *printk_output_fn;
 
 static char printk_memory_log[2048];
 static char *printk_memory_log_ptr = printk_memory_log;
@@ -290,7 +291,11 @@ int printk(char *fmt, ...)
 	if ( 1 ) {
 		int fd;
 
-		fd = sceIoOpen("ms0:/LOG_SCTL.TXT", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+		if (printk_output_fn == NULL) {
+			printk_output_fn = "ms0:/LOG_SCTL.TXT";
+		}
+
+		fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 
 		if(fd < 0) {
 			fd = sceIoOpen("ef0:/LOG_SCTL.txt", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
@@ -374,13 +379,15 @@ void printk_unlock(void)
 	psp_mutex_unlock(&lock);
 }
 
-int printk_init(void)
+int printk_init(const char *output)
 {
 	MLOCK_T *s = &lock;
 
 	s->l = 0;
 	s->c = 0;
 	s->thread_id = sceKernelGetThreadId();
+
+	printk_output_fn = output;
 
 	return 0;
 }

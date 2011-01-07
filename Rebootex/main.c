@@ -6,7 +6,7 @@
 #include <string.h>
 #include "systemctrl.h"
 #include "utils.h"
-#include "Rebootex_bin/rebootex.h"
+#include "../Rebootex_bin/rebootex.h"
 
 u32 psp_model;
 

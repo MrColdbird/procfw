@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
-#include "../Rebootex/Rebootex_bin/rebootex.h"
+#include "../Rebootex_bin/rebootex.h"
 
 static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 

@@ -45,7 +45,7 @@ int module_start(SceSize args, void* argp)
 	printk_init();
 	printk("SystemControl: model 0%dg FW 0x%08X\n", psp_model+1, psp_fw_version);
 
-	{
+	if ( 0 ) {
 		int thid;
 
 		// a test thread
@@ -55,6 +55,8 @@ int module_start(SceSize args, void* argp)
 			sceKernelStartThread(thid, 0, NULL);
 		}
 	}
+
+	syspatch_init();
 
 	return 0;
 }

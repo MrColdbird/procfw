@@ -269,8 +269,6 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	return 0;
 }
 
-int (*g_on_module_start)(SceModule2*) = NULL;
-
 STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 {
 	STMOD_HANDLER on_module_start;

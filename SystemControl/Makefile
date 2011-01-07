@@ -1,7 +1,11 @@
 TARGET = systemctrl
-OBJS = main.o loadexec_patch.o systemctrl.o kubridge.o
+OBJS = main.o syspatch.o loadexec_patch.o systemctrl.o kubridge.o \
+	   module_handler.o $(PRO_HOME)/Common/libs.o
+
 IMPORTS = $(PRO_HOME)/Common/utils.o $(PRO_HOME)/Imports/SysMemForKernel.o $(PRO_HOME)/Imports/LoadCoreForKernel.o \
-		  $(PRO_HOME)/Imports/LoadExecForKernel.o $(PRO_HOME)/Imports/SysMemForKernel.o $(PRO_HOME)/Imports/ModuleMgrForKernel.o
+		  $(PRO_HOME)/Imports/LoadExecForKernel.o $(PRO_HOME)/Imports/SysMemForKernel.o $(PRO_HOME)/Imports/ModuleMgrForKernel.o \
+		  $(PRO_HOME)/Imports/InterruptManagerForKernel.o
+
 OBJS += $(IMPORTS)
 
 INCDIR = $(PRO_HOME)/Common/ $(PRO_HOME)/include/

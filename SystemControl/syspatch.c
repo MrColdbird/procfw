@@ -43,6 +43,7 @@ void syspatch_init()
 	setup_module_handler();
 	previous = sctrlHENSetStartModuleHandler(&syspatch_module_chain);
 	patch_sceLoaderCore();
+	patch_sceMemlmd();
 
 	sync_cache();
 }

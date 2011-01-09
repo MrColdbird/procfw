@@ -24,6 +24,13 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceLoadExec();
 	}
+
+#ifdef DEBUG
+	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
+		printk_sync();
+		printk("printk synchronized\n");
+	}
+#endif
 	
 	if (previous)
 		return (*previous)(mod);

@@ -10,6 +10,13 @@ int sceKernelGetModel(void);
 
 void sync_cache(void);
 
+/**
+ * @return interrupted status
+ * 0 - we are definitely in interrupt disabled status. And the interrupt status won't change as long as our code didn't
+ * 1 - we are in interrupt enable status. but the interrupt status would change in later code
+ */
+int is_cpu_intr_enable(void);
+
 #ifdef DEBUG
 void hexdump(void *addr, int size);
 #else

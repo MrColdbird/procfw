@@ -33,3 +33,35 @@ void hexdump(void *addr, int size)
 	printk("\n");
 }
 #endif
+
+int is_cpu_intr_enable(void)
+{
+	int ret;
+
+	asm volatile ("mfic	%0, $0\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			"nop\n"
+			: "=r"(ret)
+			);
+
+	return ret;
+}

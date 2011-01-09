@@ -4,11 +4,13 @@
 #ifdef DEBUG
 int printk_init(const char* filename);
 int printk(char *fmt, ...)__attribute__((format (printf, 1, 2)));
+int printk_sync(void);
 int printk_lock(void);
 int printk_unlock(void);
 #else
-#define printk_init()
+#define printk_init(...)
 #define printk(...)
+#define printk_sync()
 #define printk_lock()
 #define printk_unlock()
 #endif

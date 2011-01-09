@@ -34,6 +34,7 @@ static MLOCK_T lock;
 
 extern void printk_lock(void);
 extern void printk_unlock(void);
+extern int is_cpu_intr_enable(void);
 
 static int itostr(char *buf, int in_data, int base, int upper, int sign)
 {
@@ -270,60 +271,88 @@ int vsnprintf(char *buf, int size, char *fmt, va_list args)
 static char printk_buf[128];
 static const char *printk_output_fn;
 
-static char printk_memory_log[1024*4];
+static char printk_memory_log[1024*4] __attribute__((aligned(64)));
 static char *printk_memory_log_ptr = printk_memory_log;
+
+static void flush_printk_memory_log(int fd, int kout)
+{
+	sceIoWrite(fd, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
+	sceIoWrite(kout, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
+	memset(printk_memory_log, 0, sizeof(printk_memory_log));
+	printk_memory_log_ptr = printk_memory_log;
+}
+
+static void append_to_memory_log(int printed_len)
+{
+	if (printk_memory_log_ptr + printed_len < printk_memory_log + sizeof(printk_memory_log)) {
+		memcpy(printk_memory_log_ptr, printk_buf, printed_len);
+		printk_memory_log_ptr += printed_len;
+	}
+}
+
+static int printk_open_output(void)
+{
+	int fd;
+
+	if (printk_output_fn == NULL) {
+		printk_output_fn = "ms0:/LOG_SCTL.TXT";
+	}
+
+	fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+
+	if(fd < 0) {
+		fd = sceIoOpen("ef0:/LOG_SCTL.txt", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+	}
+
+	return fd;
+}
+
+static void printk_output(int printed_len)
+{
+	int fd, kout;
+
+	kout = sceKernelStdout();
+	sceIoWrite(kout, printk_buf, printed_len);
+	fd = printk_open_output();
+
+	if (fd >= 0) {
+		if (printk_memory_log_ptr > printk_memory_log) {
+			flush_printk_memory_log(fd, kout);
+		}
+
+		sceIoWrite(fd, printk_buf, printed_len);
+		sceIoClose(fd);
+	} else {
+		append_to_memory_log(printed_len);
+	}
+
+	sceKernelDelayThread(10000);
+}
 
 int printk(char *fmt, ...)
 {
 	va_list args;
 	int printed_len;
-	int kout;
 
-	printk_lock();
-	va_start(args, fmt);
-	printed_len = vsnprintf(printk_buf, sizeof(printk_buf), fmt, args);
-	va_end(args);
-	printed_len--;
+	if ( 0 )
+		return 0;
 
-	kout = sceKernelStdout();
-	sceIoWrite(kout, printk_buf, printed_len);
-
-	if ( 1 ) {
-		int fd;
-
-		if (printk_output_fn == NULL) {
-			printk_output_fn = "ms0:/LOG_SCTL.TXT";
-		}
-
-		fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
-
-		if(fd < 0) {
-			fd = sceIoOpen("ef0:/LOG_SCTL.txt", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
-		}
-
-		if (fd >= 0) {
-			if (printk_memory_log_ptr != printk_memory_log) {
-				// flush debug output
-				sceIoWrite(fd, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
-				sceIoWrite(kout, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
-				memset(printk_memory_log, 0, sizeof(printk_memory_log));
-				printk_memory_log_ptr = printk_memory_log;
-			}
-
-			sceIoWrite(fd, printk_buf, printed_len);
-			sceIoClose(fd);
-		} else {
-			// log to memory buf
-
-			if (printk_memory_log_ptr + printed_len < printk_memory_log + sizeof(printk_memory_log)) {
-				memcpy(printk_memory_log_ptr, printk_buf, printed_len);
-				printk_memory_log_ptr += printed_len;
-			}
-		}
+	if (0 == is_cpu_intr_enable()) {
+		// interrupt disabled, let's do the work quickly before the watchdog bites
+		va_start(args, fmt);
+		printed_len = vsnprintf(printk_buf, sizeof(printk_buf), fmt, args);
+		va_end(args);
+		printed_len--;
+		append_to_memory_log(printed_len);
+	} else {
+		printk_lock();
+		va_start(args, fmt);
+		printed_len = vsnprintf(printk_buf, sizeof(printk_buf), fmt, args);
+		va_end(args);
+		printed_len--;
+		printk_output(printed_len);
+		printk_unlock();
 	}
-
-	sceKernelDelayThread(10000);
-	printk_unlock();
 
 	return printed_len;
 }
@@ -388,6 +417,24 @@ int printk_init(const char *output)
 	s->thread_id = sceKernelGetThreadId();
 
 	printk_output_fn = output;
+
+	return 0;
+}
+
+int printk_sync(void)
+{
+	int fd, kout;
+
+	kout = sceKernelStdout();
+	fd = printk_open_output();
+
+	if (fd >= 0) {
+		if (printk_memory_log_ptr > printk_memory_log) {
+			flush_printk_memory_log(fd, kout);
+		}
+	}
+
+	sceKernelDelayThread(10000);
 
 	return 0;
 }

@@ -68,7 +68,9 @@ PSP_EXPORT_FUNC(oe_free)
 PSP_EXPORT_FUNC(oe_mallocterminate)
 PSP_EXPORT_FUNC(sctrlSEGetUmdFile)
 PSP_EXPORT_FUNC(sctrlSESetUmdFile)
+PSP_EXPORT_FUNC_NID(sctrlSESetUmdFile, 0xB64186D0)
 PSP_EXPORT_FUNC(sctrlSESetBootConfFileIndex)
+PSP_EXPORT_FUNC_NID(sctrlSESetBootConfFileIndex, 0x5CB025F0)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(VersionSpoofer, 0, 0x4001)

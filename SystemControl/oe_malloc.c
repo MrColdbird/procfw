@@ -4,7 +4,6 @@
 #include <pspsysmem_kernel.h>
 #include <malloc.h>
 #include "utils.h"
-#include "oe_malloc.h"
 #include "printk.h"
 
 static SceUID heapid = -1;

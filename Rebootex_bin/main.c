@@ -1,6 +1,5 @@
 #include <pspsdk.h>
 #include "utils.h"
-#include "pspbtjnf.h"
 
 #define REBOOT_START 0x88600000
 #define REBOOTEX_CONFIG_START 0x88FB0000
@@ -417,22 +416,83 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 
 int _UnpackBootConfig(char * buffer, int length)
 {
-	int addsize, result;
+	int result;
+	u32 newsize;
 
-	_memcpy(buffer, pspbtjnf, size_pspbtjnf);
-	result = size_pspbtjnf;
+	result = (*UnpackBootConfig)(buffer, length);
+
+	newsize = AddPRX(buffer, "/kd/init.prx", "/kd/systemctrl.prx", 0x00EF);
+
+	if (newsize > 0) result = newsize;
+
+	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", 0x0001);
+
+	if (newsize > 0) result = newsize;
 
 	//reboot variable set
 	if(loadrebootmodulebefore)
 	{
 		//add reboot prx entry
-		addsize = AddPRX(buffer, loadrebootmodulebefore, "/rtm.prx", rebootmoduleflags);
+		newsize = AddPRX(buffer, loadrebootmodulebefore, "/rtm.prx", rebootmoduleflags);
 
-		//add size modification
-		if(addsize > 0) result += addsize;
+		if(newsize > 0) result = newsize;
 	}
 
 	return result;
+}
+
+// completely wipe out a module from bootconf
+int DeletePrx(char *buffer, const char *modname)
+{
+	//cast header
+	_btcnf_header * header = (_btcnf_header *)buffer;
+
+	if(header->signature != BTCNF_MAGIC) {
+		return -1;
+	}
+
+	if(header->nmodules <= 0) {
+		return -2;
+	}
+
+	if(header->nmodes <= 0) {
+		return -3;
+	}
+
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+	//iterate modules
+	int modnum = 0; for(; modnum < header->nmodules; modnum++)
+	{
+		//found module name
+		if(_strcmp(buffer + header->modnamestart + module[modnum].module_path, modname) == 0)
+		{
+			//stop search
+			break;
+		}
+	}
+
+	//found module
+	if(modnum >= header->nmodules) {
+		return -4;
+	}
+
+	//delete custom module
+	_memmove(&module[modnum], &module[modnum + 1], buffer + header->modnameend - (unsigned int)&module[modnum + 1]);
+	header->nmodules--;
+	header->modnamestart -= sizeof(module[0]);
+	header->modnameend -= sizeof(module[0]);
+
+	//decrease the mode module cnt
+	int modenum = 0; for(; modenum < header->nmodes; modenum++)
+	{
+		//decrease module range
+		*(unsigned short *)(buffer + header->modestart + modenum * 32) -= 1;
+	}
+
+	//return newsize
+	return header->modnameend;
 }
 
 int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
@@ -487,7 +547,7 @@ int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
 					}
 
 					//return size modificator
-					return _strlen(prxname) + 1 + sizeof(_btcnf_module);
+					return header->modnameend;
 				}
 
 				//module not found
@@ -504,6 +564,22 @@ int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
 
 	//invalid magic value
 	return -1;
+}
+
+// Tested at most 16 modules can be moved before it exhausted the remaining buffer of UnpackBootConfig
+int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
+{
+	int newsize, result;
+
+	newsize = DeletePrx(buffer, prxname);
+
+	if (newsize > 0) result = newsize;
+
+	newsize = AddPRX(buffer, insertbefore, prxname, flags);
+
+	if (newsize > 0) result = newsize;
+
+	return result;
 }
 
 #if 0

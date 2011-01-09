@@ -69,5 +69,10 @@ void patch_sceLoadExec(void)
 	//save LoadReboot function
 	LoadReboot = (void*)loadexec->text_addr;
 
+	//allow user $k1 configs to call sceKernelLoadExecWithApiType
+	_sw(MAKE_JUMP(loadexec->text_addr+0x000023EC), loadexec->text_addr+0x000023B8);
+	//allow all user levels to call sceKernelLoadExecWithApiType
+	_sw(0, loadexec->text_addr+0x000023FC);
+
 	sync_cache();
 }

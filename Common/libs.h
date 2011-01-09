@@ -18,7 +18,6 @@ typedef struct
 PspModuleImport *find_import_lib(SceModule *pMod, char *library);
 
 unsigned int find_import_bynid(SceModule *pMod, char *library, unsigned int nid);
-unsigned int find_import_byname(SceModule *pMod, char *library, char *name);
 
 void api_hook_addr(int addr, void *func);
 void api_hook_import(int addr, void *func);

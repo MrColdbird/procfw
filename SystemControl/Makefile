@@ -3,6 +3,8 @@ OBJS = main.o \
 	   syspatch.o \
 	   loadexec_patch.o \
 	   loadercore_patch.o \
+	   nid_resolver.o \
+	   nid_data.o \
 	   elf.o \
 	   systemctrl.o \
 	   kubridge.o \

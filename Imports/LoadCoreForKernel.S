@@ -7,3 +7,5 @@
 	IMPORT_FUNC	"LoadCoreForKernel",0xED53894F,sceKernelFindModuleByUID
 	IMPORT_FUNC	"LoadCoreForKernel",0x312CA47E,LoadCoreForKernel_312CA47E
 	IMPORT_FUNC	"LoadCoreForKernel",0x01DB1EB3,LoadCoreForKernel_01DB1EB3
+	IMPORT_FUNC	"LoadCoreForKernel",0x07738DC3,LoadCoreForKernel_07738DC3
+	IMPORT_FUNC	"LoadCoreForKernel",0x6565B132,LoadCoreForKernel_6565B132

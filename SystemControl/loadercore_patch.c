@@ -365,4 +365,6 @@ void patch_sceLoaderCore(void)
 	void * memlmd_E42AFE2E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0xE42AFE2E);
 	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x41A4);
 	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x5CA4);
+
+	setup_nid_resolver(loadcore->text_addr);
 }

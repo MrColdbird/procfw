@@ -15,7 +15,7 @@ static STMOD_HANDLER previous;
 
 static int syspatch_module_chain(SceModule2 *mod)
 {
-#ifdef DEBUG
+#if 0
 	if (mod != NULL) {
 		printk("%s\n", mod->modname);
 	}

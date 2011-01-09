@@ -13,45 +13,31 @@
 #include "libs.h"
 #include "nid_resolver.h"
 
-int LoadCoreForKernel_07738DC3(void *unk0, SceLibraryStubTable *stub, u32 stub_size);
-int LoadCoreForKernel_6565B132(SceLibraryStubTable *stub, u32 stub_size);
+static int (*aLinkLibEntries)(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
 
-void nid_resolver(SceLibraryStubTable *stub)
+static void nid_resolver(SceLibraryStubTable *stub)
 {
-	int i, j, k;
+	int i, cnt;
+	u32 new;
 
-	if (stub == NULL)
-		return;
+	cnt = stub->vstubcount+stub->stubcount;
+	
+	for(i=0; i<cnt; ++i) {
+		new = resolve_nid(stub->libname, stub->nidtable[i]);
 
-	for(i=0; i<nid_fix_size; ++i) {
-		if (!strcmp(stub->libname, nid_fix[i].name)) {
-			int cnt = stub->vstubcount+stub->stubcount;
-
-			for(j=0; j<cnt; ++j) {
-				for(k=0; k<nid_fix[i].nidcount; ++k) {
-					if(stub->nidtable[j] == nid_fix[i].nidtable[k].old) {
-						stub->nidtable[j] = nid_fix[i].nidtable[k].new;
-						printk("%s: %s_%08X->%s_%08X\n", __func__, stub->libname, nid_fix[i].nidtable[k].old, stub->libname, nid_fix[i].nidtable[k].new);
-
-						break;
-					}
-				}
-			}
+		if (stub->nidtable[i] != new) {
+			stub->nidtable[i] = new;
 		}
 	}
 }
 
-static int (*aLinkLibEntries)(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
-
 static int _aLinkLibEntries(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mode)
 {
 	int ret;
-	int cnt;
    
 	ret = (*aLinkLibEntries)(unk0, stub, is_user_mode);
-	cnt = stub->vstubcount+stub->stubcount;
 
-	if (stub->nidtable != NULL) {
+	if (stub != NULL && stub->nidtable != NULL) {
 		nid_resolver(stub);
 	}
 
@@ -62,4 +48,26 @@ void setup_nid_resolver(u32 text_addr)
 {
 	aLinkLibEntries = (void*)(text_addr+0x3BCC);
 	_sw(MAKE_CALL(_aLinkLibEntries), text_addr+0x3468);
+}
+
+u32 resolve_nid(const char *libname, u32 nid)
+{
+	int i, j;
+	u32 new;
+
+	for(i=0; i<nid_fix_size; ++i) {
+		if (!strcmp(libname, nid_fix[i].name)) {
+			for(j=0; j<nid_fix[i].nidcount; ++j) {
+				new = nid_fix[i].nidtable[j].new;
+				
+				if(nid == nid_fix[i].nidtable[j].old) {
+					printk("%s: %s_%08X->%s_%08X\n", __func__, libname, nid, libname, new);
+
+					return new;
+				}
+			}
+		}
+	}
+
+	return nid;
 }

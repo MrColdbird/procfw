@@ -14,5 +14,7 @@ typedef struct _resolver_config {
 
 extern resolver_config nid_fix[];
 extern u32 nid_fix_size;
+u32 resolve_nid(const char * libname, u32 nid);
+void setup_nid_resolver(u32 text_addr);
 
 #endif

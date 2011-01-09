@@ -21,7 +21,6 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check);
 
 void syspatch_init();
 void setup_module_handler(void);
-void setup_nid_resolver(u32 text_addr);
 void patch_sceLoaderCore(void);
 void patch_sceLoadExec(void);
 

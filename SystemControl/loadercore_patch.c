@@ -11,6 +11,7 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "elf.h"
+#include "nid_resolver.h"
 
 //original functions
 int (* ProbeExec1)(unsigned char * buffer, int * check) = NULL;

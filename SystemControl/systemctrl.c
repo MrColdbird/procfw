@@ -10,9 +10,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
-
-// Internal NID Relinker provided by nid_redir.c
-void patch_sysctrl_args(char * libname, u32 * nid);
+#include "nid_resolver.h"
 
 extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_45C6125B(const char *file, struct SceKernelLoadExecVSHParam *param);
@@ -216,7 +214,6 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 	return (PspIoDrv*) p;
 }
 
-// Use the classic one instead of TN's
 u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 {
 	struct SceLibraryEntryTable *entry;
@@ -225,7 +222,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	int entLen;
 
 	//nid resolve arguments
-//	patch_sysctrl_args(szLib, &nid);
+	nid = resolve_nid(szMod, nid);
 
 	pMod = sceKernelFindModuleByName(szMod);
 

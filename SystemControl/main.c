@@ -16,14 +16,6 @@ PSP_MODULE_INFO("SystemControl", 0x3007, 1, 0);
 u32 psp_model = 0;
 u32 psp_fw_version = 0;
 
-void fill_vram(u32 color)
-{
-	u32 *p = (u32*)0x44000000;
-
-	while (p < (u32*)0x44200000) 
-		*p++ = color;
-}
-
 int module_start(SceSize args, void* argp)
 {
 	fill_vram(0x000000ff);

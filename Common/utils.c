@@ -65,3 +65,11 @@ int is_cpu_intr_enable(void)
 
 	return ret;
 }
+
+void fill_vram(u32 color)
+{
+	u32 *p = (u32*)0x44000000;
+
+	while (p < (u32*)0x44200000) 
+		*p++ = color;
+}

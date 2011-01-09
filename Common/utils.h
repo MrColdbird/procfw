@@ -17,6 +17,8 @@ void sync_cache(void);
  */
 int is_cpu_intr_enable(void);
 
+void fill_vram(u32 color);
+
 #ifdef DEBUG
 void hexdump(void *addr, int size);
 #else

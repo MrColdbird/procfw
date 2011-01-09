@@ -86,6 +86,8 @@ static int itostr(char *buf, int in_data, int base, int upper, int sign)
 #define OUT_C(c) \
 	if(str<end){ \
 		*str++ = (c); \
+	} else { \
+		goto exit; \
 	}
 
 static char digital_buf[32];
@@ -265,6 +267,8 @@ int vsnprintf(char *buf, int size, char *fmt, va_list args)
 	}
 
 	OUT_C(0);
+
+exit:
 	return str-buf;
 }
 

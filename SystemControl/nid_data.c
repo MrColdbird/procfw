@@ -8,10 +8,10 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xFC114573, 0xF0E0AB7A, },
 	{ 0x3FC9AE6A, 0x5E8DCA05, },
 	{ 0x536AD5E1, 0xF3C729A6, },
-	{ 0x636C953B, 0x6D161EE2, },
-	{ 0xC9805775, 0xF9475C1A, },
-	{ 0x7B749390, 0xDB836ADB, },
-	{ 0x1C1FBFE7, 0xAF85EB1B, },
+	{ 0x636C953B, 0x6D161EE2, }, // sceKernelAllocHeapMemory
+	{ 0xC9805775, 0xF9475C1A, }, // sceKernelDeleteHeap 
+	{ 0x7B749390, 0xDB836ADB, }, // sceKernelFreeHeapMemory
+	{ 0x1C1FBFE7, 0xAF85EB1B, }, // sceKernelCreateHeap
 	{ 0x55A40B2C, 0xF5E82409, },
 	{ 0xE6581468, 0xE10F21CF, },
 	{ 0x9697CD32, 0x7BE9653E, },

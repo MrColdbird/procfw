@@ -26,6 +26,7 @@ int module_start(SceSize args, void* argp)
 	printk("SystemControl: model 0%dg FW 0x%08X\n", psp_model+1, psp_fw_version);
 	printk("Compiled in %s %s\n", __DATE__, __TIME__);
 
+	get_iso_status_from_rebootex();
 	syspatch_init();
 
 	return 0;

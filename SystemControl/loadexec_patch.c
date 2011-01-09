@@ -9,24 +9,32 @@
 #include "main.h"
 #include "utils.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "printk.h"
 #include "../Rebootex_bin/rebootex.h"
+#include "rebootex_conf.h"
+#include "strsafe.h"
 
 static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
+rebootex_config rebootex_conf;
 
 //load reboot wrapper
 static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
-	if (rebootex != NULL) {
-		//copy reboot extender
-		memcpy((void*)0x88FC0000, rebootex, size_rebootex);
+	//copy reboot extender
+	memcpy((void*)0x88FC0000, rebootex, size_rebootex);
 
-		//reset reboot flags
-		memset((void*)0x88FB0000, 0, 0x100);
+	//reset reboot flags
+	memset((void*)0x88FB0000, 0, 0x100);
 
-		//store psp model
-		_sw(psp_model, 0x88FB0000);
-	}
+	//store psp model
+	_sw(psp_model, 0x88FB0000);
+
+	rebootex_conf.magic = REBOOTEX_CONFIG_MAGIC;
+	memcpy((void*)0x88FB0020, &rebootex_conf, sizeof(rebootex_conf));
+
+	memset((void*)0x88FB0100, 0, 256);
+	strcpy_s((char*)0x88FB0100, 256, sctrlSEGetUmdFile());
 
 	//forward
 	return (*LoadReboot)(arg1, arg2, arg3, arg4);

@@ -1,4 +1,5 @@
 #include <pspsdk.h>
+#include "rebootex_conf.h"
 #include "utils.h"
 
 #define REBOOT_START 0x88600000
@@ -39,6 +40,8 @@ char * loadrebootmodulebefore = NULL;
 char * rebootmodule = NULL;
 int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
+
+PspBootConfMode iso_mode = 0;
 
 //io functions
 int (* sceBootLfatOpen)(char * filename) = NULL;
@@ -176,6 +179,12 @@ void load_configure(void)
 	rebootmodule = (char *)(*(int *)(REBOOTEX_CONFIG_START + 0x14));
 	size_rebootmodule = *(int *)(REBOOTEX_CONFIG_START + 0x18);
 	rebootmoduleflags = *(int *)(REBOOTEX_CONFIG_START + 0x1C);
+
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG_START + 0x20);
+	
+	if(conf->magic == REBOOTEX_CONFIG_MAGIC) {
+		iso_mode = conf->iso_mode;
+	}
 }
 
 int _strlen(char * string)
@@ -414,10 +423,81 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 	return module_bootstart(arg1, arg2, arg3);
 }
 
+int patch_bootconf_vsh(char *buffer, int length)
+{
+	int newsize, result;
+
+	result = length;
+	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", 0x0001);
+
+	if (newsize > 0) result = newsize;
+
+	return result;
+}
+
+struct add_module {
+	char *prxname;
+	char *insertbefore;
+	u32 flags;
+};
+
+static struct add_module np9660_add_mods[] = {
+	// dirty, but works XD
+	{"/kd/mgr.prx", "/kd/mesg_led_01g.prx", 0xB},
+	{"/kd/mgr.prx", "/kd/mesg_led_02g.prx", 0xB},
+	{"/kd/mgr.prx", "/kd/mesg_led_03g.prx", 0xB},
+	{"/kd/mgr.prx", "/kd/mesg_led_04g.prx", 0xB},
+	{"/kd/mgr.prx", "/kd/mesg_led_05g.prx", 0xB},
+
+	{"/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", 0xB},
+	{"/kd/galaxy.prx", "/kd/utility.prx", 0x2},
+	{"/kd/np9660.prx", "/kd/utility.prx", 0x2},
+	{"/kd/isofs.prx", "/kd/utility.prx", 0x2},
+};
+
+static const char *np9660_del_mods[] = {
+	"/kd/mediaman.prx",
+	"/kd/ata.prx",
+	"/kd/umdman.prx",
+	"/kd/umd9660.prx",
+	"/kd/isofs.prx",
+};
+
+int patch_bootconf_np9660(char *buffer, int length)
+{
+	int newsize, result;
+
+	result = length;
+
+	int i; for(i=0; i<NELEMS(np9660_del_mods); ++i) {
+		newsize = DeletePrx(buffer, np9660_del_mods[i]);
+
+		if (newsize > 0) result = newsize;
+	}
+
+	for(i=0; i<NELEMS(np9660_add_mods); ++i) {
+		newsize = AddPRX(buffer, np9660_add_mods[i].insertbefore, np9660_add_mods[i].prxname, np9660_add_mods[i].flags);
+
+		if (newsize > 0) result = newsize;
+	}
+
+	return result;
+}
+
+//TODO
+int patch_bootconf_march33(char *buffer, int length)
+{
+	int newsize, result;
+
+	result = length;
+
+	return result;
+}
+
 int _UnpackBootConfig(char * buffer, int length)
 {
 	int result;
-	u32 newsize;
+	int newsize;
 
 	result = (*UnpackBootConfig)(buffer, length);
 
@@ -425,9 +505,24 @@ int _UnpackBootConfig(char * buffer, int length)
 
 	if (newsize > 0) result = newsize;
 
-	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", 0x0001);
+	switch(iso_mode) {
+		default:
+		case VSH_MODE:
+			newsize = patch_bootconf_vsh(buffer, length);
 
-	if (newsize > 0) result = newsize;
+			if (newsize > 0) result = newsize;
+			break;
+		case NP9660_MODE:
+			newsize = patch_bootconf_np9660(buffer, length);
+
+			if (newsize > 0) result = newsize;
+			break;
+		case MARCH33_MODE:
+			newsize = patch_bootconf_march33(buffer, length);
+
+			if (newsize > 0) result = newsize;
+			break;
+	}
 
 	//reboot variable set
 	if(loadrebootmodulebefore)

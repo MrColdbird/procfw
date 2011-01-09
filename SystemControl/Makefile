@@ -10,6 +10,7 @@ OBJS = main.o \
 	   kubridge.o \
 	   module_handler.o \
 	   oe_malloc.o \
+	   isoload.o \
 	   $(PRO_HOME)/Common/libs.o \
 	   $(PRO_HOME)/Common/utils.o \
 	   $(PRO_HOME)/Common/strsafe.o

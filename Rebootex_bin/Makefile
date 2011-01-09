@@ -4,7 +4,6 @@ INCLUDES=-I $(PSPSDK)/include -I $(PRO_HOME)/Common
 all: a.bin
 
 a.bin:
-	bin2c pspbtjnf.bin pspbtjnf.h pspbtjnf
 	psp-gcc $(INCLUDES) -W -Wall -Os -G0 -fno-pic -fno-toplevel-reorder -mno-abicalls -w -S main.c -o main.s
 	psp-as main.s -o main.o
 	psp-ld -T linkfile.l main.o -o main.elf
@@ -13,4 +12,4 @@ a.bin:
 	bin2c rebootex.bin rebootex.h rebootex
 
 clean:
-	rm -rf *~ *.s *.o *.elf rebootex.bin rebootex.h pspbtjnf.h
+	rm -rf *~ *.s *.o *.elf rebootex.bin rebootex.h

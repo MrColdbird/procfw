@@ -228,21 +228,25 @@ void _memmove(char * to, char * from, unsigned int length)
 	//result
 	int result = 0;
 
-	//back buffer
-	char * tob = to + length;
-	char * fromb = from + length;
+	if (to > from) {
+		//back buffer
+		char * tob = to + length;
+		char * fromb = from + length;
 
-	//loop copy
-	unsigned int pos = 0; for(; pos < length; pos++)
-	{
-		//copy byte
-		*--tob = *--fromb;
+		//loop copy
+		unsigned int pos = 0; for(; pos < length; pos++)
+		{
+			//copy byte
+			*--tob = *--fromb;
 
-		//increment result
-		result++;
+			//increment result
+			result++;
+		}
+
+		return result;
 	}
 
-	return result;
+	return _memcpy(to, from, length);
 }
 
 int _memcpy(char * to, char * from, unsigned int length)

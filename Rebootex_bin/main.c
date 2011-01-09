@@ -532,8 +532,7 @@ int _UnpackBootConfig(char * buffer, int length)
 	return result;
 }
 
-// completely wipe out a module from bootconf
-int DeletePrx(char *buffer, const char *modname)
+int SearchPrx(char *buffer, const char *modname)
 {
 	//cast header
 	_btcnf_header * header = (_btcnf_header *)buffer;
@@ -569,7 +568,26 @@ int DeletePrx(char *buffer, const char *modname)
 		return -4;
 	}
 
+	return modnum;
+}
+
+// completely wipe out a module from bootconf
+int DeletePrx(char *buffer, const char *modname)
+{
+	int modnum;
+
+	//cast header
+	_btcnf_header * header = (_btcnf_header *)buffer;
+
 	//delete custom module
+	modnum = SearchPrx(buffer, modname);
+
+	if (modnum < 0)
+		return modnum;
+
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+	
 	_memmove(&module[modnum], &module[modnum + 1], buffer + header->modnameend - (unsigned int)&module[modnum + 1]);
 	header->nmodules--;
 	header->modnamestart -= sizeof(module[0]);

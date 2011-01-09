@@ -501,13 +501,13 @@ int _UnpackBootConfig(char * buffer, int length)
 
 	if (newsize > 0) result = newsize;
 
-	switch(iso_mode) {
-		default:
-		case VSH_MODE:
-			newsize = patch_bootconf_vsh(buffer, length);
+	if (SearchPrx(buffer, "/vsh/module/vshmain.prx") >= 0) {
+		newsize = patch_bootconf_vsh(buffer, length);
 
-			if (newsize > 0) result = newsize;
-			break;
+		if (newsize > 0) result = newsize;
+	}
+	
+	switch(iso_mode) {
 		case NP9660_MODE:
 			newsize = patch_bootconf_np9660(buffer, length);
 
@@ -517,6 +517,9 @@ int _UnpackBootConfig(char * buffer, int length)
 			newsize = patch_bootconf_march33(buffer, length);
 
 			if (newsize > 0) result = newsize;
+			break;
+		case VSH_MODE:
+		default:
 			break;
 	}
 

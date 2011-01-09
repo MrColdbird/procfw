@@ -13,3 +13,4 @@
 	IMPORT_FUNC	"SysMemForKernel",0xF9475C1A,sceKernelDeleteHeap
 	IMPORT_FUNC	"SysMemForKernel",0x6D161EE2,sceKernelAllocHeapMemory
 	IMPORT_FUNC	"SysMemForKernel",0xDB836ADB,sceKernelFreeHeapMemory
+	IMPORT_FUNC	"SysMemForKernel",0x9F154FA1,SysMemForKernel_9F154FA1

@@ -39,6 +39,14 @@ static int _aLinkLibEntries(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mod
 
 	if (stub != NULL && stub->nidtable != NULL) {
 		nid_resolver(stub);
+
+#if 0
+		printk("Name: %s Attr: 0x%08X\n", stub->libname, (stub->attribute << 16) | (*(u16*)stub->version));
+
+		int i, cnt; for(i=0, cnt=stub->vstubcount+stub->stubcount; i<cnt; ++i) {
+			printk("%s_%08X\n", stub->libname, stub->nidtable[i]);
+		}
+#endif
 	}
 
 	return ret;

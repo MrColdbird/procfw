@@ -62,6 +62,10 @@ PSP_EXPORT_FUNC(sctrlHENPatchSyscall)
 PSP_EXPORT_FUNC(sctrlHENSetStartModuleHandler)
 PSP_EXPORT_FUNC(sctrlHENFindFunction)
 PSP_EXPORT_FUNC(sctrlHENSetMemory)
+PSP_EXPORT_FUNC(oe_mallocinit)
+PSP_EXPORT_FUNC(oe_malloc)
+PSP_EXPORT_FUNC(oe_free)
+PSP_EXPORT_FUNC(oe_mallocterminate)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(VersionSpoofer, 0, 0x4001)

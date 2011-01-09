@@ -9,6 +9,7 @@ OBJS = main.o \
 	   systemctrl.o \
 	   kubridge.o \
 	   module_handler.o \
+	   oe_malloc.o \
 	   $(PRO_HOME)/Common/libs.o \
 	   $(PRO_HOME)/Common/utils.o
 

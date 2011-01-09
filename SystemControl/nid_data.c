@@ -6,7 +6,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xC7E57B9C, 0x9F154FA1, },
 	{ 0xCF4DE78C, 0x208F4820, },
 	{ 0xFC114573, 0xF0E0AB7A, },
-	{ 0x3FC9AE6A, 0x5E8DCA05, },
+	{ 0x3FC9AE6A, 0x5E8DCA05, }, // sceKernelDevkitVersion
 	{ 0x536AD5E1, 0xF3C729A6, },
 	{ 0x636C953B, 0x6D161EE2, }, // sceKernelAllocHeapMemory
 	{ 0xC9805775, 0xF9475C1A, }, // sceKernelDeleteHeap 
@@ -19,6 +19,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xB6D61D02, 0x8FDAFC4C, },
 	{ 0x9D9A5BA1, 0xFA5025B5, },
 	{ 0xB2C7AA36, 0x00E9A04A, }, // sceKernelSetDdrMemoryProtection
+	{ 0x6373995D, 0x458A70B5, }, // sceKernelGetModel
 };
 
 static nid_entry LoadCoreForKernel_nid[] = {
@@ -33,6 +34,7 @@ static nid_entry LoadExecForKernel_nid[] = {
 	{ 0x6D302D3D, 0xFCD765C9, },
 	{ 0x28D0D249, 0x3D805DE6, },
 	{ 0xA3D5E142, 0x5AA1A6D2, },
+	{ 0x1B97BDB3, 0x45C6125B, }, // sceKernelLoadExecVSHDisc(3.xx)
 };
 
 static nid_entry ModuleMgrForKernel_nid[] = {

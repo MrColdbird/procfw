@@ -133,6 +133,11 @@ int install_cfw(void)
 	if (ret != 0)
 		goto exit;
 
+	ret = copy_file("stargate.prx", "flash0:/kd/stargate.prx");
+
+	if (ret != 0)
+		goto exit;
+
 	// per model install goes here:
 	switch(psp_model) {
 		case PSP_GO:

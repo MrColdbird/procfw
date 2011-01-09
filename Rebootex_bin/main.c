@@ -447,6 +447,7 @@ static struct add_module np9660_add_mods[] = {
 	{"/kd/galaxy.prx", "/kd/utility.prx", 0xB},
 	{"/kd/np9660.prx", "/kd/utility.prx", 0xB},
 	{"/kd/isofs.prx", "/kd/utility.prx", 0xB},
+	{"/kd/stargate.prx", "/kd/me_wrapper.prx", 0xB},
 };
 
 static const char *np9660_del_mods[] = {

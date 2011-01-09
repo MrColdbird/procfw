@@ -11,7 +11,8 @@ OBJS = main.o \
 	   module_handler.o \
 	   oe_malloc.o \
 	   $(PRO_HOME)/Common/libs.o \
-	   $(PRO_HOME)/Common/utils.o
+	   $(PRO_HOME)/Common/utils.o \
+	   $(PRO_HOME)/Common/strsafe.o
 
 IMPORTS = $(PRO_HOME)/Imports/SysMemForKernel.o \
 		  $(PRO_HOME)/Imports/LoadCoreForKernel.o \

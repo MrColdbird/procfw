@@ -8,4 +8,3 @@
 	IMPORT_FUNC  "SystemCtrlForKernel",0xA65E8BC4,oe_free
 	IMPORT_FUNC  "SystemCtrlForKernel",0xE34A0D97,oe_mallocterminate
 	IMPORT_FUNC  "SystemCtrlForKernel",0xBA21998E,sctrlSEGetUmdFile
-	IMPORT_FUNC  "SystemCtrlForKernel",0xBC939DC1,sctrlSESetBootConfFileIndex

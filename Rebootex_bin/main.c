@@ -442,22 +442,18 @@ struct add_module {
 };
 
 static struct add_module np9660_add_mods[] = {
-	// dirty, but works XD
-	{"/kd/mgr.prx", "/kd/mesg_led_01g.prx", 0xB},
-	{"/kd/mgr.prx", "/kd/mesg_led_02g.prx", 0xB},
-	{"/kd/mgr.prx", "/kd/mesg_led_03g.prx", 0xB},
-	{"/kd/mgr.prx", "/kd/mesg_led_04g.prx", 0xB},
-	{"/kd/mgr.prx", "/kd/mesg_led_05g.prx", 0xB},
-
+	{"/kd/mgr.prx", "/kd/amctrl.prx", 0xB},
 	{"/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", 0xB},
-	{"/kd/galaxy.prx", "/kd/utility.prx", 0x2},
-	{"/kd/np9660.prx", "/kd/utility.prx", 0x2},
-	{"/kd/isofs.prx", "/kd/utility.prx", 0x2},
+	{"/kd/galaxy.prx", "/kd/utility.prx", 0xB},
+	{"/kd/np9660.prx", "/kd/utility.prx", 0xB},
+	{"/kd/isofs.prx", "/kd/utility.prx", 0xB},
 };
 
 static const char *np9660_del_mods[] = {
 	"/kd/mediaman.prx",
 	"/kd/ata.prx",
+	"/kd/npdrm.prx",
+	"/kd/mgr.prx",
 	"/kd/umdman.prx",
 	"/kd/umd9660.prx",
 	"/kd/isofs.prx",

@@ -270,7 +270,7 @@ int vsnprintf(char *buf, int size, char *fmt, va_list args)
 static char printk_buf[128];
 static const char *printk_output_fn;
 
-static char printk_memory_log[2048];
+static char printk_memory_log[1024*4];
 static char *printk_memory_log_ptr = printk_memory_log;
 
 int printk(char *fmt, ...)

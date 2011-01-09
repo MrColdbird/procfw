@@ -25,5 +25,6 @@ void patch_sceLoaderCore(void);
 void patch_sceLoadExec(void);
 void get_iso_status_from_rebootex(void);
 void patch_sceMemlmd(void);
+void patch_sceInterruptManager(void);
 
 #endif

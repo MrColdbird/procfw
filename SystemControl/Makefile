@@ -4,6 +4,7 @@ OBJS = main.o \
 	   loadexec_patch.o \
 	   loadercore_patch.o \
 	   memlmd_patch.o \
+	   interruptman_patch.o \
 	   nid_resolver.o \
 	   nid_data.o \
 	   elf.o \

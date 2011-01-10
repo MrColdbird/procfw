@@ -73,6 +73,4 @@ void patch_sceLoadExec(void)
 	_sw(MAKE_JUMP(loadexec->text_addr+0x000023EC), loadexec->text_addr+0x000023B8);
 	//allow all user levels to call sceKernelLoadExecWithApiType
 	_sw(0, loadexec->text_addr+0x000023FC);
-
-	sync_cache();
 }

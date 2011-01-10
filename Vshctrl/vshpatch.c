@@ -24,17 +24,18 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "sysconf_plugin_module")) {
 		patch_sysconf_plugin_module(text_addr);
+		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "game_plugin_module")) {
 		patch_game_plugin_module(text_addr);
+		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "vsh_module")) {
 		patch_vsh_module(text_addr);
+		sync_cache();
 	}
-
-	sync_cache();
 
 	if (previous)
 		return (*previous)(mod);
@@ -89,8 +90,6 @@ static void patch_vsh_module(u32 text_addr)
 int vshpatch_init(void)
 {
 	previous = sctrlHENSetStartModuleHandler(&vshpatch_module_chain);
-
-	sync_cache();
 
 	return 0;
 }

@@ -35,8 +35,6 @@ static int stargate_module_chain(SceModule2 *mod)
 	if (previous)
 		return (*previous)(mod);
 
-	sync_cache();
-
 	return 0;
 }
 

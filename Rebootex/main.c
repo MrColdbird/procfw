@@ -17,16 +17,15 @@ static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned i
 //load reboot wrapper
 int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
-	if (rebootex != NULL) {
-		//copy reboot extender
-		memcpy((void*)0x88FC0000, rebootex, size_rebootex);
+	//copy reboot extender
+	memcpy((void*)0x88FC0000, rebootex, size_rebootex);
 
-		//reset reboot flags
-		memset((void*)0x88FB0000, 0, 0x100);
+	//reset reboot flags
+	memset((void*)0x88FB0000, 0, 0x100);
+	memset((void*)0x88FB0100, 0, 256);
 
-		//store psp model
-		_sw(psp_model, 0x88FB0000);
-	}
+	//store psp model
+	_sw(psp_model, 0x88FB0000);
 
 	//forward
 	return (*LoadReboot)(arg1, arg2, arg3, arg4);

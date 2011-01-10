@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "kubridge.h"
+#include "utils.h"
 
 // VSH module can write F0/F1
 PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
@@ -114,29 +115,28 @@ void usage(void)
 	printf(VERSION_STR " by Coldbird&VF\n");
 }
 
+struct CopyList {
+	char *src;
+	char *dst;
+};
+
+struct CopyList g_file_lists[] = {
+	{ "systemctrl.prx", "flash0:/kd/systemctrl.prx", },
+	{ "vshctrl.prx", "flash0:/kd/vshctrl.prx", },
+	{ "galaxy.prx", "flash0:/kd/galaxy.prx", },
+	{ "stargate.prx", "flash0:/kd/stargate.prx", },
+};
+
 int install_cfw(void)
 {
 	int ret;
 
-	ret = copy_file("systemctrl.prx", "flash0:/kd/systemctrl.prx");
+	int i; for(i=0; i<NELEMS(g_file_lists); ++i) {
+		ret = copy_file(g_file_lists[i].src, g_file_lists[i].dst);
 
-	if (ret != 0)
-		goto exit;
-
-	ret = copy_file("vshctrl.prx", "flash0:/kd/vshctrl.prx");
-
-	if (ret != 0)
-		goto exit;
-
-	ret = copy_file("galaxy.prx", "flash0:/kd/galaxy.prx");
-
-	if (ret != 0)
-		goto exit;
-
-	ret = copy_file("stargate.prx", "flash0:/kd/stargate.prx");
-
-	if (ret != 0)
-		goto exit;
+		if (ret != 0)
+			goto exit;
+	}
 
 	// per model install goes here:
 	switch(psp_model) {

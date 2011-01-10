@@ -20,5 +20,10 @@ int module_start(SceSize args, void* argp)
 
 	vshpatch_init();
 
+	// always reset to NORMAL mode in VSH
+	// to avoid ISO mode is used in homebrews in next reboot
+	sctrlSESetBootConfFileIndex(0);
+	sctrlSESetUmdFile("");
+
 	return 0;
 }

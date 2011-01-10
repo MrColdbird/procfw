@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include "systemctrl_private.h"
+
 extern u32 psp_model;
 extern u32 psp_fw_version;
 
@@ -26,5 +28,9 @@ void patch_sceLoadExec(void);
 void get_iso_status_from_rebootex(void);
 void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
+void resolve_sceKernelIcacheClearAll(SceModule *pMod);
+
+void validate_stub(SceModule *pMod);
+void validate_stub_by_uid(int modid);
 
 #endif

@@ -111,4 +111,3 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 
 	return 0;
 }
-

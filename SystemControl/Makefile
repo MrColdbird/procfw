@@ -12,6 +12,7 @@ OBJS = main.o \
 	   kubridge.o \
 	   module_handler.o \
 	   oe_malloc.o \
+	   validate_stub.o \
 	   isoload.o \
 	   $(PRO_HOME)/Common/libs.o \
 	   $(PRO_HOME)/Common/utils.o \

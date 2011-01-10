@@ -266,6 +266,7 @@ int main(int argc, char* argv[])
 	memset(&g_conf, 0, sizeof(g_conf));
 	g_conf.fw_version = sceKernelDevkitVersion();
 	g_conf.psp_model = kuKernelGetModel();
+	g_conf.iso_mode = USE_NP9660_MODE;
 
 	printk_init();
 	printk("PLoad GUI started, fw: 0x%08X model: 0x%08X\r\n", g_conf.fw_version, g_conf.psp_model);

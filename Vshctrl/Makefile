@@ -1,0 +1,38 @@
+TARGET = vshctrl
+OBJS = main.o vshpatch.o $(PRO_HOME)/Common/utils.o
+
+IMPORTS =  $(PRO_HOME)/Imports/SysMemForKernel.o \
+		   $(PRO_HOME)/Imports/LoadCoreForKernel.o \
+		  $(PRO_HOME)/Imports/LoadExecForKernel.o \
+		  $(PRO_HOME)/Imports/SysMemForKernel.o \
+		  $(PRO_HOME)/Imports/ModuleMgrForKernel.o \
+
+OBJS += $(IMPORTS)
+
+INCDIR = $(PRO_HOME)/Common/ $(PRO_HOME)/include/
+CFLAGS = -Os -G0 -Wall -fno-pic
+
+#DEBUG = 1
+
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG=1
+OBJS += $(PRO_HOME)/Common/printk.o $(PRO_HOME)/Imports/IoFileMgrForKernel.o
+endif
+
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+ASFLAGS = $(CFLAGS)
+
+PSP_FW_VERSION = 635
+
+BUILD_PRX = 1
+PRX_EXPORTS = exports.exp
+
+USE_KERNEL_LIBC=1
+USE_KERNEL_LIBS=1
+
+LIBDIR = $(PRO_HOME)/libs
+LDFLAGS = -mno-crt0 -nostartfiles
+LIBS = -lpspkubridge -lpspsystemctrl_kernel
+
+PSPSDK=$(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak

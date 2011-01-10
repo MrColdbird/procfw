@@ -25,6 +25,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 		patch_sceLoadExec();
 	}
 
+	resolve_sceKernelIcacheClearAll((SceModule*)mod);
+
+	sync_cache();
+
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
 		printk_sync();

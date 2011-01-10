@@ -6,4 +6,7 @@ void *oe_malloc(size_t size);
 void oe_free(void *p);
 int oe_mallocterminate();
 
+char *GetUmdFile(void);
+void SetUmdFile(char *file);
+
 #endif

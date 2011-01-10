@@ -15,15 +15,19 @@
 
 static char g_iso_filename[256];
 
-char *sctrlSEGetUmdFile(void)
+char *GetUmdFile(void)
 {
 	return g_iso_filename;
 }
 
-void sctrlSESetUmdFile(char *file)
+char *sctrlSEGetUmdFile(void) __attribute__((alias("GetUmdFile")));
+
+void SetUmdFile(char *file)
 {
 	STRCPY_S(g_iso_filename, file);
 }
+
+void sctrlSESetUmdFile(char *file) __attribute__((alias("SetUmdFile")));
 
 void sctrlSESetBootConfFileIndex(int index)
 {

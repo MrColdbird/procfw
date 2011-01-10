@@ -87,8 +87,9 @@ void load_configure(void);
 
 int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags);
 int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags);
-int DeletePrx(char *buffer, const char *modname);
-int ModifyPrxFlag(char *buffer, const char* modname, u32 flags);
+void RemovePrx(char *buffer, const char *prxname, u32 flags);
+void ModifyPrxFlag(char *buffer, const char* modname, u32 flags);
+int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags);
 int GetPrxFlag(char *buffer, const char* modname, u32 *flag);
 
 //reboot replacement
@@ -434,7 +435,7 @@ int patch_bootconf_vsh(char *buffer, int length)
 	int newsize, result;
 
 	result = length;
-	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", 0x0001);
+	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", VSH_RUNLEVEL );
 
 	if (newsize > 0) result = newsize;
 
@@ -447,23 +448,25 @@ struct add_module {
 	u32 flags;
 };
 
-static struct add_module np9660_add_mods[] = {
-	{"/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
-	{"/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
-	{"/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
-	{"/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
-	{"/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
-	{"/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+struct del_module {
+	char *prxname;
+	u32 flags;
 };
 
-static const char *np9660_del_mods[] = {
-	"/kd/mediaman.prx",
-	"/kd/ata.prx",
-	"/kd/npdrm.prx",
-	"/kd/mgr.prx",
-	"/kd/umdman.prx",
-	"/kd/umd9660.prx",
-	"/kd/isofs.prx",
+static struct add_module np9660_add_mods[] = {
+	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+};
+
+static struct del_module np9660_del_mods[] = {
+	{ "/kd/mediaman.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/ata.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/umdman.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/umd9660.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
 };
 
 int patch_bootconf_np9660(char *buffer, int length)
@@ -473,23 +476,11 @@ int patch_bootconf_np9660(char *buffer, int length)
 	result = length;
 
 	int i; for(i=0; i<NELEMS(np9660_del_mods); ++i) {
-		u32 flags;
-	   
-		ret = GetPrxFlag(buffer, np9660_del_mods[i], &flags);
-
-		if (ret < 0)
-			continue;
-
-		if (flags & GAME_RUNLEVEL) {
-			// rewrite the flags to remove the modules from game runlevel
-			flags = flags & (~GAME_RUNLEVEL);
-		}
-
-		ModifyPrxFlag(buffer, np9660_del_mods[i], 0x80010000 | (flags & 0xFFFF));
+		RemovePrx(buffer, np9660_del_mods[i].prxname, np9660_del_mods[i].flags);
 	}
 
 	for(i=0; i<NELEMS(np9660_add_mods); ++i) {
-		newsize = AddPRX(buffer, np9660_add_mods[i].insertbefore, np9660_add_mods[i].prxname, np9660_add_mods[i].flags);
+		newsize = MovePrx(buffer, np9660_add_mods[i].insertbefore, np9660_add_mods[i].prxname, np9660_add_mods[i].flags);
 
 		if (newsize > 0) result = newsize;
 	}
@@ -591,39 +582,6 @@ int SearchPrx(char *buffer, const char *modname)
 	return modnum;
 }
 
-// completely wipe out a module from bootconf
-int DeletePrx(char *buffer, const char *modname)
-{
-	int modnum;
-
-	//cast header
-	_btcnf_header * header = (_btcnf_header *)buffer;
-
-	//delete custom module
-	modnum = SearchPrx(buffer, modname);
-
-	if (modnum < 0)
-		return modnum;
-
-	//cast module list
-	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
-	
-	_memmove(&module[modnum], &module[modnum + 1], buffer + header->modnameend - (unsigned int)&module[modnum + 1]);
-	header->nmodules--;
-	header->modnamestart -= sizeof(module[0]);
-	header->modnameend -= sizeof(module[0]);
-
-	//decrease the mode module cnt
-	int modenum = 0; for(; modenum < header->nmodes; modenum++)
-	{
-		//decrease module range
-		*(unsigned short *)(buffer + header->modestart + modenum * 32) -= 1;
-	}
-
-	//return newsize
-	return header->modnameend;
-}
-
 int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags)
 {
 	int modnum;
@@ -657,7 +615,6 @@ int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32
 		*(unsigned short *)(buffer + header->modestart + modenum * 32) += 1;
 	}
 
-	//return size modificator
 	return header->modnameend;
 }
 
@@ -687,29 +644,36 @@ int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
 	return AddPRXNoCopyName(buffer, insertbefore, header->modnameend - _strlen(prxname) - 1, flags);
 }
 
-int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
+void RemovePrx(char *buffer, const char *prxname, u32 flags)
 {
-	int ret, old_flags;
-	u16 high, low;
-
-	high = flags >> 16;
-	low = flags & 0xFFFF;
+	u32 old_flags;
+	int ret;
 
 	ret = GetPrxFlag(buffer, prxname, &old_flags);
 
 	if (ret < 0)
 		return ret;
 
-	if (old_flags & (flags)) {
+	old_flags &= 0xFFFF;
+	flags &= 0xFFFF;
+
+	if (old_flags & flags) {
 		// rewrite the flags to remove the modules from runlevels indicated by flags
 		old_flags = old_flags & (~flags);
 	}
 
-	ModifyPrxFlag(buffer, prxname, (high << 16) | (old_flags & 0xFFFF));
-	AddPRX(buffer, insertbefore, prxname, (high << 16) | flags);
+	ModifyPrxFlag(buffer, prxname, 0x80010000 | (old_flags & 0xFFFF));
 }
 
-int ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
+int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
+{
+	RemovePrx(buffer, prxname, flags);
+
+	return AddPRX(buffer, insertbefore, prxname, flags);
+}
+
+// Note flags is 32-bits!
+void ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
 {
 	int modnum;
 
@@ -727,6 +691,7 @@ int ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
 	module[modnum].flags = flags;
 }
 
+// Note flags is 32-bits!
 int GetPrxFlag(char *buffer, const char* modname, u32 *flags)
 {
 	int modnum;

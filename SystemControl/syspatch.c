@@ -23,11 +23,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceLoadExec();
+		sync_cache();
 	}
 
 	resolve_sceKernelIcacheClearAll((SceModule*)mod);
-
-	sync_cache();
 
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {

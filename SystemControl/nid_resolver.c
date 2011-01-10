@@ -79,3 +79,15 @@ u32 resolve_nid(const char *libname, u32 nid)
 
 	return nid;
 }
+
+void resolve_sceKernelIcacheClearAll(SceModule *pMod)
+{
+	void *address;
+	SceModule2 *loadcore;
+
+	// Sony removed sceKernelIcacheClearAll's export
+	// It's at 0x77CC+@LoadCore@ in 6.35
+	loadcore = (SceModule2*) sceKernelFindModuleByName("sceLoaderCore");
+	address = (void*)(0x77CC + loadcore->text_addr);
+	hook_import_bynid(pMod, "LoadCoreForKernel", 0xD8779AC6, address, 0);
+}

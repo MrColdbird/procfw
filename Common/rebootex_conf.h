@@ -1,6 +1,16 @@
 #ifndef PROBOOTCONF_H
 #define PROBOOTCONF_H
 
+enum {
+	VSH_RUNLEVEL     =     0x01,
+	GAME_RUNLEVEL    =     0x02,
+	UPDATER_RUNLEVEL =     0x04,
+	POPS_RUNLEVEL    =     0x08,
+	APP_RUNLEVEL     =     0x20,
+	UMDEMU_RUNLEVEL  =     0x40,
+	MLNAPP_RUNLEVEL  =     0x80,
+};
+
 typedef enum {
 	VSH_MODE = 0,
 	MARCH33_MODE = 1,

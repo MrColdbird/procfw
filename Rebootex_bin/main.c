@@ -85,6 +85,12 @@ void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
 
 void load_configure(void);
 
+int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags);
+int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags);
+int DeletePrx(char *buffer, const char *modname);
+int ModifyPrxFlag(char *buffer, const char* modname, u32 flags);
+int GetPrxFlag(char *buffer, const char* modname, u32 *flag);
+
 //reboot replacement
 void main(int arg1, int arg2, int arg3, int arg4)
 {
@@ -442,12 +448,12 @@ struct add_module {
 };
 
 static struct add_module np9660_add_mods[] = {
-	{"/kd/mgr.prx", "/kd/amctrl.prx", 0xB},
-	{"/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", 0xB},
-	{"/kd/galaxy.prx", "/kd/utility.prx", 0xB},
-	{"/kd/np9660.prx", "/kd/utility.prx", 0xB},
-	{"/kd/isofs.prx", "/kd/utility.prx", 0xB},
-	{"/kd/stargate.prx", "/kd/me_wrapper.prx", 0xB},
+	{"/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+	{"/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+	{"/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+	{"/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+	{"/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
+	{"/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | POPS_RUNLEVEL},
 };
 
 static const char *np9660_del_mods[] = {
@@ -466,10 +472,23 @@ int patch_bootconf_np9660(char *buffer, int length)
 
 	result = length;
 
-	int i; for(i=0; i<NELEMS(np9660_del_mods); ++i) {
-		newsize = DeletePrx(buffer, np9660_del_mods[i]);
+	(void)(np9660_add_mods);
 
-		if (newsize > 0) result = newsize;
+	int i; for(i=0; i<NELEMS(np9660_del_mods); ++i) {
+		u32 flags;
+		int ret;
+	   
+		ret = GetPrxFlag(buffer, np9660_del_mods[i], &flags);
+
+		if (ret < 0)
+			continue;
+
+		if (flags & GAME_RUNLEVEL) {
+			// rewrite the flags to remove the modules from game runlevel
+			flags = flags & (~GAME_RUNLEVEL);
+		}
+
+		ModifyPrxFlag(buffer, np9660_del_mods[i], 0x80010000 | (flags & 0xFFFF));
 	}
 
 	for(i=0; i<NELEMS(np9660_add_mods); ++i) {
@@ -608,91 +627,127 @@ int DeletePrx(char *buffer, const char *modname)
 	return header->modnameend;
 }
 
-int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
+int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags)
 {
-	//cast header
-	_btcnf_header * header = (_btcnf_header *)buffer;
+	int modnum;
 
-	//valid boot config
-	if(header->signature == BTCNF_MAGIC)
-	{
-		//valid number of modules
-		if(header->nmodules > 0)
-		{
-			//valid number of modes
-			if(header->nmodes > 0)
-			{
-				//add module name
-				header->modnameend += _strcpy(buffer + header->modnameend, prxname);
+	modnum = SearchPrx(buffer, insertbefore);
 
-				//cast module list
-				_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
-
-				//iterate modules
-				int modnum = 0; for(; modnum < header->nmodules; modnum++)
-				{
-					//found module name
-					if(_strcmp(buffer + header->modnamestart + module[modnum].module_path, insertbefore) == 0)
-					{
-						//stop search
-						break;
-					}
-				}
-
-				//found module
-				if(modnum < header->nmodules)
-				{
-					//add custom module
-					_btcnf_module newmod; _memset(&newmod, 0, sizeof(newmod));
-					newmod.module_path = header->modnameend - _strlen(prxname) - 1 - header->modnamestart;
-					newmod.flags = 0x80010000 | (flags & 0xFFFF);
-					_memmove(&module[modnum + 1], &module[modnum + 0], buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
-					_memcpy(&module[modnum + 0], &newmod, sizeof(newmod));
-					header->nmodules++;
-					header->modnamestart += sizeof(newmod);
-					header->modnameend += sizeof(newmod);
-
-					//make mode include our module
-					int modenum = 0; for(; modenum < header->nmodes; modenum++)
-					{
-						//increase module range
-						*(unsigned short *)(buffer + header->modestart + modenum * 32) += 1;
-					}
-
-					//return size modificator
-					return header->modnameend;
-				}
-
-				//module not found
-				return -4;
-			}
-
-			//invalid number of modes
-			return -3;
-		}
-
-		//invalid number of modules
-		return -2;
+	if (modnum < 0) {
+		return modnum;
 	}
 
-	//invalid magic value
-	return -1;
+	_btcnf_header * header = (_btcnf_header *)buffer;
+
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+	//add custom module
+	_btcnf_module newmod; _memset(&newmod, 0, sizeof(newmod));
+
+	newmod.module_path = prxname_offset - header->modnamestart;
+	newmod.flags = 0x80010000 | (flags & 0xFFFF);
+	_memmove(&module[modnum + 1], &module[modnum + 0], buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
+	_memcpy(&module[modnum + 0], &newmod, sizeof(newmod));
+	header->nmodules++;
+	header->modnamestart += sizeof(newmod);
+	header->modnameend += sizeof(newmod);
+
+	//make mode include our module
+	int modenum = 0; for(; modenum < header->nmodes; modenum++)
+	{
+		//increase module range
+		*(unsigned short *)(buffer + header->modestart + modenum * 32) += 1;
+	}
+
+	//return size modificator
+	return header->modnameend;
 }
 
-// Tested at most 16 modules can be moved before it exhausted the remaining buffer of UnpackBootConfig
+int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags)
+{
+	int modnum;
+
+	modnum = SearchPrx(buffer, prxname);
+
+	if (modnum >= 0) {
+		_btcnf_header * header = (_btcnf_header *)buffer;
+		_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+		return AddPRXNoCopyName(buffer, insertbefore, header->modnamestart + module[modnum].module_path, flags);
+	}
+
+	modnum = SearchPrx(buffer, insertbefore);
+
+	if (modnum < 0) {
+		return modnum;
+	}
+
+	_btcnf_header * header = (_btcnf_header *)buffer;
+
+	header->modnameend += _strcpy(buffer + header->modnameend, prxname);
+
+	return AddPRXNoCopyName(buffer, insertbefore, header->modnameend - _strlen(prxname) - 1, flags);
+}
+
 int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags)
 {
-	int newsize, result;
+	int ret, old_flags;
+	u16 high, low;
 
-	newsize = DeletePrx(buffer, prxname);
+	high = flags >> 16;
+	low = flags & 0xFFFF;
 
-	if (newsize > 0) result = newsize;
+	ret = GetPrxFlag(buffer, prxname, &old_flags);
 
-	newsize = AddPRX(buffer, insertbefore, prxname, flags);
+	if (ret < 0)
+		return ret;
 
-	if (newsize > 0) result = newsize;
+	if (old_flags & (flags)) {
+		// rewrite the flags to remove the modules from runlevels indicated by flags
+		old_flags = old_flags & (~flags);
+	}
 
-	return result;
+	ModifyPrxFlag(buffer, prxname, (high << 16) | (old_flags & 0xFFFF));
+	AddPRX(buffer, insertbefore, prxname, (high << 16) | flags);
+}
+
+int ModifyPrxFlag(char *buffer, const char* modname, u32 flags)
+{
+	int modnum;
+
+	modnum = SearchPrx(buffer, modname);
+
+	if (modnum < 0) {
+		return modnum;
+	}
+
+	_btcnf_header * header = (_btcnf_header *)buffer;
+	
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+	module[modnum].flags = flags;
+}
+
+int GetPrxFlag(char *buffer, const char* modname, u32 *flags)
+{
+	int modnum;
+
+	modnum = SearchPrx(buffer, modname);
+
+	if (modnum < 0) {
+		return modnum;
+	}
+
+	_btcnf_header * header = (_btcnf_header *)buffer;
+	
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+	*flags = module[modnum].flags;
+
+	return 0;
 }
 
 #if 0

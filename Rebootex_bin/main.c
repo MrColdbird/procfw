@@ -468,15 +468,12 @@ static const char *np9660_del_mods[] = {
 
 int patch_bootconf_np9660(char *buffer, int length)
 {
-	int newsize, result;
+	int newsize, result, ret;
 
 	result = length;
 
-	(void)(np9660_add_mods);
-
 	int i; for(i=0; i<NELEMS(np9660_del_mods); ++i) {
 		u32 flags;
-		int ret;
 	   
 		ret = GetPrxFlag(buffer, np9660_del_mods[i], &flags);
 

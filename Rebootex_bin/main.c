@@ -454,19 +454,19 @@ struct del_module {
 };
 
 static struct add_module np9660_add_mods[] = {
-	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
+	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL },
+	{ "/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL },
 };
 
 static struct del_module np9660_del_mods[] = {
-	{ "/kd/mediaman.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/ata.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/umdman.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
-	{ "/kd/umd9660.prx", GAME_RUNLEVEL | POPS_RUNLEVEL },
+	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
+	{ "/kd/ata.prx", GAME_RUNLEVEL },
+	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
 };
 
 int patch_bootconf_np9660(char *buffer, int length)
@@ -488,12 +488,35 @@ int patch_bootconf_np9660(char *buffer, int length)
 	return result;
 }
 
-//TODO
+static struct add_module march33_add_mods[] = {
+	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
+	{ "/kd/march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL },
+};
+
+static struct del_module march33_del_mods[] = {
+	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
+	{ "/kd/ata.prx", GAME_RUNLEVEL },
+	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
+};
+
 int patch_bootconf_march33(char *buffer, int length)
 {
-	int newsize, result;
+	int newsize, result, ret;
 
 	result = length;
+
+	int i; for(i=0; i<NELEMS(march33_del_mods); ++i) {
+		RemovePrx(buffer, march33_del_mods[i].prxname, march33_del_mods[i].flags);
+	}
+
+	for(i=0; i<NELEMS(march33_add_mods); ++i) {
+		newsize = MovePrx(buffer, march33_add_mods[i].insertbefore, march33_add_mods[i].prxname, march33_add_mods[i].flags);
+
+		if (newsize > 0) result = newsize;
+	}
 
 	return result;
 }

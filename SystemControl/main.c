@@ -27,6 +27,7 @@ int module_start(SceSize args, void* argp)
 	printk("Compiled in %s %s\n", __DATE__, __TIME__);
 
 	get_iso_status_from_rebootex();
+	oe_mallocinit();
 	syspatch_init();
 
 	return 0;

@@ -22,15 +22,26 @@ int oe_mallocinit()
 	} else {
 		size = 45*1024;
 	}
+
+	if (heapid >= 0) {
+		return 0;
+	}
 	
 	heapid = sceKernelCreateHeap(PSP_MEMORY_PARTITION_KERNEL, size, 1, "SystemCtrlHeap");
+
+	printk("%s: 0x%08X heap size %d\n", __func__, heapid, size);
 
 	return (heapid < 0) ? heapid : 0;
 }
 
 void *oe_malloc(size_t size)
 {
-	return sceKernelAllocHeapMemory(heapid, size);
+	void *p;
+
+	p = sceKernelAllocHeapMemory(heapid, size);
+	printk("%s: %d@0x%08X\n", __func__, size, (u32)p);
+
+	return p;
 }
 
 void oe_free(void *p)

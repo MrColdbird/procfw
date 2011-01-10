@@ -30,6 +30,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 		printk_sync();
 		printk("printk synchronized\n");
 	}
+
+	validate_stub((SceModule *)mod);
 #endif
 	
 	if (previous)

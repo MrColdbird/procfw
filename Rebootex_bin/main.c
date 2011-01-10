@@ -538,7 +538,7 @@ int _UnpackBootConfig(char * buffer, int length)
 
 			if (newsize > 0) result = newsize;
 			break;
-		case VSH_MODE:
+		case NORMAL_MODE:
 		default:
 			break;
 	}

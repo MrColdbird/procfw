@@ -12,7 +12,7 @@ enum {
 };
 
 typedef enum {
-	VSH_MODE = 0,
+	NORMAL_MODE = 0,
 	MARCH33_MODE = 1,
 	NP9660_MODE = 2,
 } PspBootConfMode;

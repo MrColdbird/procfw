@@ -1,16 +1,16 @@
 TARGET = ui
-OBJS = main.o conf.o $(PRO_HOME)/Common/strsafe.o psplink.o
+OBJS = main.o conf.o ../../Common/strsafe.o psplink.o
 
-CFLAGS = -Os -G0 -Wall -I. -I .. -I$(PRO_HOME)/Common -I$(PRO_HOME)/include -fno-toplevel-reorder
+CFLAGS = -Os -G0 -Wall -I. -I .. -I../../Common -I../../include -fno-toplevel-reorder
 PSP_FW_VERSION=635
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += $(PRO_HOME)/Common/printk.o
+OBJS += ../../Common/printk.o
 else
 endif
 
-LDFLAGS = -L. -L$(PRO_HOME)/libs
+LDFLAGS = -L. -L../../libs
 LIBS += -lpspgu -lpspkubridge
 
 BUILD_PRX=1

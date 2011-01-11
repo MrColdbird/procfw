@@ -1,16 +1,16 @@
 TARGET = galaxy
 OBJS = main.o
-OBJS += $(PRO_HOME)/Imports/SysMemForKernel.o \
+OBJS += ../../Imports/SysMemForKernel.o \
 		SystemCtrlForKernel.o
 
-CFLAGS = -Os -G0 -Wall -I. -I$(PRO_HOME)/include -I$(PRO_HOME)/Common
+CFLAGS = -Os -G0 -Wall -I. -I../../include -I../../Common
 
-LDFLAGS = -mno-crt0 -nostartfiles -L. -L$(PRO_HOME)/libs
+LDFLAGS = -mno-crt0 -nostartfiles -L. -L../../libs
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += $(PRO_HOME)/Common/printk.o \
-		$(PRO_HOME)/Common/utils.o
+OBJS += ../../Common/printk.o \
+		../../Common/utils.o
 endif
 
 BUILD_PRX=1

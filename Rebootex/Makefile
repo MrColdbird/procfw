@@ -1,10 +1,10 @@
 TARGET = Rebootex
-OBJS = main.o $(PRO_HOME)/Common/utils.o
+OBJS = main.o ../Common/utils.o
 
-CFLAGS = -Os -G0 -Wall -I $(PRO_HOME)/Common -I $(PRO_HOME)/include
+CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
 PSP_FW_VERSION=635
 
-LDFLAGS = -mno-crt0 -nostartfiles -L $(PRO_HOME)/libs
+LDFLAGS = -mno-crt0 -nostartfiles -L ../libs
 LIBS += -lpspsystemctrl_kernel -lpspkubridge
 
 BUILD_PRX=1

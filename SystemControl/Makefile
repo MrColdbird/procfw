@@ -14,27 +14,27 @@ OBJS = main.o \
 	   module_handler.o \
 	   oe_malloc.o \
 	   isoload.o \
-	   $(PRO_HOME)/Common/libs.o \
-	   $(PRO_HOME)/Common/utils.o \
-	   $(PRO_HOME)/Common/strsafe.o
+	   ../Common/libs.o \
+	   ../Common/utils.o \
+	   ../Common/strsafe.o
 
-IMPORTS = $(PRO_HOME)/Imports/SysMemForKernel.o \
-		  $(PRO_HOME)/Imports/LoadCoreForKernel.o \
-		  $(PRO_HOME)/Imports/LoadExecForKernel.o \
-		  $(PRO_HOME)/Imports/SysMemForKernel.o \
-		  $(PRO_HOME)/Imports/ModuleMgrForKernel.o \
-		  $(PRO_HOME)/Imports/InterruptManagerForKernel.o
+IMPORTS = ../Imports/SysMemForKernel.o \
+		  ../Imports/LoadCoreForKernel.o \
+		  ../Imports/LoadExecForKernel.o \
+		  ../Imports/SysMemForKernel.o \
+		  ../Imports/ModuleMgrForKernel.o \
+		  ../Imports/InterruptManagerForKernel.o
 
 OBJS += $(IMPORTS)
 
-INCDIR = $(PRO_HOME)/Common/ $(PRO_HOME)/include/
+INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
 
 #DEBUG = 1
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += validate_stub.o $(PRO_HOME)/Common/printk.o $(PRO_HOME)/Imports/IoFileMgrForKernel.o
+OBJS += validate_stub.o ../Common/printk.o ../Imports/IoFileMgrForKernel.o
 endif
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

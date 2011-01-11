@@ -90,4 +90,8 @@ void setup_module_handler(void)
 
 	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0xF475845D, myKernelStartThread, 0);
 	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0x446D8DE6, myKernelCreateThread, 0);
+
+#ifdef DEBUG
+	setup_validate_stub((SceModule*)mod);
+#endif
 }

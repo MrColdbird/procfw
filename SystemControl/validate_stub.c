@@ -7,41 +7,40 @@
 
 extern int _sceKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 
+static int (*start_module)(u32 unk0, SceModule2 *mod, u32 unk2, u32 unk3, u32 unk4) = NULL;
+
 void validate_stub(SceModule *pMod1)
 {
 	SceModule2 *pMod = (SceModule2*)pMod1;
-	u32 k1 = pspSdkGetK1();
+	u32 k1;
 	u32 i, j;
 	u32 *cur_nid, *cur_call;
 	u32 library_flag;
 	u32 is_weak;
 	PspModuleImport *pImp;
 
-	pspSdkSetK1(0);
+	k1 = pspSdkSetK1(0);
 	
-	if (pMod == NULL) {
-		pspSdkSetK1(k1);
-		return;
-	}
+	if (pMod != NULL) {
+		for(i=0; i<pMod->stub_size; i+=(pImp->entLen * 4)) {
+			pImp = (PspModuleImport*)(pMod->stub_top+i);
 
-	for(i=0; i<pMod->stub_size; i+=(pImp->entLen * 4)) {
-		pImp = (PspModuleImport*)(pMod->stub_top+i);
-		
-		cur_nid = (u32*)pImp->fnids;
-		cur_call = (u32*)pImp->funcs;
-		library_flag = pImp->attribute << 16 | pImp->version;
+			cur_nid = (u32*)pImp->fnids;
+			cur_call = (u32*)pImp->funcs;
+			library_flag = pImp->attribute << 16 | pImp->version;
 
-		for(j=0; j<pImp->funcCount; j++) {
-			is_weak = ((pImp->attribute & 0x0009) == 0x0009) ? 1 : 0;
-			
-			if (!is_weak && *cur_call == 0x0000054C) {
-				// syscall 0x15
-				printk("WARNING: %s[0x%08X] %s_%08X at 0x%08X unresolved\n",
-						pMod->modname, library_flag, pImp->name, *cur_nid, (u32)cur_call);
+			for(j=0; j<pImp->funcCount; j++) {
+				is_weak = ((pImp->attribute & 0x0009) == 0x0009) ? 1 : 0;
+
+				if (!is_weak && *cur_call == 0x0000054C) {
+					// syscall 0x15
+					printk("WARNING: %s[0x%08X] %s_%08X at 0x%08X unresolved\n",
+							pMod->modname, library_flag, pImp->name, *cur_nid, (u32)cur_call);
+				}
+
+				cur_nid ++;
+				cur_call += 2;
 			}
-			
-			cur_nid ++;
-			cur_call += 2;
 		}
 	}
 
@@ -50,23 +49,36 @@ void validate_stub(SceModule *pMod1)
 
 void validate_stub_by_uid(int modid)
 {
-	u32 k1 = pspSdkGetK1();
-	SceModule2 *pMod;
+	u32 k1;
+	SceModule *pMod;
 
-	pspSdkSetK1(0);
-	pMod = (SceModule2*) sceKernelFindModuleByUID(modid);
+	k1 = pspSdkSetK1(0);
+	pMod = sceKernelFindModuleByUID(modid);
 	
-	if (pMod == NULL) {
-		pspSdkSetK1(k1);
-		return;
+	if (pMod != NULL) {
+		validate_stub(pMod);
 	}
 
-	validate_stub((SceModule*)pMod);
 	pspSdkSetK1(k1);
+}
+
+static int _start_module(u32 unk0, SceModule2 *mod, u32 unk2, u32 unk3, u32 unk4)
+{
+	int ret;
+
+	ret = (*start_module)(unk0, mod, unk2, unk3, unk4);
+	
+	if(mod != NULL) {
+		validate_stub_by_uid(mod->modid);
+	}
+
+	return ret;
 }
 
 void setup_validate_stub(SceModule *mod)
 {
-	hook_import_bynid(mod, "ModuleMgrForKernel", 0xE6BF3960, _sceKernelStartModule, 0);
-	hook_import_bynid(mod, "ModuleMgrForUser", 0x50F0C1EC, _sceKernelStartModule, 1);
+	SceModule2 *modulemgr = (SceModule2*)mod;
+
+	start_module = (void*)(modulemgr->text_addr + 0x7004);
+	_sw(MAKE_CALL(_start_module), modulemgr->text_addr+0x290);
 }

@@ -33,8 +33,15 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
+		SceUID thid;
+
 		patch_sceLoadExec();
 		sync_cache();
+
+		thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
+
+		if(thid >= 0)
+			sceKernelStartThread(thid, 0, NULL);
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {

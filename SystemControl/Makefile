@@ -13,6 +13,7 @@ OBJS = main.o \
 	   kubridge.o \
 	   module_handler.o \
 	   oe_malloc.o \
+	   plugins.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

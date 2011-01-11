@@ -49,4 +49,7 @@ extern void *g_insert_module_binary;
 extern int g_insert_module_size;
 extern int g_insert_module_flags;
 
+int plugin_thread(SceSize args, void * argp);
+int load_start_module(char *path);
+
 #endif

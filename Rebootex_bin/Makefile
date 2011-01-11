@@ -1,5 +1,5 @@
 PSPSDK=$(shell psp-config --pspsdk-path)
-INCLUDES=-I $(PSPSDK)/include -I $(PRO_HOME)/Common
+INCLUDES=-I $(PSPSDK)/include -I ../Common
 
 all: a.bin
 

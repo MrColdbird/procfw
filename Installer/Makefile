@@ -6,15 +6,16 @@ EXTRA_TARGETS=EBOOT.PBP
 PSP_LARGE_MEMORY = 0
 
 PSP_EBOOT_TITLE=6.35PRO Updater
+PSP_EBOOT_ICON=ICON0.PNG
 
-INCDIR = $(PRO_HOME)/include $(PRO_HOME)/Common
+INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
 PSP_FW_VERSION = 635
 
-LIBDIR = $(PRO_HOME)/libs
+LIBDIR = ../libs
 LDFLAGS =
 LIBS =  -lpspkubridge -lpsppower
 

@@ -1,12 +1,12 @@
 TARGET = stargate
-OBJS = main.o key_decrypt.o pspcipher.o pauth.o $(PRO_HOME)/Common/utils.o $(PRO_HOME)/Common/libs.o
+OBJS = main.o key_decrypt.o pspcipher.o pauth.o ../Common/utils.o ../Common/libs.o
 
-INCDIR = $(PRO_HOME)/include $(PRO_HOME)/Common
+INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall -fno-pic
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += $(PRO_HOME)/Common/printk.o
+OBJS += ../Common/printk.o
 endif
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
@@ -20,7 +20,7 @@ PRX_EXPORTS = exports.exp
 USE_KERNEL_LIBC=1
 USE_KERNEL_LIBS=1
 
-LIBDIR = $(PRO_HOME)/libs
+LIBDIR = ../libs
 LDFLAGS = -mno-crt0 -nostartfiles
 LIBS = -lpspsemaphore -lpspsystemctrl_kernel -lpspkubridge -lpspmodulemgr_kernel
 

@@ -8,6 +8,7 @@ OBJS = main.o \
 	   nid_resolver.o \
 	   nid_data.o \
 	   elf.o \
+	   high_memory.o \
 	   systemctrl.o \
 	   kubridge.o \
 	   module_handler.o \

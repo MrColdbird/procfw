@@ -19,6 +19,8 @@ u32 psp_fw_version = 0;
 int module_start(SceSize args, void* argp)
 {
 	fill_vram(0x000000ff);
+//	sctrlHENSetMemory(*(u32*)(0x88FB0008), *(u32*)(0x88FB000C));
+	sctrlHENSetMemory(48, 0);
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	

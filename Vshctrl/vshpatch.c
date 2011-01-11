@@ -60,7 +60,11 @@ static void patch_sysconf_plugin_module(u32 text_addr)
 	void *p;
 	char str[20];
 
+#ifdef NIGHTLY_VERSION
+	sprintf(str, "6.35 PRO-r%d", NIGHTLY_VERSION);
+#else
 	sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
+#endif
 
 	p = (void*)(text_addr + 0x2A1FC);
 	ascii2utf16(p, str);

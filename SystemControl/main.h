@@ -30,7 +30,10 @@ void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
 void resolve_sceKernelIcacheClearAll(SceModule *pMod);
 
+#ifdef DEBUG
 void validate_stub(SceModule *pMod);
 void validate_stub_by_uid(int modid);
+void setup_validate_stub(SceModule *mod);
+#endif
 
 #endif

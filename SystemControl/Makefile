@@ -12,7 +12,6 @@ OBJS = main.o \
 	   kubridge.o \
 	   module_handler.o \
 	   oe_malloc.o \
-	   validate_stub.o \
 	   isoload.o \
 	   $(PRO_HOME)/Common/libs.o \
 	   $(PRO_HOME)/Common/utils.o \
@@ -34,7 +33,7 @@ CFLAGS = -Os -G0 -Wall -fno-pic
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += $(PRO_HOME)/Common/printk.o $(PRO_HOME)/Imports/IoFileMgrForKernel.o
+OBJS += validate_stub.o $(PRO_HOME)/Common/printk.o $(PRO_HOME)/Imports/IoFileMgrForKernel.o
 endif
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

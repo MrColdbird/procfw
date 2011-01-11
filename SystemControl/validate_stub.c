@@ -1,12 +1,14 @@
 #include <pspkernel.h>
+#include "main.h"
 #include "utils.h"
 #include "libs.h"
 #include "printk.h"
 #include "systemctrl.h"
 
+extern int _sceKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
+
 void validate_stub(SceModule *pMod1)
 {
-#ifdef DEBUG
 	SceModule2 *pMod = (SceModule2*)pMod1;
 	u32 k1 = pspSdkGetK1();
 	u32 i, j;
@@ -44,12 +46,10 @@ void validate_stub(SceModule *pMod1)
 	}
 
 	pspSdkSetK1(k1);
-#endif
 }
 
 void validate_stub_by_uid(int modid)
 {
-#ifdef DEBUG
 	u32 k1 = pspSdkGetK1();
 	SceModule2 *pMod;
 
@@ -63,6 +63,10 @@ void validate_stub_by_uid(int modid)
 
 	validate_stub((SceModule*)pMod);
 	pspSdkSetK1(k1);
-#endif
 }
 
+void setup_validate_stub(SceModule *mod)
+{
+	hook_import_bynid(mod, "ModuleMgrForKernel", 0xE6BF3960, _sceKernelStartModule, 0);
+	hook_import_bynid(mod, "ModuleMgrForUser", 0x50F0C1EC, _sceKernelStartModule, 1);
+}

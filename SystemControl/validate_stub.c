@@ -36,7 +36,7 @@ void validate_stub(SceModule *pMod1)
 			
 			if (!is_weak && *cur_call == 0x0000054C) {
 				// syscall 0x15
-				printk("WARNING: %s[0x%08X] %s_%08X at 0x%08X unresolved\r\n",
+				printk("WARNING: %s[0x%08X] %s_%08X at 0x%08X unresolved\n",
 						pMod->modname, library_flag, pImp->name, *cur_nid, (u32)cur_call);
 			}
 			

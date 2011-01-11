@@ -35,6 +35,7 @@ static nid_entry LoadExecForKernel_nid[] = {
 	{ 0x28D0D249, 0x3D805DE6, },
 	{ 0xA3D5E142, 0x5AA1A6D2, },
 	{ 0x1B97BDB3, 0x45C6125B, }, // sceKernelLoadExecVSHDisc(3.xx)
+	{ 0x94A1C627, 0x5AA1A6D2, }, // sceKernelExitVSHVSH
 };
 
 static nid_entry ModuleMgrForKernel_nid[] = {

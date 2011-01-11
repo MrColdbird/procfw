@@ -80,7 +80,7 @@ u32 resolve_nid(const char *libname, u32 nid)
 	return nid;
 }
 
-void resolve_sceKernelIcacheClearAll(SceModule *pMod)
+static void resolve_sceKernelIcacheClearAll(SceModule *mod)
 {
 	void *address;
 	SceModule2 *loadcore;
@@ -89,5 +89,107 @@ void resolve_sceKernelIcacheClearAll(SceModule *pMod)
 	// It's at 0x77CC+@LoadCore@ in 6.35
 	loadcore = (SceModule2*) sceKernelFindModuleByName("sceLoaderCore");
 	address = (void*)(0x77CC + loadcore->text_addr);
-	hook_import_bynid(pMod, "LoadCoreForKernel", 0xD8779AC6, address, 0);
+	hook_import_bynid(mod, "LoadCoreForKernel", 0xD8779AC6, address, 0);
+}
+
+//missing sysclib function from 3.XX times
+static int ownstrcspn(char * str1, char * str2)
+{
+	//iterate symbols from str1
+	u32 i = 0; for (; i < strlen(str1); i++) {
+		//iterate symbols from str2
+		u32 j = 0; for (; j < strlen(str2); j++) {
+			//match found
+			if(str1[i] == str2[j]) break;
+		}
+	}
+
+	//return read symbol count
+	return i;
+}
+
+//missing sysclib function from 3.XX times
+static int ownstrspn(char * str1, char * str2)
+{
+	//iterate symbols from str1
+	u32 i = 0; for (; i < strlen(str1); i++) {
+		//iterate symbols from str2
+		u32 j = 0; for (; j < strlen(str2); j++) {
+			//symbols not identical
+			if(str1[i] != str2[j]) break;
+		}
+	}
+
+	//return read symbol count
+	return i;
+}
+
+static char * ownstrtok_r(char * s, const char * delim, char ** last)
+{
+	char * spanp;
+	int c, sc;
+	char * tok;
+
+	if (s == NULL && (s = *last) == NULL)
+		return (NULL);
+
+	cont:
+	c = *s++;
+	for (spanp = (char *)delim; (sc = *spanp++) != 0;) {
+		if (c == sc)
+			goto cont;
+	}
+
+	if (c == 0) {
+		*last = NULL;
+		return (NULL);
+	}
+	tok = s - 1;
+
+	for (;;) {
+		c = *s++;
+		spanp = (char *)delim;
+		do {
+			if ((sc = *spanp++) == c) {
+				if (c == 0)
+					s = NULL;
+				else
+					s[-1] = 0;
+				*last = s;
+				return (tok);
+			}
+		} while (sc != 0);
+	}
+}
+
+//missing sysclib function from 3.XX times
+static char * ownstrtok(char * s, const char * delim)
+{
+	static char * last;
+	return ownstrtok_r(s, delim, &last);
+}
+
+static SceUID proKernelSearchModuleByName(char * name)
+{
+	//find module by name
+	SceModule2 * mod = (SceModule2 *)sceKernelFindModuleByName(name);
+
+	//return uid
+	return mod->modid;
+}
+
+static void resolve_removed_clib(SceModule *mod)
+{
+	hook_import_bynid(mod, "ModuleMgrForKernel", 0x04B7BD22, (void*)proKernelSearchModuleByName, 0);
+	hook_import_bynid(mod, "SysclibForKernel", 0x89B79CB1, (void*)ownstrcspn, 0);
+	hook_import_bynid(mod, "SysclibForKernel", 0x62AE052F, (void*)ownstrspn, 0);
+	hook_import_bynid(mod, "SysclibForKernel", 0x87F8D2DA, (void*)ownstrtok, 0);
+	hook_import_bynid(mod, "SysclibForKernel", 0x909C228B, (void*)0x88002E88, 0); // setjmp
+	hook_import_bynid(mod, "SysclibForKernel", 0x18FE80DB, (void*)0x88002EC4, 0); // longjmp
+}
+
+void resolve_removed_nid(SceModule *mod)
+{
+	resolve_sceKernelIcacheClearAll(mod);
+	resolve_removed_clib(mod);
 }

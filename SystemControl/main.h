@@ -28,7 +28,7 @@ void patch_sceLoadExec(void);
 void get_iso_status_from_rebootex(void);
 void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
-void resolve_sceKernelIcacheClearAll(SceModule *pMod);
+void resolve_removed_nid(SceModule *pMod);
 
 #ifdef DEBUG
 void validate_stub(SceModule *pMod);

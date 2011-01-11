@@ -42,7 +42,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	resolve_sceKernelIcacheClearAll((SceModule*)mod);
+	resolve_removed_nid((SceModule*)mod);
 
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {

@@ -52,10 +52,10 @@ static int _aLinkLibEntries(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mod
 	return ret;
 }
 
-void setup_nid_resolver(u32 text_addr)
+void setup_nid_resolver(u32 loadcore)
 {
-	aLinkLibEntries = (void*)(text_addr+0x3BCC);
-	_sw(MAKE_CALL(_aLinkLibEntries), text_addr+0x3468);
+	aLinkLibEntries = (void*)(loadcore+0x3BCC);
+	_sw(MAKE_CALL(_aLinkLibEntries), loadcore+0x3468);
 }
 
 u32 resolve_nid(const char *libname, u32 nid)

@@ -55,10 +55,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 	setup_validate_stub((SceModule*)mod);
 #endif
 
-	if(psp_model != PSP_1000) {
-		unlock_high_memory();
-	}
-
 	if (previous)
 		return (*previous)(mod);
 

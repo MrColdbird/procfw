@@ -12,6 +12,7 @@
 #include "printk.h"
 
 static int forced_umdcache_kill = 0;
+int high_memory_enabled = 0;
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
@@ -80,7 +81,8 @@ void patch_partitions(void)
 		p9[1] = (p2_len << 20) + 0x88800000;
 		p9[2] = p9_len << 20;
 		((unsigned int *)(p9[4]))[5] = (p9_len << 21) | 0xFC;
-	}
 
-	unlock_high_memory();
+		unlock_high_memory();
+		high_memory_enabled = 1;
+	}
 }

@@ -24,6 +24,10 @@ static int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
 
 	if (g_mod_start_thid != -1 && thid == g_mod_start_thid) {
 		if (g_on_module_start != NULL && g_mod_start != NULL) {
+			if(high_memory_enabled) {
+				unlock_high_memory();
+			}
+			
 			(*g_on_module_start)(g_mod_start);
 		}
 

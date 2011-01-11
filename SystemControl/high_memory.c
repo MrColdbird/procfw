@@ -26,6 +26,10 @@ void patch_umdcache(u32 text_addr)
 
 void unlock_high_memory(void)
 {
+	if(!high_memory_enabled) {
+		return;
+	}
+	
 	//unlock memory
 	unsigned int i = 0; for(; i < 0x40; i += 4) {
 		_sw(0xFFFFFFFF, 0xBC000040 + i);

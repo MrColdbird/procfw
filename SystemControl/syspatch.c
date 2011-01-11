@@ -51,31 +51,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 #endif
 
-#ifdef DEBUG
-	setup_validate_stub((SceModule*)mod);
-#endif
-
 	if (previous)
 		return (*previous)(mod);
 
 	return 0;
-}
-
-int _sceKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option)
-{
-#if DEBUG
-	int ret;
-
-	ret = sceKernelStartModule(modid, argsize, argp, status, option);
-
-	if (ret >= 0) {
-		validate_stub_by_uid(ret);
-	}
-
-	return ret;
-#else
-	return 0;
-#endif
 }
 
 void syspatch_init()

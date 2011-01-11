@@ -38,6 +38,7 @@ void setup_validate_stub(SceModule *mod);
 
 extern u32 p2_size;
 extern u32 p8_size;
+extern int high_memory_enabled;
 void patch_umdcache(u32 text_addr);
 void patch_partitions(void);
 void unlock_high_memory(void);

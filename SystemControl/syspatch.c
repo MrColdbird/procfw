@@ -24,6 +24,14 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 #endif
 
+	if(0 == strcmp(mod->modname, "sceLoadExec")) {
+		if(psp_model != PSP_1000) {
+			patch_partitions();
+		}
+
+		sync_cache();
+	}
+
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceLoadExec();
 		sync_cache();
@@ -47,7 +55,9 @@ static int syspatch_module_chain(SceModule2 *mod)
 	setup_validate_stub((SceModule*)mod);
 #endif
 
-	unlock_high_memory();
+	if(psp_model != PSP_1000) {
+		unlock_high_memory();
+	}
 
 	if (previous)
 		return (*previous)(mod);
@@ -79,10 +89,6 @@ void syspatch_init()
 	patch_sceLoaderCore();
 	patch_sceMemlmd();
 	patch_sceInterruptManager();
-
-	if(psp_model) {
-		patch_partitions();
-	}
 
 	sync_cache();
 }

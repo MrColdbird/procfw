@@ -30,6 +30,21 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	//store psp model
 	_sw(psp_model, 0x88FB0000);
 
+	//store custom partition size
+	if(p2_size != 24)
+	{
+		//store partition 2 length
+		_sw(p2_size, 0x88FB0008);
+
+		//store partition 9 length
+		_sw(p8_size, 0x88FB000C);
+	}
+
+	_sw((u32)g_insert_module_before, 0x88FB0010);
+	_sw((u32)g_insert_module_binary, 0x88FB0014);
+	_sw((u32)g_insert_module_size, 0x88FB0018);
+	_sw((u32)g_insert_module_flags, 0x88FB001C);
+	
 	rebootex_conf.magic = REBOOTEX_CONFIG_MAGIC;
 	memcpy((void*)0x88FB0020, &rebootex_conf, sizeof(rebootex_conf));
 

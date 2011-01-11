@@ -36,4 +36,16 @@ void validate_stub_by_uid(int modid);
 void setup_validate_stub(SceModule *mod);
 #endif
 
+extern u32 p2_size;
+extern u32 p8_size;
+void patch_umdcache(u32 text_addr);
+void patch_partitions(void);
+void unlock_high_memory(void);
+
+//for sctrlHENLoadModuleOnReboot
+extern char *g_insert_module_before;
+extern void *g_insert_module_binary;
+extern int g_insert_module_size;
+extern int g_insert_module_flags;
+
 #endif

@@ -29,6 +29,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {
+		patch_umdcache(mod->text_addr);
+		sync_cache();
+	}
+
 	resolve_sceKernelIcacheClearAll((SceModule*)mod);
 
 #ifdef DEBUG
@@ -41,6 +46,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 #ifdef DEBUG
 	setup_validate_stub((SceModule*)mod);
 #endif
+
+	unlock_high_memory();
 
 	if (previous)
 		return (*previous)(mod);
@@ -72,6 +79,10 @@ void syspatch_init()
 	patch_sceLoaderCore();
 	patch_sceMemlmd();
 	patch_sceInterruptManager();
+
+	if(psp_model) {
+		patch_partitions();
+	}
 
 	sync_cache();
 }

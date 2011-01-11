@@ -9,6 +9,7 @@
 #include "main.h"
 #include "utils.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "printk.h"
 
 PSP_MODULE_INFO("VshCtrl", 0x1007, 1, 0);

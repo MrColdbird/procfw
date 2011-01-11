@@ -75,6 +75,6 @@ void patch_sceLoadExec(void)
 	_sw(0, loadexec->text_addr+0x000023FC);
 
 	//allow all user levels to call sceKernelExitVSHVSH
-	_sw(0x10000008, mod->text_addr+0x168C);
-	_sw(0, mod->text_addr+0x16C0);
+	_sw(0x10000008, loadexec->text_addr+0x168C);
+	_sw(0, loadexec->text_addr+0x16C0);
 }

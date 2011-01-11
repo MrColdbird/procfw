@@ -329,9 +329,9 @@ void patch_sceLoaderCore(void)
 	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x4BE8);
 
 	//6.35 relocation fix for rt7
-	//fake relocation type 7 to be treated like 1
+	//fake relocation type 7 to be treated like 0
 	//patches handler table so jr $t5 returns properly on type 7 ;)
-	u32 faketype = 1;
+	u32 faketype = 0;
 	u32 origtype = 7;
 	_sw(*(u32 *)(loadcore->text_addr + 0x8274 + faketype * 4), loadcore->text_addr + 0x8274 + origtype * 4);
 

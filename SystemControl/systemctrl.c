@@ -314,5 +314,6 @@ int sctrlHENSetMemory(u32 p2, u32 p8)
 		p2_size = p2;
 		p8_size = p8;
 	}
+
 	return 0;
 }

@@ -306,7 +306,7 @@ static int printk_open_output(void)
 	fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 
 	if(fd < 0) {
-	  printk_output_fn = "ef0:/LOG_SCTL.TXT";
+	  strncpy(printk_output_fn, "ef", 2);
 		fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 	}
 

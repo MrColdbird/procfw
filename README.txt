@@ -12,6 +12,7 @@ Installer: install the CFW into the system. After that it can use Rebootex to bo
 CIPL: permanently install 635PRO on 01g/02g
 Satellite: VSH menu
 Recovery: Recovery menu as those in 5.XX kernel
+testsuite: test tool/homebrews/utils for 635PRO
 
 include: common used header goes here
 libs: common used library goes here

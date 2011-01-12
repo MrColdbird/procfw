@@ -27,9 +27,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
 		if(psp_model != PSP_1000) {
 			patch_partitions();
+	    sync_cache();
 		}
-
-		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
@@ -47,6 +46,21 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {
 		patch_umdcache(mod->text_addr);
 		sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "sceNpSignupPlugin_Module")) {
+	  patch_npsignup(mod->text_addr);
+	  sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "sceVshNpSignin_Module")) {
+	  patch_npsignin(mod->text_addr);
+	  sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "sceNp")) {
+	  patch_np(mod->text_addr, 9, 90);
+	  sync_cache();
 	}
 
 	resolve_removed_nid((SceModule*)mod);

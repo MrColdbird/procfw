@@ -43,6 +43,10 @@ void patch_umdcache(u32 text_addr);
 void patch_partitions(void);
 void unlock_high_memory(void);
 
+void patch_npsignup(u32 text_addr);
+void patch_npsignin(u32 text_addr);
+void patch_np(u32 text_addr, u8 mayor, u8 minor);
+
 //for sctrlHENLoadModuleOnReboot
 extern char *g_insert_module_before;
 extern void *g_insert_module_binary;

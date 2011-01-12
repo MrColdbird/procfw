@@ -23,7 +23,6 @@ all:
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)
 	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)
-	contrib/pspgz.py $(DISTRIBUTE)/systemctrl.prx contrib/SystemControl.hdr $(SYSTEMCONTROL)/systemctrl.prx
 	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)
 	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)
 	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)
@@ -37,4 +36,4 @@ clean:
 	@cd $(SYSTEMCONTROL); make clean
 	@cd $(GALAXYDRIVER); make clean
 	@cd $(STARGATE); make clean
-	rm $(DISTRIBUTE)/*
+	@rm $(DISTRIBUTE)/* || true

@@ -1,3 +1,6 @@
+all:
+	../contrib/pspgz.py ../dist/systemctrl.prx ../contrib/SystemControl.hdr systemctrl.prx
+
 TARGET = systemctrl
 OBJS = main.o \
 	   syspatch.o \

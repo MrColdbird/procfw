@@ -22,6 +22,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "utils.h"
+
 struct pthread_mlock_t {
 	volatile unsigned long l;
 	unsigned int c;
@@ -34,7 +36,6 @@ static MLOCK_T lock;
 
 extern void printk_lock(void);
 extern void printk_unlock(void);
-extern int is_cpu_intr_enable(void);
 
 static int itostr(char *buf, int in_data, int base, int upper, int sign)
 {

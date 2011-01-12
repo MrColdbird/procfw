@@ -14,6 +14,7 @@ OBJS = main.o \
 	   module_handler.o \
 	   oe_malloc.o \
 	   plugins.o \
+	   psnfix.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

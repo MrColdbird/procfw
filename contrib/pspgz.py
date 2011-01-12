@@ -13,7 +13,7 @@ def prx_compress(output, hdr, input):
 	elf = a.read(4);
 	a.close()
 
-	if (elf != b'\x7fELF'):
+	if (elf != '\x7fELF'.encode()):
 		print ("not a ELF/PRX file!")
 		return
 

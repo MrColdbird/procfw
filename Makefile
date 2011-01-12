@@ -14,6 +14,7 @@ DEBUG_OPTION="DEBUG=1"
 endif
 
 all:
+	@mkdir dist
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -37,4 +38,4 @@ clean:
 	@cd $(SYSTEMCONTROL); make clean
 	@cd $(GALAXYDRIVER); make clean
 	@cd $(STARGATE); make clean
-	rm $(DISTRIBUTE)/*
+	@rm -r $(DISTRIBUTE)

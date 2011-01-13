@@ -22,6 +22,10 @@ void launch_game(void)
 	char *eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
 	int ret;
 
+	if (g_conf.psp_model == PSP_GO) {
+		strncpy(g_conf.iso_path, "ef0", sizeof("ef0")-1);
+	}
+
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 

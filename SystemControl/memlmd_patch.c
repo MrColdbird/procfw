@@ -104,10 +104,10 @@ void patch_sceMemlmd(void)
 	memlmd_unsigner = (void*)memlmd->text_addr + patches[0]; // inner function which unsigns a PRX module 
 	memlmd_8450109F = (void*)memlmd->text_addr + patches[1]; // memlmd_8450109F: the 0xBFC00200 xor key setup function
 
-	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[2]); // the offset where memlmd_2E208358 call memlmd_unsigner
-	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[3]); // the offset where memlmd_03A71DAD call memlmd_unsigner
-	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[4]); // the offset where memlmd_CA560AA6 call memlmd_decrypt
-	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[5]); // the offset where memlmd_CE3EEFD0 call memlmd_decrypt
+	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[2]); // the offset where memlmd_3F2AC9C6 call memlmd_unsigner
+	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[3]); // the offset where memlmd_97DA82BC call memlmd_unsigner
+	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[4]); // the offset where memlmd_E42AFE2E call memlmd_decrypt
+	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[5]); // the offset where memlmd_D56F8AEC call memlmd_decrypt
 
 	memlmd_decrypt = (void*)memlmd->text_addr + 0x0134; // inner function which decrypt a PRX module
 }

@@ -15,9 +15,9 @@ DEBUG_OPTION="DEBUG=1"
 endif
 
 all:
-	@mkdir $(DISTRIBUTE)
-	@mkdir $(DISTRIBUTE)/$(INSTALLER)
-	@mkdir $(DISTRIBUTE)/ISOLauncher
+	@mkdir $(DISTRIBUTE) || true
+	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
+	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)

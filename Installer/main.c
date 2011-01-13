@@ -75,6 +75,36 @@ error:
 	return ret;
 }
 
+int smart_copy_file(const char *src, const char *dst)
+{
+	int ret;
+	SceIoStat srcstat, dststat;
+
+	ret = sceIoGetstat(dst, &dststat);
+
+	if (ret == 0) {
+		ret = sceIoGetstat(src, &srcstat);
+
+		if (ret == 0) {
+			if (dststat.st_size == srcstat.st_size) {
+				if (0 == memcmp(&dststat.st_ctime, &srcstat.st_ctime, sizeof(dststat.st_ctime)) &&
+						0 == memcmp(&dststat.st_mtime, &srcstat.st_mtime, sizeof(dststat.st_mtime))) {
+					return 0;
+				}
+			}
+		}
+	}
+
+	printf("Writing %s...", dst);
+	ret = copy_file(src, dst);
+
+	if (ret == 0) {
+		printf("OK\n");
+	}
+
+	return ret;
+}
+
 int write_file(const char *path, unsigned char *buf, int size)
 {
 	SceUID fd;
@@ -133,7 +163,7 @@ int install_cfw(void)
 	int ret;
 
 	int i; for(i=0; i<NELEMS(g_file_lists); ++i) {
-		ret = copy_file(g_file_lists[i].src, g_file_lists[i].dst);
+		ret = smart_copy_file(g_file_lists[i].src, g_file_lists[i].dst);
 
 		if (ret != 0)
 			goto exit;
@@ -156,7 +186,7 @@ int install_cfw(void)
 	return 0;
 
 exit:
-	printf("Copy file error (0x%08x)! Install aborted.\n", ret);
+	printf("\nCopy file error (0x%08x)! Install aborted.\n", ret);
 
 	return -1;
 }

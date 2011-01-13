@@ -6,7 +6,7 @@ PSP_FW_VERSION=635
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
-OBJS += ../../../Common/printk.o
+OBJS += ../../../Common/printk.o ../../../Common/utils.o
 else
 endif
 

@@ -58,7 +58,7 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 void patch_sceLoadExec(void)
 {
 	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
-	unsigned int offsets[6];
+	unsigned int offsets[4];
 	u32 text_addr;
 
 	if (loadexec == NULL) {
@@ -70,9 +70,13 @@ void patch_sceLoadExec(void)
 	if(psp_model == 4) { // PSP-N1000
 		offsets[0] = 0x2F90;
 		offsets[1] = 0x2FDC;
+		offsets[2] = 0x260C;
+		offsets[3] = 0x2650;
 	} else {
 		offsets[0] = 0x2D44;    // call to LoadReboot
 		offsets[1] = 0x2D90;    // lui $at, 0x8860
+		offsets[2] = 0x23B8;    // k1 loadexec patch
+		offsets[3] = 0x23FC;    // loadexec userlevel patch
 	}
 
 	//replace LoadReboot function
@@ -85,11 +89,11 @@ void patch_sceLoadExec(void)
 	LoadReboot = (void*)loadexec->text_addr;
 
 	//allow user $k1 configs to call sceKernelLoadExecWithApiType
-	_sw(0x1000000C, loadexec->text_addr+0x000023B8);
+	_sw(0x1000000C, loadexec->text_addr + offsets[2]);
 	//allow all user levels to call sceKernelLoadExecWithApiType
-	_sw(0, loadexec->text_addr+0x000023FC);
+	_sw(0, loadexec->text_addr + offsets[3]);
 
 	//allow all user levels to call sceKernelExitVSHVSH
-	_sw(0x10000008, loadexec->text_addr+0x168C);
-	_sw(0, loadexec->text_addr+0x16C0);
+	_sw(0x10000008, loadexec->text_addr + 0x168C);
+	_sw(0, loadexec->text_addr + 0x16C0);
 }

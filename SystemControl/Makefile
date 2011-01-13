@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/systemctrl.prx ../contrib/SystemControl.hdr systemctrl.prx
+	../contrib/pspgz.py ../dist/Installer/systemctrl.prx ../contrib/SystemControl.hdr systemctrl.prx
 
 TARGET = systemctrl
 OBJS = main.o \
@@ -17,6 +17,7 @@ OBJS = main.o \
 	   module_handler.o \
 	   oe_malloc.o \
 	   plugins.o \
+	   psnfix.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

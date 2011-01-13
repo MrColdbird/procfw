@@ -279,7 +279,7 @@ int main(int argc, char *argv[])
 			break;
 	}
 
-	printf("Install...");
+	printf("Install...\n");
 	ret = install_cfw();
 
 	if (ret == 0) {

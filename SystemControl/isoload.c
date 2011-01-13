@@ -33,15 +33,3 @@ void sctrlSESetBootConfFileIndex(int index)
 {
 	rebootex_conf.iso_mode = index;
 }
-
-void get_iso_status_from_rebootex(void)
-{
-	rebootex_config *conf = (rebootex_config*)(0x88FB0020);
-
-	if (conf->magic == REBOOTEX_CONFIG_MAGIC) {
-		rebootex_conf.iso_mode = conf->iso_mode;
-		STRCPY_S(g_iso_filename, (const char*)0x88FB0100);
-
-		printk("%s: iso_mode %d fn: %s\n", __func__, rebootex_conf.iso_mode, g_iso_filename);
-	}
-}

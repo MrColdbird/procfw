@@ -314,4 +314,13 @@ void sctrlHENSetSpeed(int cpu, int bus);
 */
 int sctrlHENSetMemory(u32 p2, u32 p8);
 
+/**
+ * Sets boot device for ISO loading. Only in PSPgo. Default use ef0
+ *
+ * @param ms0 set boot device for iso loading
+ * 0 - boot from ef0 
+ * 1 - boot from ms0
+*/
+void sctrlSEPSPGOSetBootDevice(int ms0);
+
 #endif

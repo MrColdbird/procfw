@@ -19,5 +19,3 @@ USE_KERNEL_LIBC=1
 
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
-
-

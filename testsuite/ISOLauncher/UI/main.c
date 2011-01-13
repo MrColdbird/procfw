@@ -103,7 +103,7 @@ int get_iso(void)
 	fd = sceIoDopen(get_iso_dir());
 
 	if (fd < 0) {
-		printk("sceIoDopen returns 0x%08X\r\n", fd);
+		printk("sceIoDopen returns 0x%08X\n", fd);
 
 		return fd;
 	}
@@ -245,7 +245,7 @@ static int load_start_launcher(struct PLoaderConf *loader)
 	ret = sceKernelLoadModule(path, 0, NULL);
 
 	if (ret < 0) {
-		printk("sceKernelLoadModule %s returns 0x%08x\r\n", path, ret);
+		printk("sceKernelLoadModule %s returns 0x%08x\n", path, ret);
 
 		return ret;
 	}
@@ -253,7 +253,7 @@ static int load_start_launcher(struct PLoaderConf *loader)
 	ret = sceKernelStartModule(ret, sizeof(*loader), loader, &result, NULL);
 
 	if (ret < 0) {
-		printk("sceKernelStartModule %s returns 0x%08x\r\n", path, ret);
+		printk("sceKernelStartModule %s returns 0x%08x\n", path, ret);
 	}
 
 	return ret;
@@ -268,8 +268,8 @@ int main(int argc, char* argv[])
 	g_conf.psp_model = kuKernelGetModel();
 	g_conf.iso_mode = USE_NP9660_MODE;
 
-	printk_init(NULL);
-	printk("PLoad GUI started, fw: 0x%08X model: 0x%08X\r\n", g_conf.fw_version, g_conf.psp_model);
+	printk_init("ms0:/log_loader.txt");
+	printk("PLoad GUI started, fw: 0x%08X model: 0x%08X\n", g_conf.fw_version, g_conf.psp_model);
 
 	{
 		int result;
@@ -301,7 +301,7 @@ int main(int argc, char* argv[])
 	
 	getcwd(g_conf.prx_path, sizeof(g_conf.prx_path));
 	STRCAT_S(g_conf.prx_path, "/");
-	printk("g_conf.prx_path %s\r\n", g_conf.prx_path);
+	printk("g_conf.prx_path %s\n", g_conf.prx_path);
 
 	get_iso();
 	load_conf();

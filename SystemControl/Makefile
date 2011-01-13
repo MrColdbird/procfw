@@ -5,6 +5,7 @@ TARGET = systemctrl
 OBJS = main.o \
 	   syspatch.o \
 	   loadexec_patch.o \
+	   rebootex_conf.o \
 	   loadercore_patch.o \
 	   memlmd_patch.o \
 	   interruptman_patch.o \
@@ -18,6 +19,7 @@ OBJS = main.o \
 	   oe_malloc.o \
 	   plugins.o \
 	   psnfix.o \
+	   fatfs_patch.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

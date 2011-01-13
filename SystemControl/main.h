@@ -25,7 +25,7 @@ void syspatch_init();
 void setup_module_handler(void);
 void patch_sceLoaderCore(void);
 void patch_sceLoadExec(void);
-void get_iso_status_from_rebootex(void);
+void load_rebootex_config(void);
 void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
 void resolve_removed_nid(SceModule *pMod);
@@ -36,9 +36,6 @@ void validate_stub_by_uid(int modid);
 void setup_validate_stub(SceModule *mod);
 #endif
 
-extern u32 p2_size;
-extern u32 p8_size;
-extern int high_memory_enabled;
 void patch_umdcache(u32 text_addr);
 void patch_partitions(void);
 void unlock_high_memory(void);
@@ -47,13 +44,20 @@ void patch_npsignup(u32 text_addr);
 void patch_npsignin(u32 text_addr);
 void patch_np(u32 text_addr, u8 mayor, u8 minor);
 
+void patch_sceFATFS_Driver(u32 text_addr);
+
+int plugin_thread(SceSize args, void * argp);
+int load_start_module(char *path);
+
+extern u32 p2_size;
+extern u32 p8_size;
+extern int high_memory_enabled;
+
 //for sctrlHENLoadModuleOnReboot
 extern char *g_insert_module_before;
 extern void *g_insert_module_binary;
 extern int g_insert_module_size;
 extern int g_insert_module_flags;
 
-int plugin_thread(SceSize args, void * argp);
-int load_start_module(char *path);
 
 #endif

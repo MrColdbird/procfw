@@ -45,7 +45,6 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	_sw((u32)g_insert_module_size, 0x88FB0018);
 	_sw((u32)g_insert_module_flags, 0x88FB001C);
 	
-	rebootex_conf.magic = REBOOTEX_CONFIG_MAGIC;
 	memcpy((void*)0x88FB0020, &rebootex_conf, sizeof(rebootex_conf));
 
 	memset((void*)0x88FB0100, 0, 256);

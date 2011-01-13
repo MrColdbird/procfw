@@ -22,6 +22,8 @@
 #include <stdarg.h>
 #include <string.h>
 
+#include "utils.h"
+
 struct pthread_mlock_t {
 	volatile unsigned long l;
 	unsigned int c;
@@ -34,7 +36,6 @@ static MLOCK_T lock;
 
 extern void printk_lock(void);
 extern void printk_unlock(void);
-extern int is_cpu_intr_enable(void);
 
 static int itostr(char *buf, int in_data, int base, int upper, int sign)
 {
@@ -305,7 +306,8 @@ static int printk_open_output(void)
 	fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 
 	if(fd < 0) {
-		fd = sceIoOpen("ef0:/LOG_SCTL.txt", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+		strncpy((char*)printk_output_fn, "ef", 2);
+		fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 	}
 
 	return fd;

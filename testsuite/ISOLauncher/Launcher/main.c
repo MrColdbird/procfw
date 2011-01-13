@@ -25,6 +25,9 @@ void launch_game(void)
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 
+	//full memory doesn't hurt on isos
+	sctrlHENSetMemory(48, 0);
+
 	args = sizeof(eboot);
 	argp = eboot;
 	memset(&param, 0, sizeof(param));

@@ -24,12 +24,15 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 #define PSP_1000 0
 
 int psp_model = 0;
+int disable_smart_copy = 0;
+static u8 buf[64*1024] __attribute__((aligned(64)));
+static u8 buf1[64*1024] __attribute__((aligned(64)));
+static u8 buf2[64*1024] __attribute__((aligned(64)));
 
 int copy_file(const char *src, const char *dst)
 {
 	SceUID fd = -1, fdw = -1;
 	int ret;
-	u8 buf[64*1024] __attribute__((aligned(64)));
 
 	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
 
@@ -75,23 +78,88 @@ error:
 	return ret;
 }
 
+int compare_file(const char *src, const char *dst)
+{
+	SceUID fd = -1, fdd = -1;
+	int ret, ret2;
+	SceIoStat srcstat, dststat;
+
+	ret = sceIoGetstat(src, &srcstat);
+	
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	ret = sceIoGetstat(dst, &dststat);
+	
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	if (dststat.st_size != srcstat.st_size) {
+		goto not_equal;
+	}
+
+	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fd = ret;
+
+	ret = sceIoOpen(dst, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fdd = ret;
+	ret = sizeof(buf1);
+	ret = sceIoRead(fd, buf1, ret);
+
+	while (ret > 0) {
+		ret2 = sceIoRead(fdd, buf2, ret);
+
+		if (ret2 != ret) {
+			goto not_equal;
+		}
+
+		if (memcmp(buf1, buf2, ret)) {
+			goto not_equal;
+		}
+
+		ret = sceIoRead(fd, buf1, ret);
+	}
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	sceIoClose(fd);
+	sceIoClose(fdd);
+
+	return 0;
+
+not_equal:
+	if (fd >= 0)
+		sceIoClose(fd);
+
+	if (fdd >= 0)
+		sceIoClose(fdd);
+
+	return 1;
+}
+
 int smart_copy_file(const char *src, const char *dst)
 {
 	int ret;
-	SceIoStat srcstat, dststat;
 
-	ret = sceIoGetstat(dst, &dststat);
-
-	if (ret == 0) {
-		ret = sceIoGetstat(src, &srcstat);
+	if (!disable_smart_copy) {
+		ret = compare_file(src, dst);
 
 		if (ret == 0) {
-			if (dststat.st_size == srcstat.st_size) {
-				if (0 == memcmp(&dststat.st_ctime, &srcstat.st_ctime, sizeof(dststat.st_ctime)) &&
-						0 == memcmp(&dststat.st_mtime, &srcstat.st_mtime, sizeof(dststat.st_mtime))) {
-					return 0;
-				}
-			}
+			return 0;
 		}
 	}
 
@@ -240,19 +308,20 @@ int main(int argc, char *argv[])
 	init_flash();
 	usage();
 
-	printf("Press X to install CFW.\n");
+	printf("Press X to launch CFW.\n");
+	printf("Hold L to reinstall CFW.\n");
 	printf("Press R to exit.\n");
 
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
 
-	while (key != PSP_CTRL_CROSS && key != PSP_CTRL_RTRIGGER) {
+	while (0 == (key & (PSP_CTRL_CROSS | PSP_CTRL_RTRIGGER))) {
 		sceKernelDelayThread(50000);
 		sceCtrlReadBufferPositive(&ctl, 1);
 		key = ctl.Buttons;
 	}
 
-	if (key == PSP_CTRL_RTRIGGER) {
+	if (key & PSP_CTRL_RTRIGGER) {
 		printf("Exiting...\n");
 		sceKernelDelayThread(100000);
 		sceKernelExitGame();
@@ -279,7 +348,12 @@ int main(int argc, char *argv[])
 			break;
 	}
 
-	printf("Install...\n");
+	sceCtrlReadBufferPositive(&ctl, 1);
+	
+	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
+		disable_smart_copy = 1;
+	}
+	
 	ret = install_cfw();
 
 	if (ret == 0) {

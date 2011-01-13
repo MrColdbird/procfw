@@ -23,6 +23,7 @@ all:
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
@@ -42,6 +43,7 @@ clean:
 	@cd $(INSTALLER); make clean
 	@cd $(VSHCONTROL); make clean
 	@cd $(SYSTEMCONTROL); make clean
+	@cd $(SYSTEMCONTROL)/libs; make clean
 	@cd $(GALAXYDRIVER); make clean
 	@cd $(STARGATE); make clean
 	@cd $(ISOLAUNCHER); make clean

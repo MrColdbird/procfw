@@ -27,7 +27,7 @@ void launch_game(void)
 	}
 
 	// TODO add our own library
-	// sctrlSEPSPGOSetBootDevice(0);
+	sctrlSESetBootDevice(0);
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 

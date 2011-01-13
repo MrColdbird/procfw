@@ -183,4 +183,13 @@ void sctrlSESetUmdFile(char *file);
 */
 void sctrlSESetBootConfFileIndex(int index);
 
+/**
+ * Sets boot device for ISO loading. Only in PSPgo. Default use ef0
+ *
+ * @param ms0 set boot device for iso loading
+ * 0 - boot from ef0 
+ * 1 - boot from ms0
+*/
+void sctrlSESetBootDevice(int ms0);
+
 #endif

@@ -71,6 +71,12 @@ static void patch_sysconf_plugin_module(u32 text_addr)
 
 	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr+0x18F3C); // lui $v0, 
 	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr+0x18F40); // or $v0, $v0, 
+
+	p = (void*)(text_addr + 0x2E4D8);
+	strcpy(str, "00:00:00:00:00:00");
+	ascii2utf16(p, str);
+
+	sync_cache();
 }
 
 static void patch_game_plugin_module(u32 text_addr)

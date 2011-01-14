@@ -18,12 +18,12 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
+	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)

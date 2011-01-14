@@ -122,7 +122,7 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	int ret;
 	SceModule2 *mod;
 	u32 text_addr;
-	int (*_sctrlKernelLoadExecVSHWithApitype)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param);
+	int (*_sctrlKernelLoadExecVSHWithApitype)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, u32 unk);
 
 	k1 = pspSdkSetK1(0);
 	mod = (SceModule2*) sceKernelFindModuleByName("sceLoadExec");
@@ -134,7 +134,7 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x236C); // 0x2304 in 6.20
 	}
 
-	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param);
+	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
 
 	pspSdkSetK1(k1);
 

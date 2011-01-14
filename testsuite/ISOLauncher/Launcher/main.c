@@ -20,11 +20,7 @@ void launch_game(void)
 	SceSize args; 
 	void *argp;
 	char *eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
-	int ret;
-
-	if (g_conf.psp_model == PSP_GO) {
-		strncpy(g_conf.iso_path, "ef0", sizeof("ef0")-1);
-	}
+	int ret, apitype;
 
 	// TODO add our own library
 	sctrlSESetBootDevice(0);
@@ -42,7 +38,14 @@ void launch_game(void)
 	param.argp = argp;
 	param.key = "game";
 
-	ret = sctrlKernelLoadExecVSHWithApitype(0x120, eboot, &param);
+	if (g_conf.psp_model == PSP_GO) {
+		apitype = 0x125;
+		strncpy(g_conf.iso_path, "ef0", sizeof("ef0")-1);
+	} else {
+		apitype = 0x120;
+	}
+
+	ret = sctrlKernelLoadExecVSHWithApitype(apitype, eboot, &param);
 	printk("sceKernelLoadExecVSHDisc returns 0x%08X\n", ret);
 }
 

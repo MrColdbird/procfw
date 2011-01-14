@@ -61,7 +61,7 @@ void setup_module_handler(void)
 		return;
 	
 	//psp go patches
-	if(psp_model == 4 ) {
+	if(psp_model == 4) {
 		//backup function pointer (dword_622C)
 		ProbeExec3 = (void*)mod->text_addr + 0x8864;
 

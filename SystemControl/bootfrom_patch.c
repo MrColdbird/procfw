@@ -13,88 +13,25 @@
 #include "rebootex_conf.h"
 #include "libs.h"
 
-void sctrlSESetBootDevice(int ms0)
+static void patch_sceMediaSync(u32 scemediasync_text_addr)
 {
-	if (ms0) {
-		rebootex_conf.bootdevice = 0x40;
-	}
+	// patch MsCheckMedia
+	_sw(0x03E00008, scemediasync_text_addr+0x744);
+	_sw(0x24020001, scemediasync_text_addr+0x748);
 
-	rebootex_conf.bootdevice = 0x50;
+	// patch InitForKernel_2213275D check
+	_sw(0, scemediasync_text_addr+0x00000D50);
+
+	// nuked strncmp check
+	_sw(0x1000FFDB, scemediasync_text_addr+0x10B4);
 }
 
-// sceKernelBootFrom
-// 0x50 = PSP_BOOT_EF0?
-static int _InitForKernel_EE67E450(void)
+void patch_bootfrom(SceModule *mod1)
 {
-	int ret;
+	SceModule2 *mod = (SceModule2*)mod1;
 
-	ret = rebootex_conf.bootdevice;
-	printk("%s returns 0x%08X\n", __func__, ret);
-
-	return ret;
-}
-
-void patch_sceFATFS_Driver(u32 scefatfs_text_addr)
-{
-	_sw(MAKE_JUMP(_InitForKernel_EE67E450), scefatfs_text_addr+0xEF3C);
-	_sw(0, scefatfs_text_addr+0xEF40);
-}
-
-void patch_sceMediaSync(u32 scemediasync_text_addr)
-{
-	_sw(MAKE_JUMP(_InitForKernel_EE67E450), scemediasync_text_addr+0x2F64);
-	_sw(0, scemediasync_text_addr+0x2F68);
-}
-
-static int _sceKernelInitApiType(void)
-{
-	int ret;
-
-	ret = 0x125;
-	printk("%s returns 0x%08X\n", __func__, ret);
-
-	return ret;
-}
-
-static int _sceKernelApplicationType(void)
-{
-	int ret;
-
-	ret = 0x200;
-	printk("%s returns 0x%08X\n", __func__, ret);
-
-	return ret;
-}
-
-static int _sceKernelBootFrom(void)
-{
-	int ret;
-
-	ret = rebootex_conf.bootdevice;
-	printk("%s returns 0x%08X\n", __func__, ret);
-
-	return ret;
-}
-
-static const char *_InitForKernel_2213275D(void)
-{
-	char *iso;
-
-	iso = "ef0:/PSP/GAME/NPHG00014/EBOOT.PBP";
-
-	printk("%s returns %s\n", __func__, iso);
-
-	return iso;
-}
-
-void patch_bootfrom(SceModule *mod)
-{
-	if (!strcmp(((SceModule2*)mod)->modname, "sceMediaSync")) {
-		hook_import_bynid(mod, "InitForKernel", 0x2213275D, _InitForKernel_2213275D, 0);
-
-		u32 text_addr = ((SceModule2*)mod)->text_addr;
-
-		_sw(0x1000FFDB, text_addr+0x10B4);
+	if (!strcmp(mod->modname, "sceMediaSync")) {
+		patch_sceMediaSync(mod->text_addr);
 
 		sync_cache();
 	}

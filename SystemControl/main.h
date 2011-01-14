@@ -45,8 +45,6 @@ void patch_npsignin(u32 text_addr);
 void patch_np(u32 text_addr, u8 mayor, u8 minor);
 
 void patch_bootfrom(SceModule *mod);
-void patch_sceFATFS_Driver(u32 text_addr);
-void patch_sceMediaSync(u32 text_addr);
 
 int plugin_thread(SceSize args, void * argp);
 int load_start_module(char *path);

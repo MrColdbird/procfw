@@ -22,8 +22,6 @@ void launch_game(void)
 	char *eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
 	int ret, apitype;
 
-	// TODO add our own library
-	sctrlSESetBootDevice(0);
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 

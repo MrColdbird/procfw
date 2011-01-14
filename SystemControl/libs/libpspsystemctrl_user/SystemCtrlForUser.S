@@ -74,6 +74,3 @@
 #ifdef F_SystemCtrlForUser_0022
 	IMPORT_FUNC  "SystemCtrlForUser",0x5CB025F0,sctrlSESetBootConfFileIndex
 #endif
-#ifdef F_SystemCtrlForUser_0023
-	IMPORT_FUNC  "SystemCtrlForUser",0x26932812,sctrlSESetBootDevice
-#endif

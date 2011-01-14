@@ -98,6 +98,3 @@
 #ifdef F_SystemCtrlForKernel_0030
 	IMPORT_FUNC  "SystemCtrlForKernel",0x5CB025F0,sctrlSESetBootConfFileIndex
 #endif
-#ifdef F_SystemCtrlForKernel_0031
-	IMPORT_FUNC  "SystemCtrlForKernel",0x26932812,sctrlSESetBootDevice
-#endif

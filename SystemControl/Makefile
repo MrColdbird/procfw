@@ -9,6 +9,7 @@ OBJS = main.o \
 	   loadercore_patch.o \
 	   memlmd_patch.o \
 	   interruptman_patch.o \
+	   mediasync_patch.o \
 	   nid_resolver.o \
 	   nid_data.o \
 	   elf.o \
@@ -19,7 +20,6 @@ OBJS = main.o \
 	   oe_malloc.o \
 	   plugins.o \
 	   psnfix.o \
-	   bootfrom_patch.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

@@ -42,7 +42,7 @@ void launch_game(void)
 	param.argp = argp;
 	param.key = "game";
 
-	ret = sceKernelLoadExecVSHDisc(eboot, &param);
+	ret = sctrlKernelLoadExecVSHWithApitype(0x120, eboot, &param);
 	printk("sceKernelLoadExecVSHDisc returns 0x%08X\n", ret);
 }
 

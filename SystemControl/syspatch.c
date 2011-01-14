@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
+#include "libs.h"
 
 static STMOD_HANDLER previous;
 
@@ -72,6 +73,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 		printk_sync();
 		printk("printk synchronized\n");
 	}
+
+	hook_import_bynid(mod, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
 
 	if (previous)

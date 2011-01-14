@@ -76,21 +76,26 @@ static int _sceKernelBootFrom(void)
 	return ret;
 }
 
+static const char *_InitForKernel_2213275D(void)
+{
+	char *iso;
+
+	iso = "ef0:/PSP/GAME/NPHG00014/EBOOT.PBP";
+
+	printk("%s returns %s\n", __func__, iso);
+
+	return iso;
+}
+
 void patch_bootfrom(SceModule *mod)
 {
-#if 0
-	if (0 == strcmp(((SceModule2*)mod)->modname, "sceFATFS_Driver") ||
-			0 == strcmp(((SceModule2*)mod)->modname, "sceMsEmu_Driver")
-	   ) {
-		hook_import_bynid(mod, "InitForKernel", 0xEE67E450, _InitForKernel_EE67E450, 0);
-		hook_import_bynid(mod, "InitForKernel", 0x7233B5BC, _InitForKernel_EE67E450, 0);
-		hook_import_bynid(mod, "InitForKernel", 0x7A2333AD, _sceKernelInitApiType, 0);
-	}
-#endif
-	hook_import_bynid(mod, "InitForKernel", 0xEE67E450, _InitForKernel_EE67E450, 0);
-	hook_import_bynid(mod, "InitForKernel", 0x27932388, _sceKernelBootFrom, 0);
+	if (!strcmp(((SceModule2*)mod)->modname, "sceMediaSync")) {
+		hook_import_bynid(mod, "InitForKernel", 0x2213275D, _InitForKernel_2213275D, 0);
 
-	if (strcmp(((SceModule2*)mod)->modname, "sceMediaSync")) {
-		hook_import_bynid(mod, "InitForKernel", 0x7A2333AD, _sceKernelInitApiType, 0);
+		u32 text_addr = ((SceModule2*)mod)->text_addr;
+
+		_sw(0x1000FFDB, text_addr+0x10B4);
+
+		sync_cache();
 	}
 }

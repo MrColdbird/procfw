@@ -74,7 +74,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 		printk("printk synchronized\n");
 	}
 
-	hook_import_bynid(mod, "KDebugForKernel", 0x84F370BC, printk, 0);
+	hook_import_bynid((SceModule*)mod, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
 
 	if (previous)

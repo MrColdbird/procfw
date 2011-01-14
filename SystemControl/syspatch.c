@@ -11,6 +11,7 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "libs.h"
+#include "rebootex_conf.h"
 
 static STMOD_HANDLER previous;
 
@@ -36,7 +37,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		SceUID thid;
 
-		patch_sceMediaSync(mod->text_addr);
+		if (psp_model == PSP_GO && rebootex_conf.iso_mode != NORMAL_MODE) {
+			patch_sceMediaSync(mod->text_addr);
+		}
+
 		patch_sceLoadExec();
 		sync_cache();
 

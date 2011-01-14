@@ -21,7 +21,4 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 
 	// patch InitForKernel_2213275D check
 	_sw(0, scemediasync_text_addr+0x00000D50);
-
-	// nuked strncmp check
-	_sw(0x1000FFDB, scemediasync_text_addr+0x10B4);
 }

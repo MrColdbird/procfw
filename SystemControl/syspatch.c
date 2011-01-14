@@ -19,7 +19,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	apitype = sceKernelInitApitype();
 	
-#if 0
+#if 1
 	if (mod != NULL) {
 		printk("Starting %s Apitype: 0x%X\n", mod->modname, apitype);
 	}
@@ -65,18 +65,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	resolve_removed_nid((SceModule*)mod);
-
-	if (psp_model == PSP_GO && apitype == PSP_INIT_APITYPE_DISC) {
-		if (0 == strcmp(mod->modname, "sceFATFS_Driver")) {
-			patch_sceFATFS_Driver(mod->text_addr);
-			sync_cache();
-		}
-
-		if (0 == strcmp(mod->modname, "sceMediaSync")) {
-			patch_sceMediaSync(mod->text_addr);
-			sync_cache();
-		}
-	}
+	patch_bootfrom((SceModule*)mod);
 
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {

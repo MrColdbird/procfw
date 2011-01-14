@@ -33,3 +33,9 @@ void patch_sceFATFS_Driver(u32 scefatfs_text_addr)
 	_sw(MAKE_JUMP(_InitForKernel_EE67E450), scefatfs_text_addr+0xEF3C);
 	_sw(0, scefatfs_text_addr+0xEF40);
 }
+
+void patch_sceMediaSync(u32 scemediasync_text_addr)
+{
+	_sw(MAKE_JUMP(_InitForKernel_EE67E450), scemediasync_text_addr+0x2F64);
+	_sw(0, scemediasync_text_addr+0x2F68);
+}

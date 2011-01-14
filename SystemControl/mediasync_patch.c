@@ -13,7 +13,7 @@
 #include "rebootex_conf.h"
 #include "libs.h"
 
-static void patch_sceMediaSync(u32 scemediasync_text_addr)
+void patch_sceMediaSync(u32 scemediasync_text_addr)
 {
 	// patch MsCheckMedia
 	_sw(0x03E00008, scemediasync_text_addr+0x744);
@@ -24,15 +24,4 @@ static void patch_sceMediaSync(u32 scemediasync_text_addr)
 
 	// nuked strncmp check
 	_sw(0x1000FFDB, scemediasync_text_addr+0x10B4);
-}
-
-void patch_bootfrom(SceModule *mod1)
-{
-	SceModule2 *mod = (SceModule2*)mod1;
-
-	if (!strcmp(mod->modname, "sceMediaSync")) {
-		patch_sceMediaSync(mod->text_addr);
-
-		sync_cache();
-	}
 }

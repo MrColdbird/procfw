@@ -20,7 +20,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	apitype = sceKernelInitApitype();
 	
-#if 1
+#ifdef DEBUG
 	if (mod != NULL) {
 		printk("Starting %s Apitype: 0x%X\n", mod->modname, apitype);
 	}
@@ -36,6 +36,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		SceUID thid;
 
+		patch_sceMediaSync(mod->text_addr);
 		patch_sceLoadExec();
 		sync_cache();
 
@@ -66,8 +67,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	resolve_removed_nid((SceModule*)mod);
-	patch_bootfrom((SceModule*)mod);
-
+	
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
 		printk_sync();

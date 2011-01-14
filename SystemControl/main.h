@@ -45,6 +45,7 @@ void patch_npsignin(u32 text_addr);
 void patch_np(u32 text_addr, u8 mayor, u8 minor);
 
 void patch_sceFATFS_Driver(u32 text_addr);
+void patch_sceMediaSync(u32 text_addr);
 
 int plugin_thread(SceSize args, void * argp);
 int load_start_module(char *path);
@@ -58,6 +59,5 @@ extern char *g_insert_module_before;
 extern void *g_insert_module_binary;
 extern int g_insert_module_size;
 extern int g_insert_module_flags;
-
 
 #endif

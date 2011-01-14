@@ -19,7 +19,7 @@ OBJS = main.o \
 	   oe_malloc.o \
 	   plugins.o \
 	   psnfix.o \
-	   fatfs_patch.o \
+	   bootfrom_patch.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

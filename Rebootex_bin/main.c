@@ -6,6 +6,7 @@
 #define REBOOTEX_CONFIG_START 0x88FB0000
 #define REBOOTEX_START 0x88FC0000
 #define BTCNF_MAGIC 0x0F803001
+#define BOOTCONFIG_TEMP_BUFFER 0x88FB0200
 
 typedef struct _btcnf_header
 {
@@ -68,7 +69,7 @@ int _memset(unsigned char * buffer, unsigned char value, unsigned int length);
 int _sceBootLfatOpen(char * filename);
 int _sceBootLfatRead(char * buffer, int length);
 int _sceBootLfatClose (void);
-int _UnpackBootConfig(char * buffer, int length);
+int _UnpackBootConfig(char ** buffer, int length);
 
 //loadcore replacements
 int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize);
@@ -99,7 +100,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	int version = *(int *)REBOOTEX_CONFIG_START;
 
 	//patch offsets
-	unsigned int patches[17];
+	unsigned int patches[18];
 
 	load_configure();
 
@@ -123,6 +124,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 		patches[14] = 0x5764; //0x5554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
 		patches[15] = 0x5768; //0x5558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
 		patches[16] = 0x7648; //0x7388 in 6.20 - Killing Branch Check bltz ...
+		patches[17] = 0x7308; //UnpackBootConfig buffer address
 	}
 
 	//64mb psps
@@ -145,6 +147,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 		patches[14] = 0x5834; //0x561C in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
 		patches[15] = 0x5838; //0x5620 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
 		patches[16] = 0x7714; //0x7450 in 6.20 - Killing Branch Check bltz ...
+		patches[17] = 0x73F8; //UnpackBootConfig buffer address
 	}
 
 	//global offsets
@@ -167,6 +170,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patches[14]);
 	_sw(0x02A0E821, REBOOT_START + patches[15]); // move $sp, $s5
 	_sw(0, REBOOT_START + patches[16]);
+	_sw(0x27A40004, REBOOT_START + patches[17]); // addiu $a0, $sp, 4
 
 	load_configure();
 
@@ -524,13 +528,16 @@ int patch_bootconf_march33(char *buffer, int length)
 	return result;
 }
 
-int _UnpackBootConfig(char * buffer, int length)
+int _UnpackBootConfig(char **p_buffer, int length)
 {
 	int result;
 	int newsize;
+	char *buffer;
 
-	result = (*UnpackBootConfig)(buffer, length);
-
+	result = (*UnpackBootConfig)(*p_buffer, length);
+	buffer = (void*)BOOTCONFIG_TEMP_BUFFER;
+	_memcpy(buffer, *p_buffer, length);
+	*p_buffer = buffer;
 	newsize = AddPRX(buffer, "/kd/init.prx", "/kd/systemctrl.prx", 0x00EF);
 
 	if (newsize > 0) result = newsize;

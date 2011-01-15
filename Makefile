@@ -40,11 +40,11 @@ all:
 clean:
 	@cd $(REBOOTEXBIN); make clean
 	@cd $(REBOOTEX); make clean
-	@cd $(INSTALLER); make clean
-	@cd $(VSHCONTROL); make clean
-	@cd $(SYSTEMCONTROL); make clean
-	@cd $(SYSTEMCONTROL)/libs; make clean
-	@cd $(GALAXYDRIVER); make clean
-	@cd $(STARGATE); make clean
-	@cd $(ISOLAUNCHER); make clean
+	@cd $(INSTALLER); make clean $(DEBUG_OPTION)
+	@cd $(VSHCONTROL); make clean $(DEBUG_OPTION)
+	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
+	@cd $(SYSTEMCONTROL)/libs; make clean $(DEBUG_OPTION)
+	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
+	@cd $(STARGATE); make clean $(DEBUG_OPTION)
+	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)

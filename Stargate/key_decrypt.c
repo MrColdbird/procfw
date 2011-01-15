@@ -297,10 +297,7 @@ void patch_sceMesgLed()
 		if (psp_model == PSP_GO) {
 			_sw(intr, text_addr+0x3614);
 			_sw(intr, text_addr+0x38AC);
-		} else if (psp_model == PSP_4000) {
-			_sw(intr, text_addr+0x32A8);
-			_sw(intr, text_addr+0x3540);
-		} else if (psp_model == PSP_3000) {
+		} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
 			_sw(intr, text_addr+0x32A8);
 			_sw(intr, text_addr+0x3540);
 		} else if (psp_model == PSP_2000) {

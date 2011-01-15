@@ -7,6 +7,8 @@ enum {
 	PSP_3000 = 2,
 	PSP_4000 = 3,
 	PSP_GO   = 4,
+	PSP_7000 = 6,
+	PSP_9000 = 8,
 };
 
 #define MAKE_JUMP(f) (0x08000000 | (((u32)(f) >> 2) & 0x03ffffff))

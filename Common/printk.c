@@ -279,10 +279,15 @@ static char *printk_memory_log_ptr = printk_memory_log;
 
 static void flush_printk_memory_log(int fd, int kout)
 {
+	int ret;
+
 	sceIoWrite(fd, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
-	sceIoWrite(kout, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
-	memset(printk_memory_log, 0, sizeof(printk_memory_log));
-	printk_memory_log_ptr = printk_memory_log;
+	ret = sceIoWrite(kout, printk_memory_log, printk_memory_log_ptr - printk_memory_log);
+
+	if (ret >= 0) {
+		memset(printk_memory_log, 0, sizeof(printk_memory_log));
+		printk_memory_log_ptr = printk_memory_log;
+	}
 }
 
 static void append_to_memory_log(int printed_len)
@@ -341,9 +346,12 @@ int printk(char *fmt, ...)
 {
 	va_list args;
 	int printed_len;
+	u32 k1;
 
 	if ( 0 )
 		return 0;
+
+	k1 = pspSdkSetK1(0);
 
 	if (0 == is_cpu_intr_enable()) {
 		// interrupt disabled, let's do the work quickly before the watchdog bites
@@ -361,6 +369,8 @@ int printk(char *fmt, ...)
 		printk_output(printed_len);
 		printk_unlock();
 	}
+
+	pspSdkSetK1(k1);
 
 	return printed_len;
 }
@@ -440,9 +450,9 @@ int printk_sync(void)
 		if (printk_memory_log_ptr > printk_memory_log) {
 			flush_printk_memory_log(fd, kout);
 		}
-	}
 
-	sceKernelDelayThread(10000);
+		sceKernelDelayThread(10000);
+	}
 
 	return 0;
 }

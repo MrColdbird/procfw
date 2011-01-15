@@ -18,7 +18,6 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
-	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -29,7 +28,6 @@ all:
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
 	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/$(INSTALLER)
-	contrib/pspgz.py $(DISTRIBUTE)/$(INSTALLER)/systemctrl.prx contrib/SystemControl.hdr $(SYSTEMCONTROL)/systemctrl.prx
 	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/$(INSTALLER)
 	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/$(INSTALLER)
@@ -43,8 +41,13 @@ clean:
 	@cd $(INSTALLER); make clean $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
-	@cd $(SYSTEMCONTROL)/libs; make clean $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
+
+build_lib:
+	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
+	
+clean_lib:
+	@cd $(SYSTEMCONTROL)/libs; make clean $(DEBUG_OPTION)

@@ -19,9 +19,12 @@ void launch_game(void)
 	struct SceKernelLoadExecVSHParam param;
 	SceSize args; 
 	void *argp;
-	char *eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+	char *eboot;
 	int ret, apitype;
 
+	eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+//	eboot = "disc0:/PSP_GAME/SYSDIR/BOOT.BIN";
+	
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 
@@ -44,7 +47,7 @@ void launch_game(void)
 	}
 
 	ret = sctrlKernelLoadExecVSHWithApitype(apitype, eboot, &param);
-	printk("sceKernelLoadExecVSHDisc returns 0x%08X\n", ret);
+	printk("sctrlKernelLoadExecVSHWithApitype 0x%x returns 0x%08X\n", apitype, ret);
 }
 
 int main_thread(SceSize args, void *argp)

@@ -456,10 +456,11 @@ struct del_module {
 static struct add_module np9660_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
 	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL },
+	{ "/kd/galaxy.prx", "/kd/np9660.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL },
+	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module np9660_del_mods[] = {
@@ -491,8 +492,9 @@ int patch_bootconf_np9660(char *buffer, int length)
 static struct add_module march33_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
 	{ "/kd/march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL },
+	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module march33_del_mods[] = {
@@ -500,6 +502,7 @@ static struct del_module march33_del_mods[] = {
 	{ "/kd/ata.prx", GAME_RUNLEVEL },
 	{ "/kd/umdman.prx", GAME_RUNLEVEL },
 	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
+	{ "/kd/np9660.prx", UMDEMU_RUNLEVEL },
 };
 
 int patch_bootconf_march33(char *buffer, int length)

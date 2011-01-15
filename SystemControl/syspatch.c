@@ -70,6 +70,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(psp_model == PSP_GO && 0 == strcmp(mod->modname, "pspMarch33_Driver")) {
+		patch_pspMarch33_Driver(mod->text_addr);
+		sync_cache();
+	}
+
 	resolve_removed_nid((SceModule*)mod);
 	
 #ifdef DEBUG

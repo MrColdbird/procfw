@@ -23,6 +23,7 @@
 #include <string.h>
 
 #include "utils.h"
+#include "printk.h"
 
 struct pthread_mlock_t {
 	volatile unsigned long l;
@@ -33,9 +34,6 @@ struct pthread_mlock_t {
 typedef struct pthread_mlock_t MLOCK_T;
 
 static MLOCK_T lock;
-
-extern void printk_lock(void);
-extern void printk_unlock(void);
 
 static int itostr(char *buf, int in_data, int base, int upper, int sign)
 {
@@ -306,8 +304,12 @@ static int printk_open_output(void)
 	fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 
 	if(fd < 0) {
-		strncpy((char*)printk_output_fn, "ef", 2);
-		fd = sceIoOpen(printk_output_fn, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
+		char temp_filename[80];
+
+		strncpy(temp_filename, printk_output_fn, sizeof(temp_filename));
+		temp_filename[sizeof(temp_filename)-1] = '\0';
+		strncpy(temp_filename, "ef0", sizeof("ef0")-1);
+		fd = sceIoOpen(temp_filename, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_APPEND, 0777);
 	}
 
 	return fd;

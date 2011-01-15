@@ -1,3 +1,6 @@
+#include <pspkernel.h>
+#include "systemctrl.h"
+#include "utils.h"
 #include "jumper.h"
 #include "printk.h"
 

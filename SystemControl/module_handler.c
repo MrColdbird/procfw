@@ -60,14 +60,11 @@ void setup_module_handler(void)
 	if (mod == NULL)
 		return;
 	
-	//psp go patches
-	if(psp_model == 4) {
-		//backup function pointer (dword_622C)
-		ProbeExec3 = (void*)mod->text_addr + 0x8864;
+	//backup function pointer (dword_622C)
+	ProbeExec3 = (void*)mod->text_addr + 0x8864;
 
-		//override function (sub_0045C)
-		_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + 0x7C6C);
-	}
+	//override function (sub_0045C)
+	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + 0x7C6C);
 
 	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr+0x87E4);
 

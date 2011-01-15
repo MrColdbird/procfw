@@ -6,12 +6,7 @@
 #include <pspiofilemgr.h>
 #include <stdio.h>
 #include <string.h>
-#include "main.h"
-#include "utils.h"
-#include "systemctrl.h"
 #include "printk.h"
-#include "rebootex_conf.h"
-#include "libs.h"
 
 void patch_sceMediaSync(u32 scemediasync_text_addr)
 {

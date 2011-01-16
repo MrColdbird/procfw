@@ -1,5 +1,5 @@
 TARGET = vshctrl
-OBJS = main.o vshpatch.o ../Common/utils.o
+OBJS = main.o vshpatch.o xmbiso.o ../Common/utils.o ../Common/libs.o
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic

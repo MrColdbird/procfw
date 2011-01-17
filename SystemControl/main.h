@@ -1,6 +1,8 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "systemctrl_private.h"
 
 extern u32 psp_model;
@@ -61,5 +63,10 @@ extern char *g_insert_module_before;
 extern void *g_insert_module_binary;
 extern int g_insert_module_size;
 extern int g_insert_module_flags;
+
+extern SEConfig conf;
+
+int GetConfig(SEConfig *config);
+int SetConfig(SEConfig *config);
 
 #endif

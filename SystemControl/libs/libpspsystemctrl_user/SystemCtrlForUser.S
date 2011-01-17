@@ -24,53 +24,56 @@
 	IMPORT_FUNC  "SystemCtrlForUser",0xABA7F1B0,sctrlKernelLoadExecVSHMs2
 #endif
 #ifdef F_SystemCtrlForUser_0006
-	IMPORT_FUNC  "SystemCtrlForUser",0x7B369596,sctrlKernelLoadExecVSHMs3
+	IMPORT_FUNC  "SystemCtrlForUser",0xAF22D576,sctrlKernelLoadExecVSHEf2
 #endif
 #ifdef F_SystemCtrlForUser_0007
-	IMPORT_FUNC  "SystemCtrlForUser",0xD690750F,sctrlKernelLoadExecVSHMs4
+	IMPORT_FUNC  "SystemCtrlForUser",0x7B369596,sctrlKernelLoadExecVSHMs3
 #endif
 #ifdef F_SystemCtrlForUser_0008
-	IMPORT_FUNC  "SystemCtrlForUser",0x2D10FB28,sctrlKernelLoadExecVSHWithApitype
+	IMPORT_FUNC  "SystemCtrlForUser",0xD690750F,sctrlKernelLoadExecVSHMs4
 #endif
 #ifdef F_SystemCtrlForUser_0009
-	IMPORT_FUNC  "SystemCtrlForUser",0xEB74FE45,sctrlKernelSetUserLevel
+	IMPORT_FUNC  "SystemCtrlForUser",0x2D10FB28,sctrlKernelLoadExecVSHWithApitype
 #endif
 #ifdef F_SystemCtrlForUser_0010
-	IMPORT_FUNC  "SystemCtrlForUser",0xD8FF9B99,sctrlKernelSetDevkitVersion
+	IMPORT_FUNC  "SystemCtrlForUser",0xEB74FE45,sctrlKernelSetUserLevel
 #endif
 #ifdef F_SystemCtrlForUser_0011
-	IMPORT_FUNC  "SystemCtrlForUser",0xD339E2E9,sctrlHENIsSE
+	IMPORT_FUNC  "SystemCtrlForUser",0xD8FF9B99,sctrlKernelSetDevkitVersion
 #endif
 #ifdef F_SystemCtrlForUser_0012
-	IMPORT_FUNC  "SystemCtrlForUser",0x2E2935EF,sctrlHENIsDevhook
+	IMPORT_FUNC  "SystemCtrlForUser",0xD339E2E9,sctrlHENIsSE
 #endif
 #ifdef F_SystemCtrlForUser_0013
-	IMPORT_FUNC  "SystemCtrlForUser",0x1090A2E1,sctrlHENGetVersion
+	IMPORT_FUNC  "SystemCtrlForUser",0x2E2935EF,sctrlHENIsDevhook
 #endif
 #ifdef F_SystemCtrlForUser_0014
-	IMPORT_FUNC  "SystemCtrlForUser",0x78E46415,sctrlHENFindDriver
+	IMPORT_FUNC  "SystemCtrlForUser",0x1090A2E1,sctrlHENGetVersion
 #endif
 #ifdef F_SystemCtrlForUser_0015
-	IMPORT_FUNC  "SystemCtrlForUser",0x159AF5CC,sctrlHENFindFunction
+	IMPORT_FUNC  "SystemCtrlForUser",0x78E46415,sctrlHENFindDriver
 #endif
 #ifdef F_SystemCtrlForUser_0016
-	IMPORT_FUNC  "SystemCtrlForUser",0xCE0A654E,sctrlHENLoadModuleOnReboot
-#endif
-#ifdef F_SystemCtrlForUser_0017
-	IMPORT_FUNC  "SystemCtrlForUser",0xF988C1DC,sctrlHENPatchSyscall
-#endif
-#ifdef F_SystemCtrlForUser_0018
-	IMPORT_FUNC  "SystemCtrlForUser",0x1C90BECB,sctrlHENSetStartModuleHandler
-#endif
-#ifdef F_SystemCtrlForUser_0019
 	IMPORT_FUNC  "SystemCtrlForUser",0x159AF5CC,sctrlHENFindFunction
 #endif
+#ifdef F_SystemCtrlForUser_0017
+	IMPORT_FUNC  "SystemCtrlForUser",0xCE0A654E,sctrlHENLoadModuleOnReboot
+#endif
+#ifdef F_SystemCtrlForUser_0018
+	IMPORT_FUNC  "SystemCtrlForUser",0xF988C1DC,sctrlHENPatchSyscall
+#endif
+#ifdef F_SystemCtrlForUser_0019
+	IMPORT_FUNC  "SystemCtrlForUser",0x1C90BECB,sctrlHENSetStartModuleHandler
+#endif
 #ifdef F_SystemCtrlForUser_0020
-	IMPORT_FUNC  "SystemCtrlForUser",0x745286D1,sctrlHENSetMemory
+	IMPORT_FUNC  "SystemCtrlForUser",0x159AF5CC,sctrlHENFindFunction
 #endif
 #ifdef F_SystemCtrlForUser_0021
-	IMPORT_FUNC  "SystemCtrlForUser",0xBC939DC1,sctrlSESetBootConfFileIndex
+	IMPORT_FUNC  "SystemCtrlForUser",0x745286D1,sctrlHENSetMemory
 #endif
 #ifdef F_SystemCtrlForUser_0022
+	IMPORT_FUNC  "SystemCtrlForUser",0xBC939DC1,sctrlSESetBootConfFileIndex
+#endif
+#ifdef F_SystemCtrlForUser_0023
 	IMPORT_FUNC  "SystemCtrlForUser",0x5CB025F0,sctrlSESetBootConfFileIndex
 #endif

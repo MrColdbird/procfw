@@ -59,6 +59,7 @@ int sctrlKernelLoadExecVSHMs1(const char *file, struct SceKernelLoadExecVSHParam
  * @returns < 0 on some errors. 
 */
 int sctrlKernelLoadExecVSHMs2(const char *file, struct SceKernelLoadExecVSHParam *param);
+int sctrlKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 /**
  * Executes a new executable from a memory stick.

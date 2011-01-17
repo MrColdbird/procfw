@@ -2,6 +2,7 @@
 #define _XMBISO_H_
 
 #include <pspiofilemgr.h>
+#include <psploadexec_kernel.h>
 
 //------ stage 1 - fake directory existence ------
 
@@ -36,5 +37,8 @@ int gameremove(const char * file);
 
 //remove folder
 int gamermdir(const char * path);
+
+//load and execute file
+int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param);
 
 #endif

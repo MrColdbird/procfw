@@ -1,31 +1,29 @@
 #include "xmbiso.h"
+#include "systemctrl.h"
 #include "printk.h"
+#include "utils.h"
 #include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <pspsdk.h>
 
 //game folder descriptor
 SceUID gamedfd = -1;
 
-//game folder path
-char gamepath[16];
-
 //iso folder descriptor
 SceUID isodfd = -1;
 
 //iso folder path
-char isopath[16];
+char * isopath = "ms0:/ISO";
 
 //iso counter
 u32 isocounter = 0;
 
-//fake file name
-char filename[40];
-
-//fake file offset
-u32 fileoffset = 0;
-
 //iso loader path (this should be on flash, obviously)
 char * isoloader = "ms0:/PSP/SYSTEM/PROMETHEUS/EBOOT.PBP";
+
+//iso mode (m33 mode, this requires a proper vsh-satellite)
+int isomode = 1;
 
 //open directory
 SceUID gamedopen(const char * dirname)
@@ -38,11 +36,8 @@ SceUID gamedopen(const char * dirname)
 		//save descriptor
 		gamedfd = result;
 
-		//save path
-		strcpy(gamepath, dirname);
-
 		//create iso path from game folder
-		strcpy(isopath, gamepath);
+		strcpy(isopath, dirname);
 		strcpy(isopath + 5, "ISO");
 
 		//open iso directory
@@ -78,7 +73,7 @@ int isISO(SceIoDirent * dir)
 }
 
 //inject iso directory
-int injectISO(SceIoDirent * dir)
+int injectISO(SceIoDirent * dir, int loadexecstage)
 {
 	//result
 	int result = 0;
@@ -111,9 +106,11 @@ int injectISO(SceIoDirent * dir)
 		//found iso
 		if (isofound) {
 			//patch directory entry data
-			dir->d_stat.st_mode = 0x11FF;
-			dir->d_stat.st_attr = 0x10;
-			sprintf(dir->d_name, "ISOGAME%08X", isocounter);
+			if (!loadexecstage) {
+				dir->d_stat.st_mode = 0x11FF;
+				dir->d_stat.st_attr = 0x10;
+				sprintf(dir->d_name, "ISOGAME%08X", isocounter);
+			}
 
 			//increase iso counter
 			isocounter++;
@@ -137,7 +134,7 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 	int result = sceIoDread(fd, dir);
 
 	//inject fake iso folder
-	if (fd == gamedfd && result == 0) result = injectISO(dir);
+	if (fd == gamedfd && result == 0) result = injectISO(dir, 0);
 
 	//return result
 	return result;
@@ -154,17 +151,11 @@ int gamedclose(SceUID fd)
 		//erase game folder reference
 		gamedfd = -1;
 
-		//erase game folder path
-		memset(gamepath, 0, sizeof(gamepath));
-
 		//close iso directory
 		sceIoDclose(isodfd);
 
 		//erase iso folder reference
 		isodfd = -1;
-
-		//erase iso folder path
-		memset(isopath, 0, sizeof(isopath));
 
 		//reset iso counter
 		isocounter = 0;
@@ -182,9 +173,6 @@ SceUID gameopen(const char * file, int flags, SceMode mode)
 
 	//virtual iso eboot detected
 	if (result == 0x80010002 && strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0) {
-		//copy file path
-		strcpy(filename, file);
-
 		//return isoloader descriptor
 		u32 k1 = pspSdkSetK1(0);
 		strncpy(isoloader, file, 2);
@@ -193,7 +181,7 @@ SceUID gameopen(const char * file, int flags, SceMode mode)
 	}
 
 	//log call
-	printk("sceIoOpen(%s, %08X, %08X) -> %08X\n", file, flags, mode, result);
+	//printk("sceIoOpen(%s, %08X, %08X) -> %08X\n", file, flags, mode, result);
 
 	//return result
 	return result;
@@ -214,7 +202,7 @@ int gameread(SceUID fd, void * data, SceSize size)
 	}
 
 	//log call
-	printk("sceIoRead(%08X, %p, %08X) -> %08X\n", fd, data, size, result);
+	//printk("sceIoRead(%08X, %p, %08X) -> %08X\n", fd, data, size, result);
 
 	//return result
 	return result;
@@ -235,7 +223,7 @@ int gameclose(SceUID fd)
 	}
 
 	//log call
-	printk("sceIoClose(%08X) -> %08X\n", fd, result);
+	//printk("sceIoClose(%08X) -> %08X\n", fd, result);
 
 	//return result
 	return result;
@@ -250,7 +238,7 @@ SceOff gamelseek(SceUID fd, SceOff offset, int whence)
 	pspSdkSetK1(k1);
 
 	//log call
-	printk("sceIoLseek(%08X, %016X, %08X) -> %016X\n", fd, offset, whence, result);
+	//printk("sceIoLseek(%08X, %016X, %08X) -> %016X\n", fd, offset, whence, result);
 
 	//return result
 	return result;
@@ -272,7 +260,7 @@ int gamegetstat(const char * file, SceIoStat * stat)
 	}
 
 	//log call
-	printk("sceIoGetstat(%s, %p) -> %08X\n", file, stat, result);
+	//printk("sceIoGetstat(%s, %p) -> %08X\n", file, stat, result);
 
 	//return result
 	return result;
@@ -299,6 +287,89 @@ int gamermdir(const char * path)
 
 	//log call
 	printk("sceIoRmdir(%s) -> %08X\n", path, result);
+
+	//return result
+	return result;
+}
+
+//load and execute file
+int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
+{
+	//result
+	int result = 0;
+
+	//virtual iso eboot detected
+	if (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0) {
+		//cut iso index string
+		char * strisoindex = file + 21;
+		file[29] = 0;
+
+		//parse iso index string
+		unsigned long isoindex = strtoul(strisoindex, NULL, 16);
+
+		//aquire kernel permission
+		u32 k1 = pspSdkSetK1(0);
+
+		//directory entry data
+		SceIoDirent dir;
+
+		//iso fetching result
+		int isoexists = 0;
+
+		//switch storage device
+		strncpy(isopath, file, 2);
+
+		//open iso directory
+		isodfd = sceIoDopen(isopath);
+		if (isodfd >= 0) {
+			//get iso file
+			int i = 0; for(; i <= isoindex; i++) isoexists = injectISO(&dir, 1);
+
+			//close iso directory
+			sceIoDclose(isodfd);
+
+			//found iso
+			if (isoexists) {
+				//plenty of memory in dir-struct, using as path storage
+				char * gameiso = dir.d_name + strlen(dir.d_name) + 1;
+
+				//create iso path
+				sprintf(gameiso, "%s/%s", isopath, dir.d_name);
+
+				//set iso file for reboot
+				sctrlSESetUmdFile(gameiso);
+
+				//set iso mode for reboot
+				sctrlSESetBootConfFileIndex(isomode);
+
+				//full memory doesn't hurt on isos
+				sctrlHENSetMemory(48, 0);
+
+				//reset and configure reboot parameter
+				memset(param, 0, sizeof(struct SceKernelLoadExecVSHParam));
+				param->size = sizeof(struct SceKernelLoadExecVSHParam);
+				param->argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+				param->args = strlen(param->argp) + 1;
+				param->key = "game";
+
+				//fix apitypes
+				int apitype = 0x120;
+				if (sceKernelGetModel() == PSP_GO) apitype = 0x125;
+
+				//start game image
+				return sctrlKernelLoadExecVSHWithApitype(apitype, param->argp, param);
+			}
+		}
+
+		//restore user permission
+		pspSdkSetK1(k1);
+	}
+
+	//forward to ms0 handler
+	if(strncmp(file, "ms", 2) == 0) result = sctrlKernelLoadExecVSHMs2(file, param);
+
+	//forward to ef0 handler
+	else result = sctrlKernelLoadExecVSHEf2(file, param);
 
 	//return result
 	return result;

@@ -18,6 +18,7 @@ OBJS = main.o \
 	   systemctrl.o \
 	   kubridge.o \
 	   module_handler.o \
+	   usb_charge.o \
 	   oe_malloc.o \
 	   plugins.o \
 	   psnfix.o \

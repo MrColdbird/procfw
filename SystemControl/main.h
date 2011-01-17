@@ -50,6 +50,8 @@ void patch_pspMarch33_Driver(u32 text_addr);
 int plugin_thread(SceSize args, void * argp);
 int load_start_module(char *path);
 
+void usb_charge(void);
+
 extern u32 p2_size;
 extern u32 p8_size;
 extern int high_memory_enabled;

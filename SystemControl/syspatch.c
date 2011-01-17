@@ -48,6 +48,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 		if(thid >= 0)
 			sceKernelStartThread(thid, 0, NULL);
+
+		usb_charge();
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {

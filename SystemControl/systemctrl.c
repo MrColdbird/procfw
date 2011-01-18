@@ -19,6 +19,7 @@ extern int LoadExecForKernel_7286CF0B(const char *file, struct SceKernelLoadExec
 extern int LoadExecForKernel_3D805DE6(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_BAEB4B89(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_8EF38192(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int LoadExecForKernel_D35D6403(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -87,6 +88,18 @@ int sctrlKernelLoadExecVSHMs2(const char *file, struct SceKernelLoadExecVSHParam
 
 	k1 = pspSdkSetK1(0);
 	ret = LoadExecForKernel_3D805DE6(file, param);
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+int sctrlKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSHParam *param)
+{
+	u32 k1;
+	int ret;
+
+	k1 = pspSdkSetK1(0);
+	ret = LoadExecForKernel_D35D6403(file, param);
 	pspSdkSetK1(k1);
 
 	return ret;

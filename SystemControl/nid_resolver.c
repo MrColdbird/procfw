@@ -68,7 +68,7 @@ u32 resolve_nid(const char *libname, u32 nid)
 			for(j=0; j<nid_fix[i].nidcount; ++j) {
 				new = nid_fix[i].nidtable[j].new;
 				
-				if(nid == nid_fix[i].nidtable[j].old) {
+				if(new != UNKNOWNNID && nid == nid_fix[i].nidtable[j].old) {
 					printk("%s: %s_%08X->%s_%08X\n", __func__, libname, nid, libname, new);
 
 					return new;

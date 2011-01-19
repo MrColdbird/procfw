@@ -51,6 +51,10 @@ void usb_charge(void)
 {
 	int thid;
 
+	if (!conf.usbcharge) {
+		return;
+	}
+
 	sceUsb_driver_AE5DE6AF = (void*)sctrlHENFindFunction("sceUSB_Driver", "sceUsb_driver", 0xAE5DE6AF);
 	sceUsb_driver_C21645A4 = (void*)sctrlHENFindFunction("sceUSB_Driver", "sceUsb_driver", 0xC21645A4);
 	scePower_driver_E11A1999 = (void*)sctrlHENFindFunction("scePower_Service", "scePower_driver", 0xE11A1999);

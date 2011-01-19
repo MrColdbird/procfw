@@ -4,6 +4,7 @@
 #include <string.h>
 #include "systemctrl.h"
 #include "systemctrl_se.h"
+#include "printk.h"
 
 SEConfig conf;
 
@@ -128,4 +129,25 @@ int sctrlSESetConfig(SEConfig *config)
 int sctrlSEGetConfig(SEConfig *config)
 {
 	return sctrlSEGetConfigEx(config, sizeof(*config));
+}
+
+void load_default_conf(SEConfig *config)
+{
+	memset(config, 0, sizeof(*config));
+	config->magic = CONFIG_MAGIC;
+	config->umdmode = MODE_MARCH33;
+	config->usbcharge = 1;
+	config->machidden = 1;
+}
+
+void load_config(void)
+{
+	int ret;
+	
+	ret = GetConfig(&conf);
+
+	if (ret != 0) {
+		load_default_conf(&conf);
+		SetConfig(&conf);
+	}
 }

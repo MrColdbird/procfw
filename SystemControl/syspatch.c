@@ -44,6 +44,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 		patch_sceLoadExec();
 		sync_cache();
 
+		load_config();
 		thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
 
 		if(thid >= 0)

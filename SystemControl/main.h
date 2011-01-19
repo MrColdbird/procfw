@@ -64,9 +64,10 @@ extern void *g_insert_module_binary;
 extern int g_insert_module_size;
 extern int g_insert_module_flags;
 
-extern SEConfig conf;
-
 int GetConfig(SEConfig *config);
 int SetConfig(SEConfig *config);
+void load_config(void);
+
+extern SEConfig conf;
 
 #endif

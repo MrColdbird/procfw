@@ -7,6 +7,8 @@
 #include "systemctrl_se.h"
 #include "printk.h"
 #include "utils.h"
+#include "main.h"
+#include "rebootex_conf.h"
 
 //game folder descriptor
 SceUID gamedfd = -1;
@@ -22,9 +24,6 @@ u32 isocounter = 0;
 
 //iso loader path (this should be on flash, obviously)
 char * isoloader = "ms0:/PSP/SYSTEM/PROMETHEUS/EBOOT.PBP";
-
-//iso mode (m33 mode, this requires a proper vsh-satellite)
-int isomode = 1;
 
 //open directory
 SceUID gamedopen(const char * dirname)
@@ -341,7 +340,7 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 				sctrlSESetUmdFile(gameiso);
 
 				//set iso mode for reboot
-				sctrlSESetBootConfFileIndex(isomode);
+				sctrlSESetBootConfFileIndex(conf.umdmode == MODE_MARCH33 ? MARCH33_MODE : NP9660_MODE);
 
 				//full memory doesn't hurt on isos
 				sctrlHENSetMemory(48, 0);

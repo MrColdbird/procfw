@@ -53,7 +53,8 @@ typedef struct
 	int novshmenu; //44
 	int usbcharge; //48
 	int notusedaxupd; //4C
-	int machidden; //4C
+	int machidden;
+	int useversion;
 	int reserved[2]; //50 54
 } SEConfig;
 

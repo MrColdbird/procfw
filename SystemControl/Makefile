@@ -10,6 +10,7 @@ OBJS = main.o \
 	   memlmd_patch.o \
 	   interruptman_patch.o \
 	   mediasync_patch.o \
+	   version_spoof.o \
 	   march33_patch.o \
 	   nid_resolver.o \
 	   nid_data.o \
@@ -33,7 +34,8 @@ IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadExecForKernel.o \
 		  ../Imports/SysMemForKernel.o \
 		  ../Imports/ModuleMgrForKernel.o \
-		  ../Imports/InterruptManagerForKernel.o
+		  ../Imports/InterruptManagerForKernel.o \
+		  ../Imports/sceResmgr_driver.o
 
 OBJS += $(IMPORTS)
 

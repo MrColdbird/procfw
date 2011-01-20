@@ -68,6 +68,8 @@ int GetConfig(SEConfig *config);
 int SetConfig(SEConfig *config);
 void load_config(void);
 
+void patch_module_for_updater(SceModule *mod);
+
 extern SEConfig conf;
 
 #endif

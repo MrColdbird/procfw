@@ -89,6 +89,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 	hook_import_bynid((SceModule*)mod, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
 
+	patch_module_for_updater((SceModule*)mod);
+
 	if (previous)
 		return (*previous)(mod);
 

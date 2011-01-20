@@ -138,6 +138,7 @@ void load_default_conf(SEConfig *config)
 	config->umdmode = MODE_MARCH33;
 	config->usbcharge = 1;
 	config->machidden = 1;
+	config->useversion = 1;
 }
 
 void load_config(void)

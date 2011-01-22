@@ -27,6 +27,7 @@ OBJS = main.o \
 	   isoload.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
+	   old_decrypt.o \
 	   ../Common/strsafe.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \

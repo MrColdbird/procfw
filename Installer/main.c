@@ -278,11 +278,11 @@ void start_reboot(int mode)
 
 		if (ret < 0) {
 			printf("start module error 0x%08x\n", ret);
-			delay = 50000000;
+			delay = 5000000;
 		}
 	} else {
 		printf("load module error 0x%08x\n", modid);
-		delay = 50000000;
+		delay = 5000000;
 	}
 
 	sceKernelDelayThread(delay);

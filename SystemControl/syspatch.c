@@ -76,6 +76,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "sceMesgLed")) {
+		patch_mesgled_for_updater(mod->text_addr);
+		sync_cache();
+	}
+
 	resolve_removed_nid((SceModule*)mod);
 	
 #ifdef DEBUG

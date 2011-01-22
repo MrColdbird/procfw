@@ -49,7 +49,7 @@ void patch_np(u32 text_addr, u8 mayor, u8 minor);
 void patch_sceMediaSync(u32 text_addr);
 void patch_pspMarch33_Driver(u32 text_addr);
 
-int plugin_thread(SceSize args, void * argp);
+void load_plugin(void);
 int load_start_module(char *path);
 
 void usb_charge(void);

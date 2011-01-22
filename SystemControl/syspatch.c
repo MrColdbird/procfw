@@ -37,23 +37,17 @@ static int syspatch_module_chain(SceModule2 *mod)
 	// load after lflash
 	if(0 == strcmp(mod->modname, "sceDisplay_Service")) {
 		load_config();
+
+		patch_sceLoadExec();
+		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
-		SceUID thid;
-
 		if (psp_model == PSP_GO && rebootex_conf.iso_mode != NORMAL_MODE) {
 			patch_sceMediaSync(mod->text_addr);
 		}
 
-		patch_sceLoadExec();
-		sync_cache();
-
-		thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
-
-		if(thid >= 0)
-			sceKernelStartThread(thid, 0, NULL);
-
+		load_plugin();
 		usb_charge();
 	}
 

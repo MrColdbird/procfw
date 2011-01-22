@@ -34,6 +34,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		}
 	}
 
+	// load after lflash
+	if(0 == strcmp(mod->modname, "sceDisplay_Service")) {
+		load_config();
+	}
+
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		SceUID thid;
 
@@ -44,7 +49,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 		patch_sceLoadExec();
 		sync_cache();
 
-		load_config();
 		thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
 
 		if(thid >= 0)

@@ -40,6 +40,7 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 
 		result = 0;
 
+		// support for old modules in updater, they don't like unsign
 		for(i=0; i<0x18; ++i) {
 			if (prx[i+0xB8]) {
 				result = 1;

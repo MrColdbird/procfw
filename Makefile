@@ -18,6 +18,7 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
+	@rm -f ./Common/*.o
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)

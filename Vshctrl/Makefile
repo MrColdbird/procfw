@@ -1,11 +1,11 @@
 TARGET = vshctrl
-OBJS = main.o vshpatch.o xmbiso.o ../Common/utils.o ../Common/libs.o
+OBJS = main.o vshpatch.o xmbiso.o isoreader.o ../Common/utils.o ../Common/libs.o
 IMPORTS = ../Imports/LoadExecForKernel.o
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
 
-DEBUG = 1
+#DEBUG = 1
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1

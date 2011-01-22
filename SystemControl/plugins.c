@@ -26,7 +26,7 @@ int load_start_module(char *path)
 	return ret;
 }
 
-void load_plugins(char * path)
+static void load_plugins(char * path)
 {
 	if(psp_model == PSP_GO && (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH || sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_POPS)) {
 		//override device name
@@ -108,7 +108,7 @@ void load_plugins(char * path)
 	}
 }
 
-int plugin_thread(SceSize args, void * argp)
+static int plugin_thread(SceSize args, void * argp)
 {
 	//get mode key
 	unsigned int key = sceKernelInitKeyConfig();
@@ -138,4 +138,14 @@ int plugin_thread(SceSize args, void * argp)
 
 	//return success
 	return 0;
+}
+
+void load_plugin(void)
+{
+	SceUID thid;
+
+	thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
+
+	if(thid >= 0)
+		sceKernelStartThread(thid, 0, NULL);
 }

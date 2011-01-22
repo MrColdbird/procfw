@@ -180,7 +180,7 @@ static nid_entry ExceptionManagerForKernel_nid[] = {
 static nid_entry IoFileMgrForKernel_nid[] = {
 	{ 0x3C54E908, 0x421B8EB4, }, // sceIoReopen 
 	{ 0x411106BA, 0x74482CE3, }, // sceIoGetThreadCwd
-	{ 0xA905B705, UNKNOWNNID, }, // sceIoCloseAll
+	{ 0xA905B705, 0x08CB99E3, }, // sceIoCloseAll
 	{ 0xCB0A151F, UNKNOWNNID, }, // sceIoChangeThreadCwd
 };
 
@@ -391,16 +391,16 @@ static nid_entry UtilsForKernel_nid[] = {
 };
 
 static nid_entry SysclibForKernel_nid[] = {
-	{ 0x89B79CB1, UNKNOWNNID, }, // strcspn
-	{ 0x62AE052F, UNKNOWNNID, }, // strspn
-	{ 0x87F8D2DA, UNKNOWNNID, }, // strtok
-	{ 0x1AB53A58, UNKNOWNNID, }, // strtok_r
+//	{ 0x89B79CB1, UNKNOWNNID, }, // strcspn MISSING
+//	{ 0x62AE052F, UNKNOWNNID, }, // strspn  MISSING
+//	{ 0x87F8D2DA, UNKNOWNNID, }, // strtok  MISSING
+//	{ 0x1AB53A58, UNKNOWNNID, }, // strtok_r  MISSING
 	{ 0x1D83F344, UNKNOWNNID, }, // atob
 	{ 0x8AF6B8F8, UNKNOWNNID, }, // SysclibForKernel_8AF6B8F8
-	{ 0xD3D1A3B9, UNKNOWNNID, }, // strncat
+//	{ 0xD3D1A3B9, UNKNOWNNID, }, // strncat  MISSING
 	{ 0xD887CACD, UNKNOWNNID, }, // get_ctype_table
-	{ 0x909C228B, UNKNOWNNID, }, // setjmp
-	{ 0x18FE80DB, UNKNOWNNID, }, // longjmp
+//	{ 0x909C228B, UNKNOWNNID, }, // setjmp  MISSING
+//	{ 0x18FE80DB, UNKNOWNNID, }, // longjmp  MISSING
 };
 
 static nid_entry ThreadManForKernel_nid[] = {

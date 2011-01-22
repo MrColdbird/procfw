@@ -5,6 +5,7 @@
 #include "main.h"
 #include "utils.h"
 #include "printk.h"
+#include "strsafe.h"
 
 int load_start_module(char *path)
 {
@@ -26,86 +27,85 @@ int load_start_module(char *path)
 	return ret;
 }
 
+static char *get_line(int fd, char *linebuf, int bufsiz)
+{
+	int i, ret;
+
+	if (linebuf == NULL || bufsiz < 2)
+		return NULL;
+
+	i = 0;
+	memset(linebuf, 0, bufsiz);
+
+	while (i < bufsiz - 1) {
+		char c;
+
+		ret = sceIoRead(fd, &c, 1);
+
+		if (ret < 0 || (ret == 0 && i == 0))
+			return NULL;
+
+		if (ret == 0 || c == '\n' || c == '\r') {
+			linebuf[i] = '\0';
+			break;
+		}
+
+		linebuf[i++] = c;
+	}
+
+	linebuf[bufsiz-1] = '\0';
+
+	return linebuf;
+}
+
 static void load_plugins(char * path)
 {
+	char linebuf[256], *p;
+	int fd;
+
+	if (path == NULL)
+		return;
+	
 	if(psp_model == PSP_GO && (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH || sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_POPS)) {
 		//override device name
 		strncpy(path, "ef0", 3);
 	}
 
-	//open config file
-	SceUID fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
-	//opened config
-	if (fd < 0)
+	if (fd < 0) {
+		printk("%s: open %s failed 0x%08X\n", __func__, path, fd);
+
 		return;
-
-	//file buffer
-	char buffer[0x1800];
-
-	//initialize buffer
-	memset(buffer, 0, sizeof(buffer));
-
-	//read file
-	int read = sceIoRead(fd, buffer, sizeof(buffer));
-
-	//close config file
-	sceIoClose(fd);
-
-	//read content
-	if(read <= 0)
-		return;
-
-	//erase carriage returns
-	char * terminator = NULL;
-	while((terminator = strchr(buffer, '\r'))) {
-		strcpy(terminator, terminator + 1);
 	}
 
-	//load plugins
-	while((terminator = strchr(buffer, '\n'))) {
-		//terminate line
-		terminator[0] = 0;
+	do {
+		p = get_line(fd, linebuf, sizeof(linebuf));
+		
+		if (p != NULL) {
+			int len;
 
-		//skip null lines
-		if(strlen(buffer) > 0 && buffer[strlen(buffer) - 1] == '1') {
-			//drop load flag
-			char * dot = strchr(buffer, '.');
+			printk("%s: %s\n", __func__, p);
+			len = strlen(p);
 
-			//valid prx filename
-			if(dot) {
-				//terminate string
-				dot[4] = 0;
+			if (len >= 1 && p[len-1] == '1') {
+				char *q;
 
-				//load module
-				load_start_module(buffer);
+				q=strrchr(p, ' ');
 
-				//restore string
-				dot[4] = ' ';
+				if (q != NULL) {
+					char mod_path[256];
+
+					memset(mod_path, 0, sizeof(mod_path));
+					strncpy_s(mod_path, sizeof(mod_path), p, q-p);
+					printk("%s module path: %s\n", __func__, mod_path);
+					load_start_module(mod_path);
+				}
 			}
 		}
+	} while (p != NULL);
 
-		//move buffer
-		strcpy(buffer, terminator + 1);
-	}
-
-	//skip null line
-	if(strlen(buffer) > 0 && buffer[strlen(buffer) - 1] == '1') {
-		//drop load flag
-		char * dot = strchr(buffer, '.');
-
-		//valid prx filename
-		if(dot) {
-			//terminate string
-			dot[4] = 0;
-
-			//load module
-			load_start_module(buffer);
-
-			//restore string
-			dot[4] = ' ';
-		}
-	}
+	sceIoClose(fd);
 }
 
 static int plugin_thread(SceSize args, void * argp)
@@ -144,7 +144,7 @@ void load_plugin(void)
 {
 	SceUID thid;
 
-	thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x2000, 0, NULL);
+	thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x800, 0, NULL);
 
 	if(thid >= 0)
 		sceKernelStartThread(thid, 0, NULL);

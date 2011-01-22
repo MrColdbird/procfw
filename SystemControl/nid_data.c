@@ -158,12 +158,13 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0x23425E93, UNKNOWNNID, }, // sceKernelLoadModuleVSHPlain
 	{ 0xF9275D98, UNKNOWNNID, }, // sceKernelLoadModuleBufferUsbWlan
 	{ 0xF0CAC59E, UNKNOWNNID, }, // sceKernelLoadModuleBufferVSH
-	{ 0xCC1D3699, UNKNOWNNID, }, // sceKernelStopUnloadSelfModule
+	{ 0xCC1D3699, 0x291CF03E, }, // sceKernelStopUnloadSelfModule
 	{ 0x04B7BD22, UNKNOWNNID, }, // sceKernelSearchModuleByName
 	{ 0x54D9E02E, UNKNOWNNID, }, // sceKernelSearchModuleByAddress
 	{ 0x5F0CC575, UNKNOWNNID, }, // sceKernelRebootBeforeForUser
 	{ 0xB49FFB9E, UNKNOWNNID, }, // sceKernelRebootBeforeForKernel
 	{ 0xF0A26395, 0x8B19C181, }, // sceKernelGetModuleId
+	{ 0xD8B73127, 0xAD633D71, }, // sceKernelGetModuleIdByAddress
 };
 
 static nid_entry ExceptionManagerForKernel_nid[] = {

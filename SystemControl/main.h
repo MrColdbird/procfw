@@ -69,6 +69,7 @@ int SetConfig(SEConfig *config);
 void load_config(void);
 
 void patch_module_for_updater(SceModule *mod);
+void patch_mesgled_for_updater(u32 mesgled_textaddr);
 
 extern SEConfig conf;
 

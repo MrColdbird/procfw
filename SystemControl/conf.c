@@ -150,5 +150,7 @@ void load_config(void)
 	if (ret != 0) {
 		load_default_conf(&conf);
 		SetConfig(&conf);
+	} else {
+		printk("Loading config OK\n");
 	}
 }

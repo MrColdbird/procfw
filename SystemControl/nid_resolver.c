@@ -184,6 +184,7 @@ static void resolve_removed_clib(SceModule *mod)
 	hook_import_bynid(mod, "SysclibForKernel", 0x89B79CB1, (void*)ownstrcspn, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x62AE052F, (void*)ownstrspn, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x87F8D2DA, (void*)ownstrtok, 0);
+	hook_import_bynid(mod, "SysclibForKernel", 0x1AB53A58, (void*)ownstrtok_r, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0xD3D1A3B9, (void*)strncat, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x909C228B, (void*)0x88002E88, 0); // setjmp
 	hook_import_bynid(mod, "SysclibForKernel", 0x18FE80DB, (void*)0x88002EC4, 0); // longjmp

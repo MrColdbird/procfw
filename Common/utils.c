@@ -15,6 +15,14 @@ void sync_cache(void)
 }
 
 #ifdef DEBUG
+char ownisgraph (u8 c)
+{
+    if ( c >= 0x21 && c <= 0x7e )
+        return 1;
+
+    return 0;
+}
+
 void hexdump(void *addr, int size)
 {
 	int i;
@@ -26,8 +34,68 @@ void hexdump(void *addr, int size)
 		return;
 	}
 
-	for(i=0; i<size; ++i) {
-		printk("%02X", p[i]);
+	printk("Address:   ");
+	i=0; for(;i<16; ++i) {
+		if (i == 8)
+			printk("- ");
+		
+		printk("%02X ", i);
+	}
+
+	i=0; for(;i<16; ++i) {
+		printk("%1X", i);
+	}
+
+	printk("\n");
+
+	i=0; for(;i<10+1+16*3+2+16; ++i) {
+		printk("-");
+	}
+
+	printk("\n");
+
+	i=0;
+	printk("0x%08X ", i);
+	
+	for(; i<size; ++i) {
+		if (i != 0 && i % 16 == 0) {
+			int j;
+
+			for(j=16; j>0; --j) {
+				if(ownisgraph(p[i-j])) {
+					printk("%c", p[i-j]);
+				} else {
+					printk(".");
+				}
+			}
+			printk("\n0x%08X ", i);
+		}
+
+		if (i != 0 && i % 8 == 0 && i % 16 != 0) {
+			printk("- ");
+		}
+
+		printk("%02X ", p[i]);
+	}
+
+	int rest = (16-(i%16));
+
+	rest = rest == 16 ? 0 : rest;
+	int j; for(j=0; j<rest; j++) {
+		if (j+(i%16) == 8)
+			printk("  ");
+		printk("   ");
+	}
+
+	rest = i % 16;
+	rest = rest == 0 ? 16 : rest;
+
+	for(j=rest; j>0; --j) {
+		if(ownisgraph(p[i-j])) {
+			printk("%c", p[i-j]);
+		} else {
+			printk(".");
+		}
 	}
 
 	printk("\n");

@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "xmbiso.h"
 #include "systemctrl_se.h"
+#include "main.h"
 
 static STMOD_HANDLER previous;
 SEConfig conf;
@@ -84,7 +85,7 @@ static void patch_sysconf_plugin_module(u32 text_addr)
 
 	if (conf.machidden) {
 		p = (void*)(text_addr + 0x2E4D8);
-		strcpy(str, "[ Hidden ]");
+		sprintf(str, "[ Hidden: 0%dg ]", psp_model+1);
 		ascii2utf16(p, str);
 	}
 

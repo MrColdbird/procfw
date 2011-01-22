@@ -136,7 +136,7 @@ void load_default_conf(SEConfig *config)
 	memset(config, 0, sizeof(*config));
 	config->magic = CONFIG_MAGIC;
 	config->umdmode = MODE_MARCH33;
-	config->usbcharge = 1;
+	config->usbcharge = 0;
 	config->machidden = 1;
 	config->useversion = 1;
 }

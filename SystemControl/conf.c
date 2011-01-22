@@ -32,6 +32,7 @@ int GetConfig(SEConfig *config)
 		return -2;
 	}
 
+	sceIoClose(fd);
 	pspSdkSetK1(k1);
 
 	return 0;
@@ -61,6 +62,7 @@ int SetConfig(SEConfig *config)
 		return -1;
 	}
 
+	sceIoClose(fd);
 	pspSdkSetK1(k1);
 
 	return 0;

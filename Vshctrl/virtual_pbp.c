@@ -274,8 +274,6 @@ static int save_cache(void)
 	u32 magic = MAGIC_ISOCACHE;
 
 	for(i=0; i<NELEMS(g_caches); ++i) {
-		printk("enabled %d ref %d\n", g_caches[i].enabled, g_referenced[i]);
-
 		if (g_caches[i].enabled && !g_referenced[i]) {
 			need_update = 1;
 			memset(&g_caches[i], 0, sizeof(g_caches[i]));
@@ -724,15 +722,15 @@ static int rebuild_vpbps(const char *dirname)
 
 				isoSetFile(vpbp->name);
 
-				for(i=0; i<NELEMS(pbp_entries); ++i) {
-					vpbp->header[i+2] = off;
+				int j; for(j=0; j<NELEMS(pbp_entries); ++j) {
+					vpbp->header[j+2] = off;
 
-					if (pbp_entries[i].enabled) {
-						PBPSection *sec = &vpbp->sects[i];
+					if (pbp_entries[j].enabled) {
+						PBPSection *sec = &vpbp->sects[j];
 
-						sec->lba = isoGetFileInfo(pbp_entries[i].name, &sec->size);
+						sec->lba = isoGetFileInfo(pbp_entries[j].name, &sec->size);
 
-						if (i == 0) {
+						if (j == 0) {
 							off += sizeof(virtualsfo);
 						} else {
 							off += sec->size;

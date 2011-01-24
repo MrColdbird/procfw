@@ -29,128 +29,40 @@ u32 isocounter = 0;
 //open directory
 SceUID gamedopen(const char * dirname)
 {
-	//forward to firmware
-	SceUID result = sceIoDopen(dirname);
-
-	//game folder descriptor
-	if (result >= 0 && strlen(dirname) == 13 && strcmp(dirname + 2, "0:/PSP/GAME") == 0) {
-		//save descriptor
-		gamedfd = result;
-
-		//fix iso path
-		strncpy(isopath, dirname, 2);
-
-		//open iso directory
-		u32 k1 = pspSdkSetK1(0);
-		isodfd = sceIoDopen(isopath);
-		pspSdkSetK1(k1);
-	}
-
-	//return result
-	return result;
-}
-
-//valid iso check
-int isISO(SceIoDirent * dir)
-{
-	//result
-	int result = 0;
-
-	//grab extension
-	char * ext = dir->d_name + strlen(dir->d_name) - 3;
-
-	//filename length check
-	if (ext > dir->d_name) {
-		//check extension
-		if (stricmp(ext, "iso") == 0 /* || strcmp(ext, "cso") == 0 || strcmp(ext, "CSO") == 0 */) {
-			//valid iso detected (more checks can be added here lateron)
-			result = 1;
-		}
-	}
-
-	//return result
-	return result;
-}
-
-//inject iso directory
-int injectISO(SceIoDirent * dir, SceUID isodfd, int loadexecstage)
-{
-	//result
-	int result = 0;
-
-	//get kernel permission
-	u32 k1 = pspSdkSetK1(0);
-
-	//iso folder exists
-	if (isodfd >= 0) {
-		//search for iso
-		while (!result) {
-			//memset dir memory (sony io crashes otherwise)
-			memset(dir, 0, sizeof(SceIoDirent));
-
-			//read next file
-			if (sceIoDread(isodfd, dir) > 0) {
-				//ignore incompatible entries
-				if (dir->d_stat.st_mode != FIO_S_IFDIR && isISO(dir))
-					result = 1;
-			}
-
-			//no more files
-			else
-				break;
-		}
-
-		//patch directory entry data
-		if (result && !loadexecstage) {
-			dir->d_stat.st_mode = 0x11FF;
-			dir->d_stat.st_attr = 0x10;
-			sprintf(dir->d_name, "ISOGAME%08X", isocounter);
-
-			//increase iso counter
-			isocounter++;
-		}
-	}
-
-	//restore user permission
+	SceUID result;
+	u32 k1;
+   
+	k1 = pspSdkSetK1(0);
+	result = vpbp_dopen(dirname);
 	pspSdkSetK1(k1);
 
-	//return result
+	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
+
 	return result;
 }
 
 //read directory
 int gamedread(SceUID fd, SceIoDirent * dir)
 {
-	//forward to firmware
-	int result = sceIoDread(fd, dir);
+	int result;
+	u32 k1;
+   
+	k1 = pspSdkSetK1(0);
+	result = vpbp_dread(fd, dir);
+	pspSdkSetK1(k1);
 
-	//inject fake iso folder
-	if (fd == gamedfd && result == 0) result = injectISO(dir, isodfd, 0);
-
-	//return result
 	return result;
 }
 
 //directory descriptor closer
 int gamedclose(SceUID fd)
 {
-	//forward to firmware
-	int result = sceIoDclose(fd);
-
-	//game folder descriptor
-	if (fd == gamedfd) {
-		//erase game folder reference
-		gamedfd = -1;
-
-		//close iso directory
-		sceIoDclose(isodfd);
-
-		//erase iso folder reference
-		isodfd = -1;
-
-		//reset iso counter
-		isocounter = 0;
-	}
+	int result;
+	u32 k1;
+   
+	k1 = pspSdkSetK1(0);
+	result = vpbp_dclose(fd);
+	pspSdkSetK1(k1);
 
 	//return result
 	return result;

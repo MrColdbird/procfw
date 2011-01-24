@@ -7,13 +7,13 @@ typedef struct _PBPSection {
 } PBPSection;
 
 typedef struct _VirtualPBP {
-	u32 opened;
 	u32 enabled;
+	u32 cached; // cached filename
 	u32 total_size;
-	char name[128];
-	u32 header[10]; // PBP header
-	PBPSection sects[8];
 	u32 file_pointer;
+	char name[128];
+	u32 header[10];
+	PBPSection sects[8];
 } VirtualPBP;
 
 #define MAGIC_VPBP_FD 0x8000
@@ -31,5 +31,8 @@ int vpbp_remove(const char * file);
 int vpbp_getstat(const char * file, SceIoStat * stat);
 int vpbp_is_fd(SceUID fd);
 int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param);
+SceUID vpbp_dopen(const char * dirname);
+int vpbp_dread(SceUID fd, SceIoDirent * dir);
+int vpbp_dclose(SceUID fd);
 
 #endif

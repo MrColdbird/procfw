@@ -11,47 +11,6 @@ void isoSetFile(char * str)
 	filename = str;
 }
 
-/*
-u32 isoFindName(char * str, SceUID iso)
-{
-	//result
-	u32 result = 0;
-
-	//scan buffer
-	char buffer[32] __attribute__((align(64)));
-
-	//read data counter
-	u32 read = 0;
-
-	//read directory sectors
-	while (!result && read < 0x20000) {
-		//read buffer
-		sceIoRead(iso, buffer, strlen(str));
-
-		//match found
-		if(strncmp(buffer, str, strlen(str)) == 0) {
-			//seek backwards
-			result = (u32)sceIoLseek32(iso, - strlen(str), PSP_SEEK_CUR);
-		}
-
-		//no match found yet
-		else {
-			//increase read counter
-			read++;
-
-			//seek backwards
-			sceIoLseek32(iso, 1 - strlen(str), PSP_SEEK_CUR);
-		}
-	}
-
-	//log
-	printk("Found Name: %s\n", str);
-
-	//return result
-	return result;
-}
-*/
-
 u32 isoFindName(char * str, SceUID iso)
 {
 	//result

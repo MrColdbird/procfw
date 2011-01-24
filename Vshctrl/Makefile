@@ -1,5 +1,5 @@
 TARGET = vshctrl
-OBJS = main.o vshpatch.o xmbiso.o isoreader.o ../Common/utils.o ../Common/libs.o
+OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
 IMPORTS = ../Imports/LoadExecForKernel.o
 
 INCDIR = ../Common/ ../include/

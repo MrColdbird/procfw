@@ -3,22 +3,7 @@
 
 #include <pspsdk.h>
 
-//directory structure
-typedef struct {
-	u8 len_dr;
-	u8 len_ex;
-	u32 evpos_le;
-	u32 evpos_be;
-	u32 datalen_le;
-	u32 datalen_be;
-	u8 recording[6];
-	u8 fileflags;
-	u8 fileunitsize;
-	u8 interleavegap;
-	u32 volseqnum;
-	u8 fileidentlen;
-	//fileidentifier
-};
+#define SECTOR_SIZE 0x800
 
 //set filename
 void isoSetFile(char * str);

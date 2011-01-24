@@ -13,6 +13,7 @@
 #include "xmbiso.h"
 #include "systemctrl_se.h"
 #include "main.h"
+#include "virtual_pbp.h"
 
 static STMOD_HANDLER previous;
 SEConfig conf;
@@ -141,6 +142,7 @@ int vshpatch_init(void)
 {
 	sctrlSEGetConfig(&conf);
 	previous = sctrlHENSetStartModuleHandler(&vshpatch_module_chain);
+	vpbp_init();
 
 	return 0;
 }

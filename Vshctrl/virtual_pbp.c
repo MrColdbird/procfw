@@ -125,104 +125,29 @@ static int is_iso(SceIoDirent * dir)
 	return result;
 }
 
-typedef struct _FakePath2ISOArg {
-	const char *file;
-	char *newfn;
-	int result;
-} FakePath2ISOArg;
-
-//translate virtual eboot to iso path
-static void _fakepath_2_iso(void *parg)
+static int get_vpbp_by_path(const char *path)
 {
-	FakePath2ISOArg *arg = parg;
 	char *p;
 	u32 isoindex;
-	SceUID isodfd;
-	SceIoDirent dir;
-	char isopath[] = "ms0:/ISO";
-	const char *file = arg->file;
-	char *newfn = arg->newfn;
 
-	if (!ISOEBOOT(file)) {
-		arg->result = -7;
-
-		return;
-	}
-
-	strncpy(isopath, file, 2);
-	p = strstr(file, "ISOGAME");
+	p = strstr(path, "ISOGAME");
 
 	if (p == NULL) {
-		arg->result = -9;
-
-		return;
+		return -17;
 	}
 
 	p += sizeof("ISOGAME")-1;
 	isoindex = strtoul(p, NULL, 16);
-	isodfd = sceIoDopen(isopath);
 
-	if (isodfd >= 0) {
-		int i = -1, ret;
-
-		do {
-			memset(&dir, 0, sizeof(dir));
-			ret = sceIoDread(isodfd, &dir);
-
-			if (is_iso(&dir)) {
-				i++;
-			}
-		} while(ret > 0 && i != isoindex);
-
-		//close iso directory
-		sceIoDclose(isodfd);
-
-		if (i == isoindex) {
-			//found iso
-			sprintf(newfn, "%s/%s", isopath, dir.d_name);
-
-			arg->result = 0;
-			return;
-		}
-	}
-	
-	arg->result = -10;
-
-	return;
-}
-
-static int fakepath_2_iso(const char * file, char newfn[128])
-{
-	int ret;
-
-	FakePath2ISOArg arg;
-
-	arg.file = file;
-	arg.newfn = newfn;
-	arg.result = 0;
-	ret = sceKernelExtendKernelStack(0x1000, &_fakepath_2_iso, &arg);
-
-	return arg.result;
-}
-
-static int find_enabled_vpbp(const char *file)
-{
-	int i, ret;
-	char isopath[128];
-
-	ret = fakepath_2_iso((char *)file, isopath);
-
-	if (ret < 0) {
-		return -11;
+	if (isoindex >= NELEMS(vpbps)) {
+		return -18;
 	}
 
-	for(i=0; i<NELEMS(vpbps); ++i) {
-		if (vpbps[i].enabled && 0 == strcmp(isopath, vpbps[i].name)) {
-			return i;
-		}
+	if (!vpbps[isoindex].cached) {
+		return -19;
 	}
 
-	return -1;
+	return isoindex;
 }
 
 static int find_disabled_vpbp(void)
@@ -284,10 +209,8 @@ static int disable_cache(int idx)
 	}
 
 	vpbp = &vpbps[idx];
-
-	if (!vpbp->opened && vpbp->enabled) {
-		vpbp->enabled = 0;
-	}
+	vpbp->enabled = 0;
+	vpbp->cached = 0;
 
 	return 0;
 }
@@ -306,34 +229,37 @@ int vpbp_init(void)
 
 SceUID vpbp_open(const char * file, int flags, SceMode mode)
 {
-	int fd, i, ret;
+	int i, idx;
 	VirtualPBP *vpbp;
 	u32 off;
-	char iso_fn[128];
 
 	lock();
-	fd = find_enabled_vpbp(file);
+	idx = get_vpbp_by_path(file);
 
-	if (fd >= 0) {
-		vpbp = &vpbps[fd];
-		vpbp->file_pointer = 0;
-		unlock();
+	if (idx >= 0) {
+		vpbp = &vpbps[idx];
 
-		return MAGIC_VPBP_FD+fd;
+		if (vpbp->enabled) {
+			vpbp->file_pointer = 0;
+			unlock();
+
+			return MAGIC_VPBP_FD+idx;
+		}
 	}
 
-	fd = find_disabled_vpbp();
+	idx = find_disabled_vpbp();
 
-	if (fd < 0) {
+	if (idx < 0) {
 		unlock();
 
 		return -2;
 	}
 
-	vpbp = &vpbps[fd];
-	memset(vpbp, 0, sizeof(*vpbp));
-	vpbp->opened = 1;
+	vpbp = &vpbps[idx];
+	memset(vpbp->header, 0, sizeof(vpbp->header));
+	memset(vpbp->sects, 0, sizeof(vpbp->sects));
 	vpbp->enabled = 1;
+	vpbp->cached = 1;
 	vpbp->file_pointer = 0;
 
 	if (flags & (PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT) || !(flags & PSP_O_RDONLY)) {
@@ -343,16 +269,6 @@ SceUID vpbp_open(const char * file, int flags, SceMode mode)
 		return -6;
 	}
 
-	ret = fakepath_2_iso((char *)file, iso_fn);
-
-	if (ret < 0) {
-		unlock();
-
-		return -12;
-	}
-
-	printk("%s: %s\n", __func__, iso_fn);
-	STRCPY_S(vpbp->name, iso_fn);
 	vpbp->header[0] = 0x50425000; // PBP magic
 	vpbp->header[1] = 0x10000; // version
 
@@ -380,7 +296,7 @@ SceUID vpbp_open(const char * file, int flags, SceMode mode)
 	vpbp->total_size = vpbp->header[9];
 	unlock();
 
-	return MAGIC_VPBP_FD+fd;
+	return MAGIC_VPBP_FD+idx;
 }
 
 SceOff vpbp_lseek(SceUID fd, SceOff offset, int whence)
@@ -473,7 +389,9 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 
 		// ignore last two sections
 		int i; for(i=1; i<NELEMS(pbp_entries)-2; ++i) {
-			if (vpbp->file_pointer >= vpbp->header[2+i] && vpbp->file_pointer < vpbp->header[2+1+i]) {
+			if (pbp_entries[i].enabled && 
+					vpbp->file_pointer >= vpbp->header[2+i] && 
+					vpbp->file_pointer < vpbp->header[2+1+i]) {
 				void *buf, *buf_64;
 
 				buf = oe_malloc(8*SECTOR_SIZE+64);
@@ -527,7 +445,6 @@ int vpbp_close(SceUID fd)
 		return -7;
 	}
 
-	vpbp->opened = 0;
 	unlock();
 
 	return 0;
@@ -542,9 +459,8 @@ int vpbp_disable_all_caches(void)
 		
 		vpbp = &vpbps[i];
 
-		if (!vpbp->opened && vpbp->enabled) {
-			vpbp->enabled = 0;
-		}
+		vpbp->enabled = 0;
+		vpbp->cached = 0;
 	}
 
 	unlock();
@@ -554,26 +470,21 @@ int vpbp_disable_all_caches(void)
 
 int vpbp_remove(const char * file)
 {
-	int ret;
-	char iso_fn[128];
+	int ret, idx;
+	const char *iso_fn;
 
 	lock();
-	ret = fakepath_2_iso((char *)file, iso_fn);
+	idx = get_vpbp_by_path(file);
 
-	if (ret < 0) {
+	if (idx < 0) {
 		unlock();
 
 		return -14;
 	}
 
+	iso_fn = vpbps[idx].name;
 	ret = sceIoRemove(iso_fn);
-
-	int i; for(i=0; i<NELEMS(vpbps); ++i) {
-		if (0 == strcmp(vpbps[i].name, iso_fn)) {
-			disable_cache(i);
-			break;
-		}
-	}
+	disable_cache(idx);
 
 	unlock();
 
@@ -599,18 +510,18 @@ int vpbp_is_fd(SceUID fd)
 
 int vpbp_getstat(const char * file, SceIoStat * stat)
 {
-	int ret;
-	char iso_fn[128];
+	int ret, idx;
 
 	lock();
-	ret = fakepath_2_iso((char *)file, iso_fn);
+	idx = get_vpbp_by_path(file);
 
-	if (ret < 0) {
+	if (idx < 0) {
 		unlock();
-		return ret;
+
+		return idx;
 	}
 
-	ret = sceIoGetstat(iso_fn, stat);
+	ret = sceIoGetstat(vpbps[idx].name, stat);
 	unlock();
 
 	return ret;
@@ -618,20 +529,19 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 
 int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 {
-	int ret;
-	char iso_fn[128];
+	int ret, idx;
 	SEConfig config;
 
 	lock();
-	ret = fakepath_2_iso((char *)file, iso_fn);
+	idx = get_vpbp_by_path(file);
 
-	if (ret < 0) {
+	if (idx < 0) {
 		unlock();
-		return ret;
+		return idx;
 	}
 
 	//set iso file for reboot
-	sctrlSESetUmdFile(iso_fn);
+	sctrlSESetUmdFile(vpbps[idx].name);
 
 	sctrlSEGetConfig(&config);
 	//set iso mode for reboot
@@ -639,7 +549,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	//full memory doesn't hurt on isos
 	sctrlHENSetMemory(48, 0);
-	printk("%s: ISO %s, UMD mode %d\n", __func__, iso_fn, config.umdmode);
+	printk("%s: ISO %s, UMD mode %d\n", __func__, vpbps[idx].name, config.umdmode);
 	
 	//reset and configure reboot parameter
 	memset(param, 0, sizeof(param));
@@ -658,4 +568,98 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	unlock();
 
 	return ret;
+}
+
+static int rebuild_iso_cache(const char *dirname)
+{
+	SceUID dfd;
+	int ret, i;
+	char isopath[] = "ms0:/ISO";
+	SceIoDirent dir;
+	
+	strncpy(isopath, dirname, 2);
+	dfd = sceIoDopen(isopath);
+	
+	if (dfd < 0)
+		return dfd;
+
+	i = 0;
+
+	do {
+		memset(&dir, 0, sizeof(dir));
+		ret = sceIoDread(dfd, &dir);
+
+		if (is_iso(&dir)) {
+			STRCPY_S(vpbps[i].name, isopath);
+			STRCAT_S(vpbps[i].name, "/");
+			STRCAT_S(vpbps[i].name, dir.d_name);
+			vpbps[i].cached = 1;
+			printk("%s: %s -> ISOGAME%08X cached\n", __func__, vpbps[i].name, i);
+			i++;
+		}
+	} while(ret > 0);
+
+	sceIoDclose(dfd);
+
+	return 0;
+}
+
+static int gamedfd = -1;
+
+SceUID vpbp_dopen(const char * dirname)
+{
+	SceUID result;
+
+	lock();
+
+	if (strlen(dirname) == 13 && stricmp(dirname + 2, "0:/PSP/GAME") == 0) {
+		rebuild_iso_cache(dirname);
+	}
+
+	gamedfd = result = sceIoDopen(dirname);
+	unlock();
+
+	return result;
+}
+
+int vpbp_dread(SceUID fd, SceIoDirent * dir)
+{
+	int result;
+	static int cur_idx = 0;
+   
+	lock();
+	result = sceIoDread(fd, dir);
+
+	if (fd == gamedfd && result == 0) {
+		while(cur_idx < NELEMS(vpbps) && !vpbps[cur_idx].cached) {
+			cur_idx++;
+		}
+		
+		if (cur_idx < NELEMS(vpbps)) {
+			dir->d_stat.st_mode = 0x11FF;
+			dir->d_stat.st_attr = 0x10;
+			sprintf(dir->d_name, "ISOGAME%08X", cur_idx);
+			result = 1;
+			cur_idx++;
+		}
+	} else {
+		cur_idx = 0;
+	}
+
+	unlock();
+
+	return result;
+}
+
+int vpbp_dclose(SceUID fd)
+{
+	int result;
+
+	result = sceIoDclose(fd);
+
+	if (fd == gamedfd) {
+		gamedfd = -1;
+	}
+
+	return result;
 }

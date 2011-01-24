@@ -82,3 +82,8 @@ int strncasecmp(const char *s1, const char *s2, size_t n)
 
 	return c1 - c2;
 }
+
+int strcasecmp(const char *s1, const char *s2)
+{
+	return strncasecmp(s1, s2, (u32)-1);
+}

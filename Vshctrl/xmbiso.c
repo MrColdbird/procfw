@@ -1,6 +1,7 @@
 #include "xmbiso.h"
 #include "systemctrl.h"
 #include "systemctrl_se.h"
+#include "systemctrl_private.h"
 #include "isoreader.h"
 #include "printk.h"
 #include "utils.h"
@@ -8,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pspsdk.h>
+#include "virtual_pbp.h"
 
 //virtual eboot detect macro
 #define ISOEBOOT(file) (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0)
@@ -23,15 +25,6 @@ char * isopath = "ms0:/ISO";
 
 //iso counter
 u32 isocounter = 0;
-
-//iso mode (m33 mode, this requires a proper vsh-satellite)
-int isomode = 1;
-
-//temporary filename
-char * temppath = "ms0:/C01DB15D.bin";
-
-//memory for param.sfo
-u8 titleinfo[1024];
 
 //open directory
 SceUID gamedopen(const char * dirname)
@@ -69,7 +62,7 @@ int isISO(SceIoDirent * dir)
 	//filename length check
 	if (ext > dir->d_name) {
 		//check extension
-		if (strcmp(ext, "iso") == 0 || strcmp(ext, "ISO") == 0 /* || strcmp(ext, "cso") == 0 || strcmp(ext, "CSO") == 0 */) {
+		if (stricmp(ext, "iso") == 0 /* || strcmp(ext, "cso") == 0 || strcmp(ext, "CSO") == 0 */) {
 			//valid iso detected (more checks can be added here lateron)
 			result = 1;
 		}
@@ -163,132 +156,20 @@ int gamedclose(SceUID fd)
 	return result;
 }
 
-//make param.sfo bootable
-void makebootable(u8 * param, u32 size)
-{
-	//number of items
-	u32 count = *(u32 *)(param + 16);
-
-	//key table pointer
-	u8 * keys = param + *(u32 *)(param + 8);
-
-	//value table pointer
-	u8 * values = param + *(u32 *)(param + 12);
-
-	//index table pointer
-	u8 * indices = param + 20;
-
-	//iterate items
-	int i = 0; for(; i < count; i++) {
-		//grab index
-		u8 * index = indices + 16 * i;
-
-		//grab key
-		char * key = (char *)keys + *(u16 *)(index);
-
-		//we found the category key
-		if(strcmp(key, "CATEGORY") == 0) {
-			//grab value
-			char * value = (char *)values + *(u32 *)(index + 12);
-
-			//override value
-			strncpy(value, "MG", 2);
-
-			//stop hack
-			break;
-		}
-	}
-}
-
-//create and open temporary eboot
-SceUID opentemp(const char * file, int flags, SceMode mode)
-{
-	//result
-	SceUID result = -1;
-
-	//aquire kernel permission
-	u32 k1 = pspSdkSetK1(0);
-
-	//translate iso name
-	char * isoname = pathtranslator((char *)file);
-
-	//found iso
-	if (isoname) {
-		//fix temporary path
-		strncpy(temppath, file, 2);
-
-		//mount iso file in isoreader
-		isoSetFile(isoname);
-
-		//create temporary file
-		result = sceIoOpen(temppath, PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
-		if (result >= 0) {
-			//write pbp magic
-			u32 temp = 0x50425000;
-			sceIoWrite(result, &temp, sizeof(temp));
-
-			//write pbp version
-			temp = 0x10000;
-			sceIoWrite(result, &temp, sizeof(temp));
-
-			//write param.sfo offset
-			temp = 40;
-			sceIoWrite(result, &temp, sizeof(temp));
-
-			//get param.sfo information
-			u32 paramsize = 0;
-			u32 paramlba = isoGetFileInfo("PARAM.SFO", &paramsize);
-
-			//move offset
-			temp += paramsize;
-
-			//dummy unwanted eboot files
-			int i = 0; for(; i < 7; i++) sceIoWrite(result, &temp, sizeof(temp));
-
-			//flush param.sfo
-			if (paramlba) {
-				//read param.sfo
-				isoReadRawData(titleinfo, paramlba, 0, paramsize);
-
-				//patch game to be memory stick bootable
-				makebootable(titleinfo, paramsize);
-
-				//write param.sfo
-				sceIoWrite(result, titleinfo, paramsize);
-			}
-
-			//close temporary file
-			sceIoClose(result);
-		}
-
-
-		//debugging: some japanese umd game param.sfo are fucked up...
-		//way of the samurai is one of those it seems.
-		//if(strstr(isoname, "Samurai") != NULL) {
-		//	sceIoRename(temppath, "ef0:/samurai.pbp");
-		//}
-
-		//open temporary eboot
-		result = sceIoOpen(temppath, flags, mode);
-	}
-
-	//restore user permission
-	pspSdkSetK1(k1);
-
-	//return descriptor
-	return result;
-}
-
 //open file
 SceUID gameopen(const char * file, int flags, SceMode mode)
 {
 	//forward to firmware
-	SceUID result = sceIoOpen(file, flags, mode);
-
-	//virtual iso eboot detected
-	if (result == 0x80010002 && ISOEBOOT(file)) {
-		//open temporary iso eboot
-		result = opentemp(file, flags, mode);
+	SceUID result;
+   
+	if (ISOEBOOT(file)) {
+		printk("%s: %s", __func__, file);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_open(file, flags, mode);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", result);
+	} else {
+		result = sceIoOpen(file, flags, mode);
 	}
 
 	//return result
@@ -298,14 +179,18 @@ SceUID gameopen(const char * file, int flags, SceMode mode)
 //read file
 int gameread(SceUID fd, void * data, SceSize size)
 {
-	//aquire kernel permission
-	u32 k1 = pspSdkSetK1(0);
-
 	//forward to firmware
-	int result = sceIoRead(fd, data, size);
-
-	//restore user permission
-	pspSdkSetK1(k1);
+	int result;
+   
+	if (vpbp_is_fd(fd)) {
+		printk("%s: 0x%04X %d", __func__, fd, size);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_read(fd, data, size);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", result);
+	} else {
+		result = sceIoRead(fd, data, size);
+	}
 
 	//return result
 	return result;
@@ -314,61 +199,56 @@ int gameread(SceUID fd, void * data, SceSize size)
 //close file
 int gameclose(SceUID fd)
 {
-	//aquire kernel permission
-	u32 k1 = pspSdkSetK1(0);
+	int result;
 
-	//forward to firmware
-	int result = sceIoClose(fd);
-
-	//delete temporary eboot
-	if (fd > 0x1000) sceIoRemove(temppath);
-
-	//restore user permission
-	pspSdkSetK1(k1);
-
+	if (vpbp_is_fd(fd)) {
+		printk("%s: %04X", __func__, fd);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_close(fd);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", result);
+	} else {
+		result = sceIoClose(fd);
+	}
+	
 	//return result
 	return result;
 }
 
-//seek file
 SceOff gamelseek(SceUID fd, SceOff offset, int whence)
 {
-	//result
 	SceOff result = 0;
 
-	//aquire kernel permission
-	u32 k1 = pspSdkSetK1(0);
+	if (vpbp_is_fd(fd)) {
+		printk("%s: 0x%04X 0x%08X %d", __func__, fd, (u32)offset, whence);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_lseek(fd, offset, whence);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", (u32)result);
+	} else {
+		result = sceIoLseek(fd, offset, whence);
+	}
 
-	//forward to firmware
-	result = sceIoLseek(fd, offset, whence);
-
-	//restore user permission
-	pspSdkSetK1(k1);
-
-	//return result
 	return result;
 }
 
 //get file status
 int gamegetstat(const char * file, SceIoStat * stat)
 {
-	//forward to firmware
-	int result = sceIoGetstat(file, stat);
-
+	int result;
+   
 	//virtual iso eboot detected
-	if (result == 0x80010002 && ISOEBOOT(file)) {
-		//translate path
-		char * isopath = pathtranslator((char *)file);
-
-		//found iso
-		if (isopath) {
-			//return iso status
-			u32 k1 = pspSdkSetK1(0);
-			result = sceIoGetstat(isopath, stat);
-			pspSdkSetK1(k1);
-		}
+	if (ISOEBOOT(file)) {
+		printk("%s: %s", __func__, file);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_getstat(file, stat);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", result);
+	} else {
+		result = sceIoGetstat(file, stat);
 	}
 
+	
 	//return result
 	return result;
 }
@@ -376,13 +256,18 @@ int gamegetstat(const char * file, SceIoStat * stat)
 //remove file
 int gameremove(const char * file)
 {
-	//forward to firmware
-	int result = sceIoRemove(file);
+	int result;
+   
+	if (ISOEBOOT(file)) {
+		printk("%s: %s", __func__, file);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_remove(file);
+		pspSdkSetK1(k1);
+		printk(" -> 0x%08X\n", result);
+	} else {
+		result = sceIoRemove(file);
+	}
 
-	//log call
-	printk("sceIoRemove(%s) -> %08X\n", file, result);
-
-	//return result
 	return result;
 }
 
@@ -392,8 +277,7 @@ int gamermdir(const char * path)
 	//forward to firmware
 	int result = sceIoRmdir(path);
 
-	//log call
-	printk("sceIoRmdir(%s) -> %08X\n", path, result);
+	printk("%s: %s 0x%08X\n", __func__, path, result);
 
 	//return result
 	return result;
@@ -405,36 +289,15 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	//result
 	int result = 0;
 
+	printk("%s: %s\n", __func__, file);
+	
 	//virtual iso eboot detected
 	if (ISOEBOOT(file)) {
-		//translate iso path
-		char * gameiso = pathtranslator(file);
+		u32 k1 = pspSdkSetK1(0);
+		result = vpbp_loadexec(file, param);
+		pspSdkSetK1(k1);
 
-		//found iso
-		if (gameiso) {
-			//set iso file for reboot
-			sctrlSESetUmdFile(gameiso);
-
-			//set iso mode for reboot
-			sctrlSESetBootConfFileIndex(isomode);
-
-			//full memory doesn't hurt on isos
-			sctrlHENSetMemory(48, 0);
-
-			//reset and configure reboot parameter
-			memset(param, 0, sizeof(struct SceKernelLoadExecVSHParam));
-			param->size = sizeof(struct SceKernelLoadExecVSHParam);
-			param->argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
-			param->args = strlen(param->argp) + 1;
-			param->key = "game";
-
-			//fix apitypes
-			int apitype = 0x120;
-			if (sceKernelGetModel() == PSP_GO) apitype = 0x125;
-
-			//start game image
-			return sctrlKernelLoadExecVSHWithApitype(apitype, param->argp, param);
-		}
+		return result;
 	}
 
 	//forward to ms0 handler
@@ -442,61 +305,6 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	//forward to ef0 handler
 	else result = sctrlKernelLoadExecVSHEf2(file, param);
-
-	//return result
-	return result;
-}
-
-//translate virtual eboot to iso path
-char * pathtranslator(char * file)
-{
-	//result
-	char * result = NULL;
-
-	//internal buffer
-	static char buffer[256];
-
-	//fix iso path
-	strncpy(isopath, file, 2);
-
-	//cut iso index string
-	strcpy(buffer, file);
-	char * strisoindex = buffer + 21;
-	buffer[29] = 0;
-
-	//parse iso index string
-	unsigned long isoindex = strtoul(strisoindex, NULL, 16);
-
-	//aquire kernel permission
-	u32 k1 = pspSdkSetK1(0);
-
-	//open iso directory
-	SceUID isodfd = sceIoDopen(isopath);
-	if (isodfd >= 0) {
-		//found flag
-		int isoexists = 0;
-
-		//directory entry
-		SceIoDirent dir;
-
-		//get iso file
-		int i = 0; for(; i <= isoindex; i++) isoexists = injectISO(&dir, isodfd, 1);
-
-		//close iso directory
-		sceIoDclose(isodfd);
-
-		//found iso
-		if (isoexists) {
-			//create iso path
-			sprintf(buffer, "%s/%s", isopath, dir.d_name);
-
-			//set as result
-			result = buffer;
-		}
-	}
-
-	//restore user permission
-	pspSdkSetK1(k1);
 
 	//return result
 	return result;

@@ -8,18 +8,20 @@ typedef struct _PBPSection {
 
 typedef struct _VirtualPBP {
 	u32 enabled;
-	u32 cached; // cached filename
 	u32 total_size;
 	u32 file_pointer;
 	char name[128];
 	u32 header[10];
 	PBPSection sects[8];
+	ScePspDateTime mtime;
 } VirtualPBP;
 
+#define MAGIC_ISOCACHE 0xC01DB15D
 #define MAGIC_VPBP_FD 0x8000
 #define MAX_VPBP 128
 #define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))
 #define ISOEBOOT(file) (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0)
+#define CACHE_PATH "ms0:/PSP/SYSTEM/ISOCACHE.BIN"
 
 int vpbp_init(void);
 SceUID vpbp_open(const char * file, int flags, SceMode mode);

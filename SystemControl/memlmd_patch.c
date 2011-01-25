@@ -40,7 +40,7 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 
 		result = 0;
 
-		// support for old modules in updater, they don't like unsign
+		// updater prx ... 0xB8~0x18 is zero padded
 		for(i=0; i<0x18; ++i) {
 			if (prx[i+0xB8]) {
 				result = 1;
@@ -51,8 +51,6 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 		if (result == 0) {
 			return 0;
 		}
-
-		result = 0;
 	}
 
 	return (*memlmd_unsigner)(prx, size, use_polling);
@@ -99,7 +97,7 @@ void patch_sceMemlmd(void)
 	SceModule2 * memlmd = (SceModule2*) sceKernelFindModuleByName("sceMemlmd");
 
 	//patch offsets
-	unsigned int patches[7];
+	unsigned int patches[6];
 
 	//32mb psp
 	if(psp_model == 0)
@@ -110,7 +108,6 @@ void patch_sceMemlmd(void)
 		patches[3] = 0x11A4;
 		patches[4] = 0x0E88;
 		patches[5] = 0x0EEC;
-		patches[6] = 0x0AFC;
 	}
 	//64mb psps
 	else
@@ -121,7 +118,6 @@ void patch_sceMemlmd(void)
 		patches[3] = 0x1294;
 		patches[4] = 0x0F78;
 		patches[5] = 0x0FDC;
-		patches[6] = 0x0B74;
 	}
 
 	//patches
@@ -134,5 +130,4 @@ void patch_sceMemlmd(void)
 	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[5]); // the offset where memlmd_D56F8AEC call memlmd_decrypt
 
 	memlmd_decrypt = (void*)memlmd->text_addr + 0x0134; // inner function which decrypt a PRX module
-	_sw(0, memlmd->text_addr + patches[6]); // the check prohibits old updater prx
 }

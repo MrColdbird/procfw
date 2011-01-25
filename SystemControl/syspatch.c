@@ -76,11 +76,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	if(0 == strcmp(mod->modname, "sceMesgLed")) {
-		patch_mesgled_for_updater(mod->text_addr);
-		sync_cache();
-	}
-
 	resolve_removed_nid((SceModule*)mod);
 	
 #ifdef DEBUG
@@ -92,7 +87,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	hook_import_bynid((SceModule*)mod, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
 
-	patch_module_for_updater((SceModule*)mod);
+	patch_module_for_version_spoof((SceModule*)mod);
 
 	if (previous)
 		return (*previous)(mod);

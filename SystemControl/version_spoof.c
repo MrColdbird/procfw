@@ -43,7 +43,7 @@ int versionspoofer(u8 *buf, u32 size, u32* newsize)
 	return result;
 }
 
-void patch_module_for_updater(SceModule *mod1)
+void patch_module_for_version_spoof(SceModule *mod1)
 {
 	u32 text_addr;
 	SceModule2 *mod = (SceModule2*)mod1;

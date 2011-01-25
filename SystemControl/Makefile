@@ -8,7 +8,6 @@ OBJS = main.o \
 	   rebootex_conf.o \
 	   loadercore_patch.o \
 	   memlmd_patch.o \
-	   old_decrypt.o \
 	   interruptman_patch.o \
 	   mediasync_patch.o \
 	   version_spoof.o \

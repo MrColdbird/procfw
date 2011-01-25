@@ -230,6 +230,8 @@ static int load_cache(void)
 	char path[] = CACHE_PATH;
 	u32 magic;
 
+	memset(g_caches, 0, sizeof(g_caches[0]) * g_caches_cnt);
+
 	for(i=0; i<3; ++i) {
 		fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
@@ -260,22 +262,6 @@ static int load_cache(void)
 		return -25;
 	}
 
-	if (g_caches != NULL) {
-		oe_free(g_caches);
-		g_caches_cnt = 0;
-	}
-
-	g_caches_cnt = CACHE_MAX_SIZE;
-	g_caches = oe_malloc(sizeof(*g_caches) * g_caches_cnt);
-
-	if (g_caches == NULL) {
-		g_caches_cnt = 0;
-		printk("%s: g_cache cannot allocate\n", __func__);
-
-		return -27;
-	}
-
-	memset(g_caches, 0, sizeof(g_caches[0]) * g_caches_cnt);
 	sceIoRead(fd, g_caches, g_caches_cnt*sizeof(g_caches[0]));
 	memset(g_referenced, 0, sizeof(g_referenced));
 	sceIoClose(fd);
@@ -390,6 +376,7 @@ static int build_vpbp(VirtualPBP *vpbp)
 
 	vpbp->total_size = vpbp->header[9];
 	ret = add_cache(vpbp);
+	printk("%s: add_cache -> %d\n", __func__, ret);
 
 	return ret;
 }
@@ -474,6 +461,23 @@ int vpbp_init(void)
 	if (g_sema < 0)
 		return g_sema;
 
+	if (g_caches != NULL) {
+		oe_free(g_caches);
+		g_caches_cnt = 0;
+	}
+
+	g_caches_cnt = CACHE_MAX_SIZE;
+	g_caches = oe_malloc(sizeof(*g_caches) * g_caches_cnt);
+
+	if (g_caches == NULL) {
+		g_caches_cnt = 0;
+		printk("%s: g_cache cannot allocate\n", __func__);
+
+		return -27;
+	}
+
+	memset(g_caches, 0, sizeof(g_caches[0]) * g_caches_cnt);
+	
 	return 0;
 }
 

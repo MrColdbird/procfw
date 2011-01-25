@@ -105,6 +105,11 @@ static u8 virtualsfo[408] = {
 VirtualPBP *g_vpbps = NULL;
 int g_vpbps_cnt = 0;
 static int g_sema = -1;
+static int g_gamedfd = -1;
+static VirtualPBP *g_caches = NULL;
+static u32 g_caches_cnt;
+static u8 g_referenced[32];
+static u8 g_need_update = 0;
 
 static int is_iso(SceIoDirent * dir)
 {
@@ -198,10 +203,6 @@ static int disable_cache(int idx)
 	return 0;
 }
 
-static VirtualPBP g_caches[32];
-static u8 g_referenced[32];
-static u8 need_update = 0;
-
 static int add_cache(VirtualPBP *vpbp)
 {
 	int i;
@@ -210,11 +211,11 @@ static int add_cache(VirtualPBP *vpbp)
 		return -22;
 	}
 
-	for(i=0; i<NELEMS(g_caches); ++i) {
+	for(i=0; i<g_caches_cnt; ++i) {
 		if(!g_caches[i].enabled) {
 			memcpy(&g_caches[i], vpbp, sizeof(*vpbp));
 			g_referenced[i] = 1;
-			need_update = 1;
+			g_need_update = 1;
 
 			return 1;
 		}
@@ -259,7 +260,23 @@ static int load_cache(void)
 		return -25;
 	}
 
-	sceIoRead(fd, g_caches, NELEMS(g_caches)*sizeof(g_caches[0]));
+	if (g_caches != NULL) {
+		oe_free(g_caches);
+		g_caches_cnt = 0;
+	}
+
+	g_caches_cnt = CACHE_MAX_SIZE;
+	g_caches = oe_malloc(sizeof(*g_caches) * g_caches_cnt);
+
+	if (g_caches == NULL) {
+		g_caches_cnt = 0;
+		printk("%s: g_cache cannot allocate\n", __func__);
+
+		return -27;
+	}
+
+	memset(g_caches, 0, sizeof(g_caches[0]) * g_caches_cnt);
+	sceIoRead(fd, g_caches, g_caches_cnt*sizeof(g_caches[0]));
 	memset(g_referenced, 0, sizeof(g_referenced));
 	sceIoClose(fd);
 
@@ -273,14 +290,14 @@ static int save_cache(void)
 	char path[] = CACHE_PATH;
 	u32 magic = MAGIC_ISOCACHE;
 
-	for(i=0; i<NELEMS(g_caches); ++i) {
+	for(i=0; i<g_caches_cnt; ++i) {
 		if (g_caches[i].enabled && !g_referenced[i]) {
-			need_update = 1;
+			g_need_update = 1;
 			memset(&g_caches[i], 0, sizeof(g_caches[i]));
 		}
 	}
 
-	if(!need_update) {
+	if(!g_need_update) {
 		printk("%s: no need to update\n", __func__);
 
 		return 0;
@@ -311,10 +328,10 @@ static int save_cache(void)
 	}
 
 	sceIoWrite(fd, &magic, sizeof(magic));
-	sceIoWrite(fd, g_caches, sizeof(g_caches[0])*NELEMS(g_caches));
+	sceIoWrite(fd, g_caches, sizeof(g_caches[0])*g_caches_cnt);
 	sceIoClose(fd);
 
-	need_update = 0;
+	g_need_update = 0;
 
 	return 0;
 }
@@ -323,7 +340,7 @@ static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
 {
 	int i;
 
-	for(i=0; i<NELEMS(g_caches); ++i) {
+	for(i=0; i<g_caches_cnt; ++i) {
 		if(g_caches[i].enabled && 0 == strcmp(g_caches[i].name, file)) {
 			if (memcmp(&g_caches[i].mtime, mtime, sizeof(*mtime)) == 0) {
 				memcpy(pbp, &g_caches[i], sizeof(*pbp));
@@ -335,6 +352,119 @@ static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
 	}
 
 	return -23;
+}
+
+static int build_vpbp(VirtualPBP *vpbp)
+{
+	int ret, i;
+	u32 off;
+
+	printk("Need to build vpbp %s\n", vpbp->name);
+	memset(vpbp->header, 0, sizeof(vpbp->header));
+	memset(vpbp->sects, 0, sizeof(vpbp->sects));
+	vpbp->enabled = 1;
+	vpbp->file_pointer = 0;
+	vpbp->header[0] = 0x50425000; // PBP magic
+	vpbp->header[1] = 0x10000; // version
+
+	// fill vpbp offsets
+	off = 0x28;
+
+	isoSetFile(vpbp->name);
+
+	for(i=0; i<NELEMS(pbp_entries); ++i) {
+		vpbp->header[i+2] = off;
+
+		if (pbp_entries[i].enabled) {
+			PBPSection *sec = &vpbp->sects[i];
+
+			sec->lba = isoGetFileInfo(pbp_entries[i].name, &sec->size);
+
+			if (i == 0) {
+				off += sizeof(virtualsfo);
+			} else {
+				off += sec->size;
+			}
+		}
+	}
+
+	vpbp->total_size = vpbp->header[9];
+	ret = add_cache(vpbp);
+
+	return ret;
+}
+
+static int rebuild_vpbps(const char *dirname)
+{
+	SceUID dfd;
+	int ret, i, nextdir;
+	char isopath[] = "ms0:/ISO";
+	SceIoDirent dir;
+	
+	strncpy(isopath, dirname, 2);
+	dfd = sceIoDopen(isopath);
+	
+	if (dfd < 0)
+		return dfd;
+
+	i = 0;
+
+	do {
+		memset(&dir, 0, sizeof(dir));
+		ret = sceIoDread(dfd, &dir);
+
+		if (is_iso(&dir)) {
+			i++;
+		}
+	} while(ret > 0);
+
+	g_vpbps_cnt = i;
+	printk("%s: have %d ISO(s)\n", __func__, g_vpbps_cnt);
+	sceIoDclose(dfd);
+
+	if (g_vpbps != NULL) {
+		oe_free(g_vpbps);
+	}
+
+	g_vpbps = oe_malloc(g_vpbps_cnt * sizeof(VirtualPBP));
+	memset(g_vpbps, 0, g_vpbps_cnt * sizeof(VirtualPBP));
+	dfd = sceIoDopen(isopath);
+
+	if (g_vpbps == NULL) {
+		printk("%s: g_vpbps cannot allocate\n", __func__);
+
+		return -20;
+	}
+
+	i = 0;
+	
+	do {
+		memset(&dir, 0, sizeof(dir));
+		nextdir = sceIoDread(dfd, &dir);
+
+		if (is_iso(&dir)) {
+			VirtualPBP *vpbp;
+
+			vpbp = &g_vpbps[i];
+
+			STRCPY_S(vpbp->name, isopath);
+			STRCAT_S(vpbp->name, "/");
+			STRCAT_S(vpbp->name, dir.d_name);
+			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(dir.d_stat.st_mtime));
+
+			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
+
+			if (ret < 0) {
+				build_vpbp(vpbp);
+			}
+			
+			i++;
+		}
+	} while(nextdir > 0);
+
+	sceIoDclose(dfd);
+
+	return 0;
 }
 
 int vpbp_init(void)
@@ -458,6 +588,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 				data += re;
 				remaining -= re;
 			} else {
+				printk("%s: buf cannot allocate\n", __func__);
 				unlock();
 
 				return -13;
@@ -493,6 +624,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 
 					oe_free(buf);
 				} else {
+					printk("%s: buf(2) cannot allocate\n", __func__);
 					unlock();
 
 					return -5;
@@ -535,7 +667,6 @@ int vpbp_disable_all_caches(void)
 		VirtualPBP *vpbp;
 		
 		vpbp = &g_vpbps[i];
-
 		vpbp->enabled = 0;
 	}
 
@@ -646,114 +777,6 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	return ret;
 }
 
-static int rebuild_vpbps(const char *dirname)
-{
-	SceUID dfd;
-	int ret, i, nextdir;
-	char isopath[] = "ms0:/ISO";
-	SceIoDirent dir;
-	
-	strncpy(isopath, dirname, 2);
-	dfd = sceIoDopen(isopath);
-	
-	if (dfd < 0)
-		return dfd;
-
-	i = 0;
-
-	do {
-		memset(&dir, 0, sizeof(dir));
-		ret = sceIoDread(dfd, &dir);
-
-		if (is_iso(&dir)) {
-			i++;
-		}
-	} while(ret > 0);
-
-	g_vpbps_cnt = i;
-	printk("%s: have %d ISO(s)\n", __func__, g_vpbps_cnt);
-	sceIoDclose(dfd);
-
-	if (g_vpbps != NULL) {
-		oe_free(g_vpbps);
-	}
-
-	g_vpbps = oe_malloc(g_vpbps_cnt * sizeof(VirtualPBP));
-	memset(g_vpbps, 0, g_vpbps_cnt * sizeof(VirtualPBP));
-	dfd = sceIoDopen(isopath);
-
-	if (g_vpbps == NULL) {
-		printk("allocating g_vpbps failed\n");
-
-		return -20;
-	}
-
-	i = 0;
-	
-	do {
-		memset(&dir, 0, sizeof(dir));
-		nextdir = sceIoDread(dfd, &dir);
-
-		if (is_iso(&dir)) {
-			VirtualPBP *vpbp;
-			u32 off;
-
-			vpbp = &g_vpbps[i];
-
-			STRCPY_S(vpbp->name, isopath);
-			STRCAT_S(vpbp->name, "/");
-			STRCAT_S(vpbp->name, dir.d_name);
-			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(dir.d_stat.st_mtime));
-
-			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
-
-			if (ret < 0) {
-				printk("Cache missed %s\n", vpbp->name);
-
-				memset(vpbp->header, 0, sizeof(vpbp->header));
-				memset(vpbp->sects, 0, sizeof(vpbp->sects));
-				vpbp->enabled = 1;
-				vpbp->file_pointer = 0;
-				vpbp->header[0] = 0x50425000; // PBP magic
-				vpbp->header[1] = 0x10000; // version
-
-				// fill vpbp offsets
-				off = 0x28;
-
-				isoSetFile(vpbp->name);
-
-				int j; for(j=0; j<NELEMS(pbp_entries); ++j) {
-					vpbp->header[j+2] = off;
-
-					if (pbp_entries[j].enabled) {
-						PBPSection *sec = &vpbp->sects[j];
-
-						sec->lba = isoGetFileInfo(pbp_entries[j].name, &sec->size);
-
-						if (j == 0) {
-							off += sizeof(virtualsfo);
-						} else {
-							off += sec->size;
-						}
-					}
-				}
-
-				vpbp->total_size = vpbp->header[9];
-				ret = add_cache(vpbp);
-				printk("add_cache returns %d\n", ret);
-			}
-
-			i++;
-		}
-	} while(nextdir > 0);
-
-	sceIoDclose(dfd);
-
-	return 0;
-}
-
-static int gamedfd = -1;
-
 SceUID vpbp_dopen(const char * dirname)
 {
 	SceUID result;
@@ -765,7 +788,7 @@ SceUID vpbp_dopen(const char * dirname)
 		rebuild_vpbps(dirname);
 	}
 
-	gamedfd = result = sceIoDopen(dirname);
+	g_gamedfd = result = sceIoDopen(dirname);
 	unlock();
 
 	return result;
@@ -779,7 +802,7 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	lock();
 	result = sceIoDread(fd, dir);
 
-	if (fd == gamedfd && result == 0) {
+	if (fd == g_gamedfd && result == 0) {
 		while(cur_idx < g_vpbps_cnt && !g_vpbps[cur_idx].enabled) {
 			cur_idx++;
 		}
@@ -806,10 +829,29 @@ int vpbp_dclose(SceUID fd)
 
 	result = sceIoDclose(fd);
 
-	if (fd == gamedfd) {
+	if (fd == g_gamedfd) {
 		save_cache();
-		gamedfd = -1;
+		g_gamedfd = -1;
 	}
 
 	return result;
+}
+
+int vpbp_reset(void)
+{
+	if (g_vpbps != NULL) {
+		oe_free(g_vpbps);
+		g_vpbps = NULL;
+		g_vpbps_cnt = 0;
+	}
+
+	if (g_caches != NULL) {
+		oe_free(g_caches);
+		g_caches = NULL;
+		g_caches_cnt = 0;
+	}
+
+	g_gamedfd = -1;
+
+	return 0;
 }

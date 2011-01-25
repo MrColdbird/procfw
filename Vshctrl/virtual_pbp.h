@@ -16,6 +16,7 @@ typedef struct _VirtualPBP {
 	ScePspDateTime mtime;
 } VirtualPBP;
 
+#define CACHE_MAX_SIZE 32
 #define MAGIC_ISOCACHE 0xC01DB15D
 #define MAGIC_VPBP_FD 0x8000
 #define MAX_VPBP 128
@@ -36,5 +37,6 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param);
 SceUID vpbp_dopen(const char * dirname);
 int vpbp_dread(SceUID fd, SceIoDirent * dir);
 int vpbp_dclose(SceUID fd);
+int vpbp_reset(void);
 
 #endif

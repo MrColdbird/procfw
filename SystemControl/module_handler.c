@@ -11,43 +11,22 @@
 #include "kubridge.h"
 #include "libs.h"
 
-SceUID g_mod_start_thid = -1;
-SceModule2 *g_mod_start = NULL;
 int (*g_on_module_start)(SceModule2*) = NULL;
 
 // sceKernelFindModuleByAddress most likely?
 extern SceModule2 *LoadCoreForKernel_312CA47E(void *addr);
 
-static int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
+static int (*_prologue_module)(void *unk0, SceModule2 *mod) = NULL;
+
+static int prologue_module(void *unk0, SceModule2 *mod)
 {
-	int ret;
-
-	if (g_mod_start_thid != -1 && thid == g_mod_start_thid) {
-		if (g_on_module_start != NULL && g_mod_start != NULL) {
-			unlock_high_memory();
-			(*g_on_module_start)(g_mod_start);
-		}
-
-		g_mod_start_thid = -1;
-		g_mod_start = NULL;
+	int ret = (*_prologue_module)(unk0, mod);
+	
+	if (ret >= 0) {
+		unlock_high_memory();
+		(*g_on_module_start)(mod);
 	}
-
-	ret = sceKernelStartThread(thid, arglen, argp);
-
-	return ret;
-}
-
-static int myKernelCreateThread(const char *name, void *entry, int pri, int stack, u32 attr, void *opt)
-{
-	int ret;
-
-	ret = sceKernelCreateThread(name, entry, pri, stack, attr, opt);
-
-	if (ret >= 0 && !strcmp(name, "SceModmgrStart")) {
-		g_mod_start = LoadCoreForKernel_312CA47E(entry);
-		g_mod_start_thid = ret;
-	}
-
+	
 	return ret;
 }
 
@@ -85,8 +64,8 @@ void setup_module_handler(void)
 	_sw(0, mod->text_addr + 0x43A8);
 	_sw(0, mod->text_addr + 0x43C0);
 
-	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0xF475845D, myKernelStartThread, 0);
-	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0x446D8DE6, myKernelCreateThread, 0);
+	_prologue_module = (void*)(mod->text_addr+0x8134);
+	_sw(MAKE_CALL(prologue_module), mod->text_addr+0x7058);
 
 #ifdef DEBUG
 	setup_validate_stub((SceModule*)mod);

@@ -5,13 +5,37 @@
 
 #define SECTOR_SIZE 0x800
 
-//set filename
-void isoSetFile(char * str);
+#if 0
+//directory structure
+typedef struct {
+	u8 len_dr;
+	u8 len_ex;
+	u32 evpos_le;
+	u32 evpos_be;
+	u32 datalen_le;
+	u32 datalen_be;
+	u8 recording[6];
+	u8 fileflags;
+	u8 fileunitsize;
+	u8 interleavegap;
+	u32 volseqnum;
+	u8 fileidentlen;
+	//fileidentifier
+};
+#endif
+
+int isoOpen(const char *path);
+
+void isoClose(void);
+
+int isoGetSize(void);
 
 //get file information
 u32 isoGetFileInfo(char * str, u32 * filesize);
 
+int isoReadSectors(u32 sector, u8 *buf, int count);
+
 //read raw data from iso
-u32 isoReadRawData(u8 * buffer, u32 lba, u32 offset, u32 size);
+int isoReadRawData(u8 *buffer, u32 lba, u32 offset, u32 size);
 
 #endif

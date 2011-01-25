@@ -356,7 +356,7 @@ static int build_vpbp(VirtualPBP *vpbp)
 	// fill vpbp offsets
 	off = 0x28;
 
-	isoSetFile(vpbp->name);
+	isoOpen(vpbp->name);
 
 	for(i=0; i<NELEMS(pbp_entries); ++i) {
 		vpbp->header[i+2] = off;
@@ -377,6 +377,7 @@ static int build_vpbp(VirtualPBP *vpbp)
 	vpbp->total_size = vpbp->header[9];
 	ret = add_cache(vpbp);
 	printk("%s: add_cache -> %d\n", __func__, ret);
+	isoClose();
 
 	return ret;
 }
@@ -500,6 +501,7 @@ SceUID vpbp_open(const char * file, int flags, SceMode mode)
 
 	if (vpbp->enabled) {
 		vpbp->file_pointer = 0;
+		isoOpen(vpbp->name);
 		unlock();
 
 		return MAGIC_VPBP_FD+idx;
@@ -558,7 +560,6 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 		return -4;
 	}
 
-	isoSetFile(vpbp->name);
 	remaining = size;
 
 	while(remaining > 0) {
@@ -658,6 +659,7 @@ int vpbp_close(SceUID fd)
 		return -7;
 	}
 
+	isoClose();
 	unlock();
 
 	return 0;

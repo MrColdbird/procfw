@@ -14,7 +14,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x1C1FBFE7, 0xAF85EB1B, }, // sceKernelCreateHeap
 	{ 0x55A40B2C, 0xF5E82409, }, // sceKernelQueryMemoryPartitionInfo
 	{ 0xE6581468, 0xE10F21CF, }, // sceKernelPartitionMaxFreeMemSize
-	{ 0x9697CD32, 0x7BE9653E, }, // sceKernelPartitionTotalFreeMemSize
+	{ 0x9697CD32, 0x7BE9653E, }, // sceKernelPartitionTotalFreeMemSize 0xE10F21CF??? From Davee
 	{ 0x237DBD4F, 0x4621A9CC, }, // sceKernelAllocPartitionMemory
 	{ 0xB6D61D02, 0x8FDAFC4C, }, // sceKernelFreePartitionMemory
 	{ 0x9D9A5BA1, 0xFA5025B5, }, // sceKernelGetBlockHeadAddr
@@ -87,7 +87,7 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0xB4D6FECC, UNKNOWNNID, }, // sceKernelApplyElfRelSection
 	{ 0x54AB2675, UNKNOWNNID, }, // sceKernelApplyPspRelSection
 	{ 0x2952F5AC, UNKNOWNNID, }, // sceKernelDcacheWBinvAll
-	{ 0xD8779AC6, UNKNOWNNID, }, // sceKernelIcacheClearAll
+	{ 0xD8779AC6, 0x8D46E9DF, }, // sceKernelIcacheClearAll
 	{ 0x99A695F0, UNKNOWNNID, }, // sceKernelRegisterLibrary
 	{ 0x5873A31F, UNKNOWNNID, }, // sceKernelRegisterLibraryForUser
 	{ 0x0B464512, UNKNOWNNID, }, // sceKernelReleaseLibrary

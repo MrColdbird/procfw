@@ -31,11 +31,11 @@ void isoClose(void);
 int isoGetSize(void);
 
 //get file information
-u32 isoGetFileInfo(char * str, u32 * filesize);
+int isoGetFileInfo(char * str, u32 * filesize, u32 *lba);
 
-int isoReadSectors(u32 sector, u8 *buf, int count);
+int isoReadSectors(u32 sector, void *buf, int count);
 
 //read raw data from iso
-int isoReadRawData(u8 *buffer, u32 lba, u32 offset, u32 size);
+int isoRead(void *buffer, u32 lba, int offset, u32 size);
 
 #endif

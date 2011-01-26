@@ -22,7 +22,9 @@ typedef struct _VirtualPBP {
 #define MAX_VPBP 128
 #define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))
 #define ISOEBOOT(file) (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0)
-#define CACHE_PATH "ms0:/PSP/SYSTEM/ISOCACHE.BIN"
+
+#define PSP_CACHE_PATH "ms0:/PSP/SYSTEM/ISOCACHE.BIN"
+#define PSPGO_CACHE_PATH "ef0:/PSP/SYSTEM/ISOCACHE.BIN"
 
 int vpbp_init(void);
 SceUID vpbp_open(const char * file, int flags, SceMode mode);

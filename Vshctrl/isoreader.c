@@ -24,7 +24,7 @@ static void *g_ciso_dec_buf = NULL;
 static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4];
 static int g_ciso_dec_buf_offset = -1;
 static CISOHeader g_ciso_h;
-int g_CISO_cur_idx = 0;
+static int g_CISO_cur_idx = -1;
 
 static const char * g_filename = NULL;
 static char g_sector_buffer[SECTOR_SIZE] __attribute__((aligned(64)));;
@@ -267,6 +267,10 @@ int isoOpen(const char *path)
 				return -6;
 			}
 		}
+
+		memset(g_CISO_idx_cache, 0, sizeof(g_CISO_idx_cache));
+		g_ciso_dec_buf_offset = -1;
+		g_CISO_cur_idx = -1;
 	} else {
 		g_total_sectors = isoGetSize();
 	}

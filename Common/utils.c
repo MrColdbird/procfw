@@ -34,6 +34,12 @@ void hexdump(void *addr, int size)
 		return;
 	}
 
+	if (size == 0) {
+		printk("hexdump: size 0\n");
+		
+		return;
+	}
+
 	printk("Address:   ");
 	i=0; for(;i<16; ++i) {
 		if (i == 8)
@@ -46,13 +52,7 @@ void hexdump(void *addr, int size)
 		printk("%1X", i);
 	}
 
-	printk("\n");
-
-	i=0; for(;i<10+1+16*3+2+16; ++i) {
-		printk("-");
-	}
-
-	printk("\n");
+	printk("\n-----------------------------------------------------------------------------\n");
 
 	i=0;
 	printk("0x%08X ", i);
@@ -140,4 +140,26 @@ void fill_vram(u32 color)
 
 	while (p < (u32*)0x44200000) 
 		*p++ = color;
+}
+
+int get_device_name(char *device, int size, const char* path)
+{
+	const char *p;
+
+	if (path == NULL || device == NULL) {
+		return -1;
+	}
+
+	p = strchr(path, '/');
+
+	if (p == NULL) {
+		return -2;
+	}
+
+	strncpy(device, path, MIN(size, p-path+1));
+	device[MIN(size-1, p-path)] = '\0';
+
+	printk("%s: device %s\n", __func__, device);
+
+	return 0;
 }

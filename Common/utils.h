@@ -19,6 +19,8 @@ enum {
 
 #define NELEMS(a) (sizeof(a) / sizeof(a[0]))
 
+#define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))
+
 int sceKernelGetModel(void);
 
 void sync_cache(void);
@@ -39,5 +41,7 @@ static inline void hexdump(void *addr, int size)
 {
 }
 #endif
+
+int get_device_name(char *device, int size, const char* path);
 
 #endif

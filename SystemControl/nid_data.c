@@ -87,7 +87,7 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0xB4D6FECC, UNKNOWNNID, }, // sceKernelApplyElfRelSection
 	{ 0x54AB2675, UNKNOWNNID, }, // sceKernelApplyPspRelSection
 	{ 0x2952F5AC, UNKNOWNNID, }, // sceKernelDcacheWBinvAll
-	{ 0xD8779AC6, 0x8D46E9DF, }, // sceKernelIcacheClearAll
+	{ 0xD8779AC6, UNKNOWNNID, }, // sceKernelIcacheClearAll not exported any more
 	{ 0x99A695F0, UNKNOWNNID, }, // sceKernelRegisterLibrary
 	{ 0x5873A31F, UNKNOWNNID, }, // sceKernelRegisterLibraryForUser
 	{ 0x0B464512, UNKNOWNNID, }, // sceKernelReleaseLibrary

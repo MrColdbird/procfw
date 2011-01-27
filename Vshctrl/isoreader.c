@@ -205,7 +205,7 @@ static void normalizeName(char *filename)
 	}
 }
 
-static int findFile(char * file, u32 lba, u32 dir_size, u32 is_dir, Iso9660DirectoryRecord *result_record)
+static int findFile(const char * file, u32 lba, u32 dir_size, u32 is_dir, Iso9660DirectoryRecord *result_record)
 {
 	u32 pos;
 	int ret;
@@ -454,8 +454,6 @@ void isoClose(void)
 
 int isoGetFileInfo(char * path, u32 *filesize, u32 *lba)
 {
-	u32 filenamepos = 0;
-	u8 tempdata[12];
 	int ret;
 	Iso9660DirectoryRecord rec;
 

@@ -38,14 +38,14 @@ typedef struct _PBPEntry {
 } PBPEntry;
 
 static PBPEntry pbp_entries[8] = {
-	{ 1, "PARAM.SFO" },
-	{ 1, "ICON0.PNG" },
-	{ 1, "ICON1.PMF" },
-	{ 1, "PIC0.PNG"  },
-	{ 1, "PIC1.PNG"  },
-	{ 1, "SND0.AT3"  },
-	{ 0, "DATA.PSP"  }, // never enable it
-	{ 0, "DATA.PSAR" }, // never enable it
+	{ 1, "/PSP_GAME/PARAM.SFO" },
+	{ 1, "/PSP_GAME/ICON0.PNG" },
+	{ 1, "/PSP_GAME/ICON1.PMF" },
+	{ 1, "/PSP_GAME/PIC0.PNG"  },
+	{ 1, "/PSP_GAME/PIC1.PNG"  },
+	{ 1, "/PSP_GAME/SND0.AT3"  },
+	{ 0, "DATA.PSP"  }, // placeholder, never enable or delete it
+	{ 0, "DATA.PSAR" }, // placeholder, never enable or delete it
 };
 
 static u8 virtualsfo[408] = {

@@ -7,8 +7,10 @@
 #include "systemctrl_private.h"
 
 #define MAX_RETRIES 8
+#define MAX_DIR_LEVEL 8
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000
+#define ISO_STANDARD_ID "CD001"
 
 typedef struct _CISOHeader {
 	u8 magic[4];			/* +00 : 'C','I','S','O'                           */
@@ -31,6 +33,8 @@ static char g_sector_buffer[SECTOR_SIZE] __attribute__((aligned(64)));;
 static SceUID g_isofd = -1;
 static u32 g_total_sectors = 0;
 static u32 g_is_compressed = 0;
+
+static Iso9660DirectoryRecord g_root_record;
 
 static inline u32 isoPos2LBA(u32 pos)
 {
@@ -75,7 +79,7 @@ static int reOpen(void)
 	return fd;
 }
 
-static int ReadRawData(void* addr, u32 size, int offset)
+static int readRawData(void* addr, u32 size, int offset)
 {
 	int ret, i;
 
@@ -106,7 +110,7 @@ static int ReadRawData(void* addr, u32 size, int offset)
 	return ret;
 }
 
-static int CSOReadSector(int sector, void *addr)
+static int readSectorCompressed(int sector, void *addr)
 {
 	int ret;
 	int n_sector;
@@ -117,7 +121,7 @@ static int CSOReadSector(int sector, void *addr)
 
 	// not within sector idx cache?
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
-		ret = ReadRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
+		ret = readRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
 
 		if (ret < 0) {
 			return ret;
@@ -131,14 +135,14 @@ static int CSOReadSector(int sector, void *addr)
 
 	// is uncompressed data?
 	if (g_CISO_idx_cache[n_sector] & 0x80000000) {
-		return ReadRawData(addr, SECTOR_SIZE, offset);
+		return readRawData(addr, SECTOR_SIZE, offset);
 	}
 
 	sector++;
 	n_sector = sector - g_CISO_cur_idx;
 
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
-		ret = ReadRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
+		ret = readRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
 
 		if (ret < 0) {
 			return ret;
@@ -155,7 +159,7 @@ static int CSOReadSector(int sector, void *addr)
 		size = SECTOR_SIZE;
 
 	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
-		ret = ReadRawData(PTR_ALIGN_64(g_ciso_dec_buf), CISO_DEC_BUFFER_SIZE, offset);
+		ret = readRawData(PTR_ALIGN_64(g_ciso_dec_buf), CISO_DEC_BUFFER_SIZE, offset);
 
 		if (ret < 0) {
 			g_ciso_dec_buf_offset = 0xFFF00000;
@@ -175,54 +179,175 @@ static int CSOReadSector(int sector, void *addr)
 	return ret;
 }
 
-static int ReadSector(u32 sector, void *buf)
+static int readSector(u32 sector, void *buf)
 {
 	int ret;
 	u32 pos;
 
 	if (g_is_compressed) {
-		ret = CSOReadSector(sector, buf);
+		ret = readSectorCompressed(sector, buf);
 	} else {
 		pos = isoLBA2Pos(sector, 0);
-		ret = ReadRawData(buf, SECTOR_SIZE, pos);
+		ret = readRawData(buf, SECTOR_SIZE, pos);
 	}
 
 	return ret;
 }
 
-static int findName(char * str, SceUID iso, u32 *namepos)
+static void normalizeName(char *filename)
 {
-	u32 read = 0;
-	u32 lba_cur = 0x16;
+	char *p;
+   
+	p = strstr(filename, ";1");
+
+	if (p) {
+		*p = '\0';
+	}
+}
+
+static int findFile(char * file, u32 lba, u32 dir_size, u32 is_dir, Iso9660DirectoryRecord *result_record)
+{
+	u32 pos;
 	int ret;
+	Iso9660DirectoryRecord *rec;
+	char name[32];
+	int re;
 
-	//keep scanning
-	while (read < 1000) {
-		ret = ReadSector(lba_cur, g_sector_buffer);
+	pos = isoLBA2Pos(lba, 0);
+	re = lba = 0;
 
-		if (ret < 0) {
-			break;
+	while ( re < dir_size ) {
+		if (isoPos2LBA(pos) != lba) {
+			lba = isoPos2LBA(pos);
+			ret = readSector(lba, g_sector_buffer);
+
+			if (ret < 0) {
+				return ret;
+			}
 		}
 
-		//iterate buffer
-		int i = 0; for(; i < sizeof(g_sector_buffer); i++) {
-			//matching string found
-			if (i + strlen(str) <= sizeof(g_sector_buffer) && strncmp(g_sector_buffer + i, str, strlen(str)) == 0) break;
+		rec = (Iso9660DirectoryRecord*)&g_sector_buffer[isoPos2OffsetInSector(pos)];
+
+		if(rec->len_dr == 0) {
+			u32 remaining;
+
+			remaining = isoPos2RestSize(pos);
+			pos += remaining;
+			re += remaining;
+			continue;
+		}
+		
+		if(rec->len_dr < rec->len_fi + sizeof(*rec)) {
+			printk("%s: Corrupt directory record found in %s, LBA %d\n", __func__, g_filename, lba);
+
+			return -12;
 		}
 
-		//match found
-		if (i < sizeof(g_sector_buffer)) {
-			*namepos = read * sizeof(g_sector_buffer) + i;
-
-			return 0;
+		if(rec->len_fi > 32) {
+			return -11;
 		}
 
-		//increase read cycle
-		read++;
-		lba_cur++;
+		if(rec->len_fi == 1 && rec->fi == 0) {
+			if (0 == strcmp(file, ".")) {
+				memcpy(result_record, rec, sizeof(*result_record));
+
+				return 0;
+			}
+		} else if(rec->len_fi == 1 && rec->fi == 1) {
+			if (0 == strcmp(file, "..")) {
+				// didn't support ..
+				return -19;
+			}
+		} else {
+			memset(name, 0, sizeof(name));
+			memcpy(name, &rec->fi, rec->len_fi);
+			normalizeName(name);
+
+			if (0 == strcmp(name, file)) {
+				if (is_dir) {
+					if(!rec->fileFlags & ISO9660_FILEFLAGS_DIR) {
+						return -14;
+					}
+				}
+
+				memcpy(result_record, rec, sizeof(*result_record));
+
+				return 0;
+			}
+		}
+
+		pos += rec->len_dr;
+		re += rec->len_dr;
 	}
 
-	return -8;
+	return -18;
+}
+
+static int findPath(const char *path, Iso9660DirectoryRecord *result_record)
+{
+	int level = 0, ret;
+	const char *cur_path, *next;
+	u32 lba, dir_size;
+	char cur_dir[32];
+
+	if (result_record == NULL) {
+		return -17;
+	}
+
+	memset(result_record, 0, sizeof(*result_record));
+	lba = g_root_record.lsbStart;
+	dir_size = g_root_record.lsbDataLength;
+
+	cur_path = path;
+
+	while(*cur_path == '/') {
+		cur_path++;
+	}
+
+	next = strchr(cur_path, '/');
+
+	while (next != NULL) {
+		if (next-cur_path >= sizeof(cur_dir)) {
+			return -15;
+		}
+
+		memset(cur_dir, 0, sizeof(cur_dir));
+		strncpy(cur_dir, cur_path, next-cur_path);
+		cur_dir[next-cur_path] = '\0';
+
+		if (0 == strcmp(cur_dir, ".")) {
+		} else if (0 == strcmp(cur_dir, "..")) {
+			level--;
+		} else {
+			level++;
+		}
+
+		if(level > MAX_DIR_LEVEL) {
+			return -16;
+		}
+
+		ret = findFile(cur_dir, lba, dir_size, 1, result_record);
+
+		if (ret < 0) {
+			return ret;
+		}
+
+		lba = result_record->lsbStart;
+		dir_size = result_record->lsbDataLength;
+
+		cur_path=next+1;
+
+		// skip unwant path separator
+		while(*cur_path == '/') {
+			cur_path++;
+		}
+		
+		next = strchr(cur_path, '/');
+	}
+
+	ret = findFile(cur_path, lba, dir_size, 0, result_record);
+
+	return ret;
 }
 
 int isoOpen(const char *path)
@@ -237,7 +362,8 @@ int isoOpen(const char *path)
 
 	if (reOpen() < 0) {
 		printk("%s: open failed %s -> 0x%08X\n", __func__, g_filename, g_isofd);
-		return -2;
+		ret = -2;
+		goto error;
 	}
 
 	sceIoLseek32(g_isofd, 0, PSP_SEEK_SET);
@@ -245,7 +371,8 @@ int isoOpen(const char *path)
 	ret = sceIoRead(g_isofd, &g_ciso_h, sizeof(g_ciso_h));
 
 	if (ret != sizeof(g_ciso_h)) {
-		return -9;
+		ret = -9;
+		goto error;
 	}
 
 	if (*(u32*)g_ciso_h.magic == 0x4F534943 && g_ciso_h.block_size == SECTOR_SIZE) {
@@ -263,8 +390,8 @@ int isoOpen(const char *path)
 
 			if (g_ciso_dec_buf == NULL) {
 				printk("oe_malloc -> 0x%08x\n", (u32)g_ciso_dec_buf);
-
-				return -6;
+				ret = -6;
+				goto error;
 			}
 		}
 
@@ -275,7 +402,30 @@ int isoOpen(const char *path)
 		g_total_sectors = isoGetSize();
 	}
 
+	ret = readSector(16, g_sector_buffer);
+
+	if (ret < 0) {
+		ret = -7;
+		goto error;
+	}
+
+	if (memcmp(&g_sector_buffer[1], ISO_STANDARD_ID, sizeof(ISO_STANDARD_ID)-1)) {
+		printk("%s: vol descriptor not found\n", __func__);
+		ret = -10;
+
+		goto error;
+	}
+
+	memcpy(&g_root_record, &g_sector_buffer[0x9C], sizeof(g_root_record));
+
 	return 0;
+
+error:
+	if (g_isofd >= 0) {
+		isoClose();
+	}
+
+	return ret;
 }
 
 int isoGetSize(void)
@@ -302,47 +452,26 @@ void isoClose(void)
 	}
 }
 
-//get file information
 int isoGetFileInfo(char * path, u32 *filesize, u32 *lba)
 {
 	u32 filenamepos = 0;
 	u8 tempdata[12];
 	int ret;
+	Iso9660DirectoryRecord rec;
 
-	ret = findName(path, g_isofd, &filenamepos);
+	ret = findPath(path, &rec);
 
-	if (ret < 0 || filenamepos == 0) {
-		printk("%s: cannot find %s\n", __func__, path);
-		return -5;
+	if (ret < 0) {
+		return ret;
 	}
 
-	ret = isoRead(tempdata, 0x16, filenamepos-31, sizeof(tempdata));
+	*lba = rec.lsbStart;
 
-	if (ret != sizeof(tempdata)) {
-		return -6;
-	}
-
-	memcpy(lba, &tempdata[0], sizeof(*lba));
-
-	//filesize requested
-	if (filesize) {
-		memcpy(filesize, &tempdata[8], sizeof(*filesize));
+	if (filesize != NULL) {
+		*filesize = rec.lsbDataLength;
 	}
 
 	return 0;
-}
-
-int isoReadSectors(u32 sector, void *buf, int count)
-{
-	int ret, i; for(i=0; i<count; ++i) {
-		ret = ReadSector(sector+i, buf + i * SECTOR_SIZE);
-
-		if (ret < 0) {
-			return i;
-		}
-	}
-
-	return count;
 }
 
 int isoRead(void *buffer, u32 lba, int offset, u32 size)
@@ -357,7 +486,7 @@ int isoRead(void *buffer, u32 lba, int offset, u32 size)
 	copied = 0;
 
 	while(remaining > 0) {
-		ret = ReadSector(isoPos2LBA(pos), g_sector_buffer);
+		ret = readSector(isoPos2LBA(pos), g_sector_buffer);
 
 		if (ret < 0) {
 			break;

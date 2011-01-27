@@ -788,6 +788,25 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 	return ret;
 }
 
+static int has_prometheus_module(VirtualPBP *vpbp)
+{
+	int ret;
+	u32 size, lba;
+	
+	ret = isoOpen(vpbp->name);
+
+	if (ret < 0) {
+		return 0;
+	}
+
+	ret = isoGetFileInfo("/PSP_GAME/SYSDIR/EBOOT.OLD", &size, &lba);
+	ret = (ret >= 0) ? 1 : 0;
+
+	isoClose();
+
+	return ret;
+}
+
 int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 {
 	int ret;
@@ -817,7 +836,14 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	//reset and configure reboot parameter
 	memset(param, 0, sizeof(param));
 	param->size = sizeof(param);
-	param->argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+
+	if (has_prometheus_module(vpbp)) {
+		printk("%s: prometheus module detected, use EBOOT.OLD\n", __func__);
+		param->argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.OLD";
+	} else {
+		param->argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+	}
+
 	param->args = strlen(param->argp) + 1;
 	param->key = "game";
 

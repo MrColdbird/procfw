@@ -1,5 +1,12 @@
 #!/usr/bin/python
+
+class FakeTime:
+	def time(self):
+		return 1225856967.109
+
 import sys, os, struct, gzip, hashlib
+
+gzip.time = FakeTime()
 
 def binary_replace(data, newdata, offset):
 	return data[0:offset] + newdata + data[offset+len(newdata):]

@@ -292,8 +292,6 @@ void patch_sceMesgLed()
 		u32 intr = MAKE_CALL(myMesgLed_sub_000000e0_wrapper);
 		u32 text_addr = mod->text_addr;
 
-		printk("model: 0x%08X\n", psp_model+1);
-
 		if (psp_model == PSP_GO) {
 			_sw(intr, text_addr+0x3614);
 			_sw(intr, text_addr+0x38AC);

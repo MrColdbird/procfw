@@ -367,7 +367,14 @@ static int build_vpbp(VirtualPBP *vpbp)
 			ret = isoGetFileInfo(pbp_entries[i].name, &sec->size, &sec->lba);
 
 			if (ret < 0) {
-				continue;
+				if (i == 0) {
+					// no PARAM.SFO?
+					// then it's a bad ISO
+
+					return -36;
+				} else {
+					continue;
+				}
 			}
 
 			if (i == 0) {
@@ -453,7 +460,11 @@ static int rebuild_vpbps(const char *dirname)
 			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
 
 			if (ret < 0) {
-				build_vpbp(vpbp);
+				ret = build_vpbp(vpbp);
+
+				if (ret < 0) {
+					continue;
+				}
 			}
 			
 			i++;

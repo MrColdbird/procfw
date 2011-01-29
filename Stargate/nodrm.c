@@ -6,6 +6,7 @@
 #include <string.h>
 #include "printk.h"
 #include "systemctrl.h"
+#include "systemctrl_private.h"
 #include "strsafe.h"
 #include "libs.h"
 #include "utils.h"

@@ -201,7 +201,7 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	//result
 	int result = 0;
 
-	printk("%s: %s\n", __func__, file);
+	printk("%s: %s %s\n", __func__, file, param->key);
 	
 	//virtual iso eboot detected
 	if (ISOEBOOT(file)) {

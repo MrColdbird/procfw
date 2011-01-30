@@ -21,9 +21,9 @@ all:
 	@rm -f ./Common/*.o
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
+	@rm -f ./Common/*.o
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@rm -f ./Common/*.o
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)

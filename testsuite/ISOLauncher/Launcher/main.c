@@ -17,36 +17,31 @@ struct PLoaderConf g_conf;
 void launch_game(void)
 {
 	struct SceKernelLoadExecVSHParam param;
-	SceSize args; 
-	void *argp;
-	char *eboot;
+	const char *loadexec_file;
 	int ret, apitype;
 
-	eboot = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
-//	eboot = "disc0:/PSP_GAME/SYSDIR/BOOT.BIN";
-	
 	sctrlSESetUmdFile(g_conf.iso_path);
 	sctrlSESetBootConfFileIndex(g_conf.iso_mode);
 
 	//full memory doesn't hurt on isos
-	sctrlHENSetMemory(48, 0);
+//	sctrlHENSetMemory(48, 0);
 
-	args = sizeof(eboot);
-	argp = eboot;
 	memset(&param, 0, sizeof(param));
 	param.size = sizeof(param);
-	param.args = args;
-	param.argp = argp;
-	param.key = "game";
-
+	param.argp = "disc0:/PSP_GAME/SYSDIR/EBOOT.BIN";
+	param.args = strlen(param.argp) + 1;
+	
 	if (g_conf.psp_model == PSP_GO) {
+		param.key = "umdemu";
 		apitype = 0x125;
 		strncpy(g_conf.iso_path, "ef0", sizeof("ef0")-1);
+		loadexec_file = g_conf.iso_path;
 	} else {
+		param.key = "game";
 		apitype = 0x120;
 	}
 
-	ret = sctrlKernelLoadExecVSHWithApitype(apitype, eboot, &param);
+	ret = sctrlKernelLoadExecVSHWithApitype(apitype, loadexec_file, &param);
 	printk("sctrlKernelLoadExecVSHWithApitype 0x%x returns 0x%08X\n", apitype, ret);
 }
 

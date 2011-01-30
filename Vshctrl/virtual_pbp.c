@@ -823,6 +823,8 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	int ret;
 	SEConfig config;
 	VirtualPBP *vpbp;
+	int apitype;
+	const char *loadexec_file;
 
 	lock();
 	vpbp = get_vpbp_by_path(file);
@@ -840,8 +842,9 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	//set iso mode for reboot
 	sctrlSESetBootConfFileIndex(config.umdmode);
 
-	//full memory doesn't hurt on isos
-	sctrlHENSetMemory(48, 0);
+	//high memory disabled because it hurts pspgo resuming interrupted game
+//	sctrlHENSetMemory(48, 0);
+
 	printk("%s: ISO %s, UMD mode %d\n", __func__, vpbp->name, config.umdmode);
 	
 	//reset and configure reboot parameter
@@ -856,14 +859,19 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	}
 
 	param->args = strlen(param->argp) + 1;
-	param->key = "game";
 
-	//fix apitypes
-	int apitype = 0x120;
-	if (sceKernelGetModel() == PSP_GO) apitype = 0x125;
+	if (sceKernelGetModel() == PSP_GO) {
+		param->key = "umdemu";
+	   	apitype = 0x125;
+		loadexec_file = vpbp->name;
+	} else {
+		param->key = "game";
+		apitype = 0x120;
+		loadexec_file = param->argp;
+	}
 
 	//start game image
-	return sctrlKernelLoadExecVSHWithApitype(apitype, param->argp, param);
+	return sctrlKernelLoadExecVSHWithApitype(apitype, loadexec_file, param);
 
 	unlock();
 

@@ -20,6 +20,7 @@ extern int LoadExecForKernel_3D805DE6(const char *file, struct SceKernelLoadExec
 extern int LoadExecForKernel_BAEB4B89(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_8EF38192(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_D35D6403(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int *InitForKernel_040C934B(void);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -329,4 +330,16 @@ int sctrlHENSetMemory(u32 p2, u32 p8)
 	}
 
 	return 0;
+}
+
+int sctrlKernelSetInitApitype(int apitype)
+{
+	int prev_apitype;
+	int *p;
+	
+	p = InitForKernel_040C934B();
+	prev_apitype = *p;
+	*p = apitype;
+
+	return prev_apitype;
 }

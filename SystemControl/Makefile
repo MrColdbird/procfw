@@ -35,7 +35,8 @@ IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/SysMemForKernel.o \
 		  ../Imports/ModuleMgrForKernel.o \
 		  ../Imports/InterruptManagerForKernel.o \
-		  ../Imports/sceResmgr_driver.o
+		  ../Imports/sceResmgr_driver.o \
+		  ../Imports/InitForKernel.o
 
 OBJS += $(IMPORTS)
 

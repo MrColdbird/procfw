@@ -33,3 +33,16 @@ void sctrlSESetBootConfFileIndex(int index)
 {
 	rebootex_conf.iso_mode = index;
 }
+
+int sctrlKernelSetUMDEmuFile(const char *iso)
+{
+	SceModule2 *modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+
+	if (modmgr == NULL) {
+		return -1;
+	}
+
+	*(const char**)(modmgr->text_addr+0x99B8) = iso;
+
+	return 0;
+}

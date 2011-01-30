@@ -46,6 +46,7 @@ PSP_EXPORT_FUNC(sctrlSESetConfigEx)
 PSP_EXPORT_FUNC(sctrlSEGetConfigEx)
 PSP_EXPORT_FUNC(sctrlSESetConfig)
 PSP_EXPORT_FUNC(sctrlSEGetConfig)
+PSP_EXPORT_FUNC(sctrlKernelSetInitApitype)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlForKernel, 0, 0x0001)
@@ -84,6 +85,7 @@ PSP_EXPORT_FUNC(sctrlSESetConfigEx)
 PSP_EXPORT_FUNC(sctrlSEGetConfigEx)
 PSP_EXPORT_FUNC(sctrlSESetConfig)
 PSP_EXPORT_FUNC(sctrlSEGetConfig)
+PSP_EXPORT_FUNC(sctrlKernelSetInitApitype)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x4001)

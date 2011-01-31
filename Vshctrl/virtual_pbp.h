@@ -17,7 +17,7 @@ typedef struct _VirtualPBP {
 	ScePspDateTime mtime;
 } VirtualPBP;
 
-#define ISO_ID "ISOGAME"
+#define ISO_ID "_ISOGAME_"
 #define CACHE_MAX_SIZE 32
 #define MAGIC_ISOCACHE (0xC01DB15D+1)
 #define MAGIC_VPBP_FD 0x8000

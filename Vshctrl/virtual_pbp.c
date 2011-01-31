@@ -312,17 +312,40 @@ static int save_cache(void)
 	return 0;
 }
 
+static int get_iso_file_size(const char *path, u32 *file_size)
+{
+	int ret;
+	SceIoStat stat;
+
+	ret = sceIoGetstat(path, &stat);
+
+	if (ret < 0)
+		return ret;
+
+	*file_size = stat.st_size;
+
+	return 0;
+}
+
 static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
 {
-	int i;
+	int i, ret;
+	u32 file_size;
 
 	if (g_caches == NULL) {
 		return -34;
 	}
 
+	ret = get_iso_file_size(file, &file_size);
+
+	if(ret < 0) {
+		return -37;
+	}
+
 	for(i=0; i<g_caches_cnt; ++i) {
 		if(g_caches[i].enabled && 0 == strcmp(g_caches[i].name, file)) {
-			if (memcmp(&g_caches[i].mtime, mtime, sizeof(*mtime)) == 0) {
+			if (file_size == g_caches[i].iso_total_size &&
+				   	memcmp(&g_caches[i].mtime, mtime, sizeof(*mtime)) == 0) {
 				memcpy(pbp, &g_caches[i], sizeof(*pbp));
 				g_referenced[i] = 1;
 
@@ -387,7 +410,7 @@ static int build_vpbp(VirtualPBP *vpbp)
 	}
 
 	vpbp->pbp_total_size = vpbp->header[9];
-	vpbp->iso_total_size = isoGetTotalSectorSize() * SECTOR_SIZE;
+	get_iso_file_size(vpbp->name, &vpbp->iso_total_size);
 	ret = add_cache(vpbp);
 	printk("%s: add_cache -> %d\n", __func__, ret);
 	isoClose();

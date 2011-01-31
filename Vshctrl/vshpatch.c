@@ -15,6 +15,11 @@
 #include "main.h"
 #include "virtual_pbp.h"
 
+typedef struct _HookUserFunctions {
+	u32 nid;
+	void *func;
+} HookUserFunctions;
+
 static STMOD_HANDLER previous;
 SEConfig conf;
 
@@ -120,24 +125,34 @@ static void patch_vsh_module(SceModule2 * mod)
 
 static void hook_iso_file_io(SceModule2 * mod)
 {
-	//hook file io
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x109F50BC, gameopen, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x6A638D83, gameread, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x810C4BC3, gameclose, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x27EB27B8, gamelseek, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xACE946E8, gamegetstat, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xF27A9C51, gameremove, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x1117C65F, gamermdir, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x779103A0, gamerename, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xB8A740F4, gamechstat, 1);
+	HookUserFunctions hook_list[] = {
+		{ 0x109F50BC, gameopen,    },
+		{ 0x6A638D83, gameread,    },
+		{ 0x810C4BC3, gameclose,   },
+		{ 0x27EB27B8, gamelseek,   },
+		{ 0xACE946E8, gamegetstat, },
+		{ 0xF27A9C51, gameremove,  },
+		{ 0x1117C65F, gamermdir,   },
+		{ 0x779103A0, gamerename,  },
+		{ 0xB8A740F4, gamechstat,  },
+	};
+
+	int i; for(i=0; i<NELEMS(hook_list); ++i) {
+		hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", hook_list[i].nid, hook_list[i].func, 1);
+	}
 }
 
 static void hook_iso_directory_io(SceModule2 * mod)
 {
-	//hook directory io
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xB29DDF9C, gamedopen, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xE3EB004C, gamedread, 1);
-	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xEB092469, gamedclose, 1);
+	HookUserFunctions hook_list[] = {
+		{ 0xB29DDF9C, gamedopen  }, 
+		{ 0xE3EB004C, gamedread  }, 
+		{ 0xEB092469, gamedclose },
+	};
+
+	int i; for(i=0; i<NELEMS(hook_list); ++i) {
+		hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", hook_list[i].nid, hook_list[i].func, 1);
+	}
 }
 
 int vshpatch_init(void)

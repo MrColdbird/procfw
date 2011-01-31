@@ -11,9 +11,8 @@
 void patch_sceMediaSync(u32 scemediasync_text_addr)
 {
 	// patch MsCheckMedia
+	// MsCheckMedia: mediasync used it to check EBOOT.PBP
+	// Let it return 1 always
 	_sw(0x03E00008, scemediasync_text_addr+0x744);
 	_sw(0x24020001, scemediasync_text_addr+0x748);
-
-	// patch InitForKernel_2213275D check
-	_sw(0, scemediasync_text_addr+0x00000D50);
 }

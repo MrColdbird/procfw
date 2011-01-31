@@ -154,15 +154,6 @@ int gamedclose(SceUID fd)
    
 	if(fd == MAGIC_DFD_FOR_DELETE || fd == MAGIC_DFD_FOR_DELETE_2) {
 		result = 0;
-
-		if(fd == MAGIC_DFD_FOR_DELETE) {
-			g_iso_dir[0] = '\0';
-		}
-
-		if(fd == MAGIC_DFD_FOR_DELETE_2) {
-			g_temp_delete_dir[0] = '\0';
-		}
-
 		g_delete_eboot_injected = 0;
 		printk("%s:<virtual> 0x%08X -> 0x%08X\n", __func__, fd, result);
 		
@@ -183,7 +174,7 @@ SceUID gameopen(const char * file, int flags, SceMode mode)
 	SceUID result;
    
 	if (is_iso_eboot(file)) {
-		printk("%s: %s", __func__, file);
+		printk("%s:<virtual> %s", __func__, file);
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_open(file, flags, mode);
 		pspSdkSetK1(k1);
@@ -256,7 +247,7 @@ int gamegetstat(const char * file, SceIoStat * stat)
    
 	//virtual iso eboot detected
 	if (is_iso_eboot(file)) {
-		printk("%s: %s", __func__, file);
+		printk("%s:<virtual> %s", __func__, file);
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_getstat(file, stat);
 		pspSdkSetK1(k1);
@@ -273,7 +264,6 @@ int gameremove(const char * file)
 {
 	int result;
    
-	// file under /PSP/GAME/_DEL_XXXXXXXX
 	if(0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
 		result = 0;
 		printk("%s:<virtual> %s -> 0x%08X\n", __func__, file, result);
@@ -292,13 +282,16 @@ int gamermdir(const char * path)
 {
 	int result;
    
-	if (is_iso_dir(path)) {
+	if(0 == strcmp(path, g_temp_delete_dir)) {
+		strcat(g_iso_dir, "/EBOOT.PBP");
 		u32 k1 = pspSdkSetK1(0);
-		result = vpbp_remove(path);
+		result = vpbp_remove(g_iso_dir);
 		pspSdkSetK1(k1);
 		printk("%s:<virtual> %s -> 0x%08X\n", __func__, path, result);
+		g_iso_dir[0] = '\0';
+		g_temp_delete_dir[0] = '\0';
 
-		return 0;
+		return result;
 	}
 
 	result = sceIoRmdir(path);
@@ -339,6 +332,8 @@ int gamerename(const char *oldname, const char *newfile)
 
 	if(is_iso_dir(oldname)) {
 		result = 0;
+		strncpy(g_iso_dir, oldname, sizeof(g_iso_dir));
+		g_iso_dir[sizeof(g_iso_dir)-1] = '\0';
 		strncpy(g_temp_delete_dir, newfile, sizeof(g_temp_delete_dir));
 		g_temp_delete_dir[sizeof(g_temp_delete_dir)-1] = '\0';
 
@@ -356,6 +351,23 @@ int gamerename(const char *oldname, const char *newfile)
 
 	result = sceIoRename(oldname, newfile);
 	printk("%s: %s %s -> 0x%08X\n", __func__, oldname, newfile, result);
+
+	return result;
+}
+
+int gamechstat(const char *file, SceIoStat *stat, int bits)
+{
+	int result;
+
+	if(0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
+		result = 0;
+		printk("%s:<virtual> %s -> 0x%08X\n", __func__, file, result);
+
+		return 0;
+	}
+
+	result = gamechstat(file, stat, bits);
+	printk("%s: %s -> 0x%08X\n", __func__, file, result);
 
 	return result;
 }

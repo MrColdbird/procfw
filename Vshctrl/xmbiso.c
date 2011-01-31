@@ -14,13 +14,58 @@
 #define MAGIC_DFD_FOR_DELETE 0x9000
 #define MAGIC_DFD_FOR_DELETE_2 0x9001
 
-//virtual eboot detect macro
-#define ISOEBOOT(file) (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0)
-#define ISODIR(file) (strlen(file) == 29 && strncmp(file+4, "/PSP/GAME/ISOGAME", sizeof("/PSP/GAME/ISOGAME")-1) == 0)
-
 static char g_iso_dir[128];
 static char g_temp_delete_dir[128];
 static int g_delete_eboot_injected = 0;
+
+static inline int is_iso_dir(const char *path)
+{
+	const char *p;
+	int i;
+
+	if (path == NULL)
+		return 0;
+
+	p = strchr(path, '/');
+
+	if (p == NULL)
+		return 0;
+
+	if (p <= path + 1 || p[-1] != ':')
+		return 0;
+
+	if (0 != strncmp(p, "/PSP/GAME/" ISO_ID, sizeof("/PSP/GAME/" ISO_ID)-1))
+		return 0;
+
+	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
+
+	for(i=0; i<8; ++i) {
+		if(*p < '0' || *p > '9')
+			return 0;
+
+		p++;
+	}
+
+	return 1;
+}
+
+static inline int is_iso_eboot(const char* path)
+{
+	const char *p;
+
+	if (0 == is_iso_dir(path))
+		return 0;
+
+	p = strrchr(path, '/');
+
+	if (p == NULL)
+		return 0;
+
+	if (0 != strcmp(p, "/EBOOT.PBP"))
+		return 0;
+
+	return 1;
+}
 
 //open directory
 SceUID gamedopen(const char * dirname)
@@ -28,7 +73,7 @@ SceUID gamedopen(const char * dirname)
 	SceUID result;
 	u32 k1;
 
-	if(ISODIR(dirname)) {
+	if(is_iso_dir(dirname)) {
 		result = MAGIC_DFD_FOR_DELETE;
 		g_delete_eboot_injected = 0;
 		strncpy(g_iso_dir, dirname, sizeof(g_iso_dir));
@@ -129,7 +174,7 @@ SceUID gameopen(const char * file, int flags, SceMode mode)
 	//forward to firmware
 	SceUID result;
    
-	if (ISOEBOOT(file)) {
+	if (is_iso_eboot(file)) {
 		printk("%s: %s", __func__, file);
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_open(file, flags, mode);
@@ -202,7 +247,7 @@ int gamegetstat(const char * file, SceIoStat * stat)
 	int result;
    
 	//virtual iso eboot detected
-	if (ISOEBOOT(file)) {
+	if (is_iso_eboot(file)) {
 		printk("%s: %s", __func__, file);
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_getstat(file, stat);
@@ -239,7 +284,7 @@ int gamermdir(const char * path)
 {
 	int result;
    
-	if (ISODIR(path)) {
+	if (is_iso_dir(path)) {
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_remove(path);
 		pspSdkSetK1(k1);
@@ -263,7 +308,7 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	printk("%s: %s %s\n", __func__, file, param->key);
 	
 	//virtual iso eboot detected
-	if (ISOEBOOT(file)) {
+	if (is_iso_eboot(file)) {
 		u32 k1 = pspSdkSetK1(0);
 		result = vpbp_loadexec(file, param);
 		pspSdkSetK1(k1);
@@ -284,7 +329,7 @@ int gamerename(const char *oldname, const char *newfile)
 {
 	int result;
 
-	if(ISODIR(oldname)) {
+	if(is_iso_dir(oldname)) {
 		result = 0;
 		strncpy(g_temp_delete_dir, newfile, sizeof(g_temp_delete_dir));
 		g_temp_delete_dir[sizeof(g_temp_delete_dir)-1] = '\0';

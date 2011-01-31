@@ -140,13 +140,13 @@ static VirtualPBP* get_vpbp_by_path(const char *path)
 		return NULL;
 	}
 
-	p = strstr(path, "ISOGAME");
+	p = strstr(path, ISO_ID);
 
 	if (p == NULL) {
 		return NULL;
 	}
 
-	p += sizeof("ISOGAME")-1;
+	p += sizeof(ISO_ID)-1;
 	isoindex = strtoul(p, NULL, 16);
 
 	if (isoindex >= g_vpbps_cnt) {
@@ -469,8 +469,8 @@ static int rebuild_vpbps(const char *dirname)
 				}
 			}
 
-			printk("%s: ISO %s -> ISOGAME%08X added\n",
-				   	__func__, vpbp->name, i);
+			printk("%s: ISO %s -> %s%08X added\n",
+				   	__func__, vpbp->name, ISO_ID, i);
 			i++;
 		}
 	} while(nextdir > 0);
@@ -923,7 +923,7 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 		if (cur_idx < g_vpbps_cnt) {
 			dir->d_stat.st_mode = 0x11FF;
 			dir->d_stat.st_attr = 0x10;
-			sprintf(dir->d_name, "ISOGAME%08X", cur_idx);
+			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
 			result = 1;
 			cur_idx++;
 		}

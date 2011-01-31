@@ -18,7 +18,7 @@ static char g_iso_dir[128];
 static char g_temp_delete_dir[128];
 static int g_delete_eboot_injected = 0;
 
-static inline int is_iso_dir(const char *path)
+static int is_iso_dir(const char *path)
 {
 	const char *p;
 	int i;
@@ -46,20 +46,43 @@ static inline int is_iso_dir(const char *path)
 		p++;
 	}
 
+	while(*p != '\0' && *p == '/') {
+		p++;
+	}
+
+	if (*p != '\0')
+		return 0;
+
 	return 1;
 }
 
-static inline int is_iso_eboot(const char* path)
+static int is_iso_eboot(const char* path)
 {
 	const char *p;
+	int i;
 
-	if (0 == is_iso_dir(path))
+	if (path == NULL)
 		return 0;
 
-	p = strrchr(path, '/');
+	p = strchr(path, '/');
 
 	if (p == NULL)
 		return 0;
+
+	if (p <= path + 1 || p[-1] != ':')
+		return 0;
+
+	if (0 != strncmp(p, "/PSP/GAME/" ISO_ID, sizeof("/PSP/GAME/" ISO_ID)-1))
+		return 0;
+
+	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
+
+	for(i=0; i<8; ++i) {
+		if(*p < '0' || *p > '9')
+			return 0;
+
+		p++;
+	}
 
 	if (0 != strcmp(p, "/EBOOT.PBP"))
 		return 0;

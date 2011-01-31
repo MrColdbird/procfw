@@ -17,12 +17,12 @@ typedef struct _VirtualPBP {
 	ScePspDateTime mtime;
 } VirtualPBP;
 
+#define ISO_ID "ISOGAME"
 #define CACHE_MAX_SIZE 32
 #define MAGIC_ISOCACHE (0xC01DB15D+1)
 #define MAGIC_VPBP_FD 0x8000
 #define MAX_VPBP 128
 #define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))
-#define ISOEBOOT(file) (strlen(file) == 39 && strncmp(file + 14, "ISOGAME", 7) == 0 && strcmp(file + strlen(file) - 9, "EBOOT.PBP") == 0)
 
 #define PSP_CACHE_PATH "ms0:/PSP/SYSTEM/ISOCACHE.BIN"
 #define PSPGO_CACHE_PATH "ef0:/PSP/SYSTEM/ISOCACHE.BIN"

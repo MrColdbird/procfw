@@ -4,20 +4,6 @@
 #include <pspiofilemgr.h>
 #include <psploadexec_kernel.h>
 
-//------ structures ------
-typedef struct {
-	u32 magic;
-	u32 version;
-	u32 paramsfo;
-	u32 icon0png;
-	u32 icon1pmf;
-	u32 pic0png;
-	u32 pic1png;
-	u32 snd0at3;
-	u32 datapsp;
-	u32 datapsar;
-} EBOOTHeader;
-
 //------ stage 1 - fake directory existence ------
 
 //open directory

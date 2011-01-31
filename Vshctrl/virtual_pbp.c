@@ -370,6 +370,7 @@ static int build_vpbp(VirtualPBP *vpbp)
 				if (i == 0) {
 					// no PARAM.SFO?
 					// then it's a bad ISO
+					isoClose();
 
 					return -36;
 				} else {
@@ -385,7 +386,8 @@ static int build_vpbp(VirtualPBP *vpbp)
 		}
 	}
 
-	vpbp->total_size = vpbp->header[9];
+	vpbp->pbp_total_size = vpbp->header[9];
+	vpbp->iso_total_size = isoGetTotalSectorSize() * SECTOR_SIZE;
 	ret = add_cache(vpbp);
 	printk("%s: add_cache -> %d\n", __func__, ret);
 	isoClose();
@@ -466,7 +468,9 @@ static int rebuild_vpbps(const char *dirname)
 					continue;
 				}
 			}
-			
+
+			printk("%s: ISO %s -> ISOGAME%08X added\n",
+				   	__func__, vpbp->name, i);
 			i++;
 		}
 	} while(nextdir > 0);
@@ -587,7 +591,7 @@ SceOff vpbp_lseek(SceUID fd, SceOff offset, int whence)
 			vpbp->file_pointer += (int)offset;
 			break;
 		case PSP_SEEK_END:
-			vpbp->file_pointer = vpbp->total_size + (int)offset;
+			vpbp->file_pointer = vpbp->pbp_total_size + (int)offset;
 			break;
 		default:
 			break;
@@ -690,7 +694,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 			}
 		}
 
-		if (vpbp->file_pointer >= vpbp->total_size)
+		if (vpbp->file_pointer >= vpbp->pbp_total_size)
 			break;
 	}
 
@@ -787,13 +791,19 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 	lock();
 	vpbp = get_vpbp_by_path(file);
 
-	if (vpbp == NULL) {
+	if (vpbp == NULL || stat == NULL) {
 		unlock();
 
 		return -30;
 	}
 
 	ret = sceIoGetstat(vpbp->name, stat);
+	stat->st_mode = 0x21FF;
+	stat->st_attr = 0x20;
+	stat->st_size = vpbp->iso_total_size;
+	memcpy(&stat->st_ctime, &vpbp->mtime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_mtime, &vpbp->mtime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_atime, &vpbp->mtime, sizeof(ScePspDateTime));
 	unlock();
 
 	return ret;

@@ -271,7 +271,7 @@ exit:
 	return str-buf;
 }
 
-static char printk_buf[128];
+static char printk_buf[256];
 static const char *printk_output_fn;
 
 static char printk_memory_log[1024*4] __attribute__((aligned(64)));

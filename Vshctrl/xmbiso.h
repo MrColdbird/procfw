@@ -58,9 +58,7 @@ int gamermdir(const char * path);
 //load and execute file
 int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param);
 
-//------ utilities ------
-
-//translate virtual eboot to iso path
-char * pathtranslator(char * file);
+//rename file
+int gamerename(const char *oldname, const char *newfile);
 
 #endif

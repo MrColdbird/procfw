@@ -49,7 +49,7 @@ int isoOpen(const char *path);
 
 void isoClose(void);
 
-int isoGetSize(void);
+int isoGetTotalSectorSize(void);
 
 //get file information
 int isoGetFileInfo(char * str, u32 * filesize, u32 *lba);

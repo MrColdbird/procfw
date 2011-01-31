@@ -399,7 +399,13 @@ int isoOpen(const char *path)
 		g_ciso_dec_buf_offset = -1;
 		g_CISO_cur_idx = -1;
 	} else {
-		g_total_sectors = isoGetSize();
+		int ret, size;
+
+		ret = sceIoLseek32(g_isofd, 0, PSP_SEEK_CUR);
+		size = sceIoLseek32(g_isofd, 0, PSP_SEEK_END);
+		sceIoLseek32(g_isofd, ret, PSP_SEEK_SET);
+
+		g_total_sectors = isoPos2LBA(size);
 	}
 
 	ret = readSector(16, g_sector_buffer);
@@ -428,16 +434,9 @@ error:
 	return ret;
 }
 
-int isoGetSize(void)
+int isoGetTotalSectorSize(void)
 {
-	int ret, size;
-
-	ret = sceIoLseek32(g_isofd, 0, PSP_SEEK_CUR);
-	size = sceIoLseek32(g_isofd, 0, PSP_SEEK_END);
-
-	sceIoLseek(g_isofd, ret, PSP_SEEK_SET);
-
-	return isoPos2LBA(size);
+	return g_total_sectors;
 }
 
 void isoClose(void)
@@ -450,6 +449,8 @@ void isoClose(void)
 		oe_free(g_ciso_dec_buf);
 		g_ciso_dec_buf = NULL;
 	}
+
+	g_total_sectors = 0;
 }
 
 int isoGetFileInfo(char * path, u32 *filesize, u32 *lba)

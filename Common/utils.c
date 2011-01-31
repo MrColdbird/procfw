@@ -159,7 +159,5 @@ int get_device_name(char *device, int size, const char* path)
 	strncpy(device, path, MIN(size, p-path+1));
 	device[MIN(size-1, p-path)] = '\0';
 
-	printk("%s: device %s\n", __func__, device);
-
 	return 0;
 }

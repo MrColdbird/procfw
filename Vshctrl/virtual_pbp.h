@@ -8,7 +8,8 @@ typedef struct _PBPSection {
 
 typedef struct _VirtualPBP {
 	u32 enabled;
-	u32 total_size;
+	u32 pbp_total_size;
+	u32 iso_total_size;
 	u32 file_pointer;
 	char name[128];
 	u32 header[10];
@@ -17,7 +18,7 @@ typedef struct _VirtualPBP {
 } VirtualPBP;
 
 #define CACHE_MAX_SIZE 32
-#define MAGIC_ISOCACHE 0xC01DB15D
+#define MAGIC_ISOCACHE (0xC01DB15D+1)
 #define MAGIC_VPBP_FD 0x8000
 #define MAX_VPBP 128
 #define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))

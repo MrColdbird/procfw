@@ -752,6 +752,7 @@ int vpbp_remove(const char * file)
 	vpbp = get_vpbp_by_path(file);
 
 	if (vpbp == NULL) {
+		printk("%s: Unknown file %s in vpbp list\n", __func__, file);
 		unlock();
 
 		return -14;
@@ -791,7 +792,8 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 	lock();
 	vpbp = get_vpbp_by_path(file);
 
-	if (vpbp == NULL || stat == NULL) {
+	if (vpbp == NULL) {
+		printk("%s: Unknown file %s in vpbp list\n", __func__, file);
 		unlock();
 
 		return -30;
@@ -840,6 +842,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	vpbp = get_vpbp_by_path(file);
 
 	if (vpbp == NULL) {
+		printk("%s: Unknown file %s in vpbp list\n", __func__, file);
 		unlock();
 
 		return -31;

@@ -19,6 +19,7 @@ PSP_EXPORT_FUNC(gameremove)
 PSP_EXPORT_FUNC(gamermdir)
 PSP_EXPORT_FUNC(gameloadexec)
 PSP_EXPORT_FUNC(gamerename)
+PSP_EXPORT_FUNC(gamechstat)
 PSP_EXPORT_END
 
 PSP_END_EXPORTS

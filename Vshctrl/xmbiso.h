@@ -47,4 +47,6 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param);
 //rename file
 int gamerename(const char *oldname, const char *newfile);
 
+int gamechstat(const char *file, SceIoStat *stat, int bits);
+
 #endif

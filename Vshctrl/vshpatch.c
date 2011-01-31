@@ -129,6 +129,7 @@ static void hook_iso_file_io(SceModule2 * mod)
 	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xF27A9C51, gameremove, 1);
 	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x1117C65F, gamermdir, 1);
 	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0x779103A0, gamerename, 1);
+	hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", 0xB8A740F4, gamechstat, 1);
 }
 
 static void hook_iso_directory_io(SceModule2 * mod)

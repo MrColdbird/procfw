@@ -914,7 +914,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	return ret;
 }
 
-void _vpbp_open(void *_dirname)
+static void _vpbp_dopen(void *_dirname)
 {
 	const char * dirname = _dirname;
 
@@ -931,7 +931,7 @@ SceUID vpbp_dopen(const char * dirname)
 	result = sceIoDopen(dirname);
 
 	if (check_path_is_game(dirname)) {
-		sceKernelExtendKernelStack(0x1800, &_vpbp_open, (void*)dirname);
+		sceKernelExtendKernelStack(0x1800, &_vpbp_dopen, (void*)dirname);
 		g_gamedfd = result;
 	}
 

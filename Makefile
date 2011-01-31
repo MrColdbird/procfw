@@ -7,6 +7,7 @@ GALAXYDRIVER = ISODrivers/Galaxy
 M33DRIVER = ISODrivers/March33
 STARGATE = Stargate
 ISOLAUNCHER = testsuite/ISOLauncher
+FASTRECOVERY = FastRecovery
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -18,6 +19,7 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
+	@mkdir $(DISTRIBUTE)/635FastRecovery || true
 	@rm -f ./Common/*.o
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
@@ -28,6 +30,7 @@ all:
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
+	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)/$(INSTALLER)
@@ -36,6 +39,7 @@ all:
 	@mv $(STARGATE)/stargate.prx $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
+	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)
@@ -46,6 +50,7 @@ clean:
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
+	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 
 build_lib:

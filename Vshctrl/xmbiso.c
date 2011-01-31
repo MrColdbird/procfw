@@ -21,7 +21,6 @@ static int g_delete_eboot_injected = 0;
 static int is_iso_dir(const char *path)
 {
 	const char *p;
-	int i;
 
 	if (path == NULL)
 		return 0;
@@ -38,17 +37,10 @@ static int is_iso_dir(const char *path)
 		return 0;
 
 	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
+	p += 8;
 
-	for(i=0; i<8; ++i) {
-		if(*p < '0' || *p > '9')
-			return 0;
-
+	while(*p != '\0' && *p == '/')
 		p++;
-	}
-
-	while(*p != '\0' && *p == '/') {
-		p++;
-	}
 
 	if (*p != '\0')
 		return 0;
@@ -59,7 +51,6 @@ static int is_iso_dir(const char *path)
 static int is_iso_eboot(const char* path)
 {
 	const char *p;
-	int i;
 
 	if (path == NULL)
 		return 0;
@@ -76,13 +67,7 @@ static int is_iso_eboot(const char* path)
 		return 0;
 
 	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
-
-	for(i=0; i<8; ++i) {
-		if(*p < '0' || *p > '9')
-			return 0;
-
-		p++;
-	}
+	p += 8;
 
 	if (0 != strcmp(p, "/EBOOT.PBP"))
 		return 0;
@@ -288,7 +273,7 @@ int gameremove(const char * file)
 {
 	int result;
    
-	// file under /PSP/GAME/__DEL__XXXXXXXX
+	// file under /PSP/GAME/_DEL_XXXXXXXX
 	if(0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
 		result = 0;
 		printk("%s:<virtual> %s -> 0x%08X\n", __func__, file, result);
@@ -362,21 +347,11 @@ int gamerename(const char *oldname, const char *newfile)
 		return 0;
 	}
 
-	if(strlen(oldname) > 4 && 0 == strncmp(oldname+4, "/PSP/GAME/_DEL_", sizeof("/PSP/GAME/_DEL_")-1)) {
-		const char *ext;
+	if(0 == strncmp(oldname, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
+		result = 0;
+		printk("%s:<virtual> %s %s -> 0x%08X\n", __func__, oldname, newfile, result);
 
-		ext = strrchr(oldname, '/');
-
-		if (ext != NULL) {
-			ext++;
-
-			if(0 == strcmp(ext, "EBOOT.PBP")) {
-				result = 0;
-				printk("%s:<virtual> %s %s -> 0x%08X\n", __func__, oldname, newfile, result);
-
-				return 0;
-			}
-		}
+		return 0;
 	}
 
 	result = sceIoRename(oldname, newfile);

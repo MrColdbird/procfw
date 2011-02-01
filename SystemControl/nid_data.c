@@ -14,10 +14,10 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x1C1FBFE7, 0xAF85EB1B, }, // sceKernelCreateHeap
 	{ 0x55A40B2C, 0xF5E82409, }, // sceKernelQueryMemoryPartitionInfo
 	{ 0xE6581468, 0xE10F21CF, }, // sceKernelPartitionMaxFreeMemSize
-	{ 0x9697CD32, 0x7BE9653E, }, // sceKernelPartitionTotalFreeMemSize 0xE10F21CF??? From Davee
+	{ 0x9697CD32, 0x7BE9653E, }, // sceKernelPartitionTotalFreeMemSize
 	{ 0x237DBD4F, 0x4621A9CC, }, // sceKernelAllocPartitionMemory
 	{ 0xB6D61D02, 0x8FDAFC4C, }, // sceKernelFreePartitionMemory
-	{ 0x9D9A5BA1, 0xFA5025B5, }, // sceKernelGetBlockHeadAddr
+	{ 0x9D9A5BA1, 0x52B54B93, }, // sceKernelGetBlockHeadAddr
 	{ 0xB2C7AA36, 0x00E9A04A, }, // sceKernelSetDdrMemoryProtection
 	{ 0x6373995D, 0x458A70B5, }, // sceKernelGetModel
 	{ 0xEB7A74DB, UNKNOWNNID, }, // sceKernelAllocHeapMemoryWithOption
@@ -299,6 +299,11 @@ static nid_entry sceCtrl_driver_nid[] = {
 	{ 0x7CA723DC, UNKNOWNNID, }, // sceCtrl_driver_7CA723DC
 	{ 0x5E77BC8A, UNKNOWNNID, }, // sceCtrl_driver_5E77BC8A
 	{ 0x5C56C779, UNKNOWNNID, }, // sceCtrl_driver_5C56C779
+	{ 0x1F4011E6, 0x6CB49301, }, // sceCtrlSetSamplingMode(CMF)
+	{ 0x3A622550, 0x18654FC0, }, // sceCtrlPeekBufferPositive(CMF)
+	{ 0xC152080A, 0x02DD57CF, }, // sceCtrlPeekBufferNegative(CMF)
+	{ 0x1F803938, 0x9F3038AC, }, // sceCtrlReadBufferPositive(CMF)
+	{ 0x60B81F86, 0xEB5F1D7A, }, // sceCtrlReadBufferNegative(CMF)
 };
 
 static nid_entry sceDisplay_driver_nid[] = {
@@ -318,7 +323,7 @@ static nid_entry sceDisplay_driver_nid[] = {
 	{ 0xEEDA2E54, 0x08A10838, }, // sceDisplayGetFrameBuf
 	{ 0xB4F378FA, 0x2D859B86, }, // sceDisplayIsForeground
 	{ 0xAC14F1FF, UNKNOWNNID, }, // sceDisplayGetForegroundLevel
-	{ 0x9E3C6DC6, UNKNOWNNID, }, // sceDisplaySetBrightness
+	{ 0x9E3C6DC6, 0x89FD2128, }, // sceDisplaySetBrightness
 	{ 0x9C6EAAD7, 0x21F912F4, }, // sceDisplayGetVcount
 	{ 0x4D4E10EC, 0x59456A3E, }, // sceDisplayIsVblank
 	{ 0x69B53541, 0x2F701A85, }, // sceDisplayGetVblankRest

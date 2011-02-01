@@ -56,21 +56,33 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 	return (*memlmd_unsigner)(prx, size, use_polling);
 }
 
+static int inline is_prx_compressed(u8 *prx, u32 size)
+{
+	if (size < 0x160)
+		return 0;
+
+	if (*(u16*)(prx+0x150) == 0x8B1F) {
+		if (*(u16*)(prx+0x1E) == 0x0000 || *(u16*)(prx+0x3E) == 0x0000) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 // sub_1B38
 static int _memlmd_decrypt(u8 *prx, u32 size, u32 *newsize, u32 use_polling)
 {
 	int ret;
 
 	if (prx != NULL && newsize != NULL) {
-		if (*(u32*)(prx+0x130) == 0xC6BA41D3 || *(u32*)(prx+0x130) == 0x55778D96) { // Gziped PRX signature
-			if (prx[0x150] == 0x1F && prx[151] == 0x8B) { // Gzip magic
-				u32 compsize = *(u32*)(prx + 0xB0);
+		if (is_prx_compressed(prx, size)) {
+			u32 compsize = *(u32*)(prx + 0xB0);
 
-				memmove(prx, prx+0x150, compsize);
-				*newsize = compsize;
+			memmove(prx, prx+0x150, compsize);
+			*newsize = compsize;
 
-				return 0;
-			}
+			return 0;
 		}
 	}
 

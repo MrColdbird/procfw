@@ -73,6 +73,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x960B888C, UNKNOWNNID, }, // SysMemForKernel_960B888C
 	{ 0x452E3696, UNKNOWNNID, }, // SysMemForKernel_452E3696
 	{ 0x95F5E8DA, UNKNOWNNID, }, // SysMemForKernel_95F5E8DA
+	{ 0x0D547E7F, 0x3C4C5630, }, // sceKernelGetUMDData
 };
 
 static nid_entry LoadCoreForKernel_nid[] = {

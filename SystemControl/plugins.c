@@ -7,6 +7,8 @@
 #include "printk.h"
 #include "strsafe.h"
 
+#define PLUGIN_PATH "ms0:/seplugins/"
+
 int load_start_module(char *path)
 {
 	int ret;
@@ -118,17 +120,17 @@ static int plugin_thread(SceSize args, void * argp)
 
 	//visual shell
 	if(key == PSP_INIT_KEYCONFIG_VSH) {
-		bootconf = "ms0:/plugins/vsh.txt";
+		bootconf = PLUGIN_PATH "vsh.txt";
 	} //game mode
 	else if(key == PSP_INIT_KEYCONFIG_GAME) {
-		bootconf = "ms0:/plugins/game.txt";
+		bootconf = PLUGIN_PATH "game.txt";
 	} //ps1 mode
 	else if(key == PSP_INIT_KEYCONFIG_POPS) {
-		bootconf = "ms0:/plugins/pops.txt";
+		bootconf = PLUGIN_PATH "pops.txt";
 	}
 
 	//load global plugins
-	load_plugins("ms0:/plugins/global.txt");
+	load_plugins(PLUGIN_PATH "global.txt");
 
 	//load mode specific plugins
 	load_plugins(bootconf);

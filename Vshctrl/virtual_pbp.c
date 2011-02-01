@@ -191,6 +191,20 @@ static void get_sfo_title(char *title, int n, char *sfo)
 	}
 }
 
+static void get_sfo_disc_id(char *disc_id, int n, char *sfo)
+{
+	SFOHeader *header = (SFOHeader *)sfo;
+	SFODir *entries = (SFODir *)(sfo+0x14);
+	int i;
+
+	for (i = 0; i < header->nitems; i++) {
+		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, "DISC_ID")) {
+			memset(disc_id, 0, n);
+			strncpy(disc_id, sfo+header->values_table_offs+entries[i].val_offs, n);
+		}
+	}
+}
+
 static int add_cache(VirtualPBP *vpbp)
 {
 	int i;
@@ -658,6 +672,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 			int re;
 			void *buf, *buf_64;
 			char sfotitle[64];
+			char disc_id[12];
 
 			buf = oe_malloc(SECTOR_SIZE+64);
 
@@ -665,8 +680,10 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 				buf_64 = PTR_ALIGN_64(buf);
 				isoRead(buf_64, vpbp->sects[0].lba, 0, SECTOR_SIZE);
 				get_sfo_title(sfotitle, 64, buf_64);
+				get_sfo_disc_id(disc_id, 12, buf_64);
 				oe_free(buf);
 				memcpy(virtualsfo+0x118, sfotitle, 64);
+				memcpy(virtualsfo+0xf0, disc_id, 12);
 				re = MIN(remaining, sizeof(virtualsfo) - (vpbp->file_pointer - vpbp->header[2]));
 				memcpy(data, virtualsfo+vpbp->file_pointer-vpbp->header[2], re);
 				vpbp->file_pointer += re;

@@ -11,6 +11,7 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "nid_resolver.h"
+#include "strsafe.h"
 
 extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_45C6125B(const char *file, struct SceKernelLoadExecVSHParam *param);
@@ -33,6 +34,9 @@ int g_insert_module_flags;
 // for sctrlHENSetMemory
 u32 p2_size = 24;
 u32 p8_size = 24;
+
+static char g_initfilename[80];
+static char g_iso_filename[128];
 
 int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 {
@@ -342,4 +346,34 @@ int sctrlKernelSetInitApitype(int apitype)
 	*p = apitype;
 
 	return prev_apitype;
+}
+
+int sctrlKernelSetUMDEmuFile(const char *iso)
+{
+	SceModule2 *modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+
+	if (modmgr == NULL) {
+		return -1;
+	}
+
+	STRCPY_S(g_iso_filename, iso);
+	*(const char**)(modmgr->text_addr+0x99B8) = g_iso_filename;
+
+	return 0;
+}
+
+int sctrlKernelSetInitFileName(char *filename)
+{
+	SceModule2 *modmgr;
+
+	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+
+	if(modmgr == NULL) {
+		return -1;
+	}
+
+	STRCPY_S(g_initfilename, filename);
+	*(const char**)(modmgr->text_addr+0x99B4) = g_initfilename;
+
+	return 0;
 }

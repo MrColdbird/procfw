@@ -39,6 +39,7 @@ void launch_game(void)
 	} else {
 		param.key = "game";
 		apitype = 0x120;
+		loadexec_file = param.argp;
 	}
 
 	ret = sctrlKernelLoadExecVSHWithApitype(apitype, loadexec_file, &param);

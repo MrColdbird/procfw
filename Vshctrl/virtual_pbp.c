@@ -11,6 +11,7 @@
 #include "utils.h"
 #include "strsafe.h"
 #include "virtual_pbp.h"
+#include "main.h"
 
 typedef struct __attribute__((packed))
 {
@@ -890,8 +891,8 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	//set iso file for reboot
 	sctrlSESetUmdFile(vpbp->name);
-
 	sctrlSEGetConfig(&config);
+
 	//set iso mode for reboot
 	sctrlSESetBootConfFileIndex(config.umdmode);
 
@@ -913,7 +914,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	param->args = strlen(param->argp) + 1;
 
-	if (sceKernelGetModel() == PSP_GO) {
+	if (psp_model == PSP_GO) {
 		param->key = "umdemu";
 	   	apitype = 0x125;
 		loadexec_file = vpbp->name;

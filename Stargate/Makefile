@@ -1,5 +1,5 @@
 TARGET = stargate
-OBJS = main.o key_decrypt.o pspcipher.o pauth.o nodrm.o ../Common/utils.o ../Common/libs.o
+OBJS = main.o key_decrypt.o pspcipher.o pauth.o nodrm.o utility_patch.o ../Common/utils.o ../Common/libs.o
 
 INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall -fno-pic

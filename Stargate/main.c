@@ -25,9 +25,6 @@
 PSP_MODULE_INFO("stargate", 0x1007, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
-extern int nodrm_init(void);
-extern void patch_drm_imports(SceModule *mod);
-
 static STMOD_HANDLER previous;
 
 static int stargate_module_chain(SceModule2 *mod)
@@ -35,6 +32,7 @@ static int stargate_module_chain(SceModule2 *mod)
 	// for MHP3rd: a 6.36 game
 	hook_import_bynid((SceModule*)mod, "scePauth", 0x98B83B5D, myPauth_98B83B5D, 1);
 	patch_drm_imports((SceModule*)mod);
+	patch_utility((SceModule*)mod);
 	
 	if (previous)
 		return (*previous)(mod);

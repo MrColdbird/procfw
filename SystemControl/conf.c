@@ -72,7 +72,7 @@ int sctrlSESetConfigEx(SEConfig *config, int size)
 {
 	u32 k1;
 	SceUID fd;
-	int read;
+	int written;
    
 	k1 = pspSdkSetK1(0);
 	fd = sceIoOpen("flashfat1:/config.se", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
@@ -84,9 +84,9 @@ int sctrlSESetConfigEx(SEConfig *config, int size)
 	}
 
 	config->magic = CONFIG_MAGIC;
-	read = sceIoRead(fd, config, size);
+	written = sceIoWrite(fd, config, size);
 
-	if (read != size) {
+	if (written != size) {
 		sceIoClose(fd);
 		pspSdkSetK1(k1);
 

@@ -91,9 +91,9 @@ SceUID gamedopen(const char * dirname)
 		return result;
 	}
 
-	if(0 == strcmp(g_temp_delete_dir, dirname)) {
+	if(0 == strcmp(dirname, g_temp_delete_dir)) {
 		result = MAGIC_DFD_FOR_DELETE_2;
-		printk("%s:<virtual> %s -> 0x%08X\n", __func__, dirname, result);
+		printk("%s:<virtual2> %s -> 0x%08X\n", __func__, dirname, result);
 		
 		return result;
 	}
@@ -142,6 +142,7 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 	k1 = pspSdkSetK1(0);
 	result = vpbp_dread(fd, dir);
 	pspSdkSetK1(k1);
+
 
 	return result;
 }
@@ -264,7 +265,8 @@ int gameremove(const char * file)
 {
 	int result;
    
-	if(0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
+	if(g_temp_delete_dir[0] != '\0' && 
+			0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
 		result = 0;
 		printk("%s:<virtual> %s -> 0x%08X\n", __func__, file, result);
 		
@@ -342,9 +344,10 @@ int gamerename(const char *oldname, const char *newfile)
 		return 0;
 	}
 
-	if(0 == strncmp(oldname, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
+	if(g_temp_delete_dir[0] != '\0' &&
+			0 == strncmp(oldname, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
 		result = 0;
-		printk("%s:<virtual> %s %s -> 0x%08X\n", __func__, oldname, newfile, result);
+		printk("%s:<virtual2> %s %s -> 0x%08X\n", __func__, oldname, newfile, result);
 
 		return 0;
 	}
@@ -359,14 +362,15 @@ int gamechstat(const char *file, SceIoStat *stat, int bits)
 {
 	int result;
 
-	if(0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
+	if(g_temp_delete_dir[0] != '\0' && 
+			0 == strncmp(file, g_temp_delete_dir, strlen(g_temp_delete_dir))) {
 		result = 0;
 		printk("%s:<virtual> %s -> 0x%08X\n", __func__, file, result);
 
 		return 0;
 	}
 
-	result = gamechstat(file, stat, bits);
+	result = sceIoChstat(file, stat, bits);
 	printk("%s: %s -> 0x%08X\n", __func__, file, result);
 
 	return result;

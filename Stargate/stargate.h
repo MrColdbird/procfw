@@ -6,4 +6,8 @@ int myPauth_init(void);
 
 void patch_sceMesgLed(void);
 
+int nodrm_init(void);
+void patch_drm_imports(SceModule *mod);
+void patch_utility(SceModule *mod);
+
 #endif

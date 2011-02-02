@@ -51,7 +51,7 @@ void usb_charge(void)
 {
 	int thid;
 
-	if (!conf.usbcharge) {
+	if (!conf.usbcharge || psp_model == PSP_1000 ) {
 		return;
 	}
 

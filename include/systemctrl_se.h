@@ -22,13 +22,12 @@ enum
 	FAKE_REGION_CHINA = 11, /* do not use, may cause brick on restore default settings */
 };
 
-
+// No MODE_OE_LEGACY any more
 enum SEUmdModes
 {
 	MODE_UMD = 0,
-	MODE_OE_LEGACY = 1,
-	MODE_MARCH33 = 2,
-	MODE_NP9660 = 3,
+	MODE_MARCH33 = 1,
+	MODE_NP9660 = 2,
 };
 
 typedef struct

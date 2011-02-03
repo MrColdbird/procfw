@@ -25,8 +25,7 @@ int bus2no(int cpu);
 void change_clock(int dir , int flag);
 void change_usb(int dir );
 void change_umd_mode(int dir );
-
-
+void change_plugins(int dir , int flag);
 
 /*
 #define scePaf_967A56EF_strlen strlen
@@ -54,5 +53,3 @@ int scePaf_11EFC5FD_sprintf(char *buffer , const char *format , ...);
 int scePaf_15AFC8D3_snprintf(char *buffer,int c , const char *format, ...);
 int scePaf_6BD7452C_memcpy(void *path , void *name , int size);
 int scePaf_98DE3BA6_strcpy(char *path , const char *name);
-
-

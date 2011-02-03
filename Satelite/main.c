@@ -20,6 +20,8 @@ PSP_MODULE_INFO("VshCtrlSatelite", 0, 1, 2);
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
+extern int scePowerRequestColdReset(int unk);
+extern int scePowerRequestStandby(void);
 
 //extern ISO_cache cache[32];
 extern int current_video_no;

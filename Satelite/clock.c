@@ -2,14 +2,9 @@
 	PSP VSH
 */
 #include "common.h"
+#include "utils.h"
 
 extern SEConfig cnf;
-
-/////////////////////////////////////////////////////////////////////////////
-// change CPU clock
-/////////////////////////////////////////////////////////////////////////////
-#define MAX_CLK_LIST 9
-
 
 const int cpu_list[]={0, 20, 75, 100, 133, 222, 266, 300, 333};
 const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
@@ -18,28 +13,27 @@ int cpu2no(int cpu)
 {
 	int i;
 
-	for(i=0;i< MAX_CLK_LIST;i++)
-	{
+	for(i=0; i<NELEMS(cpu_list); i++) {
 		if(cpu==cpu_list[i])
 			return i;
-	
 	}
+
 	return 0;
 }
+
 int bus2no(int cpu)
 {
 	int i;
 
-	for(i=0;i< MAX_CLK_LIST;i++)
-	{
+	for(i=0; i<NELEMS(bus_list); i++) {
 		if(cpu==bus_list[i])
 			return i;
-	
 	}
-	return 0;
 
+	return 0;
 }
-void change_clock(int dir , int flag)
+
+void change_clock(int dir, int flag)
 {
 	int sel;
 	int *cpu[2];
@@ -58,52 +52,45 @@ void change_clock(int dir , int flag)
 	sel = cpu2no(*cpu[0]);
 
 	// select new
-	sel = limit(sel+dir,0,MAX_CLK_LIST-1);
+	sel = limit(sel+dir, 0, NELEMS(cpu_list)-1);
 
 	*cpu[0] = cpu_list[sel];
 	*cpu[1] = bus_list[sel];
-
 }
 
-void change_usb(int dir )
+void change_usb(int dir)
 {
 	int sel = cnf.usbdevice;
 
 	// select new
-	sel = limit(sel+dir,0, 5);
+	sel = limit(sel+dir, 0, 5);
 	
 	cnf.usbdevice=sel;
-
 }
-/*
-void change_umd_mode(int dir )
+
+void change_umd_mode(int dir)
 {
 	int sel = cnf.umdmode;
 
 	// select new
-	sel = limit(sel+dir,0, 3);
-	
+	sel = limit(sel+dir, 0, 2);
 	cnf.umdmode=sel;
-
 }
-*/
-void change_plugins(int dir , int flag)
+
+void change_plugins(int dir, int flag)
 {
 	int sel;
 	int *plugins;
 
-	if(flag == 0){
+	if(flag == 0) {
 		plugins=&(cnf.plugvsh);
-	}else if(flag == 1){
+	} else if(flag == 1) {
 		plugins=&(cnf.pluggame);
-	}else{
+	} else {
 		plugins=&(cnf.plugpop);
 	}
 
 	sel = *plugins;
-
-	// select new
-	sel = 1 - sel;
-
-	plugins[0] = sel;
+	sel = !sel;
+	*plugins = sel;
 }

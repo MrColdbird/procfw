@@ -214,13 +214,11 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 	u32 k1;
 	int *p;
 	SceModule2 *mod;
-	u32 text_addr;
 	int* (*find_driver)(char *drvname);
 
 	k1 = pspSdkSetK1(0);
 	mod = (SceModule2*) sceKernelFindModuleByName("sceIOFileManager");
-	text_addr = mod->text_addr;
-	find_driver = (void*)(text_addr + 0x2A38); // 0x2A38 in 6.20, 6.31 remains the same
+	find_driver = (void*)(mod->text_addr + 0x2A44); // 0x2A38 in 6.20/6.31
 	p = find_driver(drvname);
 
 	if (p != NULL) {
@@ -304,11 +302,12 @@ void sctrlHENLoadModuleOnReboot(char *module_before, void *buf, int size, int fl
 
 // SystemCtrlForKernel_826668E9 in Tn's code
 // Look out syscall struct changed in 6XX kernel!
-void sctrlHENPatchSyscall(u32 addr, void *newaddr)
+void sctrlHENPatchSyscall(void *addr, void *newaddr)
 {
 	void *ptr;
 	u32 *syscalls;
 	int i;
+	u32 _addr = (u32)addr;
 
 	// get syscall struct from cop0
 	asm("cfc0 %0, $12\n" : "=r"(ptr));
@@ -320,7 +319,7 @@ void sctrlHENPatchSyscall(u32 addr, void *newaddr)
 	syscalls = (u32*)(ptr+0x10);
 
 	for(i=0; i<0xFF4; ++i) {
-		if (syscalls[i] == addr) {
+		if (syscalls[i] == _addr) {
 			syscalls[i] = (u32)newaddr;
 		}
 	}

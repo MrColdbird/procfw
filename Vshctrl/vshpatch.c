@@ -17,6 +17,7 @@
 #include "virtual_pbp.h"
 
 extern int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count);
+extern void patch_sceUSB_Driver(void);
 
 typedef struct _HookUserFunctions {
 	u32 nid;
@@ -34,7 +35,6 @@ static void hook_iso_file_io(SceModule2 * mod);
 static void hook_iso_directory_io(SceModule2 * mod);
 static void patch_sceCtrlReadBufferPositive(SceModule2 *mod); 
 static void patch_Gameboot(SceModule2 *mod); 
-
 static void patch_msvideo_main_plugin_module(u32 text_addr);
 
 static int vshpatch_module_chain(SceModule2 *mod)
@@ -226,6 +226,7 @@ int vshpatch_init(void)
 {
 	sctrlSEGetConfig(&conf);
 	previous = sctrlHENSetStartModuleHandler(&vshpatch_module_chain);
+	patch_sceUSB_Driver();
 	vpbp_init();
 
 	return 0;

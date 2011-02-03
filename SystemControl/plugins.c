@@ -112,25 +112,20 @@ static void load_plugins(char * path)
 
 static int plugin_thread(SceSize args, void * argp)
 {
-	//get mode key
 	unsigned int key = sceKernelInitKeyConfig();
 
-	//global config
 	char * bootconf = NULL;
 
 	//visual shell
-	if(key == PSP_INIT_KEYCONFIG_VSH) {
+	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
 		bootconf = PLUGIN_PATH "vsh.txt";
 	} //game mode
-	else if(key == PSP_INIT_KEYCONFIG_GAME) {
+	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
 		bootconf = PLUGIN_PATH "game.txt";
 	} //ps1 mode
-	else if(key == PSP_INIT_KEYCONFIG_POPS) {
+	else if(conf.plugpop && key == PSP_INIT_KEYCONFIG_POPS) {
 		bootconf = PLUGIN_PATH "pops.txt";
 	}
-
-	//load global plugins
-	load_plugins(PLUGIN_PATH "global.txt");
 
 	//load mode specific plugins
 	load_plugins(bootconf);

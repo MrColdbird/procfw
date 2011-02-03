@@ -33,32 +33,21 @@ enum SEUmdModes
 typedef struct
 {
 	int magic; /* 0x47434553 */ // 0
-	int hidecorrupt; // 4
-	int	skiplogo; // 8
-	int umdactivatedplaincheck; // c
-	int gamekernel150; // 10
-	int executebootbin; // 14
-	int startupprog; // 18
-	int umdmode; // 1C
-	int useisofsonumdinserted; //20
-	int	vshcpuspeed;  //24
-	int	vshbusspeed;  //28
-	int	umdisocpuspeed; //2C
-	int	umdisobusspeed; //30
-	int fakeregion; //34
-	int freeumdregion; //38
-	int	hardresetHB; //3C
-	int usbdevice; //40
-	int novshmenu; //44
-	int usbcharge; //48
-	int notusedaxupd; //4C
+	int umdmode;
+	int vshcpuspeed;
+	int vshbusspeed;
+	int umdisocpuspeed;
+	int umdisobusspeed;
+	int usbdevice;
+	int usbcharge;
 	int machidden;
 	int useversion;
 	int skipgameboot;
 	int hidepic;
-	int reserved[2]; //50 54
+	int plugvsh; 
+	int pluggame;
+	int plugpop;
 } SEConfig;
-
 
 /**
  * Gets the SE/OE version

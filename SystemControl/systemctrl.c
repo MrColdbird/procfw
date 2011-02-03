@@ -33,7 +33,7 @@ int g_insert_module_flags;
 
 // for sctrlHENSetMemory
 u32 p2_size = 24;
-u32 p8_size = 24;
+u32 p9_size = MAX_HIGH_MEMSIZE - 24;
 
 static char g_initfilename[80];
 static char g_iso_filename[128];
@@ -329,11 +329,11 @@ void sctrlHENPatchSyscall(void *addr, void *newaddr)
 	}
 }
 
-int sctrlHENSetMemory(u32 p2, u32 p8)
+int sctrlHENSetMemory(u32 p2, u32 p9)
 {
-	if(p2 > 24 && (p2 + p8) == 48) {
+	if(p2 != 0 && (p2 + p9) == 50) {
 		p2_size = p2;
-		p8_size = p8;
+		p9_size = p9;
 	}
 
 	return 0;

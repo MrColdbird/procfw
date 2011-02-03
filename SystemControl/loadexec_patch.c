@@ -37,7 +37,7 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 		_sw(p2_size, 0x88FB0008);
 
 		//store partition 9 length
-		_sw(p8_size, 0x88FB000C);
+		_sw(p9_size, 0x88FB000C);
 	}
 
 	_sw((u32)g_insert_module_before, 0x88FB0010);

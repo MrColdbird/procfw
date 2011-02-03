@@ -53,20 +53,20 @@ static SceUID load_satelite(void)
 		.access = 1,
 	};
 
-	const char *g_modlist[] = {
+	const char *modlist[] = {
 		"ms0:/satelite.prx",
 		"ef0:/satelite.prx",
 		"flash0:/vsh/module/satelite.prx",
 	};
 
-	int i; for(i=0; i<NELEMS(g_modlist); ++i) {
-		modid = sceKernelLoadModule(g_modlist[i], 0, &opt);
+	int i; for(i=0; i<NELEMS(modlist); ++i) {
+		modid = sceKernelLoadModule(modlist[i], 0, &opt);
 
 		if(modid >= 0) {
 			break;
 		}
 
-		printk("%s: loading %s -> 0x%08X\n", __func__, g_modlist[i], modid);
+		printk("%s: loading %s -> 0x%08X\n", __func__, modlist[i], modid);
 	}
 
 	return modid;

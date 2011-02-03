@@ -55,6 +55,7 @@ typedef struct
 	int machidden;
 	int useversion;
 	int skipgameboot;
+	int hidepic;
 	int reserved[2]; //50 54
 } SEConfig;
 

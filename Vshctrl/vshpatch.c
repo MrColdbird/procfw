@@ -31,6 +31,8 @@ static void hook_iso_file_io(SceModule2 * mod);
 static void hook_iso_directory_io(SceModule2 * mod);
 static void patch_Gameboot(SceModule2 *mod); 
 
+static void patch_msvideo_main_plugin_module(u32 text_addr);
+
 static int vshpatch_module_chain(SceModule2 *mod)
 {
 	u32 text_addr;
@@ -57,6 +59,11 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
 		patch_Gameboot(mod);
+		sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "msvideo_main_plugin_module")) {
+		patch_msvideo_main_plugin_module(text_addr);
 		sync_cache();
 	}
 
@@ -132,10 +139,31 @@ static void patch_game_plugin_module(u32 text_addr)
 	_sw(0x03E00008, text_addr + 0x20BC8); //jr $ra
 	_sw(0x00001021, text_addr + 0x20BCC); // move $v0, $zr
 
+	if (conf.hidepic) {
+		_sw(0x00601021, text_addr + 0x0001D5DC);
+		_sw(0x00601021, text_addr + 0x0001D5E8);
+	}
+	
 	if (conf.skipgameboot) {
 		_sw(MAKE_CALL(text_addr+0x00019294), text_addr + 0x00018F14);
 		_sw(0x24040002, text_addr + 0x00018F18);
 	}
+}
+
+static void patch_msvideo_main_plugin_module(u32 text_addr)
+{
+	_sh(0xFE00, text_addr + 0x0003AED4);
+	_sh(0xFE00, text_addr + 0x0003AF5C);
+	_sh(0xFE00, text_addr + 0x0003D79C);
+	_sh(0xFE00, text_addr + 0x0003D9F8);
+
+	_sh(0xFE00, text_addr + 0x00044150);
+	_sh(0xFE00, text_addr + 0x00074550);
+	_sh(0xFE00, text_addr + 0x00088BA0);
+
+	_sh(0x4003, text_addr + 0x0003D714);
+	_sh(0x4003, text_addr + 0x0003D75C);
+	_sh(0x4003, text_addr + 0x000431F8);
 }
 
 static void patch_vsh_module(SceModule2 * mod)

@@ -142,6 +142,7 @@ void load_default_conf(SEConfig *config)
 	config->machidden = 1;
 	config->useversion = 1;
 	config->skipgameboot = 1;
+	config->hidepic = 0;
 }
 
 void load_config(void)

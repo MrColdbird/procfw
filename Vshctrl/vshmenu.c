@@ -114,7 +114,8 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 			if (modid < 0) {
 				printk("%s: start module -> 0x%08X\n", __func__, modid);
 			}
-			ctrl->Buttons &= 0xFFFE; // Filter SELECT
+
+			ctrl->Buttons &= (~PSP_CTRL_SELECT); // Filter SELECT
 		}
 	}
 	

@@ -439,7 +439,7 @@ int patch_bootconf_vsh(char *buffer, int length)
 	int newsize, result;
 
 	result = length;
-	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/vshctrl.prx", VSH_RUNLEVEL );
+	newsize = AddPRX(buffer, "/kd/vshbridge.prx", "/kd/vshctrl.prx", VSH_RUNLEVEL );
 
 	if (newsize > 0) result = newsize;
 

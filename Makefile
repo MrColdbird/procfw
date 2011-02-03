@@ -8,7 +8,6 @@ M33DRIVER = ISODrivers/March33
 STARGATE = Stargate
 ISOLAUNCHER = testsuite/ISOLauncher
 FASTRECOVERY = FastRecovery
-CONFTOOL = testsuite/ConfTool
 SATELITE = Satelite
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
@@ -22,7 +21,6 @@ all:
 	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
-	@mkdir $(DISTRIBUTE)/635ConfTool || true
 	@rm -f ./Common/*.o
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make
@@ -33,7 +31,6 @@ all:
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
-	@cd $(CONFTOOL); make $(OPT FLAGS) $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/$(INSTALLER)
@@ -46,7 +43,6 @@ all:
 	@cp contrib/usbdevice.prx $(DISTRIBUTE)/$(INSTALLER)
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
-	@mv $(CONFTOOL)/EBOOT.PBP $(DISTRIBUTE)/635ConfTool
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
 
 clean:
@@ -58,7 +54,6 @@ clean:
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
-	@cd $(CONFTOOL); make clean $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)

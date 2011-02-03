@@ -34,13 +34,9 @@ int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
 	int ret;
 
    	k1 = pspSdkSetK1(0);
-	g_VshMenuCtrl = NULL;
-#if 0
-	memcpy(&conf, config, sizeof(*config));
+	memcpy(&conf, config, sizeof(conf));
 	ret = sctrlSESetConfig(&conf);
-#else
-	ret = 0;
-#endif
+	g_VshMenuCtrl = NULL;
 	pspSdkSetK1(k1);
 	
 	return ret;

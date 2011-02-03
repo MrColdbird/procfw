@@ -52,7 +52,7 @@ void patch_partitions(void)
 
 	//get new length
 	u32 p2_len = p2_size;
-	u32 p9_len = p8_size;
+	u32 p9_len = p9_size;
 
 	//grab executable name
 	char * path = sceKernelInitFileName();
@@ -61,10 +61,10 @@ void patch_partitions(void)
 
 	//set highmemory for homebrew eboots, it doesn't hurt.
 	if ((apitype == PSP_INIT_APITYPE_MS2 || apitype == 0x152) && p2_size == 24
-			&& p8_size == 24 && path && strlen(path) >= 25 && strncmp(path + 2,
+			&& p9_size == MAX_HIGH_MEMSIZE - 24 && path && strlen(path) >= 25 && strncmp(path + 2,
 				"0:/PSP/GAME/", 12) == 0 && strcmp(path + strlen(path) - 3, "PBP") == 0) {
 		//override memory settings
-		p2_len = 48;
+		p2_len = MAX_HIGH_MEMSIZE;
 		p9_len = 0;
 	}
 
@@ -73,10 +73,10 @@ void patch_partitions(void)
 
 	//reset saved length
 	p2_size = 24;
-	p8_size = 24;
+	p9_size = MAX_HIGH_MEMSIZE - 24;
 
 	//valid partition size
-	if(p2_len > 24 && (p2_len + p9_len) == 48 && p9) {
+	if(p2_len > 24 && (p2_len + p9_len) == MAX_HIGH_MEMSIZE && p9) {
 		//resize partition 2
 		p2[2] = p2_len << 20;
 		((unsigned int *)(p2[4]))[5] = (p2_len << 21) | 0xFC;

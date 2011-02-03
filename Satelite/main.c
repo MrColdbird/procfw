@@ -99,7 +99,7 @@ static void button_func(void)
 			}
 			break;
 		case 1:
-			res = menu_ctrl(cur_buttons, button_on);
+			res = menu_ctrl(button_on);
 
 			if(res != 0) {
 				stop_stock = res;

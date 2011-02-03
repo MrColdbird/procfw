@@ -4,6 +4,7 @@
 #include <psputilsforkernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
+#include <pspctrl.h>
 #include <stdio.h>
 #include <string.h>
 #include "utils.h"
@@ -14,6 +15,8 @@
 #include "systemctrl_se.h"
 #include "main.h"
 #include "virtual_pbp.h"
+
+extern int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count);
 
 typedef struct _HookUserFunctions {
 	u32 nid;
@@ -29,6 +32,7 @@ static void patch_vsh_module(SceModule2 * mod);
 
 static void hook_iso_file_io(SceModule2 * mod);
 static void hook_iso_directory_io(SceModule2 * mod);
+static void patch_sceCtrlReadBufferPositive(SceModule2 *mod); 
 static void patch_Gameboot(SceModule2 *mod); 
 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
@@ -58,6 +62,7 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
+		patch_sceCtrlReadBufferPositive(mod);
 		patch_Gameboot(mod);
 		sync_cache();
 	}
@@ -83,6 +88,11 @@ static int Gameboot_Patched(void)
 	}
 
 	return 0;
+}
+
+static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
+{
+	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", 0x9F3038AC, _sceCtrlReadBufferPositive, 0);
 }
 
 static void patch_Gameboot(SceModule2 *mod)

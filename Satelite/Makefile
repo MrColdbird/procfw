@@ -1,7 +1,8 @@
 TARGET = satelite
-OBJS = main.o blit.o ui.o menu.o clock.o stubkk.o exports.o 
+OBJS = main.o blit.o ui.o menu.o clock.o stubkk.o
 
 BUILD_PRX=1
+PSP_FW_VERSION=635
 
 INCDIR = ../include ../Common
 CFLAGS = -O2 -G0 -Wall

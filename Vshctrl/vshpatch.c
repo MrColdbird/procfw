@@ -29,6 +29,7 @@ static void patch_vsh_module(SceModule2 * mod);
 
 static void hook_iso_file_io(SceModule2 * mod);
 static void hook_iso_directory_io(SceModule2 * mod);
+static void patch_Gameboot(SceModule2 *mod); 
 
 static int vshpatch_module_chain(SceModule2 *mod)
 {
@@ -54,10 +55,33 @@ static int vshpatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
+		patch_Gameboot(mod);
+		sync_cache();
+	}
+
 	if (previous)
 		return (*previous)(mod);
 
 	return 0;
+}
+
+// sceDisplay_driver_73CA5F45
+static int (*GameBoot) (void) = NULL;
+
+static int Gameboot_Patched(void)
+{
+	if (conf.skipgameboot == 0) {
+		return GameBoot();
+	}
+
+	return 0;
+}
+
+static void patch_Gameboot(SceModule2 *mod)
+{
+	_sw(MAKE_CALL(Gameboot_Patched), mod->text_addr + 0x1A14);
+	GameBoot = (void*)(mod->text_addr+0x5618);
 }
 
 static inline void ascii2utf16(char *dest, const char *src)
@@ -107,6 +131,11 @@ static void patch_game_plugin_module(u32 text_addr)
 	//kill ps1 eboot check
 	_sw(0x03E00008, text_addr + 0x20BC8); //jr $ra
 	_sw(0x00001021, text_addr + 0x20BCC); // move $v0, $zr
+
+	if (conf.skipgameboot) {
+		_sw(MAKE_CALL(text_addr+0x00019294), text_addr + 0x00018F14);
+		_sw(0x24040002, text_addr + 0x00018F18);
+	}
 }
 
 static void patch_vsh_module(SceModule2 * mod)

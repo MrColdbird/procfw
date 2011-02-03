@@ -54,6 +54,7 @@ typedef struct
 	int notusedaxupd; //4C
 	int machidden;
 	int useversion;
+	int skipgameboot;
 	int reserved[2]; //50 54
 } SEConfig;
 

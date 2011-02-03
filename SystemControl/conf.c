@@ -141,6 +141,7 @@ void load_default_conf(SEConfig *config)
 	config->usbcharge = 0;
 	config->machidden = 1;
 	config->useversion = 1;
+	config->skipgameboot = 1;
 }
 
 void load_config(void)

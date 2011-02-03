@@ -27,7 +27,7 @@ const char *iso[]={
 	"Sony NP9660"
 };
 
-#define TMENU_MAX 15
+#define TMENU_MAX 16
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -44,6 +44,7 @@ enum{
 	TMENU_USE_VERSION,
 	TMENU_SKIP_GAMEBOOT,
 	TMENU_HIDE_PIC,
+	TMENU_FLASH_PROT,
 	TMENU_SHUTDOWN_DEVICE,
 	TMENU_RESET_DEVICE,
 	TMENU_EXIT
@@ -64,6 +65,7 @@ const char *top_menu_list[TMENU_MAX] ={
 	"USE VERSION.TXT",
 	"SKIP GAMEBOOT  ",
 	"HIDE PIC       ",
+	"FLASH PROTECT  ",
 	"SHUTDOWN DEVICE",
 	"RESET DEVICE",
 	"EXIT"
@@ -201,6 +203,7 @@ int menu_setup(void)
 	item_str[TMENU_USE_VERSION]  = get_enable_disable(cnf.useversion);
 	item_str[TMENU_SKIP_GAMEBOOT]  = get_enable_disable(cnf.skipgameboot);
 	item_str[TMENU_HIDE_PIC]  = get_enable_disable(cnf.hidepic);
+	item_str[TMENU_FLASH_PROT]  = get_enable_disable(cnf.flashprot);
 	
 	return 0;
 }
@@ -269,6 +272,9 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_HIDE_PIC:
 			if(direction) change_bool_option(&cnf.hidepic, direction);
+			break;
+		case TMENU_FLASH_PROT:
+			if(direction) change_bool_option(&cnf.flashprot, direction);
 			break;
 		case TMENU_SHUTDOWN_DEVICE:			
 			if(direction==0) {

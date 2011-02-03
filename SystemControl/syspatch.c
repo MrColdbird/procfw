@@ -15,6 +15,9 @@
 
 static STMOD_HANDLER previous;
 
+static void patch_sceWlan_Driver(u32 text_addr);
+static void patch_scePower_Service(u32 text_addr);
+
 static int syspatch_module_chain(SceModule2 *mod)
 {
 	int apitype;
@@ -56,6 +59,16 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "sceWlan_Driver")) {
+		patch_sceWlan_Driver(mod->text_addr);
+		sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "scePower_Service")) {
+		patch_scePower_Service(mod->text_addr);
+		sync_cache();
+	}
+
 	if(0 == strcmp(mod->modname, "sceNpSignupPlugin_Module")) {
 		patch_npsignup(mod->text_addr);
 		sync_cache();
@@ -93,6 +106,17 @@ static int syspatch_module_chain(SceModule2 *mod)
 		return (*previous)(mod);
 
 	return 0;
+}
+
+static void patch_sceWlan_Driver(u32 text_addr)
+{
+	_sw(0, text_addr + 0x000026C0);
+}
+
+static void patch_scePower_Service(u32 text_addr)
+{
+	// scePowerGetBacklightMaximum always returns 4
+	_sw(0, text_addr + 0x00000E10);
 }
 
 void syspatch_init()

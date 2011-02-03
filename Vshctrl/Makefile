@@ -1,5 +1,5 @@
 TARGET = vshctrl
-OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
+OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
 IMPORTS = ../Imports/LoadExecForKernel.o
 
 INCDIR = ../Common/ ../include/
@@ -27,7 +27,7 @@ USE_KERNEL_LIBS=1
 
 LIBDIR = ../libs
 LDFLAGS = -mno-crt0 -nostartfiles
-LIBS = -lpspsystemctrl_kernel
+LIBS = -lpspsystemctrl_kernel -lpspusb -lpspusbdevice_driver
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

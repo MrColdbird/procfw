@@ -38,13 +38,10 @@ void change_clock(int dir, int flag)
 	int sel;
 	int *cpu[2];
 
-	if(flag)
-	{
+	if(flag) {
 		cpu[0]=&(cnf.umdisocpuspeed);
 		cpu[1]=&(cnf.umdisobusspeed);
-	}
-	else		
-	{
+	} else {
 		cpu[0]=&(cnf.vshcpuspeed);
 		cpu[1]=&(cnf.vshbusspeed);
 	}
@@ -93,4 +90,12 @@ void change_plugins(int dir, int flag)
 	sel = *plugins;
 	sel = !sel;
 	*plugins = sel;
+}
+
+void change_bool_option(int *p, int direction)
+{
+	int sel = *p;
+
+	sel = limit(sel+direction, 0, 1);
+	*p=sel;
 }

@@ -47,6 +47,7 @@ typedef struct
 	int plugvsh; 
 	int pluggame;
 	int plugpop;
+	int flashprot;
 } SEConfig;
 
 /**

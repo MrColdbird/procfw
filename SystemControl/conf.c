@@ -145,6 +145,7 @@ void load_default_conf(SEConfig *config)
 	config->hidepic = 0;
 	config->plugvsh = config->pluggame = config->plugpop = 1;
 	config->usbdevice = 0;
+	config->flashprot = 1;
 }
 
 void load_config(void)

@@ -34,6 +34,7 @@ static SceUID load_start_usbdevice(void)
 	ret = sceKernelStartModule(modid, 0, NULL, NULL, NULL);
 
 	if (ret < 0) {
+		printk("%s: sceKernelStartModule -> 0x%08X\n", __func__, ret);
 		sceKernelUnloadModule(modid);
 
 		return -1;
@@ -66,7 +67,7 @@ static int _sceUsbStart(const char *driverName, int size, void *args)
 			}
 
 			if (g_usbdevice_modid >= 0) {
-				pspUsbDeviceSetDevice(conf.usbdevice - 1, 0, 0);
+				pspUsbDeviceSetDevice(conf.usbdevice - 1, conf.flashprot, 0);
 			}
 		}
 	}

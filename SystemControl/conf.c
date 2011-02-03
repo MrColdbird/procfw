@@ -75,7 +75,7 @@ int sctrlSESetConfigEx(SEConfig *config, int size)
 	int written;
    
 	k1 = pspSdkSetK1(0);
-	fd = sceIoOpen("flashfat1:/config.se", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+	fd = sceIoOpen("flash1:/config.se", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
 
 	if (fd < 0) {
 		pspSdkSetK1(k1);
@@ -108,7 +108,7 @@ int sctrlSEGetConfigEx(SEConfig *config, int size)
 	read = -1;
 	k1 = pspSdkSetK1(0);
 	memset(config, 0, size);
-	fd = sceIoOpen("flashfat1:/config.se", PSP_O_RDONLY, 0666);
+	fd = sceIoOpen("flash1:/config.se", PSP_O_RDONLY, 0666);
 
 	if (fd > 0) {
 		read = sceIoRead(fd, config, size);

@@ -144,6 +144,7 @@ void load_default_conf(SEConfig *config)
 	config->skipgameboot = 1;
 	config->hidepic = 0;
 	config->plugvsh = config->pluggame = config->plugpop = 1;
+	config->usbdevice = 0;
 }
 
 void load_config(void)

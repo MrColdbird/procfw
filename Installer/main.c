@@ -17,12 +17,6 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 #define VERSION_STR "635PRO"
 #define printf pspDebugScreenPrintf
 
-#define PSP_GO   4
-#define PSP_4000 3
-#define PSP_3000 2
-#define PSP_2000 1
-#define PSP_1000 0
-
 int psp_model = 0;
 int disable_smart_copy = 0;
 static u8 buf[64*1024] __attribute__((aligned(64)));
@@ -332,6 +326,12 @@ int main(int argc, char *argv[])
 	switch(psp_model) {
 		case PSP_GO:
 			printf("PSP BRITE N-1000(psp-go) Detected ....\n");
+			break;
+		case PSP_9000:
+			printf("PSP BRITE 9000 Detected ....\n");
+			break;
+		case PSP_7000:
+			printf("PSP BRITE 7000 Detected ....\n");
 			break;
 		case PSP_4000:
 			printf("PSP BRITE 4000 Detected ....\n");

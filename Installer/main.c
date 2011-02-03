@@ -218,6 +218,8 @@ struct CopyList g_file_lists[] = {
 	{ "galaxy.prx", "flash0:/kd/galaxy.prx", },
 	{ "stargate.prx", "flash0:/kd/stargate.prx", },
 	{ "march33.prx", "flash0:/kd/march33.prx", },
+	{ "usbdevice.prx", "flash0:/kd/usbdevice.prx", },
+	{ "satelite.prx", "flash0:/vsh/module/satelite.prx", },
 };
 
 int install_cfw(void)

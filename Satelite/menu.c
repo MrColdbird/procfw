@@ -81,7 +81,7 @@ const char *top_menu_list[TMENU_MAX] ={
 
 
 int item_fcolor[TMENU_MAX];
-char *item_str[TMENU_MAX];
+const char *item_str[TMENU_MAX];
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -100,7 +100,7 @@ int menu_draw(void)
 	const char *msg;
 //	int menu_len;
 	int max_menu;
-	int *pointer;
+	const int *pointer;
 	int xPointer;
 	
 	// check & setup video mode
@@ -177,7 +177,7 @@ int menu_setup(void)
 {
 
 	int i;
-	char *bridge;
+	const char *bridge;
 
 
 	//scePaf_6439FDBC_memset(item_str , 0 , sizeof(item_str));

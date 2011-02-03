@@ -45,29 +45,16 @@ int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
 static SceUID load_satelite(void)
 {
 	SceUID modid;
+	const char *mod = "flash0:/vsh/module/satelite.prx";
 	SceKernelLMOption opt = {
 		.size = 0x14,
-		.mpidtext = 5,
-		.mpiddata = 5,
 		.flags = 0,
 		.access = 1,
+		.position = 1,
 	};
 
-	const char *modlist[] = {
-		"ms0:/satelite.prx",
-		"ef0:/satelite.prx",
-		"flash0:/vsh/module/satelite.prx",
-	};
-
-	int i; for(i=0; i<NELEMS(modlist); ++i) {
-		modid = sceKernelLoadModule(modlist[i], 0, &opt);
-
-		if(modid >= 0) {
-			break;
-		}
-
-		printk("%s: loading %s -> 0x%08X\n", __func__, modlist[i], modid);
-	}
+	modid = sceKernelLoadModule(mod, 0, &opt);
+	printk("%s: loading %s -> 0x%08X\n", __func__, mod, modid);
 
 	return modid;
 }

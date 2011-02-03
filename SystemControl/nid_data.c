@@ -533,6 +533,42 @@ static nid_entry sceMpegbase_driver_nid[] = {
 	{ 0x304882E1, UNKNOWNNID, }, // sceMpegbase_driver_304882E1
 };
 
+static nid_entry sceUmd_nid[] = {
+	{ 0x659587F7, 0x24E838BA, },
+	{ 0xAE53DC2D, 0x507AB2B8, },
+	{ 0x230666E3, 0x7E185F98, },
+	{ 0x319ED97C, 0xE42F8D12, },
+	{ 0x38503380, 0x1228C54A, },
+	{ 0x086DDC0D, 0xE8909D7B, },
+	{ 0x4832ABF3, 0x5BB22C42, },
+	{ 0x4BA25F4A, 0xF80E731B, },
+	{ 0xBD2BDE07, 0x6E350FE4, },
+	{ 0xAEE7404D, 0x58708431, },
+	{ 0x46EBB729, 0x8213F674, },
+	{ 0x6AF9B50A, 0x145DBD8C, },
+	{ 0x87533940, 0xB1E889EB, },
+	{ 0xCBE9F02A, 0xE34F613F, },
+	{ 0x3D0DECD5, 0x8C486A4F, },
+	{ 0xD45D1FE6, 0x7E45DF26, },
+	{ 0xD01B2DC6, 0x80CA9429, },
+	{ 0x3925CBD8, 0xD0F6CBDD, },
+	{ 0x9B22AED7, 0x3F826E9B, },
+	{ 0x71F81482, 0x749B5538, },
+	{ 0x7850F057, 0x04349047, },
+	{ 0x27A764A1, 0x3C650E45, },
+	{ 0xF8352373, 0xAA66D818, },
+	{ 0x5469DC37, 0xAC4709C0, },
+	{ 0x2D81508D, 0xFD058E55, },
+	{ 0x56202973, 0xF0E95430, },
+	{ 0x4A9E5E29, 0xFAAA2DC6, },
+	{ 0x075F1E0B, 0x8799D350, },
+	{ 0x340B7686, 0x47B447E5, },
+	{ 0xEB56097E, 0xF4DF9EDE, },
+	{ 0x6A41ED25, 0x107064CC, },
+	{ 0x4C952ACF, 0xC886430B, },
+	{ 0xF2D0EDFB, 0x8213F674, },
+};
+
 resolver_config nid_fix[] = {
 #define NID_ENTRY(libname) \
 	{ #libname, NELEMS(libname##_nid), libname##_nid, }
@@ -557,6 +593,7 @@ resolver_config nid_fix[] = {
 	NID_ENTRY(sceGe_driver),
 	NID_ENTRY(sceRtc_driver),
 	NID_ENTRY(sceMpegbase_driver),
+	NID_ENTRY(sceUmd),
 #undef NID_ENTRY
 };
 

@@ -280,4 +280,6 @@ void sctrlHENSetSpeed(int cpu, int bus);
 */
 int sctrlHENSetMemory(u32 p2, u32 p8);
 
+void sctrlHENPatchSyscall(u32 addr, void *newaddr);
+
 #endif

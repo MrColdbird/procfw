@@ -12,6 +12,7 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "systemctrl_se.h"
+#include "systemctrl_private.h"
 #include "main.h"
 
 static int (*g_VshMenuCtrl) (SceCtrlData *, int);
@@ -36,6 +37,13 @@ int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
    	k1 = pspSdkSetK1(0);
 	memcpy(&conf, config, sizeof(conf));
 	ret = sctrlSESetConfig(&conf);
+
+	if (conf.vshcpuspeed != 0) {
+		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);
+	} else {
+		SetSpeed(222, 111);
+	}
+
 	g_VshMenuCtrl = NULL;
 	pspSdkSetK1(k1);
 	

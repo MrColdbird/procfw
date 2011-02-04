@@ -18,6 +18,30 @@ static STMOD_HANDLER previous;
 static void patch_sceWlan_Driver(u32 text_addr);
 static void patch_scePower_Service(u32 text_addr);
 
+extern int sceKernelGetSystemStatus(void);
+
+static inline void set_clock(void)
+{
+	int key_config, ret;
+
+	ret = sceKernelGetSystemStatus();
+   
+	// status becomes 0x00020000 after init_file loads
+	if (ret != 0x00020000) {
+		return;
+	}
+	
+	key_config = sceKernelInitKeyConfig();
+
+	if (key_config == PSP_INIT_KEYCONFIG_GAME ||
+			key_config == PSP_INIT_KEYCONFIG_POPS
+	   ) {
+		SetSpeed(conf.umdisocpuspeed, conf.umdisobusspeed);
+	} else if (conf.vshcpuspeed != 0) {
+		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);
+	}
+}
+
 static int syspatch_module_chain(SceModule2 *mod)
 {
 	int apitype;
@@ -101,6 +125,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 #endif
 
 	patch_module_for_version_spoof((SceModule*)mod);
+	set_clock();
 
 	if (previous)
 		return (*previous)(mod);

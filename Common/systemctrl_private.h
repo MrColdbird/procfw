@@ -20,4 +20,6 @@ void SetUmdFile(char *file);
  */
 int sctrlKernelSetUMDEmuFile(const char *iso);
 
+void SetSpeed(int cpuspd, int busspd);
+
 #endif

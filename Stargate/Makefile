@@ -12,7 +12,7 @@ endif
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
-PSP_FW_VERSION = 500
+PSP_FW_VERSION = 635
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

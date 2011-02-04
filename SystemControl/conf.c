@@ -8,7 +8,7 @@
 
 SEConfig conf;
 
-#define CONFIG_MAGIC 0x47434553
+#define CONFIG_MAGIC 0x47434554
 
 int GetConfig(SEConfig *config)
 {

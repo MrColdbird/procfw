@@ -12,6 +12,7 @@
 #include "systemctrl_se.h"
 #include "ui.h"
 #include "blit.h"
+#include "utils.h"
 
 int menu_draw(void);
 int menu_setup(void);
@@ -24,6 +25,7 @@ void change_usb(int dir );
 void change_umd_mode(int dir );
 void change_plugins(int dir , int flag);
 void change_bool_option(int *p, int direction);
+void change_region(int dir, int max);
 
 #define scePaf_967A56EF_strlen scePaf_strlen
 #define scePaf_6439FDBC_memset scePaf_memset

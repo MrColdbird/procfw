@@ -27,7 +27,20 @@ const char *iso[]={
 	"Sony NP9660"
 };
 
-#define TMENU_MAX 16
+const char *region_name[] = {
+	"Disabled",
+	"Japan",
+	"America",
+	"Europe",
+	"Korea",
+	"Australia",
+	"Hongkong",
+	"Taiwan",
+	"Russia",
+	"China",
+};
+
+#define TMENU_MAX 17
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -45,6 +58,7 @@ enum{
 	TMENU_SKIP_GAMEBOOT,
 	TMENU_HIDE_PIC,
 	TMENU_FLASH_PROT,
+	TMENU_FAKE_REGION,
 	TMENU_SHUTDOWN_DEVICE,
 	TMENU_RESET_DEVICE,
 	TMENU_EXIT
@@ -66,9 +80,10 @@ const char *top_menu_list[TMENU_MAX] ={
 	"SKIP GAMEBOOT  ",
 	"HIDE PIC       ",
 	"FLASH PROTECT  ",
+	"FAKE REGION    ",
 	"SHUTDOWN DEVICE",
 	"RESET DEVICE",
-	"EXIT"
+	"EXIT",
 };
 
 int item_fcolor[TMENU_MAX];
@@ -143,6 +158,15 @@ static inline const char *get_enable_disable(int opt)
 	return enable_disable[opt != 0 ? 1 : 0];
 }
 
+static inline const char *get_region_name(int region)
+{
+	if (region < NELEMS(region_name)) {
+		return region_name[region];
+	}
+
+	return region_name[0];
+}
+
 int menu_setup(void)
 {
 	int i;
@@ -204,6 +228,7 @@ int menu_setup(void)
 	item_str[TMENU_SKIP_GAMEBOOT]  = get_enable_disable(cnf.skipgameboot);
 	item_str[TMENU_HIDE_PIC]  = get_enable_disable(cnf.hidepic);
 	item_str[TMENU_FLASH_PROT]  = get_enable_disable(cnf.flashprot);
+	item_str[TMENU_FAKE_REGION]  = get_region_name(cnf.fakeregion);
 	
 	return 0;
 }
@@ -275,6 +300,9 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_FLASH_PROT:
 			if(direction) change_bool_option(&cnf.flashprot, direction);
+			break;
+		case TMENU_FAKE_REGION:
+			if(direction) change_region(direction, NELEMS(region_name)-1);
 			break;
 		case TMENU_SHUTDOWN_DEVICE:			
 			if(direction==0) {

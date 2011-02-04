@@ -113,6 +113,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
+		patch_sceChkreg();
+		sync_cache();
+	} 
+
 	if(psp_model == PSP_GO && 0 == strcmp(mod->modname, "pspMarch33_Driver")) {
 		patch_pspMarch33_Driver(mod->text_addr);
 		sync_cache();

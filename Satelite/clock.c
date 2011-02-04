@@ -74,6 +74,15 @@ void change_umd_mode(int dir)
 	cnf.umdmode=sel;
 }
 
+void change_region(int dir, int max)
+{
+	int sel = cnf.fakeregion;
+
+	// select new
+	sel = limit(sel+dir, 0, max);
+	cnf.fakeregion=sel;
+}
+
 void change_plugins(int dir, int flag)
 {
 	int sel;

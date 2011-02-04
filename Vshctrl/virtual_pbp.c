@@ -678,8 +678,19 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 			buf = oe_malloc(SECTOR_SIZE+64);
 
 			if (buf != NULL) {
+				int ret;
+
 				buf_64 = PTR_ALIGN_64(buf);
-				isoRead(buf_64, vpbp->sects[0].lba, 0, SECTOR_SIZE);
+				ret = isoRead(buf_64, vpbp->sects[0].lba, 0, SECTOR_SIZE);
+
+				if (ret < 0) {
+					printk("%s: isoRead -> 0x%08X\n", __func__, ret);
+					oe_free(buf);
+					unlock();
+
+					return -37;
+				}
+
 				get_sfo_title(sfotitle, 64, buf_64);
 				get_sfo_disc_id(disc_id, 12, buf_64);
 				oe_free(buf);
@@ -715,8 +726,18 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 					buf_64 = PTR_ALIGN_64(buf);
 
 					while (rest > 0) {
+						int ret;
+
 						re = MIN(rest, 8*SECTOR_SIZE);
-						isoRead(buf_64, vpbp->sects[i].lba, pos, re);
+						ret = isoRead(buf_64, vpbp->sects[i].lba, pos, re);
+
+						if (ret < 0) {
+							printk("%s: isoRead -> 0x%08X\n", __func__, ret);
+							unlock();
+
+							return -38;
+						}
+
 						memcpy(data, buf_64, re);
 						rest -= re;
 						pos += re;

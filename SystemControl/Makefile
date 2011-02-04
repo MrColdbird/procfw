@@ -25,6 +25,7 @@ OBJS = main.o \
 	   plugins.o \
 	   psnfix.o \
 	   isoload.o \
+	   cpuclock.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
 	   ../Common/strsafe.o

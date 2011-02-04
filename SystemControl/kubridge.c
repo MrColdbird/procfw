@@ -39,7 +39,7 @@ SceUID kuKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, 
 	return ret;
 }
 
-SceUID kuKernelInitApitype()
+int kuKernelInitApitype(void)
 {
 	return sceKernelInitApitype();
 }
@@ -82,7 +82,14 @@ int kuKernelGetUserLevel(void)
 
 int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 {
-	return SysMemForKernel_00E9A04A(addr, size, prot);
+	int ret;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
+	ret = SysMemForKernel_00E9A04A(addr, size, prot);
+	pspSdkSetK1(k1);
+
+	return ret;
 }
 
 int kuKernelGetModel(void)

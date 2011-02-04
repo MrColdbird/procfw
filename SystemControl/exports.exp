@@ -49,6 +49,7 @@ PSP_EXPORT_FUNC(sctrlSEGetConfig)
 PSP_EXPORT_FUNC(sctrlKernelSetInitApitype)
 PSP_EXPORT_FUNC(sctrlKernelSetUMDEmuFile)
 PSP_EXPORT_FUNC(sctrlKernelSetInitFileName)
+PSP_EXPORT_FUNC(FindProc)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlForKernel, 0, 0x0001)
@@ -90,6 +91,7 @@ PSP_EXPORT_FUNC(sctrlSEGetConfig)
 PSP_EXPORT_FUNC(sctrlKernelSetInitApitype)
 PSP_EXPORT_FUNC(sctrlKernelSetUMDEmuFile)
 PSP_EXPORT_FUNC(sctrlKernelSetInitFileName)
+PSP_EXPORT_FUNC(FindProc)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x4001)

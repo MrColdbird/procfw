@@ -185,8 +185,8 @@ int sctrlKernelSetDevkitVersion(int version)
 	k1 = pspSdkSetK1(0);
 	ret = sceKernelDevkitVersion();
 
-	_sh((version>>16), 0x88011AB8); // 0x88011AAC in 6.20
-	_sh((version&0xFFFF), 0x88011AC0); // 0x88011AB4 in 6.20
+	_sh((version>>16), 0x88011998); // 0x88011AAC in 6.20
+	_sh((version&0xFFFF), 0x880119A0); // 0x88011AB4 in 6.20
 
 	sync_cache();
 	pspSdkSetK1(k1);
@@ -333,7 +333,7 @@ void sctrlHENPatchSyscall(void *addr, void *newaddr)
 
 int sctrlHENSetMemory(u32 p2, u32 p9)
 {
-	if(p2 != 0 && (p2 + p9) == 50) {
+	if(p2 != 0 && (p2 + p9) == MAX_HIGH_MEMSIZE) {
 		p2_size = p2;
 		p9_size = p9;
 	}

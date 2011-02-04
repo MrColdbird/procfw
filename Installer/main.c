@@ -226,7 +226,7 @@ int install_cfw(void)
 {
 	int ret;
 
-	sceIoRemove("flash1:/config.se");
+//	sceIoRemove("flash1:/config.se");
 
 	int i; for(i=0; i<NELEMS(g_file_lists); ++i) {
 		ret = smart_copy_file(g_file_lists[i].src, g_file_lists[i].dst);

@@ -15,6 +15,7 @@
 #include "systemctrl_se.h"
 #include "main.h"
 #include "virtual_pbp.h"
+#include "strsafe.h"
 
 extern int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count);
 extern void patch_sceUSB_Driver(void);
@@ -27,7 +28,7 @@ typedef struct _HookUserFunctions {
 static STMOD_HANDLER previous;
 SEConfig conf;
 
-static void patch_sysconf_plugin_module(u32 text_addr);
+static void patch_sysconf_plugin_module(SceModule2 *mod);
 static void patch_game_plugin_module(u32 text_addr);
 static void patch_vsh_module(SceModule2 * mod);
 
@@ -44,7 +45,7 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	text_addr = mod->text_addr;
 
 	if(0 == strcmp(mod->modname, "sysconf_plugin_module")) {
-		patch_sysconf_plugin_module(text_addr);
+		patch_sysconf_plugin_module(mod);
 		sync_cache();
 	}
 
@@ -113,11 +114,43 @@ static inline void ascii2utf16(char *dest, const char *src)
 	*dest++ = '\0';
 }
 
-static void patch_sysconf_plugin_module(u32 text_addr)
+static const char *g_cfw_dirs[] = {
+	"/seplugins",
+	"/ISO",
+};
+
+int myIoMkdir(const char *dir, SceMode mode)
+{
+	int ret, i;
+	u32 k1;
+
+	if(0 == strcmp(dir, "ms0:/PSP/GAME") || 
+			0 == strcmp(dir, "ef0:/PSP/GAME")) {
+		k1 = pspSdkSetK1(0);
+
+		for(i=0; i<NELEMS(g_cfw_dirs); ++i) {
+			char path[40];
+
+			get_device_name(path, sizeof(path), dir);
+			STRCAT_S(path, g_cfw_dirs[i]);
+			sceIoMkdir(path, mode);
+		}
+
+		pspSdkSetK1(k1);
+	}
+
+	ret = sceIoMkdir(dir, mode);
+
+	return ret;
+}
+
+static void patch_sysconf_plugin_module(SceModule2 *mod)
 {
 	void *p;
 	char str[20];
+	u32 text_addr;
 
+	text_addr = mod->text_addr;
 #ifdef NIGHTLY_VERSION
 	sprintf(str, "6.35 PRO-r%d", NIGHTLY_VERSION);
 #else
@@ -136,6 +169,8 @@ static void patch_sysconf_plugin_module(u32 text_addr)
 		ascii2utf16(p, str);
 	}
 
+	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
+	
 	sync_cache();
 }
 

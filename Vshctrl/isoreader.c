@@ -89,7 +89,8 @@ static int readRawData(void* addr, u32 size, int offset)
 		if (ret >= 0) {
 			break;
 		} else {
-			printk("%s: got error 0x%08X, reOpening ISO: %s\n", __func__, ret, g_filename);
+			printk("%s: sceIoLseek32 -> 0x%08X\n", __func__, ret);
+			reOpen();
 		}
 
 		sceKernelDelayThread(100000);
@@ -101,7 +102,9 @@ static int readRawData(void* addr, u32 size, int offset)
 		if(ret >= 0) {
 			break;
 		} else {
-			printk("%s: got error 0x%08X, reOpening ISO: %s\n", __func__, ret, g_filename);
+			printk("%s: sceIoRead -> 0x%08X\n", __func__, ret);
+			reOpen();
+			sceIoLseek32(g_isofd, offset, PSP_SEEK_SET);
 		}
 
 		sceKernelDelayThread(100000);
@@ -123,8 +126,8 @@ static int readSectorCompressed(int sector, void *addr)
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = readRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
 
-		if (ret < 0) {
-			return ret;
+		if (ret != sizeof(g_CISO_idx_cache)) {
+			return -21;
 		}
 
 		g_CISO_cur_idx = sector;
@@ -144,8 +147,8 @@ static int readSectorCompressed(int sector, void *addr)
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = readRawData(g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(CISOHeader));
 
-		if (ret < 0) {
-			return ret;
+		if (ret != sizeof(g_CISO_idx_cache)) {
+			return -22;
 		}
 
 		g_CISO_cur_idx = sector;
@@ -161,10 +164,10 @@ static int readSectorCompressed(int sector, void *addr)
 	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		ret = readRawData(PTR_ALIGN_64(g_ciso_dec_buf), CISO_DEC_BUFFER_SIZE, offset);
 
-		if (ret < 0) {
+		if (ret != CISO_DEC_BUFFER_SIZE) {
 			g_ciso_dec_buf_offset = 0xFFF00000;
 
-			return ret;
+			return -24;
 		}
 
 		g_ciso_dec_buf_offset = offset;
@@ -221,8 +224,8 @@ static int findFile(const char * file, u32 lba, u32 dir_size, u32 is_dir, Iso966
 			lba = isoPos2LBA(pos);
 			ret = readSector(lba, g_sector_buffer);
 
-			if (ret < 0) {
-				return ret;
+			if (ret != SECTOR_SIZE) {
+				return -23;
 			}
 		}
 
@@ -410,7 +413,7 @@ int isoOpen(const char *path)
 
 	ret = readSector(16, g_sector_buffer);
 
-	if (ret < 0) {
+	if (ret != SECTOR_SIZE) {
 		ret = -7;
 		goto error;
 	}
@@ -487,8 +490,10 @@ int isoRead(void *buffer, u32 lba, int offset, u32 size)
 	while(remaining > 0) {
 		ret = readSector(isoPos2LBA(pos), g_sector_buffer);
 
-		if (ret < 0) {
-			break;
+		if (ret != SECTOR_SIZE) {
+			printk("%s: readSector -> 0x%08X\n", __func__, ret);
+
+			return -20;
 		}
 
 		re = MIN(isoPos2RestSize(pos), remaining);

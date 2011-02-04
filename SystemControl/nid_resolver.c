@@ -178,7 +178,7 @@ static SceUID proKernelSearchModuleByName(char * name)
 	return mod->modid;
 }
 
-static void resolve_removed_clib(SceModule *mod)
+static void resolve_clib(SceModule *mod)
 {
 	hook_import_bynid(mod, "ModuleMgrForKernel", 0x04B7BD22, (void*)proKernelSearchModuleByName, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x89B79CB1, (void*)ownstrcspn, 0);
@@ -190,8 +190,23 @@ static void resolve_removed_clib(SceModule *mod)
 	hook_import_bynid(mod, "SysclibForKernel", 0x18FE80DB, (void*)0x88002EC4, 0); // longjmp
 }
 
+static void resolve_syscon_driver(SceModule *mod)
+{
+	void *_sceSysconPowerStandby;
+	SceModule2 *syscon;
+
+	syscon = (SceModule2*)sceKernelFindModuleByName("sceSYSCON_Driver");
+
+	if(syscon == NULL)
+		return;
+
+	_sceSysconPowerStandby = (void*)(mod->text_addr + 0x00002C6C);
+	hook_import_bynid(mod, "sceSyscon_driver", 0xC8439C57, _sceSysconPowerStandby, 0);
+}
+
 void resolve_removed_nid(SceModule *mod)
 {
 	resolve_sceKernelIcacheClearAll(mod);
-	resolve_removed_clib(mod);
+	resolve_clib(mod);
+	resolve_syscon_driver(mod);
 }

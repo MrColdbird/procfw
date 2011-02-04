@@ -10,7 +10,6 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "libs.h"
-#include "rebootex_conf.h"
 
 static const int g_cpu_list[]={20, 75, 100, 133, 222, 266, 300, 333};
 static u32 g_scePowerSetClockFrequency_orig;

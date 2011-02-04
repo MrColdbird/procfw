@@ -297,7 +297,7 @@ int main(int argc, char *argv[])
 	fw_version = sceKernelDevkitVersion();
 	
 	if (fw_version != 0x06030510) {
-		printf("This program requires 6.35 Sorry.\n");
+		printf("Sorry. This program requires 6.35.\n");
 		goto exit;
 	}
 

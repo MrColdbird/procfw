@@ -27,6 +27,7 @@ OBJS = main.o \
 	   isoload.o \
 	   cpuclock.o \
 	   vlf_patch.o \
+	   fake_region.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
 	   ../Common/strsafe.o

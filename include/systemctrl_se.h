@@ -12,14 +12,12 @@ enum
 	FAKE_REGION_JAPAN = 1,
 	FAKE_REGION_AMERICA = 2,
 	FAKE_REGION_EUROPE = 3,
-	FAKE_REGION_KOREA = 4, /* do not use, may cause brick on restore default settings */
-	FAKE_REGION_UNK = 5, 
-	FAKE_REGION_UNK2 = 6,
-	FAKE_REGION_AUSTRALIA = 7,
-	FAKE_REGION_HONGKONG = 8, /* do not use, may cause brick on restore default settings */
-	FAKE_REGION_TAIWAN = 9, /* do not use, may cause brick on restore default settings */
-	FAKE_REGION_RUSSIA = 10,
-	FAKE_REGION_CHINA = 11, /* do not use, may cause brick on restore default settings */
+	FAKE_REGION_KOREA = 4, 
+	FAKE_REGION_AUSTRALIA = 5,
+	FAKE_REGION_HONGKONG = 6,
+	FAKE_REGION_TAIWAN = 7,
+	FAKE_REGION_RUSSIA = 8,
+	FAKE_REGION_CHINA = 9,
 };
 
 // No MODE_OE_LEGACY any more
@@ -48,6 +46,7 @@ typedef struct
 	int pluggame;
 	int plugpop;
 	int flashprot;
+	int fakeregion;
 } SEConfig;
 
 /**

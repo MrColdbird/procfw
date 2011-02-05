@@ -18,7 +18,6 @@ static void load_default_rebootex_config()
 	memset(&rebootex_conf, 0, sizeof(rebootex_conf));
 	rebootex_conf.magic = REBOOTEX_CONFIG_MAGIC;
 	rebootex_conf.iso_mode = 0;
-	rebootex_conf.bootdevice = 0x50;
 	SetUmdFile("");
 }
 
@@ -30,11 +29,6 @@ void load_rebootex_config(void)
 
 	if (conf->magic == REBOOTEX_CONFIG_MAGIC) {
 		rebootex_conf.iso_mode = conf->iso_mode;
-
-		if (conf->bootdevice == 0x40 || conf->bootdevice == 0x50) {
-			rebootex_conf.bootdevice = conf->bootdevice;
-		}
-
 		SetUmdFile((char*)0x88FB0100);
 		printk("%s: iso_mode %d fn: %s\n", __func__, rebootex_conf.iso_mode, GetUmdFile());
 	}

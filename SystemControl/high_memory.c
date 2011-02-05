@@ -11,7 +11,6 @@
 #include "systemctrl.h"
 #include "printk.h"
 
-static int forced_umdcache_kill = 0;
 int g_high_memory_enabled = 0;
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.

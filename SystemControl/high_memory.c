@@ -52,7 +52,7 @@ static inline int can_override_high_memory_setting(void)
 		return 0;
 
 	// p2 and p9 size untouch?
-	if(g_p2_size != 24 || g_p9_size != MAX_HIGH_MEMSIZE - 24)
+	if(g_p2_size != 24 || g_p9_size != 24)
 		return 0;
 
 	// minimal size as "xx0:/PSP/GAME/x/EBOOT.PBP"
@@ -77,6 +77,10 @@ void patch_partitions(void)
 	// real len we are going to use
 	u32 p2_len = g_p2_size;
 	u32 p9_len = g_p9_size;
+	u32 p8_len = 4;
+
+	//memory layout: P2 P9 P8 P11
+	//P11 only occurs in the first boot
 
 	//system memory manager
 	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
@@ -84,8 +88,14 @@ void patch_partitions(void)
 	//get partition 2
 	unsigned int * p2 = GetPartition(2);
 
+	//get partition 8
+	unsigned int * p8 = GetPartition(8);
+
 	//get partition 9
 	unsigned int * p9 = GetPartition(9);
+
+	//get partition 11, only occurs in first boot
+	unsigned int * p11 = GetPartition(11);
 
 	//set highmemory for homebrew eboots, it doesn't hurt.
 	if (can_override_high_memory_setting()) {
@@ -93,7 +103,7 @@ void patch_partitions(void)
 		p9_len = 0;
 	}
 
-	if(p2_len <= 24 || (p2_len + p9_len) != MAX_HIGH_MEMSIZE) {
+	if(p2_len <= 24 || (p2_len + p9_len) > MAX_HIGH_MEMSIZE) {
 		return;
 	}
 
@@ -102,7 +112,7 @@ void patch_partitions(void)
 
 	//reset partition length for next reboot
 	g_p2_size = 24;
-	g_p9_size = MAX_HIGH_MEMSIZE - 24;
+	g_p9_size = 24;
 
 	if(p2 != NULL) {
 		//resize partition 2
@@ -119,6 +129,24 @@ void patch_partitions(void)
 		((unsigned int *)(p9[4]))[5] = (p9_len << 21) | 0xFC;
 	} else {
 		printk("%s: part9 not found\n", __func__);
+	}
+
+	if (p8 != NULL) {
+		// move p8 to the end of p9
+		p8[1] = ((p2_len + p9_len) << 20) + 0x88800000;
+	} else {
+		printk("%s: part8 not found\n", __func__);
+	}
+
+	if (p11 != NULL) {
+		u32 p11_len = 0;
+
+		// move p11 to the end of p8
+		p11[1] = ((p2_len + p9_len + p8_len) << 20) + 0x88800000;
+		p11[2] = p11_len << 20;
+		((unsigned int *)(p11[4]))[5] = (p11_len << 21) | 0xFC;
+	} else {
+//		printk("%s: part11 not found\n", __func__);
 	}
 
 	unlock_high_memory();

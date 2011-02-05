@@ -720,7 +720,6 @@ static nid_entry sceSyscon_driver_nid[] = {
 	{ 0xBAAECDF8, 0xB1F1AA4F, },
 	{ 0x7479DB05, 0xC15ECA50, },
 	{ 0x6848D817, 0xCF14E5F9, },
-	{ 0x2EE82492, 0x2EE82492, },
 	{ 0xFC32141A, 0x035EA6E4, },
 	{ 0xF775BC34, 0x8278F12B, },
 	{ 0xA9AEF39F, 0xE5E76E20, },

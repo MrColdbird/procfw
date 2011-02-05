@@ -31,13 +31,13 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	_sw(psp_model, 0x88FB0000);
 
 	//store custom partition size
-	if(p2_size != 24)
+	if(g_p2_size != 24)
 	{
 		//store partition 2 length
-		_sw(p2_size, 0x88FB0008);
+		_sw(g_p2_size, 0x88FB0008);
 
 		//store partition 9 length
-		_sw(p9_size, 0x88FB000C);
+		_sw(g_p9_size, 0x88FB000C);
 	}
 
 	_sw((u32)g_insert_module_before, 0x88FB0010);

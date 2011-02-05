@@ -22,7 +22,6 @@ typedef enum {
 typedef struct _rebootex_config {
 	u32 magic;
 	int iso_mode;
-	int bootdevice;
 } rebootex_config;
 
 extern rebootex_config rebootex_conf;

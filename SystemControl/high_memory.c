@@ -12,12 +12,12 @@
 #include "printk.h"
 
 static int forced_umdcache_kill = 0;
-int high_memory_enabled = 0;
+int g_high_memory_enabled = 0;
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
 {
-	if(forced_umdcache_kill || (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_GAME && sceKernelBootFrom() == PSP_BOOT_MS)) {
+	if(g_high_memory_enabled == 1) {
 		//kill module start
 		_sw(0x03E00008, text_addr + 0x9C8);
 		_sw(0x24020001, text_addr + 0x9CC);
@@ -26,7 +26,7 @@ void patch_umdcache(u32 text_addr)
 
 void unlock_high_memory(void)
 {
-	if(!high_memory_enabled) {
+	if(!g_high_memory_enabled) {
 		return;
 	}
 	
@@ -36,10 +36,48 @@ void unlock_high_memory(void)
 	}
 }
 
+static inline int can_override_high_memory_setting(void)
+{
+	int apitype;
+	const char *path;
+
+	path = sceKernelInitFileName();
+	apitype = sceKernelInitApitype();
+
+	// have init file?
+	if(path == NULL)
+		return 0;
+
+	// homebrew runlevel?
+	if(apitype != PSP_INIT_APITYPE_MS2 && apitype != 0x152)
+		return 0;
+
+	// p2 and p9 size untouch?
+	if(g_p2_size != 24 || g_p9_size != MAX_HIGH_MEMSIZE - 24)
+		return 0;
+
+	// minimal size as "xx0:/PSP/GAME/x/EBOOT.PBP"
+	if(strlen(path) < 25)
+		return 0;
+
+	// validate path
+	if(0 != strncmp(path + 2, "0:/PSP/GAME/", sizeof("0:/PSP/GAME/")-1))
+		return 0;
+
+	// validate ext
+	if (0 != strcmp(path + strlen(path) - 3, "PBP")) {
+		return 0;
+	}	
+
+	return 1;
+}
+
 //it's partition 9 on 6.31... its smaller than 5.X one too... only 24MB instead of 28MB...
 void patch_partitions(void) 
 {
-	int apitype;
+	// real len we are going to use
+	u32 p2_len = g_p2_size;
+	u32 p9_len = g_p9_size;
 
 	//system memory manager
 	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
@@ -50,43 +88,39 @@ void patch_partitions(void)
 	//get partition 9
 	unsigned int * p9 = GetPartition(9);
 
-	//get new length
-	u32 p2_len = p2_size;
-	u32 p9_len = p9_size;
-
-	//grab executable name
-	char * path = sceKernelInitFileName();
-
-	apitype = sceKernelInitApitype();
-
 	//set highmemory for homebrew eboots, it doesn't hurt.
-	if ((apitype == PSP_INIT_APITYPE_MS2 || apitype == 0x152) && p2_size == 24
-			&& p9_size == MAX_HIGH_MEMSIZE - 24 && path && strlen(path) >= 25 && strncmp(path + 2,
-				"0:/PSP/GAME/", 12) == 0 && strcmp(path + strlen(path) - 3, "PBP") == 0) {
-		//override memory settings
+	if (can_override_high_memory_setting()) {
 		p2_len = MAX_HIGH_MEMSIZE;
 		p9_len = 0;
 	}
 
+	if(p2_len <= 24 || (p2_len + p9_len) != MAX_HIGH_MEMSIZE) {
+		return;
+	}
+
 	//force umdcache kill for disc0 reboots
-	if(p2_len != 24) forced_umdcache_kill = 1;
+	if(p2_len != 24) g_high_memory_enabled = 1;
 
-	//reset saved length
-	p2_size = 24;
-	p9_size = MAX_HIGH_MEMSIZE - 24;
+	//reset partition length for next reboot
+	g_p2_size = 24;
+	g_p9_size = MAX_HIGH_MEMSIZE - 24;
 
-	//valid partition size
-	if(p2_len > 24 && (p2_len + p9_len) == MAX_HIGH_MEMSIZE && p9) {
+	if(p2 != NULL) {
 		//resize partition 2
 		p2[2] = p2_len << 20;
 		((unsigned int *)(p2[4]))[5] = (p2_len << 21) | 0xFC;
+	} else {
+		printk("%s: part2 not found\n", __func__);
+	}
 
+	if (p9 != NULL) {
 		//resize partition 9
 		p9[1] = (p2_len << 20) + 0x88800000;
 		p9[2] = p9_len << 20;
 		((unsigned int *)(p9[4]))[5] = (p9_len << 21) | 0xFC;
-
-		unlock_high_memory();
-		high_memory_enabled = 1;
+	} else {
+		printk("%s: part9 not found\n", __func__);
 	}
+
+	unlock_high_memory();
 }

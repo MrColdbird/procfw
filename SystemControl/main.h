@@ -56,9 +56,9 @@ void usb_charge(void);
 
 #define MAX_HIGH_MEMSIZE 51
 
-extern u32 p2_size;
-extern u32 p9_size;
-extern int high_memory_enabled;
+extern u32 g_p2_size;
+extern u32 g_p9_size;
+extern int g_high_memory_enabled;
 
 //for sctrlHENLoadModuleOnReboot
 extern char *g_insert_module_before;

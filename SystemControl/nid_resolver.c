@@ -169,18 +169,8 @@ static char * ownstrtok(char * s, const char * delim)
 	return ownstrtok_r(s, delim, &last);
 }
 
-static SceUID proKernelSearchModuleByName(char * name)
-{
-	//find module by name
-	SceModule2 * mod = (SceModule2 *)sceKernelFindModuleByName(name);
-
-	//return uid
-	return mod->modid;
-}
-
 static void resolve_clib(SceModule *mod)
 {
-	hook_import_bynid(mod, "ModuleMgrForKernel", 0x04B7BD22, (void*)proKernelSearchModuleByName, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x89B79CB1, (void*)ownstrcspn, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x62AE052F, (void*)ownstrspn, 0);
 	hook_import_bynid(mod, "SysclibForKernel", 0x87F8D2DA, (void*)ownstrtok, 0);

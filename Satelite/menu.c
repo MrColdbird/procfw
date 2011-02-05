@@ -40,7 +40,7 @@ const char *region_name[] = {
 	"China",
 };
 
-#define TMENU_MAX 17
+#define TMENU_MAX 16
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -54,7 +54,6 @@ enum{
 //	TMENU_PLUGINS_MGR,
 	TMENU_USB_CHARGE,
 	TMENU_HIDE_MAC,
-	TMENU_USE_VERSION,
 	TMENU_SKIP_GAMEBOOT,
 	TMENU_HIDE_PIC,
 	TMENU_FLASH_PROT,
@@ -76,7 +75,6 @@ const char *top_menu_list[TMENU_MAX] ={
 //	"PLUGINS MANAGER  ->",
 	"USB CHARGE     ",
 	"HIDE MAC       ",
-	"USE VERSION.TXT",
 	"SKIP GAMEBOOT  ",
 	"HIDE PIC       ",
 	"FLASH PROTECT  ",
@@ -224,7 +222,6 @@ int menu_setup(void)
 	item_str[TMENU_UMD_MODE] = iso[cnf.umdmode];
 	item_str[TMENU_USB_CHARGE]  = get_enable_disable(cnf.usbcharge);
 	item_str[TMENU_HIDE_MAC]  = get_enable_disable(cnf.machidden);
-	item_str[TMENU_USE_VERSION]  = get_enable_disable(cnf.useversion);
 	item_str[TMENU_SKIP_GAMEBOOT]  = get_enable_disable(cnf.skipgameboot);
 	item_str[TMENU_HIDE_PIC]  = get_enable_disable(cnf.hidepic);
 	item_str[TMENU_FLASH_PROT]  = get_enable_disable(cnf.flashprot);
@@ -288,9 +285,6 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_HIDE_MAC:
 			if(direction) change_bool_option(&cnf.machidden, direction);
-			break;
-		case TMENU_USE_VERSION:
-			if(direction) change_bool_option(&cnf.useversion, direction);
 			break;
 		case TMENU_SKIP_GAMEBOOT:
 			if(direction) change_bool_option(&cnf.skipgameboot, direction);

@@ -24,8 +24,8 @@ int versionspoofer(u8 *buf, u32 size, u32* newsize)
 		u32 k1 = pspSdkSetK1(0);
 
 		//open version.txt
-		SceUID fd = sceIoOpen("ms0:/version.txt", PSP_O_RDONLY, 0777);
-		if(fd < 0) fd = sceIoOpen("ef0:/version.txt", PSP_O_RDONLY, 0777);
+		SceUID fd = sceIoOpen("ms0:/seplugins/version.txt", PSP_O_RDONLY, 0777);
+		if(fd < 0) fd = sceIoOpen("ef0:/seplugins/version.txt", PSP_O_RDONLY, 0777);
 
 		if(fd >= 0) {
 			//read contents

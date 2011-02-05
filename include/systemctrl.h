@@ -276,7 +276,7 @@ void sctrlHENSetSpeed(int cpu, int bus);
  *
  * @returns 0 on success, < 0 on error.
  * This function is only available in the slim. The function will fail
- * if p2+p8 > 51 or p2 == 0
+ * if p2+p8 > 52 or p2 == 0
 */
 int sctrlHENSetMemory(u32 p2, u32 p8);
 

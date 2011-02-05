@@ -33,7 +33,7 @@ int g_insert_module_flags;
 
 // for sctrlHENSetMemory
 u32 g_p2_size = 24;
-u32 g_p9_size = MAX_HIGH_MEMSIZE - 24;
+u32 g_p9_size = 24;
 
 static char g_initfilename[80];
 static char g_iso_filename[128];

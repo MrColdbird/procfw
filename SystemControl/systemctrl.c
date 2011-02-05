@@ -146,7 +146,7 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	mod = (SceModule2*) sceKernelFindModuleByName("sceLoadExec");
 	text_addr = mod->text_addr;
 
-	if (psp_model == 4) {
+	if (psp_model == PSP_GO) {
 		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x25C0); // 0x2558 in 6.20
 	} else {
 		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x236C); // 0x2304 in 6.20

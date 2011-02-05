@@ -43,7 +43,7 @@ void patch_sceLoadExec(void)
 
 	text_addr = loadexec->text_addr;
 
-	if(psp_model == 4) { // PSP-N1000
+	if(psp_model == PSP_GO) { // PSP-N1000
 		offsets[0] = 0x2F90;
 		offsets[1] = 0x2FDC;
 	} else {

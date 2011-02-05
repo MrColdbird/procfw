@@ -31,8 +31,6 @@ typedef struct _UtilityHookEntry {
 static int (*_sceUtilityLoadModule)(int id);
 static int (*_sceUtilityUnloadModule)(int id);
 
-static int g_umd_mode = -1;
-
 int myUtilityLoadModule(int id)
 {
 	int ret;
@@ -42,10 +40,8 @@ int myUtilityLoadModule(int id)
 
 	// fake NPDRM load in np9660
 	if (ret == 0x80020139 && id == 0x500) {
-		if (g_umd_mode == MODE_NP9660) {
-			ret = 0;
-			printk("%s: [FAKE] -> %d\n", __func__, ret);
-		}
+		ret = 0;
+		printk("%s: [FAKE] -> %d\n", __func__, ret);
 	}
 	
 	return ret;
@@ -60,10 +56,8 @@ int myUtilityUnloadModule(int id)
 
 	// fake NPDRM unload in np9660
 	if (ret == 0x80111103 && id == 0x500) {
-		if (g_umd_mode == MODE_NP9660) {
-			ret = 0;
-			printk("%s: [FAKE] -> %d\n", __func__, ret);
-		}
+		ret = 0;
+		printk("%s: [FAKE] -> %d\n", __func__, ret);
 	}
 	
 	return ret;
@@ -77,10 +71,6 @@ static UtilityHookEntry g_utility_hook_map[] = {
 void patch_utility(SceModule *mod)
 {
 	int i;
-	SEConfig config;
-
-	sctrlSEGetConfig(&config);
-	g_umd_mode = config.umdmode;
 
 	_sceUtilityLoadModule = (void*)sctrlHENFindFunction("sceUtility_Driver", "sceUtility", 0x2A2B3DE0);
 	_sceUtilityUnloadModule = (void*)sctrlHENFindFunction("sceUtility_Driver", "sceUtility", 0xE49BFE92);

@@ -30,13 +30,18 @@ enum SEUmdModes
 
 typedef struct
 {
-	int magic; /* 0x47434553 */ // 0
+	int magic;
+	int reserved[6];
 	int umdmode;
+	int reserved2;
 	int vshcpuspeed;
 	int vshbusspeed;
 	int umdisocpuspeed;
 	int umdisobusspeed;
+	int fakeregion;
+	int reserved3[2];
 	int usbdevice;
+	int reserved4;
 	int usbcharge;
 	int machidden;
 	int useversion;
@@ -46,7 +51,6 @@ typedef struct
 	int pluggame;
 	int plugpop;
 	int flashprot;
-	int fakeregion;
 } SEConfig;
 
 /**

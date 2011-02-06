@@ -28,14 +28,7 @@ typedef struct _MissingNIDResolver {
 	u32 size;
 } MissingNIDResolver;
 
-#define MAX_CUSTOM_RESOLVER 16
-
-static CustomResolver g_custom[MAX_CUSTOM_RESOLVER];
-static int g_custom_cnt = 0;
-
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
-
-static void *g_buf = NULL;
 
 resolver_config* get_nid_resolver(const char *libname)
 {
@@ -68,7 +61,7 @@ u32 resolve_nid(resolver_config *resolver, u32 nid)
 	return nid;
 }
 
-static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resolver)
+static int resolve_missing_nid(SceLibraryStubTable *stub, MissingNIDResolver *resolver)
 {
 	int cnt, i, j;
 	const char *libname;
@@ -76,7 +69,7 @@ static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resol
 	libname = resolver->libname;
 
 	if (0 != strcmp(stub->libname, libname)) {
-		return 0;
+		return -1;
 	}
 
 	for(i=0, cnt=stub->vstubcount+stub->stubcount; i<cnt; ++i) {
@@ -87,21 +80,15 @@ static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resol
 
 			if(stub->nidtable[i] == nid) {
 				void *stub_addr;
+				u32 fp;
 
 				stub_addr = stub->stubtable + (i << 3);
-
-				if(g_custom_cnt < NELEMS(g_custom)) {
-					void *fp;
-
-					fp = (void*)resolver->entry[j].fp;
-					printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, (u32)fp);
-					g_custom[g_custom_cnt].import_addr = stub_addr;
-					g_custom[g_custom_cnt].fp = fp;
-					g_custom_cnt++;
-				} else {
-					printk("%s: custom resolve exceed in %s\n", __func__, libname);
-					break;
-				}
+				fp = resolver->entry[j].fp;
+				printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, fp);
+				_sw(MAKE_JUMP(fp), (u32)stub_addr);
+				_sw(NOP, (u32)stub_addr+4);
+				sceKernelDcacheWritebackInvalidateRange(stub_addr, 8);
+				sceKernelIcacheInvalidateRange(stub_addr, 8);
 			}
 		}
 	}
@@ -214,9 +201,6 @@ int _sceKernelLinkLibraryEntries(void *buf, int size)
 		offset += entry->len << 2;
 	}
 
-	memset(g_custom, 0, sizeof(g_custom));
-	g_custom_cnt = 0;
-	g_buf = buf;
 	ret = (*sceKernelLinkLibraryEntries)(buf, size);
 
 	offset = 0;
@@ -226,23 +210,10 @@ int _sceKernelLinkLibraryEntries(void *buf, int size)
 		stubcount = stub->stubcount;
 
 		for(i=0; i<NELEMS(g_missing_resolver); ++i) {
-			mark_missing_NID(stub, g_missing_resolver[i]);
+			resolve_missing_nid(stub, g_missing_resolver[i]);
 		}
 		
 		offset += stub->len << 2;
-	}
-
-	for(i=0; i<NELEMS(g_custom); ++i) {
-		void *import_addr;
-
-		import_addr = g_custom[i].import_addr;
-
-		if(import_addr != NULL) {
-			_sw(MAKE_JUMP(g_custom[i].fp), (u32)import_addr);
-			_sw(NOP, (u32)(import_addr+4));
-			sceKernelDcacheWritebackInvalidateRange(import_addr, 8);
-			sceKernelIcacheInvalidateRange(import_addr, 8);
-		}
 	}
 
 	return ret;

@@ -28,12 +28,6 @@ typedef struct _MissingNIDResolver {
 	u32 size;
 } MissingNIDResolver;
 
-#define MAX_CUSTOM_RESOLVER 16
-
-static CustomResolver g_custom[MAX_CUSTOM_RESOLVER];
-static int g_custom_cnt = 0;
-
-static int (*aLinkLibEntries)(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
 
 resolver_config* get_nid_resolver(const char *libname)
@@ -67,7 +61,7 @@ u32 resolve_nid(resolver_config *resolver, u32 nid)
 	return nid;
 }
 
-static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resolver)
+static int resolve_missing_nid(SceLibraryStubTable *stub, MissingNIDResolver *resolver)
 {
 	int cnt, i, j;
 	const char *libname;
@@ -75,7 +69,7 @@ static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resol
 	libname = resolver->libname;
 
 	if (0 != strcmp(stub->libname, libname)) {
-		return 0;
+		return -1;
 	}
 
 	for(i=0, cnt=stub->vstubcount+stub->stubcount; i<cnt; ++i) {
@@ -86,21 +80,15 @@ static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resol
 
 			if(stub->nidtable[i] == nid) {
 				void *stub_addr;
+				u32 fp;
 
 				stub_addr = stub->stubtable + (i << 3);
-
-				if(g_custom_cnt < NELEMS(g_custom)) {
-					void *fp;
-
-					fp = (void*)resolver->entry[j].fp;
-					printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, (u32)fp);
-					g_custom[g_custom_cnt].import_addr = stub_addr;
-					g_custom[g_custom_cnt].fp = fp;
-					g_custom_cnt++;
-				} else {
-					printk("%s: custom resolve exceed in %s\n", __func__, libname);
-					break;
-				}
+				fp = resolver->entry[j].fp;
+				printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, fp);
+				_sw(MAKE_JUMP(fp), (u32)stub_addr);
+				_sw(NOP, (u32)stub_addr+4);
+				sceKernelDcacheWritebackInvalidateRange(stub_addr, 8);
+				sceKernelIcacheInvalidateRange(stub_addr, 8);
 			}
 		}
 	}
@@ -187,59 +175,48 @@ static char * ownstrtok(char * s, const char * delim)
 
 #include "nid_data_missing.h"
 
-static int _aLinkLibEntries(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode)
-{
-	int ret, i;
-   
-	ret = (*aLinkLibEntries)(unk0, stub, is_user_mode);
-
-	for(i=0; i<NELEMS(g_missing_resolver); ++i) {
-		mark_missing_NID(stub, g_missing_resolver[i]);
-	}
-
-	return ret;
-}
-
 int _sceKernelLinkLibraryEntries(void *buf, int size)
 {
 	int ret, offset, i;
 	u32 stubcount;
-	struct SceLibraryEntryTable *entry;
-	u32 *pnid;
+	struct SceLibraryStubTable *stub;
 	resolver_config *resolver;
 
 	offset = 0;
 
 	while(offset < size) {
-		entry = buf + offset;
-		stubcount = entry->stubcount;
-		resolver = get_nid_resolver(entry->libname);
+		stub = buf + offset;
+		stubcount = stub->stubcount;
+		resolver = get_nid_resolver(stub->libname);
 
 		if(resolver != NULL) {
 			for (i=0; i<stubcount; i++) {
-				pnid = entry->entrytable + (i << 2);
-				*pnid = resolve_nid(resolver, *pnid);
+				u32 newnid;
+
+				newnid = resolve_nid(resolver, stub->nidtable[i]);
+
+				if(newnid != stub->nidtable[i]) {
+					stub->nidtable[i] = newnid;
+				}
 			}
 		}
 
-		offset += entry->len << 2;
+		offset += stub->len << 2;
 	}
 
-	memset(g_custom, 0, sizeof(g_custom));
-	g_custom_cnt = 0;
 	ret = (*sceKernelLinkLibraryEntries)(buf, size);
 
-	for(i=0; i<NELEMS(g_custom); ++i) {
-		void *import_addr;
+	offset = 0;
 
-		import_addr = g_custom[i].import_addr;
+	while(offset < size) {
+		stub = buf + offset;
+		stubcount = stub->stubcount;
 
-		if(import_addr != NULL) {
-			_sw(MAKE_JUMP(g_custom[i].fp), (u32)import_addr);
-			_sw(NOP, (u32)(import_addr+4));
-			sceKernelDcacheWritebackInvalidateRange(import_addr, 8);
-			sceKernelIcacheInvalidateRange(import_addr, 8);
+		for(i=0; i<NELEMS(g_missing_resolver); ++i) {
+			resolve_missing_nid(stub, g_missing_resolver[i]);
 		}
+		
+		offset += stub->len << 2;
 	}
 
 	return ret;
@@ -256,8 +233,6 @@ void setup_nid_resolver(void)
 	// It's at 0x77CC+@LoadCore@ in 6.35
 	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
 
-	aLinkLibEntries = (void*)(loadcore->text_addr+0x3BCC);
-	_sw(MAKE_CALL(_aLinkLibEntries), loadcore->text_addr+0x3468);
 	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
 	sync_cache();

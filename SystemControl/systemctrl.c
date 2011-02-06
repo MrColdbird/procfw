@@ -240,9 +240,13 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	SceModule *pMod;
 	void *entTab;
 	int entLen;
+	resolver_config *resolver;
 
-	//nid resolve arguments
-	nid = resolve_nid(szMod, nid);
+	resolver = get_nid_resolver(szLib);
+
+	if(resolver != NULL) {
+		nid = resolve_nid(resolver, nid);
+	}
 
 	pMod = sceKernelFindModuleByName(szMod);
 

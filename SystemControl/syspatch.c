@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "rebootex_conf.h"
+#include "nid_resolver.h"
 
 static STMOD_HANDLER previous;
 
@@ -59,6 +60,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 			patch_partitions();
 			sync_cache();
 		}
+	}
+
+	if(0 == strcmp(mod->modname, "sceSYSCON_Driver")) {
+		resolve_syscon_driver((SceModule*)mod);
 	}
 
 	// load after lflash
@@ -123,8 +128,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	resolve_removed_nid((SceModule*)mod);
-	
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
 		printk_sync();

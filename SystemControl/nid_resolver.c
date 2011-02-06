@@ -13,83 +13,99 @@
 #include "libs.h"
 #include "nid_resolver.h"
 
-static int (*aLinkLibEntries)(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
+typedef struct _CustomResolver {
+	void *import_addr;
+	void *fp;
+} CustomResolver;
 
-static void nid_resolver(SceLibraryStubTable *stub)
+typedef struct _MissingNIDEntry {
+	u32 nid, fp;
+} MissingNIDEntry;
+
+typedef struct _MissingNIDResolver {
+	const char *libname;
+	MissingNIDEntry *entry;
+	u32 size;
+} MissingNIDResolver;
+
+#define MAX_CUSTOM_RESOLVER 16
+
+static CustomResolver g_custom[MAX_CUSTOM_RESOLVER];
+static int g_custom_cnt = 0;
+
+static int (*aLinkLibEntries)(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
+static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
+
+resolver_config* get_nid_resolver(const char *libname)
 {
-	int i, cnt;
-	u32 new;
-
-	cnt = stub->vstubcount+stub->stubcount;
-	
-	for(i=0; i<cnt; ++i) {
-		new = resolve_nid(stub->libname, stub->nidtable[i]);
-
-		if (stub->nidtable[i] != new) {
-			stub->nidtable[i] = new;
-		}
-	}
-}
-
-static int _aLinkLibEntries(u32 unk0, SceLibraryStubTable* stub, u32 is_user_mode)
-{
-	int ret;
-   
-	ret = (*aLinkLibEntries)(unk0, stub, is_user_mode);
-
-	if (stub != NULL && stub->nidtable != NULL) {
-		nid_resolver(stub);
-
-#if 0
-		printk("Name: %s Attr: 0x%08X\n", stub->libname, (stub->attribute << 16) | (*(u16*)stub->version));
-
-		int i, cnt; for(i=0, cnt=stub->vstubcount+stub->stubcount; i<cnt; ++i) {
-			printk("%s_%08X\n", stub->libname, stub->nidtable[i]);
-		}
-#endif
-	}
-
-	return ret;
-}
-
-void setup_nid_resolver(u32 loadcore)
-{
-	aLinkLibEntries = (void*)(loadcore+0x3BCC);
-	_sw(MAKE_CALL(_aLinkLibEntries), loadcore+0x3468);
-}
-
-u32 resolve_nid(const char *libname, u32 nid)
-{
-	int i, j;
-	u32 new;
+	int i;
 
 	for(i=0; i<nid_fix_size; ++i) {
 		if (!strcmp(libname, nid_fix[i].name)) {
-			for(j=0; j<nid_fix[i].nidcount; ++j) {
-				new = nid_fix[i].nidtable[j].new;
-				
-				if(new != UNKNOWNNID && nid == nid_fix[i].nidtable[j].old) {
-					printk("%s: %s_%08X->%s_%08X\n", __func__, libname, nid, libname, new);
+			return &nid_fix[i];
+		}
+	}
 
-					return new;
-				}
-			}
+	return NULL;
+}
+
+u32 resolve_nid(resolver_config *resolver, u32 nid)
+{
+	int i;
+	u32 new;
+
+	for(i=0; i<resolver->nidcount; ++i) {
+		new = resolver->nidtable[i].new;
+
+		if(new != UNKNOWNNID && nid == resolver->nidtable[i].old) {
+			printk("%s: %s_%08X->%s_%08X\n", __func__, resolver->name, nid, resolver->name, new);
+
+			return new;
 		}
 	}
 
 	return nid;
 }
 
-static void resolve_sceKernelIcacheClearAll(SceModule *mod)
+static int mark_missing_NID(SceLibraryStubTable *stub, MissingNIDResolver *resolver)
 {
-	void *address;
-	SceModule2 *loadcore;
+	int cnt, i, j;
+	const char *libname;
 
-	// Sony removed sceKernelIcacheClearAll's export
-	// It's at 0x77CC+@LoadCore@ in 6.35
-	loadcore = (SceModule2*) sceKernelFindModuleByName("sceLoaderCore");
-	address = (void*)(0x77CC + loadcore->text_addr);
-	hook_import_bynid(mod, "LoadCoreForKernel", 0xD8779AC6, address, 0);
+	libname = resolver->libname;
+
+	if (0 != strcmp(stub->libname, libname)) {
+		return 0;
+	}
+
+	for(i=0, cnt=stub->vstubcount+stub->stubcount; i<cnt; ++i) {
+		for(j=0; j<resolver->size; ++j) {
+			u32 nid;
+
+			nid = resolver->entry[j].nid;
+
+			if(stub->nidtable[i] == nid) {
+				void *stub_addr;
+
+				stub_addr = stub->stubtable + (i << 3);
+
+				if(g_custom_cnt < NELEMS(g_custom)) {
+					void *fp;
+
+					fp = (void*)resolver->entry[j].fp;
+					printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, (u32)fp);
+					g_custom[g_custom_cnt].import_addr = stub_addr;
+					g_custom[g_custom_cnt].fp = fp;
+					g_custom_cnt++;
+				} else {
+					printk("%s: custom resolve exceed in %s\n", __func__, libname);
+					break;
+				}
+			}
+		}
+	}
+
+	return 0;
 }
 
 //missing sysclib function from 3.XX times
@@ -169,20 +185,86 @@ static char * ownstrtok(char * s, const char * delim)
 	return ownstrtok_r(s, delim, &last);
 }
 
-static void resolve_clib(SceModule *mod)
+#include "nid_data_missing.h"
+
+static int _aLinkLibEntries(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode)
 {
-	hook_import_bynid(mod, "SysclibForKernel", 0x89B79CB1, (void*)ownstrcspn, 0);
-	hook_import_bynid(mod, "SysclibForKernel", 0x62AE052F, (void*)ownstrspn, 0);
-	hook_import_bynid(mod, "SysclibForKernel", 0x87F8D2DA, (void*)ownstrtok, 0);
-	hook_import_bynid(mod, "SysclibForKernel", 0x1AB53A58, (void*)ownstrtok_r, 0);
-	hook_import_bynid(mod, "SysclibForKernel", 0xD3D1A3B9, (void*)strncat, 0);
-	hook_import_bynid(mod, "SysclibForKernel", 0x909C228B, (void*)0x88002E88, 0); // setjmp
-	hook_import_bynid(mod, "SysclibForKernel", 0x18FE80DB, (void*)0x88002EC4, 0); // longjmp
+	int ret, i;
+   
+	ret = (*aLinkLibEntries)(unk0, stub, is_user_mode);
+
+	for(i=0; i<NELEMS(g_missing_resolver); ++i) {
+		mark_missing_NID(stub, g_missing_resolver[i]);
+	}
+
+	return ret;
 }
 
-static void resolve_syscon_driver(SceModule *mod)
+int _sceKernelLinkLibraryEntries(void *buf, int size)
 {
-	void *_sceSysconPowerStandby;
+	int ret, offset, i;
+	u32 stubcount;
+	struct SceLibraryEntryTable *entry;
+	u32 *pnid;
+	resolver_config *resolver;
+
+	offset = 0;
+
+	while(offset < size) {
+		entry = buf + offset;
+		stubcount = entry->stubcount;
+		resolver = get_nid_resolver(entry->libname);
+
+		if(resolver != NULL) {
+			for (i=0; i<stubcount; i++) {
+				pnid = entry->entrytable + (i << 2);
+				*pnid = resolve_nid(resolver, *pnid);
+			}
+		}
+
+		offset += entry->len << 2;
+	}
+
+	memset(g_custom, 0, sizeof(g_custom));
+	g_custom_cnt = 0;
+	ret = (*sceKernelLinkLibraryEntries)(buf, size);
+
+	for(i=0; i<NELEMS(g_custom); ++i) {
+		void *import_addr;
+
+		import_addr = g_custom[i].import_addr;
+
+		if(import_addr != NULL) {
+			_sw(MAKE_JUMP(g_custom[i].fp), (u32)import_addr);
+			_sw(NOP, (u32)(import_addr+4));
+			sceKernelDcacheWritebackInvalidateRange(import_addr, 8);
+			sceKernelIcacheInvalidateRange(import_addr, 8);
+		}
+	}
+
+	return ret;
+}
+
+void setup_nid_resolver(void)
+{
+	SceModule2 *modmgr, *loadcore;
+
+	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+	loadcore = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
+
+	// Sony removed sceKernelIcacheClearAll's export
+	// It's at 0x77CC+@LoadCore@ in 6.35
+	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
+
+	aLinkLibEntries = (void*)(loadcore->text_addr+0x3BCC);
+	_sw(MAKE_CALL(_aLinkLibEntries), loadcore->text_addr+0x3468);
+	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
+	sync_cache();
+}
+
+void resolve_syscon_driver(SceModule *mod)
+{
 	SceModule2 *syscon;
 
 	syscon = (SceModule2*)sceKernelFindModuleByName("sceSYSCON_Driver");
@@ -190,13 +272,5 @@ static void resolve_syscon_driver(SceModule *mod)
 	if(syscon == NULL)
 		return;
 
-	_sceSysconPowerStandby = (void*)(mod->text_addr + 0x00002C6C);
-	hook_import_bynid(mod, "sceSyscon_driver", 0xC8439C57, _sceSysconPowerStandby, 0);
-}
-
-void resolve_removed_nid(SceModule *mod)
-{
-	resolve_sceKernelIcacheClearAll(mod);
-	resolve_clib(mod);
-	resolve_syscon_driver(mod);
+	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + 0x00002C6C); // _sceSysconPowerStandby
 }

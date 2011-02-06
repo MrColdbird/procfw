@@ -275,7 +275,7 @@ int myNpDrmRenameCheck(char *fn)
 	
 	ret = check_file_is_encrypted_by_path(fn);
 
-	if (ret) {
+	if (ret == 0) {
 		SceIoStat stat;
 		u32 k1;
 		
@@ -327,10 +327,9 @@ SceOff myNpDrmEdataGetDataSize(SceUID fd)
 	if (real_fd >= 0) {
 		u64 off;
 	   
-		off = sceIoLseek(fd, 0, PSP_SEEK_CUR);
-		end = sceIoLseek(fd, 0, PSP_SEEK_END);
-
-		sceIoLseek(fd, off, PSP_SEEK_SET);
+		off = sceIoLseek(real_fd, 0, PSP_SEEK_CUR);
+		end = sceIoLseek(real_fd, 0, PSP_SEEK_END);
+		sceIoLseek(real_fd, off, PSP_SEEK_SET);
 	} else {
 		if (_sceNpDrmEdataGetDataSize != NULL) {
 			end = (*_sceNpDrmEdataGetDataSize)(fd);

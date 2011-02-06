@@ -387,8 +387,9 @@ static int build_vpbp(VirtualPBP *vpbp)
 
 	if (ret < 0) {
 		printk("%s: isoOpen -> %d\n", __func__, ret);
+		ret = add_cache(vpbp);
 
-		return -28;
+		return ret;
 	}
 
 	for(i=0; i<NELEMS(pbp_entries); ++i) {

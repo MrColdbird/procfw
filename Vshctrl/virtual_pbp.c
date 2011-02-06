@@ -178,7 +178,7 @@ static VirtualPBP* get_vpbp_by_fd(SceUID fd)
 	return &g_vpbps[fd];
 }
 
-static int get_sfo_entry(const char *sfo, const char *name, char *output, int output_size)
+static int get_sfo_string(const char *sfo, const char *name, char *output, int output_size)
 {
 	SFOHeader *header = (SFOHeader *)sfo;
 	SFODir *entries = (SFODir *)(sfo+0x14);
@@ -190,6 +190,10 @@ static int get_sfo_entry(const char *sfo, const char *name, char *output, int ou
 
 	for (i=0; i<header->nitems; i++) {
 		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, name)) {
+			if(entries[i].type != 0x02) {
+				return -41;
+			}
+
 			memset(output, 0, output_size);
 			strncpy(output, sfo+header->values_table_offs+entries[i].val_offs, output_size);
 			output[output_size-1] = '\0';
@@ -687,7 +691,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 					return -37;
 				}
 
-				ret = get_sfo_entry(buf_64, "TITLE", sfotitle, sizeof(sfotitle));
+				ret = get_sfo_string(buf_64, "TITLE", sfotitle, sizeof(sfotitle));
 				if (ret < 0) {
 					oe_free(buf);
 					unlock();
@@ -695,7 +699,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 					return ret;
 				}
 
-				ret = get_sfo_entry(buf_64, "DISC_ID", disc_id, sizeof(disc_id));
+				ret = get_sfo_string(buf_64, "DISC_ID", disc_id, sizeof(disc_id));
 				if (ret < 0) {
 					oe_free(buf);
 					unlock();

@@ -273,6 +273,12 @@ int myNpDrmRenameCheck(char *fn)
 {
 	int ret;
 	
+	// don't worry, it works without setting $k1 to 0
+	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
+		ret = 0x8002013A;
+		goto exit;
+	}
+
 	ret = check_file_is_encrypted_by_path(fn);
 
 	if (ret == 0) {
@@ -290,6 +296,7 @@ int myNpDrmRenameCheck(char *fn)
 		}
 	}
 
+exit:
 	printk("%s: %s -> 0x%08X\n", __func__, fn, ret);
 
 	return ret;
@@ -299,6 +306,11 @@ int myNpDrmEdataSetupKey(SceUID fd)
 {
 	SceUID real_fd;
 	int ret;
+
+	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
+		ret = 0x8002013A;
+		goto exit;
+	}
 
 	real_fd = nodrm2real(fd);
 
@@ -312,6 +324,7 @@ int myNpDrmEdataSetupKey(SceUID fd)
 		}
 	}
 
+exit:
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 
 	return ret;	
@@ -322,6 +335,11 @@ SceOff myNpDrmEdataGetDataSize(SceUID fd)
 	u64 end;
 	SceUID real_fd;
 
+	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
+		end = 0x8002013A;
+		goto exit;
+	}
+	
 	real_fd = nodrm2real(fd);
 
 	if (real_fd >= 0) {
@@ -338,6 +356,7 @@ SceOff myNpDrmEdataGetDataSize(SceUID fd)
 		}
 	}
 
+exit:
 	printk("%s 0x%08X -> 0x%08X\n", __func__, fd, (u32)end);
 
 	return end;
@@ -658,19 +677,26 @@ static NoDrmHookEntry g_nodrm_hook_map[] = {
 	{ "ModuleMgrForUser", 0xF2D8D1B4, &myKernelLoadModuleNpDrm },
 };
 
-static int get_npdrm_functions(void)
+int nodrm_get_normal_functions(void)
+{
+	_sceKernelLoadModuleNpDrm = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0xF2D8D1B4);
+	_sceKernelLoadModule = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0x977DE386);
+
+	if (_sceKernelLoadModuleNpDrm == NULL) return -4;
+	if (_sceKernelLoadModule == NULL) return -5;
+
+	return 0;
+}
+
+int nodrm_get_npdrm_functions(void)
 {
 	_sceNpDrmRenameCheck = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x275987D1);
 	_sceNpDrmEdataSetupKey = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x08D98894);
 	_sceNpDrmEdataGetDataSize = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x219EF5CC);
-	_sceKernelLoadModuleNpDrm = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0xF2D8D1B4);
-	_sceKernelLoadModule = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0x977DE386);
 
 	if (_sceNpDrmRenameCheck == NULL) return -1;
 	if (_sceNpDrmEdataSetupKey == NULL) return -2;
 	if (_sceNpDrmEdataGetDataSize == NULL) return -3;
-	if (_sceKernelLoadModuleNpDrm == NULL) return -4;
-	if (_sceKernelLoadModule == NULL) return -5;
 
 	return 0;
 }
@@ -705,18 +731,6 @@ int nodrm_init(void)
 void patch_drm_imports(SceModule *mod)
 {
 	u32 i;
-	int ret;
-
-	if(sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
-		return;
-	}
-
-	ret = get_npdrm_functions();
-
-	if (ret < 0) {
-		printk("%s: get_npdrm_functions -> %d\n", __func__, ret);
-		return;
-	}
 
 	for(i=0; i<NELEMS(g_nodrm_hook_map); ++i) {
 		hook_import_bynid(mod, g_nodrm_hook_map[i].libname, g_nodrm_hook_map[i].nid, g_nodrm_hook_map[i].hook_addr, 1);

@@ -33,8 +33,9 @@ typedef struct _MissingNIDResolver {
 static CustomResolver g_custom[MAX_CUSTOM_RESOLVER];
 static int g_custom_cnt = 0;
 
-static int (*aLinkLibEntries)(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode) = NULL;
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
+
+static void *g_buf = NULL;
 
 resolver_config* get_nid_resolver(const char *libname)
 {
@@ -187,24 +188,12 @@ static char * ownstrtok(char * s, const char * delim)
 
 #include "nid_data_missing.h"
 
-static int _aLinkLibEntries(void *unk0, SceLibraryStubTable* stub, u32 is_user_mode)
-{
-	int ret, i;
-   
-	ret = (*aLinkLibEntries)(unk0, stub, is_user_mode);
-
-	for(i=0; i<NELEMS(g_missing_resolver); ++i) {
-		mark_missing_NID(stub, g_missing_resolver[i]);
-	}
-
-	return ret;
-}
-
 int _sceKernelLinkLibraryEntries(void *buf, int size)
 {
 	int ret, offset, i;
 	u32 stubcount;
 	struct SceLibraryEntryTable *entry;
+	struct SceLibraryStubTable *stub;
 	u32 *pnid;
 	resolver_config *resolver;
 
@@ -227,7 +216,21 @@ int _sceKernelLinkLibraryEntries(void *buf, int size)
 
 	memset(g_custom, 0, sizeof(g_custom));
 	g_custom_cnt = 0;
+	g_buf = buf;
 	ret = (*sceKernelLinkLibraryEntries)(buf, size);
+
+	offset = 0;
+
+	while(offset < size) {
+		stub = buf + offset;
+		stubcount = stub->stubcount;
+
+		for(i=0; i<NELEMS(g_missing_resolver); ++i) {
+			mark_missing_NID(stub, g_missing_resolver[i]);
+		}
+		
+		offset += stub->len << 2;
+	}
 
 	for(i=0; i<NELEMS(g_custom); ++i) {
 		void *import_addr;
@@ -256,8 +259,6 @@ void setup_nid_resolver(void)
 	// It's at 0x77CC+@LoadCore@ in 6.35
 	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
 
-	aLinkLibEntries = (void*)(loadcore->text_addr+0x3BCC);
-	_sw(MAKE_CALL(_aLinkLibEntries), loadcore->text_addr+0x3468);
 	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
 	sync_cache();

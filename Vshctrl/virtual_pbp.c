@@ -178,32 +178,27 @@ static VirtualPBP* get_vpbp_by_fd(SceUID fd)
 	return &g_vpbps[fd];
 }
 
-static void get_sfo_title(char *title, int n, char *sfo)
+static int get_sfo_entry(const char *sfo, const char *name, char *output, int output_size)
 {
 	SFOHeader *header = (SFOHeader *)sfo;
 	SFODir *entries = (SFODir *)(sfo+0x14);
 	int i;
 
-	for (i = 0; i < header->nitems; i++) {
-		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, "TITLE")) {
-			memset(title, 0, n);
-			strncpy(title, sfo+header->values_table_offs+entries[i].val_offs, n);
+	if(header->signature != 0x46535000) {
+		return -39;
+	}
+
+	for (i=0; i<header->nitems; i++) {
+		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, name)) {
+			memset(output, 0, output_size);
+			strncpy(output, sfo+header->values_table_offs+entries[i].val_offs, output_size);
+			output[output_size-1] = '\0';
+
+			return 0;
 		}
 	}
-}
 
-static void get_sfo_disc_id(char *disc_id, int n, char *sfo)
-{
-	SFOHeader *header = (SFOHeader *)sfo;
-	SFODir *entries = (SFODir *)(sfo+0x14);
-	int i;
-
-	for (i = 0; i < header->nitems; i++) {
-		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, "DISC_ID")) {
-			memset(disc_id, 0, n);
-			strncpy(disc_id, sfo+header->values_table_offs+entries[i].val_offs, n);
-		}
-	}
+	return  -40;
 }
 
 static int add_cache(VirtualPBP *vpbp)
@@ -691,8 +686,22 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 					return -37;
 				}
 
-				get_sfo_title(sfotitle, 64, buf_64);
-				get_sfo_disc_id(disc_id, 12, buf_64);
+				ret = get_sfo_entry(buf_64, "TITLE", sfotitle, sizeof(sfotitle));
+				if (ret < 0) {
+					oe_free(buf);
+					unlock();
+
+					return ret;
+				}
+
+				ret = get_sfo_entry(buf_64, "DISC_ID", disc_id, sizeof(disc_id));
+				if (ret < 0) {
+					oe_free(buf);
+					unlock();
+
+					return ret;
+				}
+				
 				oe_free(buf);
 				memcpy(virtualsfo+0x118, sfotitle, 64);
 				memcpy(virtualsfo+0xf0, disc_id, 12);

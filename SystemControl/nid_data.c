@@ -1,4 +1,5 @@
 #include <pspsdk.h>
+#include "systemctrl.h"
 #include "nid_resolver.h"
 #include "utils.h"
 

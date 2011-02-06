@@ -30,7 +30,6 @@ void patch_sceLoadExec(void);
 void load_rebootex_config(void);
 void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
-void resolve_removed_nid(SceModule *pMod);
 
 #ifdef DEBUG
 void validate_stub(SceModule *pMod);

@@ -368,7 +368,7 @@ void patch_sceLoaderCore(void)
 	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x41A4);
 	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x5CA4);
 
-	setup_nid_resolver(loadcore->text_addr);
+	setup_nid_resolver();
 
 #ifdef DEBUG
 	hook_import_bynid((SceModule*)loadcore, "KDebugForKernel", 0x84F370BC, printk, 0);

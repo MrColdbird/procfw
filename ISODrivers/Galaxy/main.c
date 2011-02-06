@@ -13,10 +13,11 @@
 
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000
+#define SECTOR_SIZE 0x800
 
 PSP_MODULE_INFO("M33GalaxyController", 0x1006, 1, 1);
 
-extern int sub_000000D8(void);
+extern int get_total_block(void);
 extern int clear_cache(void);
 extern int SysMemForKernel_9F154FA1(void *unk0);
 
@@ -51,7 +52,6 @@ int g_ciso_dec_buf_offset = -1;
 
 // 0x000011C4
 int g_CISO_cur_idx = 0;
-
 
 struct CISO_header {
 	u8 magic[4];  // 0
@@ -88,7 +88,7 @@ u32 g_func_121C = 0;
 char *g_iso_fn = NULL;
 
 // 0x00000e10
-u8 g_data_e10[16] = {
+u8 g_umddata[16] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
@@ -115,7 +115,8 @@ SceUID myKernelCreateThread (const char * name,
 	return thid;
 }
 
-int sub_00000670(SceUID fd)
+// 670
+int cso_open(SceUID fd)
 {
 	int ret;
 
@@ -125,7 +126,9 @@ int sub_00000670(SceUID fd)
 	sceIoLseek(fd, 0, PSP_SEEK_SET);
 	ret = sceIoRead(fd, &g_CISO_hdr, sizeof(g_CISO_hdr));
 
-	if (ret < 0) {
+	if (ret != sizeof(g_CISO_hdr)) {
+		ret = -1;
+		printk("%s: -> %d\n", __func__, ret);
 		goto exit;
 	}
 
@@ -136,10 +139,10 @@ int sub_00000670(SceUID fd)
 
 		if (g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
-			printk("oe_malloc returns 0x%08x\r\n", (u32)g_ciso_dec_buf);
 
 			if (g_ciso_dec_buf == NULL) {
-				ret = -1;
+				ret = -2;
+				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
 			}
 
@@ -148,11 +151,11 @@ int sub_00000670(SceUID fd)
 		}
 
 		if (g_ciso_block_buf == NULL) {
-			g_ciso_block_buf = oe_malloc(0x800);
-			printk("oe_malloc returns 0x%08x\r\n", (u32)g_ciso_block_buf);
+			g_ciso_block_buf = oe_malloc(SECTOR_SIZE);
 
 			if (g_ciso_block_buf == NULL) {
-				ret = -1;
+				ret = -3;
+				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
 			}
 		}
@@ -166,12 +169,13 @@ exit:
 	return ret;
 }
 
-int sub_00000184(void)
+// 184
+int open_iso(void)
 {
 	int ret;
 
 	g_iso_opened = 0;
-	ret = sceIoClose(g_iso_fd);
+	sceIoClose(g_iso_fd);
 
 	while ( 1 ) {
 		g_iso_fd = sceIoOpen(g_iso_fn, 0x000F0000 | PSP_O_RDONLY, 0);
@@ -189,14 +193,14 @@ int sub_00000184(void)
 	// see 0x00003428 in sub_000033F4, memset(0x5BA4, 0, 60)
 	_sw(g_iso_fd, g_sceNp9660_driver_text_addr + 0x8A04);
 	g_is_ciso = 0;
-	ret = sub_00000670(g_iso_fd);
+	ret = cso_open(g_iso_fd);
 
 	if (ret >= 0) {
 		g_is_ciso = 1;
 		printk("%s: g_is_ciso = 1\r\n", __func__);
 	}
 
-	ret = sub_000000D8();
+	ret = get_total_block();
 	g_total_blocks = ret;
 	g_iso_opened = 1;
 
@@ -209,7 +213,7 @@ int sub_00000588(void)
 	void (*ptr)(u32) = (void*)g_func_1200;
 
 	(*ptr)(0);
-	sub_00000184();
+	open_iso();
 	intr = sceKernelCpuSuspendIntr();
 
 	// see 0x00004640 in sub_000045CC
@@ -231,12 +235,13 @@ int sub_00000588(void)
 	}
 
 	clear_cache();
-	SysMemForKernel_9F154FA1(g_data_e10);
+	SysMemForKernel_9F154FA1(g_umddata);
 
 	return 0;
 }
 
-int sub_000000D8(void)
+// d8
+int get_total_block(void)
 {
 	SceOff offset;
 	int ret;
@@ -254,16 +259,8 @@ int sub_000000D8(void)
 	return ret;
 }
 
-struct sub_0000030C_args {
-	u32 a0; // 0
-	u8 *a1; // 4
-	u32 a2; // 8
-};
-
-// 0x00001210~0x0000121C
-struct sub_0000030C_args args;
-
-int sub_00000244(u8* addr, u32 size, int offset)
+// 244
+int read_raw_data(u8* addr, u32 size, int offset)
 {
 	int ret;
 	int i;
@@ -278,7 +275,7 @@ int sub_00000244(u8* addr, u32 size, int offset)
 			i = 0;
 			break;
 		} else {
-			sub_00000184();
+			open_iso();
 		}
 	} while(i < 16);
 
@@ -294,7 +291,7 @@ int sub_00000244(u8* addr, u32 size, int offset)
 			i = 0;
 			break;
 		} else {
-			sub_00000184();
+			open_iso();
 		}
 	}
 
@@ -307,7 +304,8 @@ exit:
 	return ret;
 }
 
-int sub_00000790(u8 *addr, int sector)
+// 790
+int read_cso_sector(u8 *addr, int sector)
 {
 	int ret;
 	int n_sector;
@@ -318,9 +316,12 @@ int sub_00000790(u8 *addr, int sector)
 
 	// not within sector idx cache?
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
-		ret = sub_00000244((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
+		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if (ret != sizeof(g_CISO_idx_cache)) {
+			ret = -4;
+			printk("%s: -> %d\n", __func__, ret);
+
 			return ret;
 		}
 
@@ -334,16 +335,19 @@ int sub_00000790(u8 *addr, int sector)
 	// is plain?
 	if (g_CISO_idx_cache[n_sector] & 0x80000000) {
 		// loc_968
-		return sub_00000244(addr, 0x800, offset);
+		return read_raw_data(addr, SECTOR_SIZE, offset);
 	}
 
 	sector++;
 	n_sector = sector - g_CISO_cur_idx;
 
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
-		ret = sub_00000244((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
+		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if (ret != sizeof(g_CISO_idx_cache)) {
+			ret = -5;
+			printk("%s: -> %d\n", __func__, ret);
+
 			return ret;
 		}
 
@@ -355,16 +359,18 @@ int sub_00000790(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
-	if (size <= 0x800)
-		size = 0x800;
+	if (size <= SECTOR_SIZE)
+		size = SECTOR_SIZE;
 
 	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		// loc_93C
-		ret = sub_00000244(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
+		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
 
-		if (ret < 0) {
+		if (ret != CISO_DEC_BUFFER_SIZE) {
 			// loc_95C
 			g_ciso_dec_buf_offset = 0xFFF00000;
+			ret = -6;
+			printk("%s: -> %d\n", __func__, ret);
 
 			return ret;
 		}
@@ -373,31 +379,31 @@ int sub_00000790(u8 *addr, int sector)
 	}
 
 	// loc_8B8
-	ret = sceKernelDeflateDecompress(addr, 0x800, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
-
-	if (ret >= 0) {
-		return 0x800;
-	}
+	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
 
 	return ret;
 }
 
-int sub_00000998(u8* addr, u32 size, int offset)
+// 998
+int read_cso_data(u8* addr, u32 size, int offset)
 {
-	u32 cur_block = offset / 0x800;
+	u32 cur_block = offset / SECTOR_SIZE;
 	int ret;
 	int read_bytes;
 	int pos = offset & 0x7FF;
 
 	if (pos) {
 		// loc_A80
-		ret = sub_00000790(g_ciso_block_buf, cur_block);
+		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret < 0) {
+		if (ret != SECTOR_SIZE) {
+			ret = -7;
+			printk("%s: -> %d\n", __func__, ret);
+
 			return ret;
 		}
 
-		read_bytes = MIN(size, (0x800 - pos));
+		read_bytes = MIN(size, (SECTOR_SIZE - pos));
 		memcpy(addr, g_ciso_block_buf + pos, read_bytes);
 		size -= read_bytes;
 		addr += read_bytes;
@@ -408,30 +414,36 @@ int sub_00000998(u8* addr, u32 size, int offset)
 
 	// loc_9E4
 	// more than 1 block left
-	if (size / 0x800 > 0) {
+	if (size / SECTOR_SIZE > 0) {
 		int i;
-		int block_cnt = size / 0x800;
+		int block_cnt = size / SECTOR_SIZE;
 
 		for(i=0; i<block_cnt; ++i) {
-			ret = sub_00000790(addr, cur_block);
-			cur_block++;
-			addr += 0x800;
-			read_bytes += 0x800;
-			size -= 0x800;
+			ret = read_cso_sector(addr, cur_block);
 
-			if (ret < 0) {
+			if (ret != SECTOR_SIZE) {
+				ret = -8;
+				printk("%s: -> %d\n", __func__, ret);
+
 				return ret;
 			}
+
+			cur_block++;
+			addr += SECTOR_SIZE;
+			read_bytes += SECTOR_SIZE;
+			size -= SECTOR_SIZE;
 		}
 	}
 
 	if (size != 0) {
-		ret = sub_00000790(g_ciso_block_buf, cur_block);
+		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret < 0) {
+		if (ret != SECTOR_SIZE) {
+			ret = -9;
+			printk("%s: -> %d\n", __func__, ret);
+
 			return ret;
 		}
-
 		memcpy(addr, g_ciso_block_buf, size);
 
 		return size + read_bytes;
@@ -440,13 +452,23 @@ int sub_00000998(u8* addr, u32 size, int offset)
 	return read_bytes;
 }
 
-int sub_0000030C (struct sub_0000030C_args *args)
+struct read_data_args {
+	u32 offset; // 0
+	u8 *address; // 4
+	u32 size; // 8
+};
+
+// 0x00001210~0x0000121C
+struct read_data_args args;
+
+// 30C
+int read_data (struct read_data_args *args)
 {
 	if (g_is_ciso != 0) {
 		// ciso decompess
-		return sub_00000998(args->a1, args->a2, args->a0);
+		return read_cso_data(args->address, args->size, args->offset);
 	} else {
-		return sub_00000244(args->a1, args->a2, args->a0);
+		return read_raw_data(args->address, args->size, args->offset);
 	}
 }
 
@@ -456,15 +478,13 @@ int sub_00000054(u32 a0, u8 *a1, u32 a2)
 	int (*ptr2)(void) = (void*)g_func_121C;
 	int ret;
 
-//	printk("%s 0x%08x 0x%08x 0x%08x\r\n", __func__, a0, a1, a2);
-
 	ret = (*ptr)(a0, a1, a2);
 
-	args.a0 = a0;
-	args.a1 = a1;
-	args.a2 = a2;
+	args.offset = a0;
+	args.address = a1;
+	args.size = a2;
 
-	ret = sceKernelExtendKernelStack(0x2000, (void*)&sub_0000030C, &args);
+	ret = sceKernelExtendKernelStack(0x2000, (void*)&read_data, &args);
 
 	(*ptr2)();
 
@@ -582,4 +602,3 @@ int clear_cache(void)
 
 	return 0;
 }
-

@@ -242,7 +242,7 @@ void resolve_syscon_driver(SceModule *mod)
 {
 	SceModule2 *syscon;
 
-	syscon = (SceModule2*)sceKernelFindModuleByName("sceSYSCON_Driver");
+	syscon = (SceModule2*)mod;
 
 	if(syscon == NULL)
 		return;

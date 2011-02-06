@@ -93,8 +93,18 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 					void *addr = (void*)(&pImp->funcs[j*2]);
 
 					if(syscall) {
+						u32 syscall_num;
+
+						syscall_num = sceKernelQuerySystemCall(func);
+
+						if(syscall == (u32)-1) {
+							printk("%s: cannot find syscall in %s_%08X\n", __func__, library, nid);
+
+							return -1;
+						}
+
 						_sw(0x03E00008, (u32)addr);
-						_sw((((sceKernelQuerySystemCall(func))<<6)|12), (u32)addr + 4);
+						_sw(((syscall_num<<6)|12), (u32)addr + 4);
 					} else {
 						_sw(MAKE_JUMP(func), (u32)addr);
 						_sw(0, (u32)(addr + 4));

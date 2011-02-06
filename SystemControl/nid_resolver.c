@@ -179,26 +179,29 @@ int _sceKernelLinkLibraryEntries(void *buf, int size)
 {
 	int ret, offset, i;
 	u32 stubcount;
-	struct SceLibraryEntryTable *entry;
 	struct SceLibraryStubTable *stub;
-	u32 *pnid;
 	resolver_config *resolver;
 
 	offset = 0;
 
 	while(offset < size) {
-		entry = buf + offset;
-		stubcount = entry->stubcount;
-		resolver = get_nid_resolver(entry->libname);
+		stub = buf + offset;
+		stubcount = stub->stubcount;
+		resolver = get_nid_resolver(stub->libname);
 
 		if(resolver != NULL) {
 			for (i=0; i<stubcount; i++) {
-				pnid = entry->entrytable + (i << 2);
-				*pnid = resolve_nid(resolver, *pnid);
+				u32 newnid;
+
+				newnid = resolve_nid(resolver, stub->nidtable[i]);
+
+				if(newnid != stub->nidtable[i]) {
+					stub->nidtable[i] = newnid;
+				}
 			}
 		}
 
-		offset += entry->len << 2;
+		offset += stub->len << 2;
 	}
 
 	ret = (*sceKernelLinkLibraryEntries)(buf, size);

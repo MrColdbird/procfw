@@ -14,7 +14,7 @@ PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
-#define VERSION_STR "635PRO"
+#define VERSION_STR "635PRO-A"
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;

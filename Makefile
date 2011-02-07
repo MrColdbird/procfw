@@ -18,7 +18,7 @@ endif
 
 all:
 	@mkdir $(DISTRIBUTE) || true
-	@mkdir $(DISTRIBUTE)/$(INSTALLER) || true
+	@mkdir $(DISTRIBUTE)/UPDATE || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
 	@rm -f ./Common/*.o
@@ -33,14 +33,14 @@ all:
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/$(INSTALLER)
-	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/$(INSTALLER)
-	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/$(INSTALLER)
-	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)/$(INSTALLER)
-	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/$(INSTALLER)
-	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/$(INSTALLER)
-	@mv $(STARGATE)/stargate.prx $(DISTRIBUTE)/$(INSTALLER)
-	@cp contrib/usbdevice.prx $(DISTRIBUTE)/$(INSTALLER)
+	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/UPDATE
+	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/UPDATE
+	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/UPDATE
+	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)/UPDATE
+	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/UPDATE
+	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/UPDATE
+	@mv $(STARGATE)/stargate.prx $(DISTRIBUTE)/UPDATE
+	@cp contrib/usbdevice.prx $(DISTRIBUTE)/UPDATE
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery

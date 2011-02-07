@@ -5,7 +5,7 @@ BUILD_PRX=1
 PSP_FW_VERSION=635
 
 INCDIR = ../include ../Common
-CFLAGS = -O2 -G0 -Wall
+CFLAGS = -Os -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 

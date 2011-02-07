@@ -143,3 +143,45 @@ void patch_sceMemlmd(void)
 
 	memlmd_decrypt = (void*)memlmd->text_addr + 0x0134; // inner function which decrypt a PRX module
 }
+
+static int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2);
+
+static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2)
+{
+	if (prx != NULL && newsize != NULL) {
+		if (is_prx_compressed(prx, size)) {
+			u32 compsize = *(u32*)(prx + 0xB0);
+
+			memmove(prx, prx+0x150, compsize);
+			*newsize = compsize;
+
+			return 0;
+		}
+	}
+
+	return (*mesgled_decrypt)(tag, key, code, prx, size, newsize, use_polling, blacklist, blacklistsize, type, xor_key1, xor_key2);
+}
+
+void patch_mesgled(SceModule* mod1)
+{
+	SceModule2 *mod = (SceModule2*) mod1;
+	u32 text_addr;
+	u32 offsets[] = {
+		0x00001D20,
+		0x00001DD0,
+		0x00001E60,
+		0x00001E60,
+		0x00001EF8,
+		0xDEADBEEF,
+		0x00001E60,
+		0xDEADBEEF,
+		0x00001E60,
+	};
+   
+	text_addr = mod->text_addr;
+	mesgled_decrypt = (void*)(text_addr+0xE0);
+
+	if (psp_model < NELEMS(offsets) && offsets[psp_model] != 0xDEADBEEF) {
+		_sw(MAKE_CALL(_mesgled_decrypt), text_addr+offsets[psp_model]);
+	}
+}

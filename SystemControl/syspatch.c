@@ -98,6 +98,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "sceMesgLed")) {
+		patch_mesgled((SceModule*)mod);
+		sync_cache();
+	}
+
 	if(0 == strcmp(mod->modname, "sceNpSignupPlugin_Module")) {
 		patch_npsignup(mod->text_addr);
 		sync_cache();

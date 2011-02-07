@@ -75,7 +75,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
-		if (psp_model == PSP_GO && rebootex_conf.iso_mode != NORMAL_MODE) {
+		if (rebootex_conf.iso_mode != NORMAL_MODE) {
 			patch_sceMediaSync(mod->text_addr);
 		}
 

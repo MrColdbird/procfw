@@ -1,5 +1,5 @@
 all:
-	../../contrib/pspgz.py ../../dist/UPDATE/galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController
+	../../contrib/pspgz.py ../../dist/635PROUPDATE/galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController
 
 TARGET = galaxy
 OBJS = main.o

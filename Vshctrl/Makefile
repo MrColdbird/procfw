@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/UPDATE/vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl
+	../contrib/pspgz.py ../dist/635PROUPDATE/vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl
 
 TARGET = vshctrl
 OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o

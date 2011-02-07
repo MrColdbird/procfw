@@ -21,6 +21,3 @@ LIBS =  -lpspkubridge -lpsppower
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak
-
-MKSFO = mksfoex -s UPDATER_VER=9.99
-

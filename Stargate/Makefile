@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/UPDATE/stargate.prx ../contrib/SystemControl.hdr stargate.prx stargate
+	../contrib/pspgz.py ../dist/635PROUPDATE/stargate.prx ../contrib/SystemControl.hdr stargate.prx stargate
 
 TARGET = stargate
 OBJS = main.o key_decrypt.o pspcipher.o pauth.o nodrm.o utility_patch.o ../Common/utils.o ../Common/libs.o

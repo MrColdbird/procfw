@@ -18,7 +18,7 @@ endif
 
 all:
 	@mkdir $(DISTRIBUTE) || true
-	@mkdir $(DISTRIBUTE)/UPDATE || true
+	@mkdir $(DISTRIBUTE)/635PROUPDATE || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
 	@rm -f ./Common/*.o
@@ -33,11 +33,11 @@ all:
 	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/UPDATE
-	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/UPDATE
-	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/UPDATE
-	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/UPDATE
-	@cp contrib/usbdevice.prx $(DISTRIBUTE)/UPDATE
+	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/635PROUPDATE
+	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/635PROUPDATE
+	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/635PROUPDATE
+	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/635PROUPDATE
+	@cp contrib/usbdevice.prx $(DISTRIBUTE)/635PROUPDATE
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery

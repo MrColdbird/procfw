@@ -41,6 +41,7 @@ void patch_umdcache(u32 text_addr);
 void patch_partitions(void);
 void unlock_high_memory(void);
 
+void patch_mesgled(SceModule* mod);
 void patch_npsignup(u32 text_addr);
 void patch_npsignin(u32 text_addr);
 void patch_np(u32 text_addr, u8 mayor, u8 minor);

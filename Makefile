@@ -36,10 +36,7 @@ all:
 	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/UPDATE
 	@mv $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/UPDATE
 	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/UPDATE
-	@mv $(VSHCONTROL)/vshctrl.prx $(DISTRIBUTE)/UPDATE
-	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/UPDATE
 	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/UPDATE
-	@mv $(STARGATE)/stargate.prx $(DISTRIBUTE)/UPDATE
 	@cp contrib/usbdevice.prx $(DISTRIBUTE)/UPDATE
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher

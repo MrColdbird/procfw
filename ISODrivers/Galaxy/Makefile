@@ -1,3 +1,6 @@
+all:
+	../../contrib/pspgz.py ../../dist/UPDATE/galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController
+
 TARGET = galaxy
 OBJS = main.o
 OBJS += ../../Imports/SysMemForKernel.o \

@@ -1,3 +1,6 @@
+all:
+	../contrib/pspgz.py ../dist/UPDATE/vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl
+
 TARGET = vshctrl
 OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
 IMPORTS = ../Imports/LoadExecForKernel.o

@@ -27,6 +27,7 @@ all:
 	@mkdir $(DISTRIBUTE)/635PROUPDATE || true
 	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
+	@mkdir $(DISTRIBUTE)/dbg_installer || true
 	@rm -f ./Common/*.o
 
 # Creating Live-System Reboot Buffer
@@ -62,6 +63,8 @@ all:
 	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
 	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
+	@cp $(DISTRIBUTE)/635PROUPDATE/* $(DISTRIBUTE)/dbg_installer
+	@cp $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/dbg_installer
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)

@@ -22,6 +22,7 @@ int module_start(SceSize args, void* argp)
 	fill_vram(0x000000ff);
 #endif
 	sctrlHENSetMemory(*(u32*)(0x88FB0008), *(u32*)(0x88FB000C));
+	printk("High memory: p2/p9 %d/%d\n", g_p2_size, g_p9_size);
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	

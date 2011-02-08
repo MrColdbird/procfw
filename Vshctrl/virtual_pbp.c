@@ -943,7 +943,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	sctrlSESetBootConfFileIndex(config.umdmode);
 
 	//high memory disabled because it hurts pspgo resuming interrupted game
-//	sctrlHENSetMemory(48, 0);
+//	sctrlHENSetMemory(55, 0);
 
 	printk("%s: ISO %s, UMD mode %d\n", __func__, vpbp->name, config.umdmode);
 	

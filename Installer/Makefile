@@ -3,6 +3,9 @@ OBJS = main.o
 
 BUILD_PRX=1
 
+EXTRA_TARGETS=EBOOT.PBP
+PSP_EBOOT_TITLE=6.35PRO-A Updater
+
 INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

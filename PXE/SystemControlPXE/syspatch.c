@@ -12,7 +12,6 @@
 #include "modhandler.h"
 #include "printk.h"
 #include "syspatch.h"
-#include "funcs_630.h"
 #include "libs.h"
 
 char installerpath[256];

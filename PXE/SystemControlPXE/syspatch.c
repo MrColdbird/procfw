@@ -41,7 +41,7 @@ int installer_thread(SceSize args, void * argp)
 	}
 
 	//kill loader thread
-	sceKernelExitThread(0);
+	sceKernelExitDeleteThread(0);
 
 	//return dummy result
 	return 0;

@@ -51,42 +51,6 @@ void unlock_high_memory(u32 forced)
 	}
 }
 
-static inline int can_override_high_memory_setting(void)
-{
-	int apitype;
-	const char *path;
-
-	path = sceKernelInitFileName();
-	apitype = sceKernelInitApitype();
-
-	// have init file?
-	if(path == NULL)
-		return 0;
-
-	// homebrew runlevel?
-	if(apitype != PSP_INIT_APITYPE_MS2 && apitype != 0x152)
-		return 0;
-
-	// p2 and p9 size untouch?
-	if(g_p2_size != 24 || g_p9_size != 24)
-		return 0;
-
-	// minimal size as "xx0:/PSP/GAME/x/EBOOT.PBP"
-	if(strlen(path) < 25)
-		return 0;
-
-	// validate path
-	if(0 != strncmp(path + 2, "0:/PSP/GAME/", sizeof("0:/PSP/GAME/")-1))
-		return 0;
-
-	// validate ext
-	if (0 != strcmp(path + strlen(path) - 3, "PBP")) {
-		return 0;
-	}	
-
-	return 1;
-}
-
 static int display_meminfo(void)
 {
 #ifdef DEBUG
@@ -127,12 +91,8 @@ void prepatch_partitions(void)
 	p8.size = 4;
 
 	p11.meminfo = (*GetPartition)(11);
-	p11.size = 0;
+	p11.size = 0; // nuke p11
 
-	printk("%s: before\n", __func__);
-	display_meminfo();
-
-#if 1
 	if (p8.meminfo != NULL) {
 		// move p8 to 52M
 		p8.meminfo[1] = (52 << 20) + 0x88800000;
@@ -141,9 +101,7 @@ void prepatch_partitions(void)
 	} else {
 		printk("%s: part8 not found\n", __func__);
 	}
-#endif
 
-#if 1
 	if (p11.meminfo != NULL) {
 		// move p11 to the end of p8
 		p11.meminfo[1] = ((52 + p8.size) << 20) + 0x88800000;
@@ -152,67 +110,49 @@ void prepatch_partitions(void)
 	} else {
 //		printk("%s: part11 not found\n", __func__);
 	}
-#endif
-
-	printk("%s: after\n", __func__);
-	display_meminfo();
-	unlock_high_memory(1);
 }
 
-//it's partition 9 on 6.31... its smaller than 5.X one too... only 24MB instead of 28MB...
 void patch_partitions(void) 
 {
-	// real len we are going to use
-	u32 p2_len = g_p2_size;
-	u32 p9_len = g_p9_size;
-
-	//memory layout: P2 P9 P8 P11
-	//P11 only occurs in the first boot
-
+	MemPart p2, p9;
 	//system memory manager
 	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
 
-	//get partition 2
-	unsigned int * p2 = GetPartition(2);
+	// shut up gcc warning
+	(void)display_meminfo;
 
-	//get partition 9
-	unsigned int * p9 = GetPartition(9);
+	p2.meminfo = (*GetPartition)(2);
+	p9.meminfo = (*GetPartition)(9);
 
-	display_meminfo();
-
-	//set highmemory for homebrew eboots, it doesn't hurt.
-	if (can_override_high_memory_setting()) {
-		p2_len = MAX_HIGH_MEMSIZE;
-		p9_len = 0;
+	if(g_p2_size == 24 && g_p9_size == 24) {
+		p2.size = MAX_HIGH_MEMSIZE;
+		p9.size = 0;
+	} else {
+		p2.size = g_p2_size;
+		p9.size = g_p9_size;
 	}
-
-	if(p2_len <= 24 || (p2_len + p9_len) > MAX_HIGH_MEMSIZE) {
-		return;
-	}
-
-	//force umdcache kill for disc0 reboots
-	if(p2_len != 24) g_high_memory_enabled = 1;
 
 	//reset partition length for next reboot
-	g_p2_size = 24;
-	g_p9_size = 24;
+	sctrlHENSetMemory(24, 24);
 
-	if(p2 != NULL) {
+	if(p2.meminfo != NULL) {
 		//resize partition 2
-		p2[2] = p2_len << 20;
-		((unsigned int *)(p2[4]))[5] = (p2_len << 21) | 0xFC;
+		p2.meminfo[2] = p2.size << 20;
+		((unsigned int *)(p2.meminfo[4]))[5] = (p2.size << 21) | 0xFC;
 	} else {
 		printk("%s: part2 not found\n", __func__);
 	}
 
-	if (p9 != NULL) {
+	if (p9.meminfo != NULL) {
+		// at end of p2
+		p9.meminfo[1] = (p2.size << 20) + 0x88800000;
 		//resize partition 9
-		p9[1] = (p2_len << 20) + 0x88800000;
-		p9[2] = p9_len << 20;
-		((unsigned int *)(p9[4]))[5] = (p9_len << 21) | 0xFC;
+		p9.meminfo[2] = p9.size << 20;
+		((unsigned int *)(p9.meminfo[4]))[5] = (p9.size << 21) | 0xFC;
 	} else {
 		printk("%s: part9 not found\n", __func__);
 	}
 
+	g_high_memory_enabled = 1;
 	unlock_high_memory(0);
 }

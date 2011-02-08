@@ -121,10 +121,18 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 		_sw(0x1000001D, scemediasync_text_addr+0xDC8);
 	}
 
-	init_file = sceKernelInitFileName();
+	if(g_p2_size != 24 || g_p9_size != 24) {
+		printk("%s: p2/p9 %d/%d\n", __func__, g_p2_size, g_p9_size);
 
-	if(is_pbp(init_file)) {
-		printk("%s: patching _sceSystemFileGetIndex\n", __func__);
-		_sw(MAKE_CALL(_sceSystemFileGetIndex), scemediasync_text_addr+0x0000097C);
+		if(psp_model != PSP_1000) {
+			patch_partitions();
+			sync_cache();
+		}
+	} else {
+		init_file = sceKernelInitFileName();
+
+		if(is_pbp(init_file)) {
+			_sw(MAKE_CALL(_sceSystemFileGetIndex), scemediasync_text_addr+0x0000097C);
+		}
 	}
 }

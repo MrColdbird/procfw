@@ -82,31 +82,44 @@ static int display_meminfo(void)
 	return 0;
 }
 
+static void modify_partition(u32 *meminfo, u32 offset, u32 size)
+{
+	if (offset != (u32)-1) {
+		meminfo[1] = (offset << 20) + 0x88800000;
+	}
+
+	meminfo[2] = size << 20;
+	((u32*)(meminfo[4]))[5] = (size << 21) | 0xFC;
+}
+
 void prepatch_partitions(void)
 {
 	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
 	MemPart p8, p11;
+	u32 total_user_size;
+
+	if(g_p2_size == 24 && g_p9_size == 24) {
+		total_user_size = MAX_HIGH_MEMSIZE;
+	} else {
+		total_user_size = g_p2_size + g_p9_size;
+	}
 
 	p8.meminfo = (*GetPartition)(8);
-	p8.size = 4;
+	p8.size = MIN(4, 56 - total_user_size);
 
 	p11.meminfo = (*GetPartition)(11);
 	p11.size = 0; // nuke p11
 
 	if (p8.meminfo != NULL) {
-		// move p8 to 52M
-		p8.meminfo[1] = (52 << 20) + 0x88800000;
-		p8.meminfo[2] = p8.size << 20;
-		((unsigned int *)(p8.meminfo[4]))[5] = (p8.size << 21) | 0xFC;
+		// move p8 to total_user_size
+		modify_partition(p8.meminfo, total_user_size, p8.size);
 	} else {
 		printk("%s: part8 not found\n", __func__);
 	}
 
 	if (p11.meminfo != NULL) {
 		// move p11 to the end of p8
-		p11.meminfo[1] = ((52 + p8.size) << 20) + 0x88800000;
-		p11.meminfo[2] = p11.size << 20;
-		((unsigned int *)(p11.meminfo[4]))[5] = (p11.size << 21) | 0xFC;
+		modify_partition(p11.meminfo, (total_user_size + p8.size), p11.size);
 	} else {
 //		printk("%s: part11 not found\n", __func__);
 	}
@@ -132,23 +145,21 @@ void patch_partitions(void)
 		p9.size = g_p9_size;
 	}
 
+	printk("%s: p2/p9 %d/%d\n", __func__, p2.size, p9.size);
+
 	//reset partition length for next reboot
 	sctrlHENSetMemory(24, 24);
 
 	if(p2.meminfo != NULL) {
 		//resize partition 2
-		p2.meminfo[2] = p2.size << 20;
-		((unsigned int *)(p2.meminfo[4]))[5] = (p2.size << 21) | 0xFC;
+		modify_partition(p2.meminfo, (u32)-1, p2.size);
 	} else {
 		printk("%s: part2 not found\n", __func__);
 	}
 
 	if (p9.meminfo != NULL) {
 		// at end of p2
-		p9.meminfo[1] = (p2.size << 20) + 0x88800000;
-		//resize partition 9
-		p9.meminfo[2] = p9.size << 20;
-		((unsigned int *)(p9.meminfo[4]))[5] = (p9.size << 21) | 0xFC;
+		modify_partition(p9.meminfo, p2.size, p9.size);
 	} else {
 		printk("%s: part9 not found\n", __func__);
 	}

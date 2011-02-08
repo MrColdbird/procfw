@@ -1,3 +1,4 @@
+#include <pspkernel.h>
 #include <pspdebug.h>
 #include <pspctrl.h>
 #include <pspsdk.h>
@@ -348,6 +349,7 @@ int main(int argc, char * argv[])
 	//result
 	int result = 0;
 	u32 power_buf_address = 0;
+	u32 fw_version;
 
 	//puzzle installer path
 	strcpy(installerpath, argv[0]);
@@ -360,6 +362,14 @@ int main(int argc, char * argv[])
 	printk_init("ms0:/launcher.txt");
 	printk("Hello exploit\r\n");
 	pspDebugScreenInit();
+
+	fw_version = sceKernelDevkitVersion();
+
+	if (fw_version != 0x06030510) {
+		pspDebugScreenPrintf("Sorry. This program requires 6.35.\n");
+		sceKernelDelayThread(5*1000000);
+		goto exit;
+	}
 
 	{
 		SceCtrlData ctl;
@@ -482,6 +492,7 @@ int main(int argc, char * argv[])
 		printk("SysMemUserForUser_D8DE5C1E returns 0x%08X\r\n", result);
 	}
 
+exit:
 	//trigger reboot
 	sceKernelExitGame();
 

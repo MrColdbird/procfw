@@ -38,6 +38,7 @@ void setup_validate_stub(SceModule *mod);
 #endif
 
 void patch_umdcache(u32 text_addr);
+void prepatch_partitions(void);
 void patch_partitions(void);
 void unlock_high_memory(u32 forced);
 

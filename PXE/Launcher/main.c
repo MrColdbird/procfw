@@ -16,8 +16,6 @@
 PSP_MODULE_INFO("635kernel", PSP_MODULE_USER, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
-#define NELEMS(a) (sizeof(a) / sizeof(a[0]))
-
 /**
  * Taken from M33 SDK.
  * Describes a Module Structure from the chained Module List.

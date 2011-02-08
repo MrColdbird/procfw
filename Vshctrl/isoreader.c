@@ -240,11 +240,11 @@ static int findFile(const char * file, u32 lba, u32 dir_size, u32 is_dir, Iso966
 			continue;
 		}
 		
+#ifdef DEBUG
 		if(rec->len_dr < rec->len_fi + sizeof(*rec)) {
-			printk("%s: Corrupt directory record found in %s, LBA %d\n", __func__, g_filename, lba);
-
-			return -12;
+			printk("%s: Corrupted directory record found in %s, LBA %d\n", __func__, g_filename, lba);
 		}
+#endif
 
 		if(rec->len_fi > 32) {
 			return -11;

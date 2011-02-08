@@ -74,12 +74,10 @@ int _sceSystemFileGetIndex(u8 *sfo, u32 unk1, u32 unk2)
 	if(ret == 1) {
 		printk("%s: found MEMSIZE=1 in this homebrew\n", __func__);
 
-#if 1
 		if(psp_model != PSP_1000) {
 			patch_partitions();
 			sync_cache();
 		}
-#endif
 	}
 
 	ret = (*sceSystemFileGetIndex)(sfo, unk1, unk2);

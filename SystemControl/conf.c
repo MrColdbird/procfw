@@ -10,6 +10,17 @@ SEConfig conf;
 
 #define CONFIG_MAGIC 0x47434554
 
+static inline u32 get_conf_magic(void)
+{
+	u32 version;
+
+	version = (sctrlHENGetVersion() & 0xF);
+	version = (version << 16) | sctrlHENGetMinorVersion();
+	version += CONFIG_MAGIC;
+
+	return version;
+}
+
 int GetConfig(SEConfig *config)
 {
 	SceUID fd;
@@ -53,7 +64,7 @@ int SetConfig(SEConfig *config)
 		return -1;
 	}
 
-	config->magic = CONFIG_MAGIC;
+	config->magic = get_conf_magic();
 
 	if (sceIoWrite(fd, config, sizeof(*config)) != sizeof(*config)) {
 		sceIoClose(fd);
@@ -83,7 +94,8 @@ int sctrlSESetConfigEx(SEConfig *config, int size)
 		return -1;
 	}
 
-	config->magic = CONFIG_MAGIC;
+	config->magic = get_conf_magic();
+
 	written = sceIoWrite(fd, config, size);
 
 	if (written != size) {
@@ -136,11 +148,10 @@ int sctrlSEGetConfig(SEConfig *config)
 void load_default_conf(SEConfig *config)
 {
 	memset(config, 0, sizeof(*config));
-	config->magic = CONFIG_MAGIC;
+	config->magic = get_conf_magic();
 	config->umdmode = MODE_NP9660;
 	config->usbcharge = 0;
 	config->machidden = 1;
-	config->useversion = 1;
 	config->skipgameboot = 1;
 	config->hidepic = 0;
 	config->plugvsh = config->pluggame = config->plugpop = 1;

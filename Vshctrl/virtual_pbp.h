@@ -19,7 +19,6 @@ typedef struct _VirtualPBP {
 
 #define ISO_ID "@ISOGAME@"
 #define CACHE_MAX_SIZE 32
-#define MAGIC_ISOCACHE (0xC01DB15D+1)
 #define MAGIC_VPBP_FD 0x8000
 #define MAX_VPBP 128
 #define PTR_ALIGN_64(p) ((void*)((((u32)p)+64-1)&(~(64-1))))

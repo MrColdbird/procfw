@@ -149,13 +149,17 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	void *p;
 	char str[20];
 	u32 text_addr;
+	u32 minor_version;
 
 	text_addr = mod->text_addr;
-#ifdef NIGHTLY_VERSION
-	sprintf(str, "6.35 PRO-r%d", NIGHTLY_VERSION);
-#else
-	sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
-#endif
+
+	minor_version = sctrlHENGetMinorVersion();
+
+	if(minor_version == 0) {
+		sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
+	} else {
+		sprintf(str, "6.35 PRO-%c%d", 'A'+(sctrlHENGetVersion()&0xF)-1, minor_version);
+	}
 
 	p = (void*)(text_addr + 0x2A1FC);
 	ascii2utf16(p, str);

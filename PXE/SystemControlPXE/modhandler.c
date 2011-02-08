@@ -11,9 +11,10 @@
 #include "utils.h"
 #include "kubridge.h"
 #include "modhandler.h"
-#include "funcs_630.h"
 #include "libs.h"
 #include "elf.h"
+
+extern SceModule2 *LoadCoreForKernel_312CA47E(void *entry);
 
 SceUID g_mod_start_thid = -1;
 SceModule2 *g_mod_start = NULL;

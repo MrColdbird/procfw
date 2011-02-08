@@ -11,7 +11,6 @@
 #include "modhandler.h"
 #include "printk.h"
 #include "syspatch.h"
-#include "funcs_630.h"
 
 extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
 

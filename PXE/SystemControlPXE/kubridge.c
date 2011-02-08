@@ -11,7 +11,8 @@
 #include "modhandler.h"
 #include "printk.h"
 #include "syspatch.h"
-#include "funcs_630.h"
+
+extern int SysMemForKernel_458A70B5(void);
 
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
 {

@@ -11,7 +11,6 @@
 #include "modhandler.h"
 #include "printk.h"
 #include "syspatch.h"
-#include "funcs_630.h"
 #include "libs.h"
 
 PSP_MODULE_INFO("SystemControl", 0x3007, 2, 5);

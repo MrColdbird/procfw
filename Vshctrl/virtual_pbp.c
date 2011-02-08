@@ -112,6 +112,17 @@ static u32 g_caches_cnt;
 static u8 g_referenced[32];
 static u8 g_need_update = 0;
 
+static inline u32 get_isocache_magic(void)
+{
+	u32 version;
+
+	version = sctrlHENGetVersion() & 0xF;
+	version = (version << 16) | sctrlHENGetMinorVersion();
+	version += 0xC01DB15D;
+
+	return version;
+}
+
 static int is_iso(SceIoDirent * dir)
 {
 	//result
@@ -261,7 +272,7 @@ static int load_cache(void)
 
 	ret = sceIoRead(fd, &magic, sizeof(magic));
 
-	if (ret != sizeof(magic) && magic != MAGIC_ISOCACHE) {
+	if (ret != sizeof(magic) && magic != get_isocache_magic()) {
 		return -25;
 	}
 
@@ -276,7 +287,7 @@ static int save_cache(void)
 {
 	int i;
 	SceUID fd;
-	u32 magic = MAGIC_ISOCACHE;
+	u32 magic = get_isocache_magic();
 
 	if (g_caches == NULL) {
 		return -33;

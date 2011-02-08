@@ -56,7 +56,7 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 	return (*memlmd_unsigner)(prx, size, use_polling);
 }
 
-static int inline is_prx_compressed(u8 *prx, u32 size)
+static inline int is_prx_compressed(u8 *prx, u32 size)
 {
 	if (size < 0x160)
 		return 0;

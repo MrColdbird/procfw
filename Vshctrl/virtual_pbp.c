@@ -146,7 +146,7 @@ static int is_iso(SceIoDirent * dir)
 static VirtualPBP* get_vpbp_by_path(const char *path)
 {
 	char *p;
-	u32 isoindex;
+	int isoindex;
 
 	if (g_vpbps == NULL) {
 		return NULL;
@@ -159,9 +159,9 @@ static VirtualPBP* get_vpbp_by_path(const char *path)
 	}
 
 	p += sizeof(ISO_ID)-1;
-	isoindex = strtoul(p, NULL, 16);
+	isoindex = strtol(p, NULL, 16);
 
-	if (isoindex >= g_vpbps_cnt) {
+	if (isoindex < 0 || isoindex >= g_vpbps_cnt) {
 		return NULL;
 	}
 
@@ -654,7 +654,7 @@ SceOff vpbp_lseek(SceUID fd, SceOff offset, int whence)
 int vpbp_read(SceUID fd, void * data, SceSize size)
 {
 	VirtualPBP *vpbp;
-	int remaining;
+	u32 remaining;
 	
 	lock();
 	vpbp = get_vpbp_by_fd(fd);
@@ -669,8 +669,8 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 	remaining = size;
 
 	while(remaining > 0) {
-		if (vpbp->file_pointer >= 0 && vpbp->file_pointer < vpbp->header[2]) {
-			int re;
+		if (vpbp->file_pointer < vpbp->header[2]) {
+			u32 re;
 
 			re = MIN(remaining, vpbp->header[2] - vpbp->file_pointer);
 			memcpy(data, vpbp->header+vpbp->file_pointer, re);

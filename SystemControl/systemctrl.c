@@ -209,6 +209,11 @@ int sctrlHENGetVersion()
 	return 0x1001; // 0x1000 in TN's code :)
 }
 
+int sctrlHENGetMinorVersion()
+{
+	return 0x1;
+}
+
 PspIoDrv *sctrlHENFindDriver(char *drvname)
 {
 	u32 k1;

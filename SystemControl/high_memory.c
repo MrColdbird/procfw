@@ -11,21 +11,37 @@
 #include "systemctrl.h"
 #include "printk.h"
 
+typedef struct _MemPart {
+	u32 *meminfo;
+	void *addr;
+	u32 size;
+} MemPart;
+
 int g_high_memory_enabled = 0;
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
 {
-	if(g_high_memory_enabled == 1) {
-		//kill module start
-		_sw(0x03E00008, text_addr + 0x9C8);
-		_sw(0x24020001, text_addr + 0x9CC);
-	}
+	int ret;
+
+	ret = sceKernelInitKeyConfig();
+
+	if (ret != PSP_INIT_KEYCONFIG_GAME)
+		return;
+
+	ret = sceKernelBootFrom();
+
+	if (ret != 0x40 && ret != 0x50)
+		return;
+	
+	//kill module start
+	_sw(0x03E00008, text_addr + 0x9C8);
+	_sw(0x24020001, text_addr + 0x9CC);
 }
 
-void unlock_high_memory(void)
+void unlock_high_memory(u32 forced)
 {
-	if(!g_high_memory_enabled) {
+	if(!forced && !g_high_memory_enabled) {
 		return;
 	}
 	
@@ -35,119 +51,108 @@ void unlock_high_memory(void)
 	}
 }
 
-static inline int can_override_high_memory_setting(void)
+static int display_meminfo(void)
 {
-	int apitype;
-	const char *path;
+#ifdef DEBUG
+	int i;
+	int pid = 1;
+	int max = 256;
 
-	path = sceKernelInitFileName();
-	apitype = sceKernelInitApitype();
+	printk("Memory Partitions:\n");
+	printk("N  |    BASE    |   SIZE   | TOTALFREE |  MAXFREE  | ATTR |\n");
+	printk("---|------------|----------|-----------|-----------|------|\n");
 
-	// have init file?
-	if(path == NULL)
-		return 0;
+	for(i = pid; i <= max; i++) {
+		SceSize total;
+		SceSize free;
+		PspSysmemPartitionInfo info;
 
-	// homebrew runlevel?
-	if(apitype != PSP_INIT_APITYPE_MS2 && apitype != 0x152)
-		return 0;
+		memset(&info, 0, sizeof(info));
+		info.size = sizeof(info);
 
-	// p2 and p9 size untouch?
-	if(g_p2_size != 24 || g_p9_size != 24)
-		return 0;
+		if(sceKernelQueryMemoryPartitionInfo(i, &info) == 0) {
+			free = sceKernelPartitionMaxFreeMemSize(i);
+			total = sceKernelPartitionTotalFreeMemSize(i);
+			printk("%-2d | 0x%08X | %8d | %9d | %9d | %04X |\n", 
+					i, info.startaddr, info.memsize, total, free, info.attr);
+		}
+	}
+#endif
 
-	// minimal size as "xx0:/PSP/GAME/x/EBOOT.PBP"
-	if(strlen(path) < 25)
-		return 0;
-
-	// validate path
-	if(0 != strncmp(path + 2, "0:/PSP/GAME/", sizeof("0:/PSP/GAME/")-1))
-		return 0;
-
-	// validate ext
-	if (0 != strcmp(path + strlen(path) - 3, "PBP")) {
-		return 0;
-	}	
-
-	return 1;
+	return 0;
 }
 
-//it's partition 9 on 6.31... its smaller than 5.X one too... only 24MB instead of 28MB...
-void patch_partitions(void) 
+void prepatch_partitions(void)
 {
-	// real len we are going to use
-	u32 p2_len = g_p2_size;
-	u32 p9_len = g_p9_size;
-	u32 p8_len = 4;
-
-	//memory layout: P2 P9 P8 P11
-	//P11 only occurs in the first boot
-
-	//system memory manager
 	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
+	MemPart p8, p11;
 
-	//get partition 2
-	unsigned int * p2 = GetPartition(2);
+	p8.meminfo = (*GetPartition)(8);
+	p8.size = 4;
 
-	//get partition 8
-	unsigned int * p8 = GetPartition(8);
+	p11.meminfo = (*GetPartition)(11);
+	p11.size = 0; // nuke p11
 
-	//get partition 9
-	unsigned int * p9 = GetPartition(9);
-
-	//get partition 11, only occurs in first boot
-	unsigned int * p11 = GetPartition(11);
-
-	//set highmemory for homebrew eboots, it doesn't hurt.
-	if (can_override_high_memory_setting()) {
-		p2_len = MAX_HIGH_MEMSIZE;
-		p9_len = 0;
-	}
-
-	if(p2_len <= 24 || (p2_len + p9_len) > MAX_HIGH_MEMSIZE) {
-		return;
-	}
-
-	//force umdcache kill for disc0 reboots
-	if(p2_len != 24) g_high_memory_enabled = 1;
-
-	//reset partition length for next reboot
-	g_p2_size = 24;
-	g_p9_size = 24;
-
-	if(p2 != NULL) {
-		//resize partition 2
-		p2[2] = p2_len << 20;
-		((unsigned int *)(p2[4]))[5] = (p2_len << 21) | 0xFC;
-	} else {
-		printk("%s: part2 not found\n", __func__);
-	}
-
-	if (p9 != NULL) {
-		//resize partition 9
-		p9[1] = (p2_len << 20) + 0x88800000;
-		p9[2] = p9_len << 20;
-		((unsigned int *)(p9[4]))[5] = (p9_len << 21) | 0xFC;
-	} else {
-		printk("%s: part9 not found\n", __func__);
-	}
-
-	if (p8 != NULL) {
-		// move p8 to the end of p9
-		p8[1] = ((p2_len + p9_len) << 20) + 0x88800000;
+	if (p8.meminfo != NULL) {
+		// move p8 to 52M
+		p8.meminfo[1] = (52 << 20) + 0x88800000;
+		p8.meminfo[2] = p8.size << 20;
+		((unsigned int *)(p8.meminfo[4]))[5] = (p8.size << 21) | 0xFC;
 	} else {
 		printk("%s: part8 not found\n", __func__);
 	}
 
-	if (p11 != NULL) {
-		u32 p11_len = 0;
-
+	if (p11.meminfo != NULL) {
 		// move p11 to the end of p8
-		p11[1] = ((p2_len + p9_len + p8_len) << 20) + 0x88800000;
-		p11[2] = p11_len << 20;
-		((unsigned int *)(p11[4]))[5] = (p11_len << 21) | 0xFC;
+		p11.meminfo[1] = ((52 + p8.size) << 20) + 0x88800000;
+		p11.meminfo[2] = p11.size << 20;
+		((unsigned int *)(p11.meminfo[4]))[5] = (p11.size << 21) | 0xFC;
 	} else {
 //		printk("%s: part11 not found\n", __func__);
 	}
+}
 
-	unlock_high_memory();
+void patch_partitions(void) 
+{
+	MemPart p2, p9;
+	//system memory manager
+	unsigned int * (*GetPartition)(int pid) = (void *)(0x88003E34);
+
+	// shut up gcc warning
+	(void)display_meminfo;
+
+	p2.meminfo = (*GetPartition)(2);
+	p9.meminfo = (*GetPartition)(9);
+
+	if(g_p2_size == 24 && g_p9_size == 24) {
+		p2.size = MAX_HIGH_MEMSIZE;
+		p9.size = 0;
+	} else {
+		p2.size = g_p2_size;
+		p9.size = g_p9_size;
+	}
+
+	//reset partition length for next reboot
+	sctrlHENSetMemory(24, 24);
+
+	if(p2.meminfo != NULL) {
+		//resize partition 2
+		p2.meminfo[2] = p2.size << 20;
+		((unsigned int *)(p2.meminfo[4]))[5] = (p2.size << 21) | 0xFC;
+	} else {
+		printk("%s: part2 not found\n", __func__);
+	}
+
+	if (p9.meminfo != NULL) {
+		// at end of p2
+		p9.meminfo[1] = (p2.size << 20) + 0x88800000;
+		//resize partition 9
+		p9.meminfo[2] = p9.size << 20;
+		((unsigned int *)(p9.meminfo[4]))[5] = (p9.size << 21) | 0xFC;
+	} else {
+		printk("%s: part9 not found\n", __func__);
+	}
+
+	g_high_memory_enabled = 1;
+	unlock_high_memory(0);
 }

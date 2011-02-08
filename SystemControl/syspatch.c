@@ -11,7 +11,6 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "libs.h"
-#include "rebootex_conf.h"
 #include "nid_resolver.h"
 
 static STMOD_HANDLER previous;
@@ -56,9 +55,16 @@ static int syspatch_module_chain(SceModule2 *mod)
 #endif
 
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
-		if(psp_model != PSP_1000) {
-			patch_partitions();
-			sync_cache();
+		if(PSP_1000 != psp_model) {
+			u32 key_config;
+
+			key_config = sceKernelInitKeyConfig();
+
+			if (key_config == PSP_INIT_KEYCONFIG_GAME) {
+
+				prepatch_partitions();
+				sync_cache();
+			}
 		}
 	}
 
@@ -75,9 +81,8 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
-		if (rebootex_conf.iso_mode != NORMAL_MODE) {
-			patch_sceMediaSync(mod->text_addr);
-		}
+		patch_sceMediaSync(mod->text_addr);
+		sync_cache();
 
 		load_plugin();
 		usb_charge();

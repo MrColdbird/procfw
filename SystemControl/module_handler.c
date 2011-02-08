@@ -23,7 +23,7 @@ static int prologue_module(void *unk0, SceModule2 *mod)
 	int ret = (*_prologue_module)(unk0, mod);
 	
 	if (ret >= 0) {
-		unlock_high_memory();
+		unlock_high_memory(0);
 		(*g_on_module_start)(mod);
 	}
 	

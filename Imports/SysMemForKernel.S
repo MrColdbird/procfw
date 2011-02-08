@@ -15,3 +15,6 @@
 	IMPORT_FUNC	"SysMemForKernel",0xDB836ADB,sceKernelFreeHeapMemory
 	IMPORT_FUNC	"SysMemForKernel",0x9F154FA1,SysMemForKernel_9F154FA1
 	IMPORT_FUNC	"SysMemForKernel",0xD9A4D69E,sceKernelGetSystemStatus
+	IMPORT_FUNC	"SysMemForKernel",0xF5E82409,sceKernelQueryMemoryPartitionInfo
+	IMPORT_FUNC	"SysMemForKernel",0xE10F21CF,sceKernelPartitionMaxFreeMemSize
+	IMPORT_FUNC	"SysMemForKernel",0x7BE9653E,sceKernelPartitionTotalFreeMemSize

@@ -61,7 +61,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 			key_config = sceKernelInitKeyConfig();
 
 			if (key_config == PSP_INIT_KEYCONFIG_GAME) {
-
 				prepatch_partitions();
 				sync_cache();
 			}

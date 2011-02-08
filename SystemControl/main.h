@@ -39,7 +39,7 @@ void setup_validate_stub(SceModule *mod);
 
 void patch_umdcache(u32 text_addr);
 void patch_partitions(void);
-void unlock_high_memory(void);
+void unlock_high_memory(u32 forced);
 
 void patch_mesgled(SceModule* mod);
 void patch_npsignup(u32 text_addr);

@@ -8,25 +8,23 @@
 #include "pspmodulemgr_kernel.h"
 #include "systemctrl.h"
 #include "printk.h"
+#include "utils.h"
 
 PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
-#define MAKE_JUMP(f) (0x08000000 | (((u32)(f) >> 2)  & 0x03ffffff))
-#define MAKE_CALL(f) (0x0c000000 | (((u32)(f) >> 2) & 0x03ffffff)) 
-
-// 0x4300
+// 4300
 u32 g_missing_PNG_icon = 1;
 
-// 0x00004308
-u32 g_data_4308 = 0;
+// 4308
+u32 g_not_found_pstitle = 0;
 
-// 0xBCC
+// BCC
 extern u8 g_icon_png[0x3730];
 
-// 0x00004304
+// 4304
 STMOD_HANDLER g_previous = NULL;
 
-// 0x0
+// 0
 int sceIoReadPatched(int fd, u8 *buf, int size)
 {
 	int ret;
@@ -71,16 +69,17 @@ int sceIoReadPatched(int fd, u8 *buf, int size)
 	return ret;
 }
 
-// sub_41c
+// 41c
 void sync_cache()
 {
-	sceKernelDcacheWritebackAll();
-	sceKernelIcacheClearAll();
+	sceKernelIcacheInvalidateAll();
+	sceKernelDcacheWritebackInvalidateAll();
 }
 
-int sub_750(SceModule2 *mod)
+// 750
+int popcorn_patch_chain(SceModule2 *mod)
 {
-	if (!strcmp(mod->modname, "pops")) {
+	if (0 == strcmp(mod->modname, "pops")) {
 		u32 text_addr = mod->text_addr;
 
 		printk("%s: patch pops\n", __func__);
@@ -102,7 +101,8 @@ int sub_750(SceModule2 *mod)
 	return 0;
 }
 
-void sub_2E4(u32 error)
+// 2E4
+void reboot_vsh_with_error(u32 error)
 {
 	struct SceKernelLoadExecVSHParam param;	
 	u32 vshmain_args[0x20/4];
@@ -124,13 +124,16 @@ void sub_2E4(u32 error)
 	sctrlKernelExitVSH(&param);
 }
 
-int sub_358(u32 destSize, const u8 *src, u8 *dest)
+// 358
+int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 {
-	int k1 = pspSdkSetK1(0);
+	u32 k1;
 	int ret;
 
+	k1 = pspSdkSetK1(0);
+
 	if (destSize < 0) {
-		sub_2E4((u32)destSize);
+		reboot_vsh_with_error((u32)destSize);
 		pspSdkSetK1(k1);
 
 		return 0;
@@ -149,14 +152,18 @@ int sub_358(u32 destSize, const u8 *src, u8 *dest)
 	return ret;
 }
 
-int sub_19C(char *path, void *keys, int flags, int filemode, int offset)
+// 19C
+int setup_PGD_fd(char *path, void *keys, int flags, int filemode, int offset)
 {
-	SceUID fd = sceIoOpen(path, flags, filemode);
+	SceUID fd;
 	u32 signature;
 	int ret;
 
-	if (fd < 0)
+	fd = sceIoOpen(path, flags, filemode);
+
+	if (fd < 0) {
 		return fd;
+	}
 
 	sceIoLseek(fd, offset, PSP_SEEK_SET);
 	sceIoRead(fd, &signature, 4);
@@ -172,9 +179,11 @@ int sub_19C(char *path, void *keys, int flags, int filemode, int offset)
 	sceIoClose(fd);
 	fd = sceIoOpen(path, flags | 0x40000000, filemode);
 
-	if (fd < 0)
+	if (fd < 0) {
 		return fd;
+	}
 
+	// setting PDG offset
 	ret = sceIoIoctl(fd, 0x04100002, &offset, 4, NULL, 0);
 
 	if (ret < 0) {
@@ -183,6 +192,7 @@ int sub_19C(char *path, void *keys, int flags, int filemode, int offset)
 		return ret;
 	}
 
+	// setting PDG decrypt key
 	ret = sceIoIoctl(fd, 0x04100001, keys, 0x10, NULL, 0);
 
 	if (ret < 0) {
@@ -200,14 +210,13 @@ int module_start(SceSize args, void* argp)
 {
 	int fd;
 	u8 header[40];
-	u32 offset_at_0xc = 0;
-	u32 offset_at_0x24 = 0;
+	u32 icon0_offset = 0;
+	u32 psar_offset = 0;
 	SceModule2 *mod;
 	u32 text_addr;
 	int (*SysMemUserForUser_315AD3A0)(u32 fw_version);
 
 	printk_init();
-
 	printk("%s: open %s\n", __func__, sceKernelInitFileName());
 	fd = sceIoOpen(sceKernelInitFileName(), PSP_O_RDONLY, 0);
 
@@ -218,19 +227,19 @@ int module_start(SceSize args, void* argp)
 	}
 
 	sceIoRead(fd, header, sizeof(header));
-	offset_at_0xc = *(u32*)(header+0x0c);
-	offset_at_0x24 = *(u32*)(header+0x24);
-	sceIoLseek(fd, offset_at_0x24, PSP_SEEK_SET);
+	icon0_offset = *(u32*)(header+0x0c);
+	psar_offset = *(u32*)(header+0x24);
+	sceIoLseek(fd, psar_offset, PSP_SEEK_SET);
 	sceIoRead(fd, header, sizeof(header));
 
-	if (memcmp(header, "PSTITLE", 7)) {
+	if (0 == memcmp(header, "PSTITLE", 7)) {
+		printk("%s: header match PSTITILE\n", __func__);
+		sceIoLseek(fd, psar_offset + 0x200, PSP_SEEK_SET);
+	} else {
 		// loc_00000688
 		printk("%s: header doesn't match PSTITILE\n", __func__);
-		sceIoLseek(fd, offset_at_0x24 + 0x400, PSP_SEEK_SET);
-		g_data_4308 = 1;
-	} else {
-		printk("%s: header match PSTITILE\n", __func__);
-		sceIoLseek(fd, offset_at_0x24 + 0x200, PSP_SEEK_SET);
+		sceIoLseek(fd, psar_offset + 0x400, PSP_SEEK_SET);
+		g_not_found_pstitle = 1;
 	}
 
 	sceIoRead(fd, header, sizeof(header));
@@ -243,12 +252,11 @@ int module_start(SceSize args, void* argp)
 		_sw(0, text_addr+0x158);
 		sync_cache();
 
-		printk("%s: exit 1\n", __func__);
-
+		// module exit
 		return 1;
 	}
 
-	sceIoLseek(fd, offset_at_0xc, PSP_SEEK_SET);
+	sceIoLseek(fd, icon0_offset, PSP_SEEK_SET);
 	sceIoRead(fd, header, sizeof(header));
 
 	if (*(u32*)header == 0x474E5089 && // PNG
@@ -266,11 +274,11 @@ int module_start(SceSize args, void* argp)
 	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
 	text_addr = mod->text_addr;
 	_sw(0, text_addr + 0x158);
-	g_previous = sctrlHENSetStartModuleHandler(&sub_750);
+	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
 	SysMemUserForUser_315AD3A0 = (void*)sctrlHENFindFunction("sceSystemMemoryManager", "SysMemUserForUser", 0x315AD3A0);
 
 	if (!SysMemUserForUser_315AD3A0) {
-		sub_2E4(0x80000001);
+		reboot_vsh_with_error(0x80000001);
 	}
 
 	//loc_59C
@@ -279,8 +287,7 @@ int module_start(SceSize args, void* argp)
 	printk("%s: patching scePops_Manager\n", __func__);
 
 	_sw(0, text_addr+0x158C); // 0x1EA8 (6.31)
-
-	_sw(MAKE_JUMP(&sub_358), text_addr+0x162C); // 0x1F80 (6.31)
+	_sw(MAKE_JUMP(&decompress_data), text_addr+0x162C); // 0x1F80 (6.31)
 	_sw(0, text_addr+0x1630); // 0x1F84 (6.31)
 
 	// In 6.31 popsman.prx has more calls to sceIoIoctl, needs more patch
@@ -288,10 +295,10 @@ int module_start(SceSize args, void* argp)
 	// sceMeAudio_9EA8B21A sceMeAudio_F8FD8B48 sceIoReadPatched0000D64
 	// sceMeAudio_B213763F sceIoReadPatched0001AEC
 	// Should I use sceIoIoctl NODRM patch?
-	_sw(MAKE_JUMP(&sub_19C), text_addr+0x6A8); // for sceIoIoctl
+	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0x6A8); // for sceIoIoctl
 	_sw(0, text_addr+0x6AC);
 
-	_sw(MAKE_JUMP(&sub_19C), text_addr+0xCA0);
+	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0xCA0);
 	_sw(0, text_addr+0xCA4);
 	
 	_sw(0, text_addr+0x378);  // 0x564 (6.31)

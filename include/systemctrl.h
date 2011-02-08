@@ -165,6 +165,13 @@ int	sctrlHENIsDevhook();
 int sctrlHENGetVersion();
 
 /**
+ * Gets the HEN minor version
+ *
+ * @returns - The HEN minor version
+ */
+int sctrlHENGetMinorVersion();
+
+/**
  * Finds a driver
  *
  * @param drvname - The name of the driver (without ":" or numbers)

@@ -8,8 +8,6 @@ IMPORTS = ../Imports/LoadExecForKernel.o
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
 
-#DEBUG = 1
-
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
 OBJS += ../Common/printk.o

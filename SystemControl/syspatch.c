@@ -49,9 +49,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	apitype = sceKernelInitApitype();
 	
 #ifdef DEBUG
-	if (mod != NULL) {
-		printk("Starting %s Apitype: 0x%X\n", mod->modname, apitype);
-	}
+	printk("Starting %s Apitype: 0x%X\n", mod->modname, apitype);
 #endif
 
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {

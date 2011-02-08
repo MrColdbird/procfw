@@ -1,10 +1,11 @@
 TARGET = 635kernel
 OBJS = main.o sysmem.o syscall.o ../Common/utils.o
 LIBS =
-CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
+CFLAGS = -Os -G0 -Wall -I ../Common
 CXXFLAGS = $(CFLAGS)
 ASFLAGS = $(CFLAGS)
 LDFLAGS =
+INCDIR = ../Common/ ../include/
 ENCRYPT=1
 
 ifeq ($(DEBUG), 1)
@@ -16,7 +17,7 @@ endif
 BUILD_PRX = 1
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = 635PRO-A Fast Recovery
+PSP_EBOOT_TITLE = 635 PRO-A
 PSP_EBOOT_ICON = ICON0.PNG
 PSP_FW_VERSION = 635
 

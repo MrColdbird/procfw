@@ -444,6 +444,7 @@ int read_cso_data(u8* addr, u32 size, int offset)
 
 			return ret;
 		}
+
 		memcpy(addr, g_ciso_block_buf, size);
 
 		return size + read_bytes;

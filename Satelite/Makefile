@@ -11,7 +11,8 @@ ASFLAGS = $(CFLAGS)
 
 PRX_EXPORTS = exports.exp
 
-LIBDIR =
+LIBS = -lpspsystemctrl_user
+LIBDIR = . ../libs
 LDFLAGS =
 
 PSPSDK=$(shell psp-config --pspsdk-path)

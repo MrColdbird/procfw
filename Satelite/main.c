@@ -7,6 +7,7 @@
 
 #include "common.h"
 #include "vshctrl.h"
+#include "systemctrl.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -143,6 +144,8 @@ int TSRThread(SceSize args, void *argp)
 		scePowerRequestColdReset(0);
 	} else if (stop_flag ==3) {
 		scePowerRequestStandby();
+	} else if (stop_flag ==4) {
+		sctrlKernelExitVSH(NULL);
 	}
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);

@@ -344,18 +344,18 @@ int main(int argc, char * argv[])
 	printk("Hello exploit\r\n");
 	pspDebugScreenInit();
 
-	if(sctrlHENGetMinorVersion() >= 0) {
-		install_in_cfw();
-
-		return 0;
-	}
-
 	fw_version = sceKernelDevkitVersion();
 
 	if (fw_version != 0x06030510) {
 		pspDebugScreenPrintf("Sorry. This program requires 6.35.\n");
 		sceKernelDelayThread(5*1000000);
 		goto exit;
+	}
+
+	if(sctrlHENGetVersion() >= 0) {
+		install_in_cfw();
+
+		return 0;
 	}
 
 	{

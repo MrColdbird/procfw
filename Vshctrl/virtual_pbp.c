@@ -352,7 +352,7 @@ static int get_iso_file_size(const char *path, u32 *file_size)
 	return 0;
 }
 
-static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
+static int get_cache(const char *file, ScePspDateTime *ctime, VirtualPBP* pbp)
 {
 	int i, ret;
 	u32 file_size;
@@ -370,7 +370,7 @@ static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
 	for(i=0; i<g_caches_cnt; ++i) {
 		if(g_caches[i].enabled && 0 == strcmp(g_caches[i].name, file)) {
 			if (file_size == g_caches[i].iso_total_size &&
-				   	memcmp(&g_caches[i].mtime, mtime, sizeof(*mtime)) == 0) {
+				   	memcmp(&g_caches[i].ctime, ctime, sizeof(*ctime)) == 0) {
 				memcpy(pbp, &g_caches[i], sizeof(*pbp));
 				g_referenced[i] = 1;
 
@@ -506,9 +506,9 @@ static int rebuild_vpbps(const char *dirname)
 			STRCPY_S(vpbp->name, isopath);
 			STRCAT_S(vpbp->name, "/");
 			STRCAT_S(vpbp->name, dir.d_name);
-			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(vpbp->mtime));
+			memcpy(&vpbp->ctime, &dir.d_stat.st_ctime, sizeof(vpbp->ctime));
 
-			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
+			ret = get_cache(vpbp->name, &vpbp->ctime, vpbp);
 
 			if (ret < 0) {
 				ret = build_vpbp(vpbp);
@@ -890,9 +890,9 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 	stat->st_mode = 0x21FF;
 	stat->st_attr = 0x20;
 	stat->st_size = vpbp->iso_total_size;
-	memcpy(&stat->st_ctime, &vpbp->mtime, sizeof(ScePspDateTime));
-	memcpy(&stat->st_mtime, &vpbp->mtime, sizeof(ScePspDateTime));
-	memcpy(&stat->st_atime, &vpbp->mtime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
 	unlock();
 
 	return ret;
@@ -1023,9 +1023,9 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 			dir->d_stat.st_mode = 0x11FF;
 			dir->d_stat.st_attr = 0x10;
 			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
-			memcpy(&dir->d_stat.st_ctime, &vpbp->mtime, sizeof(ScePspDateTime));
-			memcpy(&dir->d_stat.st_mtime, &vpbp->mtime, sizeof(ScePspDateTime));
-			memcpy(&dir->d_stat.st_atime, &vpbp->mtime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
 			result = 1;
 			cur_idx++;
 		}

@@ -506,7 +506,7 @@ static int rebuild_vpbps(const char *dirname)
 			STRCPY_S(vpbp->name, isopath);
 			STRCAT_S(vpbp->name, "/");
 			STRCAT_S(vpbp->name, dir.d_name);
-			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(dir.d_stat.st_mtime));
+			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(vpbp->mtime));
 
 			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
 
@@ -1018,9 +1018,14 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 		}
 		
 		if (cur_idx < g_vpbps_cnt) {
+			VirtualPBP *vpbp = &g_vpbps[cur_idx];
+
 			dir->d_stat.st_mode = 0x11FF;
 			dir->d_stat.st_attr = 0x10;
 			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+			memcpy(&dir->d_stat.st_ctime, &vpbp->mtime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_mtime, &vpbp->mtime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_atime, &vpbp->mtime, sizeof(ScePspDateTime));
 			result = 1;
 			cur_idx++;
 		}

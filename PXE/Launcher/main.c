@@ -10,49 +10,13 @@
 #include <psputilsforkernel.h>
 #include <psppower.h>
 #include <string.h>
+#include "systemctrl.h"
 #include "rebootex.h"
 #include "utils.h"
 #include "printk.h"
 
 PSP_MODULE_INFO("635kernel", PSP_MODULE_USER, 1, 0);
 PSP_HEAP_SIZE_KB(0);
-
-/**
- * Taken from M33 SDK.
- * Describes a Module Structure from the chained Module List.
- */
-typedef struct SceModule2
-{
-	struct SceModule2 * next; // 0
-	unsigned short attribute; // 4
-	unsigned char version[2]; // 6
-	char modname[27]; // 8
-	char terminal; // 0x23
-	char mod_state;  // 0x24
-	char unk1;    // 0x25
-	char unk2[2]; // 0x26
-	unsigned int unk3; // 0x28
-	SceUID modid; // 0x2C
-	unsigned int unk4; // 0x30
-	SceUID mem_id; // 0x34
-	unsigned int mpid_text;  // 0x38
-	unsigned int mpid_data; // 0x3C
-	void * ent_top; // 0x40
-	unsigned int ent_size; // 0x44
-	void * stub_top; // 0x48
-	unsigned int stub_size; // 0x4C
-	unsigned int entry_addr_; // 0x50
-	unsigned int unk5[4]; // 0x54
-	unsigned int entry_addr; // 0x64
-	unsigned int gp_value; // 0x68
-	unsigned int text_addr; // 0x6C
-	unsigned int text_size; // 0x70
-	unsigned int data_size;  // 0x74
-	unsigned int bss_size; // 0x78
-	unsigned int nsegment; // 0x7C
-	unsigned int segmentaddr[4]; // 0x80
-	unsigned int segmentsize[4]; // 0x90
-} SceModule2;
 
 //installer path
 char installerpath[256];
@@ -343,6 +307,23 @@ void freezeme(unsigned int color)
 }
 #endif
 
+int install_in_cfw(void)
+{
+	//installer load result
+	int result = 0;
+
+	//load installer module
+	SceUID mod = sceKernelLoadModule(installerpath, 0, NULL);
+
+	//installer loaded
+	if (mod >= 0) {
+		//start installer
+		result = sceKernelStartModule(mod, strlen(installerpath) + 1, installerpath, NULL, NULL);
+	}
+
+	return 0;
+}
+
 //entry point
 int main(int argc, char * argv[])
 {
@@ -362,6 +343,12 @@ int main(int argc, char * argv[])
 	printk_init("ms0:/launcher.txt");
 	printk("Hello exploit\r\n");
 	pspDebugScreenInit();
+
+	if(sctrlHENGetMinorVersion() >= 0) {
+		install_in_cfw();
+
+		return 0;
+	}
 
 	fw_version = sceKernelDevkitVersion();
 

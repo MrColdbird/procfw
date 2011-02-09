@@ -11,7 +11,7 @@ gzip.time = FakeTime()
 def binary_replace(data, newdata, offset):
 	return data[0:offset] + newdata + data[offset+len(newdata):]
 
-def prx_compress(output, hdr, input, mod_name=""):
+def prx_compress(output, hdr, input, mod_name="", mod_attr=0xFFFFFFFF):
 	a=open(hdr, "rb")
 	fileheader = a.read();
 	a.close()
@@ -51,6 +51,9 @@ def prx_compress(output, hdr, input, mod_name=""):
 			mod_name = mod_name[0:28]
 		fileheader = binary_replace(fileheader, mod_name.encode(), 0xA)
 
+	if mod_attr != 0xFFFFFFFF:
+		fileheader = binary_replace(fileheader, struct.pack('H', mod_attr), 0x4)
+
 	fileheader = binary_replace(fileheader, struct.pack('L', uncompsize), 0x28)
 	fileheader = binary_replace(fileheader, struct.pack('L', filesize), 0x2c)
 	fileheader = binary_replace(fileheader, struct.pack('L', len(prx)), 0xb0)
@@ -71,13 +74,15 @@ def prx_compress(output, hdr, input, mod_name=""):
 
 def main():
 	if len(sys.argv) < 4:
-		print ("Usage: %s outfile prxhdr infile [modname]\n"%(sys.argv[0]))
+		print ("Usage: %s outfile prxhdr infile [modname] [modattr]\n"%(sys.argv[0]))
 		exit(-1)
 
 	if len(sys.argv) < 5:
 		prx_compress(sys.argv[1], sys.argv[2], sys.argv[3])
-	else:
+	elif len(sys.argv) < 6:
 		prx_compress(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
+	else:
+		prx_compress(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], int(sys.argv[5], 16))
 
 if __name__ == "__main__":
 	main()

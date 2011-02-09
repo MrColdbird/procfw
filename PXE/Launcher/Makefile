@@ -1,6 +1,7 @@
 TARGET = 635kernel
 OBJS = main.o sysmem.o syscall.o ../../Common/utils.o
-LIBS =
+LIBS = -lpspsystemctrl_user
+LIBDIR = . ../../libs
 CFLAGS = -Os -G0 -Wall -I ../../Common
 CXXFLAGS = $(CFLAGS)
 ASFLAGS = $(CFLAGS)

@@ -31,7 +31,8 @@ int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 	return (*LoadReboot)(arg1, arg2, arg3, arg4);
 }
 
-void patch_sceLoadExec(void)
+// mode: 0 - OFW 1 - CFW
+void patch_sceLoadExec(int mode)
 {
 	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
 	unsigned int offsets[6];
@@ -50,22 +51,36 @@ void patch_sceLoadExec(void)
 		offsets[0] = 0x2D44;    // call to LoadReboot
 		offsets[1] = 0x2D90;    // lui $at, 0x8860
 	}
-
-	//replace LoadReboot function
-	_sw(MAKE_CALL(load_reboot), loadexec->text_addr + offsets[0]);
-
-	//patch Rebootex position to 0x88FC0000
-	_sw(0x3C0188FC, loadexec->text_addr + offsets[1]); // lui $at, 0x88FC
-
+	
 	//save LoadReboot function
 	LoadReboot = (void*)loadexec->text_addr;
+
+	if(mode == 0) {
+		//restore LoadReboot
+		_sw(MAKE_CALL(LoadReboot), loadexec->text_addr + offsets[0]);
+
+		//restore jmp to 0x88600000
+		_sw(0x3C018860, loadexec->text_addr + offsets[1]);
+	} else if(mode == 1) {
+		//replace LoadReboot function
+		_sw(MAKE_CALL(load_reboot), loadexec->text_addr + offsets[0]);
+
+		//patch Rebootex position to 0x88FC0000
+		_sw(0x3C0188FC, loadexec->text_addr + offsets[1]); // lui $at, 0x88FC
+	}
 
 	sync_cache();
 }
 
 int main_thread(SceSize args, void *argp)
 {
-	patch_sceLoadExec();
+	int mode = 1;
+
+	if(args == 4 && 0 == *(u32*)argp) {
+		mode = 0;
+	}
+
+	patch_sceLoadExec(mode);
 	sctrlKernelExitVSH(NULL);
 
 	return 0;

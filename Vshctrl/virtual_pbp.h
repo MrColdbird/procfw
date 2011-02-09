@@ -14,7 +14,7 @@ typedef struct _VirtualPBP {
 	char name[128];
 	u32 header[10];
 	PBPSection sects[8];
-	ScePspDateTime mtime;
+	ScePspDateTime ctime;
 } VirtualPBP;
 
 #define ISO_ID "@ISOGAME@"

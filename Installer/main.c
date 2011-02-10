@@ -196,7 +196,15 @@ error:
 
 void init_flash()
 {
-	sceIoUnassign("flash0:");
+	int ret;
+   
+	ret = sceIoUnassign("flash0:");
+
+	while(ret < 0) {
+		ret = sceIoUnassign("flash0:");
+		sceKernelDelayThread(500000);
+	}
+
 	sceIoAssign("flash0:", "lflash0:0,0", "flashfat0:", 0, NULL, 0);
 	sceIoUnassign("flash1:");
 	sceIoAssign("flash1:", "lflash0:0,1", "flashfat1:", 0, NULL, 0);
@@ -257,8 +265,42 @@ exit:
 	return -1;
 }
 
+int uninstall_cfw(void)
+{
+	int ret;
+
+	sceIoRemove("flash1:/config.se");
+
+	int i; for(i=0; i<NELEMS(g_file_lists); ++i) {
+		printf("Removing %s...", g_file_lists[i].dst);
+		ret = sceIoRemove(g_file_lists[i].dst);
+
+		if(ret == 0 || ret == 0x80010002) {
+			printf("OK\n");
+		} else {
+			printf("failed(0x%08X)\n", ret);
+		}
+	}
+
+	// per model uninstall goes here:
+	switch(psp_model) {
+		case PSP_GO:
+			break;
+		case PSP_4000:
+			break;
+		case PSP_3000:
+			break;
+		case PSP_2000:
+			break;
+		case PSP_1000:
+			break;
+	}
+
+	return 0;
+}
+
 /**
- * mode: 2 for psp3000, 1 for psp2000v3
+ * mode: 0 - OFW mode, 1 - CFW mode
  */
 void start_reboot(int mode)
 {
@@ -270,7 +312,7 @@ void start_reboot(int mode)
 	modid = kuKernelLoadModule(modpath, 0, 0);
 
 	if (modid >= 0) {
-		ret = sceKernelStartModule(modid, 0, NULL, 0, NULL);
+		ret = sceKernelStartModule(modid, sizeof(mode), &mode, 0, NULL);
 
 		if (ret < 0) {
 			printf("start module error 0x%08x\n", ret);
@@ -295,7 +337,7 @@ int main(int argc, char *argv[])
 	memset(&stat, 0, sizeof(stat));
 	pspDebugScreenInit();
 	fw_version = sceKernelDevkitVersion();
-	
+
 	if (fw_version != 0x06030510) {
 		printf("Sorry. This program requires 6.35.\n");
 		goto exit;
@@ -307,13 +349,14 @@ int main(int argc, char *argv[])
 	usage();
 
 	printf("Press X to launch CFW.\n");
+	printf("Press Triangle to uninstall CFW.\n");
 	printf("Hold L to reinstall CFW.\n");
 	printf("Press R to exit.\n");
 
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
 
-	while (0 == (key & (PSP_CTRL_CROSS | PSP_CTRL_RTRIGGER))) {
+	while (0 == (key & (PSP_CTRL_CROSS | PSP_CTRL_RTRIGGER | PSP_CTRL_TRIANGLE))) {
 		sceKernelDelayThread(50000);
 		sceCtrlReadBufferPositive(&ctl, 1);
 		key = ctl.Buttons;
@@ -353,46 +396,49 @@ int main(int argc, char *argv[])
 	}
 
 	sceCtrlReadBufferPositive(&ctl, 1);
-	
+
 	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
 		disable_smart_copy = 1;
 	}
-	
-	ret = install_cfw();
 
-	if (ret == 0) {
-		printf(" Completed.\nPress X to start CFW.\n");
+	if (key & PSP_CTRL_CROSS) {
+		ret = install_cfw();
 
-		sceCtrlReadBufferPositive(&ctl, 1);
-		key = ctl.Buttons;
+		if (ret == 0) {
+			printf(" Completed.\nPress X to start CFW.\n");
 
-		while (key != PSP_CTRL_CROSS) {
-			sceKernelDelayThread(50000);
 			sceCtrlReadBufferPositive(&ctl, 1);
 			key = ctl.Buttons;
+
+			while (key != PSP_CTRL_CROSS) {
+				sceKernelDelayThread(50000);
+				sceCtrlReadBufferPositive(&ctl, 1);
+				key = ctl.Buttons;
+			}
+
+			printf("Now reboot to " VERSION_STR " :)\n");
+			start_reboot(1);
 		}
-
-		printf("Now reboot to " VERSION_STR " :)\n");
-		start_reboot(psp_model);
-	} else {
-exit:
-		printf("Press X to exit.\n");
-
-		sceCtrlReadBufferPositive(&ctl, 1);
-		key = ctl.Buttons;
-
-		while (key != PSP_CTRL_CROSS) {
-			sceKernelDelayThread(50000);
-			sceCtrlReadBufferPositive(&ctl, 1);
-			key = ctl.Buttons;
-		}
-
-		sceKernelExitGame();
+	} else if (key & PSP_CTRL_TRIANGLE) {
+		ret = uninstall_cfw();
+		printf("Now reboot to OFW :)\n");
+		sceKernelDelayThread(1000000);
+		start_reboot(0);
 	}
 
-	printf("Now reboot to %s\n", VERSION_STR);
-	start_reboot(psp_model);
+exit:
+	printf("Press X to exit.\n");
+
+	sceCtrlReadBufferPositive(&ctl, 1);
+	key = ctl.Buttons;
+
+	while (key != PSP_CTRL_CROSS) {
+		sceKernelDelayThread(50000);
+		sceCtrlReadBufferPositive(&ctl, 1);
+		key = ctl.Buttons;
+	}
+
+	sceKernelExitGame();
 
 	return 0;
 }
-

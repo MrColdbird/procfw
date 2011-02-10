@@ -97,7 +97,7 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 
 						syscall_num = sceKernelQuerySystemCall(func);
 
-						if(syscall == (u32)-1) {
+						if(syscall_num == (u32)-1) {
 							printk("%s: cannot find syscall in %s_%08X\n", __func__, library, nid);
 
 							return -1;

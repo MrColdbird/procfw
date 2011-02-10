@@ -1,8 +1,8 @@
 all:
-	../contrib/pspgz.py ../dist/635PROUPDATE/stargate.prx ../contrib/SystemControl.hdr stargate.prx stargate
+	../contrib/pspgz.py ../dist/635PROUPDATE/stargate.prx ../contrib/SystemControl.hdr stargate.prx stargate 0x1007
 
 TARGET = stargate
-OBJS = main.o key_decrypt.o pspcipher.o pauth.o nodrm.o utility_patch.o ../Common/utils.o ../Common/libs.o
+OBJS = main.o key_decrypt.o pspcipher.o pauth.o nodrm.o utility_patch.o loadmodule_patch.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
 
 INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall -fno-pic

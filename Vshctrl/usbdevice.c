@@ -45,9 +45,27 @@ static SceUID load_start_usbdevice(void)
 
 static void stop_unload_usbdevice(void)
 {
-	sceKernelStopModule(g_usbdevice_modid, 0, NULL, NULL, NULL);
-	sceKernelUnloadModule(g_usbdevice_modid);
-	g_usbdevice_modid = -1;
+	int ret;
+
+	ret = sceKernelStopModule(g_usbdevice_modid, 0, NULL, NULL, NULL);
+
+#ifdef DEBUG
+	if(ret < 0) {
+		printk("%s: sceKernelStopModule(0x%08X) -> 0x%08X\n", __func__, g_usbdevice_modid, ret);
+	}
+#endif
+
+	ret = sceKernelUnloadModule(g_usbdevice_modid);
+
+#ifdef DEBUG
+	if(ret < 0) {
+		printk("%s: sceKernelUnloadModule(0x%08X) -> 0x%08X\n", __func__, g_usbdevice_modid, ret);
+	}
+#endif
+
+	if (ret >= 0) {
+		g_usbdevice_modid = -1;
+	}
 }
 
 static int (*sceUsbStartOrig)(const char *driverName, int size, void *args) = NULL;
@@ -67,7 +85,9 @@ static int _sceUsbStart(const char *driverName, int size, void *args)
 			}
 
 			if (g_usbdevice_modid >= 0) {
-				pspUsbDeviceSetDevice(conf.usbdevice - 1, conf.flashprot, 0);
+				ret = pspUsbDeviceSetDevice(conf.usbdevice - 1, conf.flashprot, 0);
+				printk("%s: pspUsbDeviceSetDevice %d %d -> 0x%08X\n", __func__,
+						conf.usbdevice-1, conf.flashprot, ret);
 			}
 		}
 	}
@@ -89,7 +109,10 @@ static int _sceUsbStop(const char *driverName, int size, void *args)
 	if (0 == strcmp(driverName, "USBStor_Driver")) {
 		if(conf.usbdevice > 0 && conf.usbdevice <= 5) {
 			if (g_usbdevice_modid >= 0) {
-				pspUsbDeviceFinishDevice();
+				int result;
+
+				result = pspUsbDeviceFinishDevice();
+				printk("%s: pspUsbDeviceFinishDevice -> 0x%08X\n", __func__, result);
 				stop_unload_usbdevice();
 			}
 		}

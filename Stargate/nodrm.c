@@ -37,7 +37,7 @@ static int (*_sceNpDrmRenameCheck)(char *fn);
 static int (*_sceNpDrmEdataSetupKey)(int fd);
 static SceOff (*_sceNpDrmEdataGetDataSize)(int fd);
 static int (*_sceKernelLoadModuleNpDrm)(char *fn, int flag, void *opt);
-static int (*_sceKernelLoadModule)(char *fname, int flag, void *opt);
+extern int (*_sceKernelLoadModule)(char *fname, int flag, void *opt);
 
 static SceUID g_nodrm_sema = -1;
 
@@ -680,10 +680,8 @@ static NoDrmHookEntry g_nodrm_hook_map[] = {
 int nodrm_get_normal_functions(void)
 {
 	_sceKernelLoadModuleNpDrm = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0xF2D8D1B4);
-	_sceKernelLoadModule = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0x977DE386);
 
 	if (_sceKernelLoadModuleNpDrm == NULL) return -4;
-	if (_sceKernelLoadModule == NULL) return -5;
 
 	return 0;
 }

@@ -79,6 +79,7 @@ static int stargate_module_chain(SceModule2 *mod)
 	hook_import_bynid((SceModule*)mod, "scePauth", 0x98B83B5D, myPauth_98B83B5D, 1);
 	patch_drm_imports((SceModule*)mod);
 	patch_utility((SceModule*)mod);
+	patch_load_module((SceModule*)mod);
 
 	// m33 mode: until npdrm loaded
 	if(0 == strcmp(mod->modname, "scePspNpDrm_Driver")) {
@@ -103,9 +104,11 @@ int module_start(SceSize args, void *argp)
 	printk("stargate started\n");
 	patch_sceMesgLed();
 	myPauth_init();
+	load_module_get_function();
 	nodrm_init();
 	nodrm_get_normal_functions();
 	nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
+	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
 
 	return 0;

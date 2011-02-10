@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/635PROUPDATE/vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl
+	../contrib/pspgz.py ../dist/635PROUPDATE/vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl 0x1007
 
 TARGET = vshctrl
 OBJS = main.o vshpatch.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
@@ -7,8 +7,6 @@ IMPORTS = ../Imports/LoadExecForKernel.o
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
-
-#DEBUG = 1
 
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1

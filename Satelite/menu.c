@@ -40,7 +40,7 @@ const char *region_name[] = {
 	"China",
 };
 
-#define TMENU_MAX 16
+#define TMENU_MAX 17
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -60,6 +60,7 @@ enum{
 	TMENU_FAKE_REGION,
 	TMENU_SHUTDOWN_DEVICE,
 	TMENU_RESET_DEVICE,
+	TMENU_RESET_VSH,
 	TMENU_EXIT
 };
 
@@ -81,6 +82,7 @@ const char *top_menu_list[TMENU_MAX] ={
 	"FAKE REGION    ",
 	"SHUTDOWN DEVICE",
 	"RESET DEVICE",
+	"RESET VSH",
 	"EXIT",
 };
 
@@ -89,8 +91,8 @@ const char *item_str[TMENU_MAX];
 
 static int menu_sel = TMENU_XMB_CLOCK;
 
-const int xyPoint[] ={0x98, 0x30, 0xC0, 0xA0, 0x70, 0x08, 0x0E};//data243C=
-const int xyPoint2[] ={0xB0, 0x30, 0xD8, 0xB8, 0x88, 0x08, 0x11};//data2458=
+const int xyPoint[] ={0x98, 0x30, 0xC0, 0xA0, 0x70, 0x08, 0x0E, 0xA8};//data243C=
+const int xyPoint2[] ={0xB0, 0x30, 0xD8, 0xB8, 0x88, 0x08, 0x11, 0xC0};//data2458=
 
 int menu_draw(void)
 {
@@ -127,6 +129,9 @@ int menu_draw(void)
 					break;
 				case TMENU_RESET_DEVICE:
 					xPointer = pointer[3];
+					break;
+				case TMENU_RESET_VSH:
+					xPointer = pointer[7];
 					break;
 				case TMENU_SHUTDOWN_DEVICE:
 					xPointer = 176;
@@ -308,6 +313,11 @@ int menu_ctrl(u32 button_on)
 				return 2; // RESET flag
 			}
 			break;
+		case TMENU_RESET_VSH:	
+			if(direction==0) {
+				return 4; // RESET flag
+			}
+			break;
 		case TMENU_EXIT:
 			if(direction==0) return 1; // finish
 			break;
@@ -315,4 +325,3 @@ int menu_ctrl(u32 button_on)
 
 	return 0; // continue
 }
-

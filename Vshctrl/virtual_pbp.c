@@ -146,7 +146,7 @@ static int is_iso(SceIoDirent * dir)
 static VirtualPBP* get_vpbp_by_path(const char *path)
 {
 	char *p;
-	u32 isoindex;
+	int isoindex;
 
 	if (g_vpbps == NULL) {
 		return NULL;
@@ -159,9 +159,9 @@ static VirtualPBP* get_vpbp_by_path(const char *path)
 	}
 
 	p += sizeof(ISO_ID)-1;
-	isoindex = strtoul(p, NULL, 16);
+	isoindex = strtol(p, NULL, 16);
 
-	if (isoindex >= g_vpbps_cnt) {
+	if (isoindex < 0 || isoindex >= g_vpbps_cnt) {
 		return NULL;
 	}
 
@@ -506,7 +506,8 @@ static int rebuild_vpbps(const char *dirname)
 			STRCPY_S(vpbp->name, isopath);
 			STRCAT_S(vpbp->name, "/");
 			STRCAT_S(vpbp->name, dir.d_name);
-			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(dir.d_stat.st_mtime));
+			memcpy(&vpbp->ctime, &dir.d_stat.st_ctime, sizeof(vpbp->ctime));
+			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(vpbp->mtime));
 
 			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
 
@@ -654,7 +655,7 @@ SceOff vpbp_lseek(SceUID fd, SceOff offset, int whence)
 int vpbp_read(SceUID fd, void * data, SceSize size)
 {
 	VirtualPBP *vpbp;
-	int remaining;
+	u32 remaining;
 	
 	lock();
 	vpbp = get_vpbp_by_fd(fd);
@@ -669,8 +670,8 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 	remaining = size;
 
 	while(remaining > 0) {
-		if (vpbp->file_pointer >= 0 && vpbp->file_pointer < vpbp->header[2]) {
-			int re;
+		if (vpbp->file_pointer < vpbp->header[2]) {
+			u32 re;
 
 			re = MIN(remaining, vpbp->header[2] - vpbp->file_pointer);
 			memcpy(data, vpbp->header+vpbp->file_pointer, re);
@@ -890,9 +891,9 @@ int vpbp_getstat(const char * file, SceIoStat * stat)
 	stat->st_mode = 0x21FF;
 	stat->st_attr = 0x20;
 	stat->st_size = vpbp->iso_total_size;
-	memcpy(&stat->st_ctime, &vpbp->mtime, sizeof(ScePspDateTime));
-	memcpy(&stat->st_mtime, &vpbp->mtime, sizeof(ScePspDateTime));
-	memcpy(&stat->st_atime, &vpbp->mtime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&stat->st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
 	unlock();
 
 	return ret;
@@ -943,7 +944,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	sctrlSESetBootConfFileIndex(config.umdmode);
 
 	//high memory disabled because it hurts pspgo resuming interrupted game
-//	sctrlHENSetMemory(48, 0);
+//	sctrlHENSetMemory(55, 0);
 
 	printk("%s: ISO %s, UMD mode %d\n", __func__, vpbp->name, config.umdmode);
 	
@@ -1018,9 +1019,14 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 		}
 		
 		if (cur_idx < g_vpbps_cnt) {
+			VirtualPBP *vpbp = &g_vpbps[cur_idx];
+
 			dir->d_stat.st_mode = 0x11FF;
 			dir->d_stat.st_attr = 0x10;
 			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+			memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+			memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
 			result = 1;
 			cur_idx++;
 		}

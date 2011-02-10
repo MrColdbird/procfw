@@ -38,6 +38,7 @@ PSP_EXPORT_FUNC(myNpDrmEdataGetDataSize)
 PSP_EXPORT_FUNC(myKernelLoadModuleNpDrm)
 PSP_EXPORT_FUNC(myUtilityLoadModule)
 PSP_EXPORT_FUNC(myUtilityUnloadModule)
+PSP_EXPORT_FUNC(myKernelLoadModule)
 PSP_EXPORT_END
 
 PSP_END_EXPORTS

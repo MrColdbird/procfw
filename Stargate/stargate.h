@@ -11,5 +11,7 @@ void patch_drm_imports(SceModule *mod);
 void patch_utility(SceModule *mod);
 int nodrm_get_normal_functions(void);
 int nodrm_get_npdrm_functions(void);
+int load_module_get_function(void);
+void patch_load_module(SceModule *mod);
 
 #endif

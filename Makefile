@@ -12,6 +12,7 @@ STARGATE = Stargate
 ISOLAUNCHER = testsuite/ISOLauncher
 FASTRECOVERY = FastRecovery
 SATELITE = Satelite
+POPCORN = Popcorn
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -25,7 +26,7 @@ all:
 # Preparing Distribution Folders
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/635PROUPDATE || true
-	@mkdir $(DISTRIBUTE)/ISOLauncher || true
+#	@mkdir $(DISTRIBUTE)/ISOLauncher || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
 	@mkdir $(DISTRIBUTE)/dbg_installer || true
 	@rm -f ./Common/*.o
@@ -56,12 +57,13 @@ all:
 	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/635PROUPDATE
 	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/635PROUPDATE
 	@cp contrib/usbdevice.prx $(DISTRIBUTE)/635PROUPDATE
+	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating Debugging Suite for Live-System
-	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
+#	@cd $(ISOLAUNCHER); make $(OPT FLAGS) $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
-	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
+#	@mv $(ISOLAUNCHER)/UI/EBOOT.PBP $(DISTRIBUTE)/ISOLauncher
+#	@mv $(ISOLAUNCHER)/Launcher/launcher.prx $(DISTRIBUTE)/ISOLauncher
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
 	@cp $(DISTRIBUTE)/635PROUPDATE/* $(DISTRIBUTE)/dbg_installer
 	@cp $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/dbg_installer
@@ -74,7 +76,7 @@ clean:
 	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
-	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
+#	@cd $(ISOLAUNCHER); make clean $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)

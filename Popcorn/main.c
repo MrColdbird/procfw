@@ -12,6 +12,8 @@
 
 PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
+#define FAKE_RIF "JP0700-ULJS00237_00-EXTRAMISSION0001"
+
 // 4300
 u32 g_missing_PNG_icon = 1;
 
@@ -25,12 +27,22 @@ extern u8 g_icon_png[0x3730];
 STMOD_HANDLER g_previous = NULL;
 
 // 0
-int sceIoReadPatched(int fd, u8 *buf, int size)
+int myIoRead(int fd, u8 *buf, int size)
 {
 	int ret;
-	u32 png_signature = 0x474E5089;
+	u32 png_signature = 0x474E5089, pos;
+
+	if(fd == 0x10000) {
+		size = 152;
+		printk("%s: fake rif content %d\n", __func__, size);
+		memset(buf, 0, size);
+
+		return size;
+	}
 	
+	pos = sceIoLseek32(fd, 0, SEEK_CUR);
 	ret = sceIoRead(fd, buf, size);
+	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, fd, pos, size, ret);
 
 	if (ret != size) {
 		return ret;
@@ -46,12 +58,17 @@ int sceIoReadPatched(int fd, u8 *buf, int size)
 	}
 
 	// loc_60
-	if (ret == 4 && !(((u32)buf) & 4)) {
-		if (*(u32*)(buf) == 0x464C457F) { // ~ELF
-			*(u32*)(buf) = 0x5053507E; // ~PSP
+	if (ret == 4) {
+		u32 magic;
+
+		magic = 0x464C457F; // ~ELF
+
+		if(0 == memcmp(buf, &magic, sizeof(magic))) {
+			magic = 0x5053507E; // ~PSP
+			memcpy(buf, &magic, sizeof(magic));
 		}
 
-		printk("%s: patch plain ELF header to ~PSP\n", __func__);
+		printk("%s: patch ~ELF -> ~PSP\n", __func__);
 
 		return 4;
 	}
@@ -69,21 +86,38 @@ int sceIoReadPatched(int fd, u8 *buf, int size)
 	return ret;
 }
 
-// 41c
-void sync_cache()
+int myIoClose(SceUID fd)
 {
-	sceKernelIcacheInvalidateAll();
-	sceKernelDcacheWritebackInvalidateAll();
+	int ret;
+
+	if (fd == 0x10000) {
+		printk("%s: [FAKE]\n", __func__);
+		ret = 0;
+	} else {
+		ret = sceIoClose(fd);
+	}
+
+	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
+
+	return ret;
 }
 
 // 750
 int popcorn_patch_chain(SceModule2 *mod)
 {
+	printk("%s: %s\n", __func__, mod->modname);
+
 	if (0 == strcmp(mod->modname, "pops")) {
 		u32 text_addr = mod->text_addr;
 
 		printk("%s: patch pops\n", __func__);
+		(void)(text_addr);
 
+		_sw(0, mod->text_addr + 0x1E80);
+
+		//kill first 0x80010016 error
+		_sw(0x24020000, mod->text_addr + 0x220);
+#if 0
 		_sw(0x5000FFE3, text_addr+0xE9AC);
 		_sw(_lw(text_addr+0x16A08), text_addr+0xE90C); // jal scePopsManExitVSHKernel
 		_sw(0, text_addr+0x190A8);
@@ -91,6 +125,7 @@ int popcorn_patch_chain(SceModule2 *mod)
 		if (g_missing_PNG_icon) {
 			_sw(0x24053730, text_addr+0x2734C);
 		}
+#endif
 
 		sync_cache();
 	}
@@ -142,7 +177,7 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	ret = sceKernelDeflateDecompress(dest, destSize, src, 0);
 
 	if (ret == 0x9300) {
-		printk("%s: return 0x92FF instead of 0x9300\n", __func__);
+		printk("%s: [FAKE] 0x9300 -> 0x92FF\n", __func__);
 
 		ret = 0x92FF;
 	}
@@ -206,22 +241,206 @@ int setup_PGD_fd(char *path, void *keys, int flags, int filemode, int offset)
 	return fd;
 }
 
+int myIoOpen(const char *file, int flag, int mode)
+{
+	int ret;
+
+	if(strstr(file, FAKE_RIF)) {
+		printk("%s: [FAKE]\n", __func__);
+		ret = 0x10000;
+	} else {
+		ret = sceIoOpen(file, flag, mode);
+	}
+
+	printk("%s: %s 0x%08X -> 0x%08X\n", __func__, file, flag, ret);
+
+	return ret;
+}
+
+int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void * outdata, int outlen)
+{
+	int ret;
+
+	if(cmd == 0x04100001 && inlen == 16) {
+		printk("%s: setting PGD key\n", __func__);
+		hexdump(indata, inlen);
+	}
+
+	if(cmd == 0x04100002 && inlen == 4) {
+		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
+	}
+
+#if 0
+	if (cmd == 0x04100001 || cmd == 0x04100002) {
+		ret = 0;
+		printk("%s: [FAKE] 0x%08X -> 0x%08X\n", __func__, fd, ret);
+		goto exit;
+	}
+#endif
+
+	ret = sceIoIoctl(fd, cmd, indata, inlen, outdata, outlen);
+
+exit:
+#ifdef DEBUG
+	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
+#endif
+
+	return ret;
+}
+
+int myIoGetstat(const char *path, SceIoStat *stat)
+{
+	int ret;
+
+	if(strstr(path, FAKE_RIF)) {
+		ret = 0;
+		printk("%s: [FAKE]\n", __func__);
+	} else {
+		ret = sceIoGetstat(path, stat);
+	}
+
+	printk("%s: %s -> 0x%08X\n", __func__, path, ret);
+
+	return ret;
+}
+
+extern int strnlen(const char *str, int size);
+
+static int _strnlen(const char *str, int size)
+{
+	int ret;
+
+	ret = strnlen(str, size);
+	printk("%s: %s %d -> %d\n", __func__, str, size, ret);
+
+	return ret;
+}
+
+static int _strncmp(const char *a, const char *b, int size)
+{
+	int ret;
+
+	ret = strncmp(a, b, size);
+	printk("%s: %s %s %d-> %d\n", __func__, a, b, size, ret);
+
+	return ret;
+}
+
+static int (*_check_rif_path)(const char *src, char *dst) = NULL;
+
+static int check_rif_path(char *src, char *dst)
+{
+	int ret;
+
+	strcpy(src, FAKE_RIF);
+	ret = (*_check_rif_path)(src, dst);
+	strcpy(dst, "ef0:/PSP/LICNESE/");
+	strcat(dst, FAKE_RIF);
+	strcat(dst, ".RIF");
+	printk("%s: %s %s-> 0x%08X\n", __func__, src, dst, ret);
+
+	return ret;
+}
+
+static void patch_scePops_Manager(void)
+{
+	SceModule2 *mod;
+	u32 text_addr;
+
+	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
+	text_addr = mod->text_addr;
+
+	// cannot find 635 one
+	// _sw(0, text_addr+0x158);
+
+	_sw(0, text_addr+0x1E80); // 158C
+
+	_sw(MAKE_JUMP(&decompress_data), text_addr+0x00001F58); // 162C
+	_sw(0, text_addr+0x00001F5C); // 1630
+
+	// it no longer works because 635 sceIoIoctl becames inline now
+#if 0
+	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0x6A8); // for sceIoIoctl
+	_sw(0, text_addr+0x6AC);
+
+	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0xCA0);
+	_sw(0, text_addr+0xCA4);
+#endif
+
+#if 0
+	_sw(0, text_addr+0x378);  // 0x564 (6.31)
+	_sw(0, text_addr+0xA80);  // 0x126C (6.31)
+	_sw(0, text_addr+0xE2C);  // 0x14B0 (6.31)
+	_sw(0, text_addr+0xECC);  // 0x15B8 (6.31)
+	_sw(0, text_addr+0x1100); // 0x1780 (6.31)
+	_sw(0, text_addr+0x1354); // 0x1CCC (6.31)
+	_sw(0, text_addr+0x278C); // 0x3C8C (6.31)
+#endif
+
+	_sw(MAKE_JUMP(&myIoOpen), text_addr+0x00003B98);
+	_sw(NOP, text_addr+0x00003B9C);
+
+	_sw(MAKE_JUMP(&myIoIoctl), text_addr+0x00003BA8);
+	_sw(NOP, text_addr+0x00003BAC);
+
+	_sw(MAKE_JUMP(&myIoRead), text_addr+0x00003BB0);
+	_sw(NOP, text_addr+0x00003BB4);
+
+	_sw(MAKE_JUMP(&_strncmp), text_addr+0x00003C38);
+	_sw(NOP, text_addr+0x00003C3C);
+
+	_sw(MAKE_JUMP(&_strnlen), text_addr+0x00003C40);
+	_sw(NOP, text_addr+0x00003C44);
+
+	_sw(MAKE_JUMP(&myIoGetstat), text_addr+0x00003BD0);
+	_sw(NOP, text_addr+0x00003BD4);
+
+	_sw(MAKE_JUMP(&myIoClose), text_addr+0x00003BC0);
+	_sw(NOP, text_addr+0x00003BC4);
+
+	_check_rif_path = (void*)(text_addr+0x00000190);
+	_sw(MAKE_CALL(&check_rif_path), text_addr+0x00002798);
+	_sw(MAKE_CALL(&check_rif_path), text_addr+0x00002C58);
+
+	//removing break instruction
+	_sw(0, text_addr + 0x1E80);
+
+	//kill first 0x80010016 error
+	_sw(0x24020000, text_addr + 0x220);
+
+	//kill second 0x80010016 error
+	_sw(0, text_addr + 0x284C);
+
+	//fake success sceNpDrmGetVersionKey
+	_sw(0x24020000, text_addr + 0x29CC);
+}
+
+static void setup_psx_fw_version(u32 fw_version)
+{
+	int (*_SysMemUserForUser_315AD3A0)(u32 fw_version);
+	
+	_SysMemUserForUser_315AD3A0 = (void*)sctrlHENFindFunction("sceSystemMemoryManager", "SysMemUserForUser", 0x315AD3A0);
+
+	if (_SysMemUserForUser_315AD3A0 == NULL) {
+		printk("_SysMemUserForUser_315AD3A0 not found\n");
+		reboot_vsh_with_error(0x80000001);
+	}
+
+	_SysMemUserForUser_315AD3A0(fw_version);
+}
+
 int module_start(SceSize args, void* argp)
 {
 	int fd;
 	u8 header[40];
-	u32 icon0_offset = 0;
-	u32 psar_offset = 0;
-	SceModule2 *mod;
-	u32 text_addr;
-	int (*SysMemUserForUser_315AD3A0)(u32 fw_version);
+	u32 icon0_offset = 0, psar_offset = 0;
 
-	printk_init();
-	printk("%s: open %s\n", __func__, sceKernelInitFileName());
+	printk_init("ms0:/popcorn.txt");
+	printk("Popcorn: init_file = %s\n", sceKernelInitFileName());
 	fd = sceIoOpen(sceKernelInitFileName(), PSP_O_RDONLY, 0);
 
 	if (fd < 0) {
-		printk("%s: sceIoOpen returns 0x%08X\n", __func__, fd);
+		printk("sceIoOpen returns 0x%08X\n", fd);
 
 		return 1;
 	}
@@ -233,11 +452,10 @@ int module_start(SceSize args, void* argp)
 	sceIoRead(fd, header, sizeof(header));
 
 	if (0 == memcmp(header, "PSTITLE", 7)) {
-		printk("%s: header match PSTITILE\n", __func__);
+		printk("header match PSTITILE\n");
 		sceIoLseek(fd, psar_offset + 0x200, PSP_SEEK_SET);
 	} else {
-		// loc_00000688
-		printk("%s: header doesn't match PSTITILE\n", __func__);
+		printk("header doesn't match PSTITILE\n");
 		sceIoLseek(fd, psar_offset + 0x400, PSP_SEEK_SET);
 		g_not_found_pstitle = 1;
 	}
@@ -245,12 +463,8 @@ int module_start(SceSize args, void* argp)
 	sceIoRead(fd, header, sizeof(header));
 
 	if (*(u32*)header == 0x44475000) { //PDG
-		printk("%s: PDG flag found, patching scePops_Manager\n", __func__);
+		printk("PDG flag found, genius PSX game\n");
 		sceIoClose(fd);
-		mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
-		text_addr = mod->text_addr;
-		_sw(0, text_addr+0x158);
-		sync_cache();
 
 		// module exit
 		return 1;
@@ -265,52 +479,16 @@ int module_start(SceSize args, void* argp)
 			*(u32*)(header+0x10) == 0x50000000 && // 
 			*(u32*)(header+0x14) == *(u32*)(header+0x10)
 	   ) {
-		printk("%s: PNG file found\n", __func__);
+		printk("PNG file found\n");
 		g_missing_PNG_icon = 0;
+	} else {
+		printk("PNG file is missing\n");
 	}
 	
-	// loc_53c
 	sceIoClose(fd);
-	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
-	text_addr = mod->text_addr;
-	_sw(0, text_addr + 0x158);
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
-	SysMemUserForUser_315AD3A0 = (void*)sctrlHENFindFunction("sceSystemMemoryManager", "SysMemUserForUser", 0x315AD3A0);
-
-	if (!SysMemUserForUser_315AD3A0) {
-		reboot_vsh_with_error(0x80000001);
-	}
-
-	//loc_59C
-	SysMemUserForUser_315AD3A0(0x03090010);
-
-	printk("%s: patching scePops_Manager\n", __func__);
-
-	_sw(0, text_addr+0x158C); // 0x1EA8 (6.31)
-	_sw(MAKE_JUMP(&decompress_data), text_addr+0x162C); // 0x1F80 (6.31)
-	_sw(0, text_addr+0x1630); // 0x1F84 (6.31)
-
-	// In 6.31 popsman.prx has more calls to sceIoIoctl, needs more patch
-	// List of using sceIoIoctl DRM functions:
-	// sceMeAudio_9EA8B21A sceMeAudio_F8FD8B48 sceIoReadPatched0000D64
-	// sceMeAudio_B213763F sceIoReadPatched0001AEC
-	// Should I use sceIoIoctl NODRM patch?
-	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0x6A8); // for sceIoIoctl
-	_sw(0, text_addr+0x6AC);
-
-	_sw(MAKE_JUMP(&setup_PGD_fd), text_addr+0xCA0);
-	_sw(0, text_addr+0xCA4);
-	
-	_sw(0, text_addr+0x378);  // 0x564 (6.31)
-	_sw(0, text_addr+0xA80);  // 0x126C (6.31)
-	_sw(0, text_addr+0xE2C);  // 0x14B0 (6.31)
-	_sw(0, text_addr+0xECC);  // 0x15B8 (6.31)
-	_sw(0, text_addr+0x1100); // 0x1780 (6.31)
-	_sw(0, text_addr+0x1354); // 0x1CCC (6.31)
-	_sw(MAKE_JUMP(&sceIoReadPatched), text_addr+0x2788); // sceIoRead 0x3C88 (6.31)
-	_sw(0, text_addr+0x278C); // 0x3C8C (6.31)
-
-	// sceIoReadAsync (6.31)???
+	setup_psx_fw_version(0x03090010);
+	patch_scePops_Manager();
 	sync_cache();
 
 	return 0;

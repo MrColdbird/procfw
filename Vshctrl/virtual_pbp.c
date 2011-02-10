@@ -352,7 +352,7 @@ static int get_iso_file_size(const char *path, u32 *file_size)
 	return 0;
 }
 
-static int get_cache(const char *file, ScePspDateTime *ctime, VirtualPBP* pbp)
+static int get_cache(const char *file, ScePspDateTime *mtime, VirtualPBP* pbp)
 {
 	int i, ret;
 	u32 file_size;
@@ -370,7 +370,7 @@ static int get_cache(const char *file, ScePspDateTime *ctime, VirtualPBP* pbp)
 	for(i=0; i<g_caches_cnt; ++i) {
 		if(g_caches[i].enabled && 0 == strcmp(g_caches[i].name, file)) {
 			if (file_size == g_caches[i].iso_total_size &&
-				   	memcmp(&g_caches[i].ctime, ctime, sizeof(*ctime)) == 0) {
+				   	memcmp(&g_caches[i].mtime, mtime, sizeof(*mtime)) == 0) {
 				memcpy(pbp, &g_caches[i], sizeof(*pbp));
 				g_referenced[i] = 1;
 
@@ -507,8 +507,9 @@ static int rebuild_vpbps(const char *dirname)
 			STRCAT_S(vpbp->name, "/");
 			STRCAT_S(vpbp->name, dir.d_name);
 			memcpy(&vpbp->ctime, &dir.d_stat.st_ctime, sizeof(vpbp->ctime));
+			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(vpbp->mtime));
 
-			ret = get_cache(vpbp->name, &vpbp->ctime, vpbp);
+			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
 
 			if (ret < 0) {
 				ret = build_vpbp(vpbp);

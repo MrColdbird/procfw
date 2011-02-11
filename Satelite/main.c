@@ -19,6 +19,7 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
 extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
+extern int scePowerRequestSuspend(void);
 
 int menu_mode  = 0;
 u32 cur_buttons = 0xFFFFFFFF;
@@ -146,6 +147,8 @@ int TSRThread(SceSize args, void *argp)
 		scePowerRequestStandby();
 	} else if (stop_flag ==4) {
 		sctrlKernelExitVSH(NULL);
+	} else if (stop_flag == 5) {
+		scePowerRequestSuspend();
 	}
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);

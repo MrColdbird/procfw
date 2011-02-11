@@ -40,7 +40,7 @@ const char *region_name[] = {
 	"China",
 };
 
-#define TMENU_MAX 17
+#define TMENU_MAX 18
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -59,6 +59,7 @@ enum{
 	TMENU_FLASH_PROT,
 	TMENU_FAKE_REGION,
 	TMENU_SHUTDOWN_DEVICE,
+	TMENU_SUSPEND_DEVICE,
 	TMENU_RESET_DEVICE,
 	TMENU_RESET_VSH,
 	TMENU_EXIT
@@ -81,6 +82,7 @@ const char *top_menu_list[TMENU_MAX] ={
 	"FLASH PROTECT  ",
 	"FAKE REGION    ",
 	"SHUTDOWN DEVICE",
+	"SUSPEND DEVICE",
 	"RESET DEVICE",
 	"RESET VSH",
 	"EXIT",
@@ -134,6 +136,9 @@ int menu_draw(void)
 					xPointer = pointer[7];
 					break;
 				case TMENU_SHUTDOWN_DEVICE:
+					xPointer = 176;
+					break;
+				case TMENU_SUSPEND_DEVICE:
 					xPointer = 176;
 					break;
 				default:
@@ -315,7 +320,12 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_RESET_VSH:	
 			if(direction==0) {
-				return 4; // RESET flag
+				return 4; // RESET VSH flag
+			}
+			break;
+		case TMENU_SUSPEND_DEVICE:	
+			if(direction==0) {
+				return 5; // SUSPEND flag
 			}
 			break;
 		case TMENU_EXIT:

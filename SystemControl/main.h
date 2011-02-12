@@ -73,7 +73,6 @@ void load_config(void);
 
 void patch_module_for_version_spoof(SceModule *mod);
 
-void patch_VLF_Module(void);
 void patch_sceChkreg(void);
 
 extern SEConfig conf;

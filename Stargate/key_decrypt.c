@@ -19,7 +19,6 @@
 #include "psputilsforkernel.h"
 #include "systemctrl.h"
 #include "kubridge.h"
-#include "pspcipher.h"
 #include "utils.h"
 #include "printk.h"
 
@@ -118,21 +117,6 @@ static u8 g_key_d91611f0[16] = {
 	0x74, 0x67, 0x0E, 0x5C, 0x7E, 0x6E, 0x95, 0xB9,
 };
 
-static u8 g_key_2fd312f0[16] = {
-	0xC5, 0xFB, 0x69, 0x03, 0x20, 0x7A, 0xCF, 0xBA,
-   	0x2C, 0x90, 0xF8, 0xB8, 0x4D, 0xD2, 0xF1, 0xDE,
-};
-
-static u8 g_key_2fd30bf0[16] = {
-	0xD8, 0x58, 0x79, 0xF9, 0xA4, 0x22, 0xAF, 0x86,
-   	0x90, 0xAC, 0xDA, 0x45, 0xCE, 0x60, 0x40, 0x3F,
-};
-
-static u8 g_key_2fd311f0[16] = {
-	0x3A, 0x6B, 0x48, 0x96, 0x86, 0xA5, 0xC8, 0x80,
-	0x69, 0x6C, 0xE6, 0x4B, 0xF6, 0x04, 0x17, 0x44,
-};
-
 // 6.30 game key
 static u8 g_key_d91680f0[16] = {
 	0x2C, 0x22, 0x9B, 0x12, 0x36, 0x74, 0x11, 0x67,
@@ -157,22 +141,14 @@ static u8 g_key_0b2b80f0[16] = {
 	0xe1, 0x67, 0xe3, 0x31, 0xbf, 0x4d, 0x70, 0xf8
 };
 
-void fillvram(u32 color)
-{
-	u32 *p = (u32*) 0x04000000;
-
-	while (p < (u32*) 0x04400000)
-		*p++ = color;
-}
-
 typedef struct {
 	u32 tag;
 	u8 *key;
 	u32 code;
 	u32 type;
-} Cipher;
+} GameCipher;
 
-static Cipher g_cipher[] = {
+static GameCipher g_cipher[] = {
 	{ 0xd91609f0, g_key_d91609f0, 0x5d, 2},
 	{ 0xd9160af0, g_key_d9160af0, 0x5d, 2},
 	{ 0xd9160bf0, g_key_d9160bf0, 0x5d, 2},
@@ -198,17 +174,11 @@ static Cipher g_cipher[] = {
 	{ 0x457b80f0, g_key_457b80f0, 0x5b, 6},
 };
 
-static Cipher g_cipher_pauth[] = {
-	{ 0x2fd30bf0, g_key_2fd30bf0, 0x47, 5},
-	{ 0x2fd311f0, g_key_2fd311f0, 0x47, 5},
-	{ 0x2fd312f0, g_key_2fd312f0, 0x47, 5},
-};
-
-static Cipher *GetCipherByTag(u32 tag)
+static GameCipher *get_game_cipher(u32 tag)
 {
 	int i;
 
-	for(i=0; i<sizeof(g_cipher) / sizeof(g_cipher[0]); ++i) {
+	for(i=0; i<NELEMS(g_cipher); ++i) {
 		if (g_cipher[i].tag == tag)
 			return &g_cipher[i];
 	}
@@ -216,40 +186,16 @@ static Cipher *GetCipherByTag(u32 tag)
 	return NULL;
 }
 
-static Cipher *GetCipherByTag_Pauth(u32 tag)
-{
-	int i;
+int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2) = NULL;
 
-	for(i=0; i<sizeof(g_cipher_pauth) / sizeof(g_cipher_pauth[0]); ++i) {
-		if (g_cipher_pauth[i].tag == tag)
-			return &g_cipher_pauth[i];
-	}
-
-	return NULL;
-}
-
-static int myMesgLed_sub_000000e0_wrapper(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2)
+static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2)
 {
 	int ret;
-	user_decryptor block;
 	u32 keytag;
-	Cipher *cipher = NULL;
-
-	block.tag = tag;
-	block.key = key;
-	block.code = code;
-	block.prx = prx;
-	block.size = size;
-	block.newsize = newsize;
-	block.use_polling = use_polling;
-	block.blacklist = blacklist;
-	block.blacklistsize = blacklistsize;
-	block.type = type;
-	block.xor_key1 = xor_key1;
-	block.xor_key2 = xor_key2;
+	GameCipher *cipher = NULL;
 
 	// try default decrypt
-	ret = _uprx_decrypt(&block);
+	ret = (*mesgled_decrypt)(tag, key, code, prx, size, newsize, use_polling, blacklist, blacklistsize, type, xor_key1, xor_key2);
 
 	if (ret == 0) {
 		return 0;
@@ -257,39 +203,17 @@ static int myMesgLed_sub_000000e0_wrapper(u32 *tag, u8 *key, u32 code, u8 *prx, 
 	
 	// try game key
 	keytag = *((u32*)(prx+0xd0));
-	cipher = GetCipherByTag(keytag);
+	cipher = get_game_cipher(keytag);
 
 	if (cipher != NULL) {
-		block.tag = &keytag;
-		block.code = cipher->code;
-		block.type = cipher->type;
-		block.key = cipher->key;
-		block.xor_key1 = NULL;
-		block.xor_key2 = NULL;
-
-		ret = _uprx_decrypt(&block);
-
+		ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		
 		if (ret == 0) {
-			fillvram(0x000000ff);
+			printk("%s: tag=0x%08X type=%d decrypt OK\n", __func__, cipher->tag, cipher->type);
+			fill_vram(0x000000ff);
 
 			return ret;
 		}
-
-		return -301;
-	}
-
-	// try pauth key
-	cipher = GetCipherByTag_Pauth(keytag);
-
-	if (cipher != NULL) {
-		block.tag = &keytag;
-		block.code = cipher->code;
-		block.type = cipher->type;
-		block.key = cipher->key;
-
-		ret = _uprx_decrypt(&block);
-
-		return ret;
 	}
 
 	return -301;
@@ -297,27 +221,34 @@ static int myMesgLed_sub_000000e0_wrapper(u32 *tag, u8 *key, u32 code, u8 *prx, 
 
 void patch_sceMesgLed()
 {
-	SceModule2 *mod = (SceModule2*)sceKernelFindModuleByName("sceMesgLed");
+	SceModule2 *mod;
+	u32 psp_model;
+	u32 intr, text_addr;
 
-	if (mod != NULL) {
-		u32 psp_model = sceKernelGetModel();
-		u32 intr = MAKE_CALL(myMesgLed_sub_000000e0_wrapper);
-		u32 text_addr = mod->text_addr;
+	mod = (SceModule2*)sceKernelFindModuleByName("sceMesgLed");
 
-		if (psp_model == PSP_GO) {
-			_sw(intr, text_addr+0x3614);
-			_sw(intr, text_addr+0x38AC);
-		} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
-			_sw(intr, text_addr+0x32A8);
-			_sw(intr, text_addr+0x3540);
-		} else if (psp_model == PSP_2000) {
-			_sw(intr, text_addr+0x2F08);
-			_sw(intr, text_addr+0x31A0);
-		} else if (psp_model == PSP_1000) {
-			_sw(intr, text_addr+0x2B28); // sceMesgLed_driver_CA17E61A
-			_sw(intr, text_addr+0x2DC0); // sceMesgLed_driver_E9BF25D2
-		}
- 
-		sync_cache();
+	if (mod == NULL) {
+		return;
 	}
+
+	psp_model = sceKernelGetModel();
+	intr = MAKE_CALL(_mesgled_decrypt);
+	text_addr = mod->text_addr;
+	mesgled_decrypt = (void*)(text_addr+0xE0);
+
+	if (psp_model == PSP_GO) {
+		_sw(intr, text_addr+0x3614);
+		_sw(intr, text_addr+0x38AC);
+	} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
+		_sw(intr, text_addr+0x32A8);
+		_sw(intr, text_addr+0x3540);
+	} else if (psp_model == PSP_2000) {
+		_sw(intr, text_addr+0x2F08);
+		_sw(intr, text_addr+0x31A0);
+	} else if (psp_model == PSP_1000) {
+		_sw(intr, text_addr+0x2B28); // sceMesgLed_driver_CA17E61A
+		_sw(intr, text_addr+0x2DC0); // sceMesgLed_driver_E9BF25D2
+	}
+
+	sync_cache();
 }

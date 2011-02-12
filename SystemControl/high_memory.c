@@ -22,6 +22,8 @@ int g_high_memory_enabled = 0;
 //in system memory manager
 static unsigned int * (*get_partition)(int pid) = (void *)(0x88003E34);
 
+static u8 g_p8_size = 4;
+
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
 {
@@ -112,26 +114,45 @@ static void delete_part_11(void)
 	_sw(0, 0x880145e8);
 }
 
-void prepatch_partitions(void)
+static inline int is_homebrews_runlevel(void)
 {
-	MemPart p8, p11;
 	int apitype;
 
 	apitype = sceKernelInitApitype();
-
+	
 	if(apitype == 0x152 || apitype == 0x141) {
-		delete_part_11();
+		return 1;
 	}
+
+	return 0;
+}
+
+void prepatch_partitions(void)
+{
+	MemPart p8, p11;
+
+	(void)(delete_part_11);
+
+	if(!is_homebrews_runlevel()) {
+		printk("%s: no need to patch partition, quit\n", __func__);
+
+		return;
+	}
+
+#if 0
+	// Enable this 4MB but it will crash on standby
+	delete_part_11();
+#endif
 
 	p8.meminfo = (*get_partition)(8);
 	p11.meminfo = (*get_partition)(11);
-	
-	p8.size = 1;
+
+	g_p8_size = p8.size = 1;
 	
 	if(p11.meminfo != NULL) {
-		p8.offset = 56-4-1;
+		p8.offset = 56-4-p8.size;
 	} else {
-		p8.offset = 56-1;
+		p8.offset = 56-p8.size;
 	}
 
 	modify_partition(&p8);
@@ -139,11 +160,13 @@ void prepatch_partitions(void)
 	p11.size = 4;
 	p11.offset = 56-4;
 	modify_partition(&p11);
+	display_meminfo();
 }
 
 void patch_partitions(void) 
 {
 	MemPart p2, p9;
+	int max_user_part_size;
 
 	// shut up gcc warning
 	(void)display_meminfo;
@@ -159,16 +182,23 @@ void patch_partitions(void)
 		p9.size = g_p9_size;
 	}
 
-	if ((*get_partition)(11) != NULL && p2.size + p9.size > 56 - 1 - 4) {
+	if((*get_partition)(11) != NULL) {
+		max_user_part_size = 56 - 4 - g_p8_size;
+	} else {
+		max_user_part_size = 56 - g_p8_size;
+	}
+
+	if (p2.size + p9.size > max_user_part_size) {
 		// reserved 4MB for P11
 		int reserved_len;
 
-		reserved_len = p2.size + p9.size - (56 - 1 - 4);
+		reserved_len = p2.size + p9.size - max_user_part_size;
 
 		if(p9.size > reserved_len) {
 			p9.size -= reserved_len;
 		} else {
-			p2.size -= reserved_len; 
+			p2.size -= reserved_len - p9.size; 
+			p9.size = 0;
 		}
 	}
 
@@ -184,5 +214,6 @@ void patch_partitions(void)
 	modify_partition(&p9);
 
 	g_high_memory_enabled = 1;
+	display_meminfo();
 	unlock_high_memory(0);
 }

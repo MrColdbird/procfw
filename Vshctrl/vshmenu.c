@@ -53,7 +53,7 @@ int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
 static SceUID load_satelite(void)
 {
 	SceUID modid;
-	const char *mod = "flash0:/vsh/module/satelite.prx";
+	const char *mod = "flash0:/vsh/module/_satelite.prx";
 	SceKernelLMOption opt = {
 		.size = 0x14,
 		.flags = 0,

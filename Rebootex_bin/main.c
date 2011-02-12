@@ -439,7 +439,7 @@ int patch_bootconf_vsh(char *buffer, int length)
 	int newsize, result;
 
 	result = length;
-	newsize = AddPRX(buffer, "/kd/vshbridge.prx", "/kd/vshctrl.prx", VSH_RUNLEVEL );
+	newsize = AddPRX(buffer, "/kd/vshbridge.prx", "/kd/_vshctrl.prx", VSH_RUNLEVEL );
 
 	if (newsize > 0) result = newsize;
 
@@ -460,11 +460,11 @@ struct del_module {
 static struct add_module np9660_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
 	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL },
-	{ "/kd/galaxy.prx", "/kd/np9660.prx", UMDEMU_RUNLEVEL },
-	{ "/kd/galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/_galaxy.prx", "/kd/np9660.prx", UMDEMU_RUNLEVEL },
+	{ "/kd/_galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
+	{ "/kd/_stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module np9660_del_mods[] = {
@@ -495,8 +495,8 @@ int patch_bootconf_np9660(char *buffer, int length)
 
 static struct add_module march33_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
-	{ "/kd/march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
+	{ "/kd/_march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ "/kd/_march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
@@ -538,7 +538,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 	buffer = (void*)BOOTCONFIG_TEMP_BUFFER;
 	_memcpy(buffer, *p_buffer, length);
 	*p_buffer = buffer;
-	newsize = AddPRX(buffer, "/kd/init.prx", "/kd/systemctrl.prx", 0x00EF);
+	newsize = AddPRX(buffer, "/kd/init.prx", "/kd/_systemctrl.prx", 0x00EF);
 
 	if (newsize > 0) result = newsize;
 

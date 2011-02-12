@@ -230,13 +230,27 @@ struct CopyList g_file_lists[] = {
 	{ "satelite.prx", "flash0:/vsh/module/_satelite.prx", },
 };
 
+static const char *g_old_cfw_files[] = {
+	"flash0:/kd/systemctrl.prx",
+	"flash0:/kd/vshctrl.prx",
+	"flash0:/kd/galaxy.prx",
+	"flash0:/kd/stargate.prx",
+	"flash0:/kd/march33.prx",
+	"flash0:/kd/usbdevice.prx",
+	"flash0:/vsh/module/satelite.prx",
+};
+
 int install_cfw(void)
 {
-	int ret;
+	int ret, i;
 
 //	sceIoRemove("flash1:/config.se");
 
-	int i; for(i=0; i<NELEMS(g_file_lists); ++i) {
+	for(i=0; i<NELEMS(g_old_cfw_files); ++i) {
+		sceIoRemove(g_old_cfw_files[i]);
+	}
+
+	for(i=0; i<NELEMS(g_file_lists); ++i) {
 		ret = smart_copy_file(g_file_lists[i].src, g_file_lists[i].dst);
 
 		if (ret != 0)

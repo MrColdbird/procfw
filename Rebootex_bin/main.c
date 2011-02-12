@@ -498,7 +498,7 @@ static struct add_module march33_add_mods[] = {
 	{ "/kd/_march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/_march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
+	{ "/kd/_stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module march33_del_mods[] = {

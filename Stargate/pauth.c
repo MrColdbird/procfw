@@ -3,10 +3,10 @@
 #include <psploadcore.h>
 #include <stdio.h>
 #include <string.h>
-#include "pspcipher.h"
 #include "printk.h"
 #include "libs.h"
 #include "stargate.h"
+#include "utils.h"
 
 static SceUID g_sema = -1;
 
@@ -16,7 +16,7 @@ typedef struct {
 	u8 *xor;
 	u32 code;
 	u32 type;
-} Cipher;
+} PauthCipher;
 
 static u8 key_2fd312f0[16] = {
 	0xC5, 0xFB, 0x69, 0x03, 0x20, 0x7A, 0xCF, 0xBA, 0x2C, 0x90, 0xF8, 0xB8, 0x4D, 0xD2, 0xF1, 0xDE
@@ -38,18 +38,18 @@ static u8 xor_key[16] = {
 	0xA9, 0x1E, 0xDD, 0x7B, 0x09, 0xBB, 0x22, 0xB5, 0x9D, 0xA3, 0x30, 0x69, 0x13, 0x6E, 0x0E, 0xD8
 };
 
-static Cipher g_cipher[] = {
+static PauthCipher g_cipher[] = {
 	{ 0x2fd30bf0, key_2fd30bf0, xor_key, 0x47, 5},
 	{ 0x2fd311f0, key_2fd311f0, xor_key, 0x47, 5},
 	{ 0x2fd312f0, key_2fd312f0, xor_key, 0x47, 5},
 	{ 0x2fd313f0, key_2fd313f0, xor_key, 0x47, 5},
 };
 
-static Cipher *GetCipherByTag(u32 tag)
+static PauthCipher *get_pauth_cipher(u32 tag)
 {
 	int i;
 
-	for(i=0; i<sizeof(g_cipher) / sizeof(g_cipher[0]); ++i) {
+	for(i=0; i<NELEMS(g_cipher); ++i) {
 		if (g_cipher[i].tag == tag)
 			return &g_cipher[i];
 	}
@@ -59,46 +59,35 @@ static Cipher *GetCipherByTag(u32 tag)
 
 int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key)
 {
-	user_decryptor db;
-	u32 tag = 0;
+	u32 tag = 0, k1;
 	int ret;
-	Cipher *cipher = NULL;
+	PauthCipher *cipher;
 
-	u32 k1 = pspSdkGetK1();
-	pspSdkSetK1(0);
+	k1 = pspSdkSetK1(0);
 
 	tag = *((u32*)(p+0xd0));
-	cipher = GetCipherByTag(tag);
+	cipher = get_pauth_cipher(tag);
 
 	if (cipher == NULL) {
 		printk("%s: unknown key tag 0x%08x\n", __func__, tag);
 		pspSdkSetK1(k1);
+
 		return -1;
 	}
 
-	db.tag = &tag;
-	db.prx = p;
-	db.size  = size;
-	db.newsize = newsize;
-	db.use_polling = 0;
-	db.blacklist = NULL;
-	db.blacklistsize = 0;
-	db.code = cipher->code;
-	db.type = cipher->type;
-	db.xor_key2 = xor_key;
-
-	db.key = cipher->key;
-	db.xor_key1 = cipher->xor;
-
 	ret = sceKernelWaitSema(g_sema, 1, 0);
 
-	if (ret < 0)
+	if (ret < 0) {
+		pspSdkSetK1(k1);
+		
 		return ret;
+	}
 
-	ret = _uprx_decrypt(&db);
+	ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, p, size, newsize, 0, NULL, 0, cipher->type, cipher->xor, xor_key);
+	
 	sceKernelSignalSema(g_sema, 1);
 
-	printk("%s: tag 0x%08x returns 0x%08x\n", __func__, tag, ret);
+	printk("%s: tag 0x%08x -> 0x%08x\n", __func__, tag, ret);
 	pspSdkSetK1(k1);
 
 	return ret;

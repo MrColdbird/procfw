@@ -52,17 +52,14 @@ void setup_module_handler(void)
 	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + 0x68A8);
 
 	//no device check patches
-	_sw(0, mod->text_addr + 0x0760);
+	_sw(NOP, mod->text_addr + 0x0760);
 	_sw(0x24020000, mod->text_addr + 0x07C0);
-	_sw(0, mod->text_addr + 0x30B0);
-	_sw(0, mod->text_addr + 0x310C);
+	_sw(NOP, mod->text_addr + 0x30B0);
+	_sw(NOP, mod->text_addr + 0x310C);
 	_sw(0x10000009, mod->text_addr + 0x3138);
-	_sw(0, mod->text_addr + 0x3444);
-	_sw(0, mod->text_addr + 0x349C);
+	_sw(NOP, mod->text_addr + 0x3444);
+	_sw(NOP, mod->text_addr + 0x349C);
 	_sw(0x10000010, mod->text_addr + 0x34C8);
-	_sw(0, mod->text_addr + 0x4360);
-	_sw(0, mod->text_addr + 0x43A8);
-	_sw(0, mod->text_addr + 0x43C0);
 
 	_prologue_module = (void*)(mod->text_addr+0x8134);
 	_sw(MAKE_CALL(prologue_module), mod->text_addr+0x7058);

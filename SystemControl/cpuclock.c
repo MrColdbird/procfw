@@ -11,7 +11,18 @@
 #include "printk.h"
 #include "libs.h"
 
-static const int g_cpu_list[]={20, 75, 100, 133, 222, 266, 300, 333};
+static const int g_cpu_list[]={
+	20, 75, 100, 133, 222, 266, 300, 333
+};
+
+static u32 g_power_function_nids[] = {
+	0x545A7F3C,
+	0xB8D7B3FB,
+	0x843FBF43,
+	0xEBD177D6,
+	0x469989AD,
+};
+
 static u32 g_scePowerSetClockFrequency_orig;
 
 static inline u32 find_power_function(u32 nid)
@@ -55,16 +66,11 @@ void SetSpeed(int cpuspd, int busspd)
 
 	// fp = find_power_function(0x737486F2); // scePowerSetClockFrequency
 	nullify_function(fp);
-	fp = find_power_function(0x545A7F3C); // scePowerSetClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0xB8D7B3FB); // scePowerSetBusClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0x843FBF43); // scePowerSetCpuClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0xEBD177D6);
-	nullify_function(fp);
-	fp = find_power_function(0x469989AD); // 6.3x new function
-	nullify_function(fp);
+
+	for(i=0; i<NELEMS(g_power_function_nids); ++i) {
+		fp = find_power_function(g_power_function_nids[i]);
+		nullify_function(fp);
+	}
 
 	sync_cache();
 }

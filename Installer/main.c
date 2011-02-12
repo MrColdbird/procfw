@@ -228,6 +228,7 @@ struct CopyList g_file_lists[] = {
 	{ "march33.prx", "flash0:/kd/_march33.prx", },
 	{ "usbdevice.prx", "flash0:/kd/_usbdevice.prx", },
 	{ "satelite.prx", "flash0:/vsh/module/_satelite.prx", },
+	{ "popcorn.prx", "flash0:/kd/_popcorn.prx", },
 };
 
 static const char *g_old_cfw_files[] = {

@@ -446,6 +446,18 @@ int patch_bootconf_vsh(char *buffer, int length)
 	return result;
 }
 
+int patch_bootconf_pops(char *buffer, int length)
+{
+	int newsize, result;
+
+	result = length;
+	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/_popcorn.prx", POPS_RUNLEVEL);
+
+	if (newsize > 0) result = newsize;
+
+	return result;
+}
+
 struct add_module {
 	char *prxname;
 	char *insertbefore;
@@ -547,6 +559,10 @@ int _UnpackBootConfig(char **p_buffer, int length)
 
 		if (newsize > 0) result = newsize;
 	}
+
+	newsize = patch_bootconf_pops(buffer, length);
+
+	if (newsize > 0) result = newsize;
 	
 	switch(iso_mode) {
 		case NP9660_MODE:

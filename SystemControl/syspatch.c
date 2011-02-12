@@ -40,6 +40,8 @@ static inline void set_clock(void)
 	} else if (conf.vshcpuspeed != 0) {
 		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);
 	}
+
+	sync_cache();
 }
 
 static int syspatch_module_chain(SceModule2 *mod)

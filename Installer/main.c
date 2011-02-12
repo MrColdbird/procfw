@@ -221,13 +221,13 @@ struct CopyList {
 };
 
 struct CopyList g_file_lists[] = {
-	{ "systemctrl.prx", "flash0:/kd/systemctrl.prx", },
-	{ "vshctrl.prx", "flash0:/kd/vshctrl.prx", },
-	{ "galaxy.prx", "flash0:/kd/galaxy.prx", },
-	{ "stargate.prx", "flash0:/kd/stargate.prx", },
-	{ "march33.prx", "flash0:/kd/march33.prx", },
-	{ "usbdevice.prx", "flash0:/kd/usbdevice.prx", },
-	{ "satelite.prx", "flash0:/vsh/module/satelite.prx", },
+	{ "systemctrl.prx", "flash0:/kd/_systemctrl.prx", },
+	{ "vshctrl.prx", "flash0:/kd/_vshctrl.prx", },
+	{ "galaxy.prx", "flash0:/kd/_galaxy.prx", },
+	{ "stargate.prx", "flash0:/kd/_stargate.prx", },
+	{ "march33.prx", "flash0:/kd/_march33.prx", },
+	{ "usbdevice.prx", "flash0:/kd/_usbdevice.prx", },
+	{ "satelite.prx", "flash0:/vsh/module/_satelite.prx", },
 };
 
 int install_cfw(void)

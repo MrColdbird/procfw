@@ -120,11 +120,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	if (0 == strcmp(mod->modname, "VLF_Module")) {
-		patch_VLF_Module();
-		sync_cache();
-	}
-
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
 		patch_sceChkreg();
 		sync_cache();

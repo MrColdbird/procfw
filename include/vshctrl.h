@@ -2,7 +2,7 @@
 #define __VSHCTRL_H__
 
 /**
- * This api is for vsh menu. (flash0:/vsh/module/satelite.prx)
+ * This api is for vsh menu. (flash0:/vsh/module/_satelite.prx)
  *
  * The vsh menu is an user mode module, and because of this, these functions are
  * only available to user mode.

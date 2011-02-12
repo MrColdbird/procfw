@@ -2,7 +2,7 @@
 #define __PSPUSBDEVICE_H__
 
 /**
- * This functions require flash0:/kd/usbdevice.prx to be loaded/started first.
+ * This functions require flash0:/kd/_usbdevice.prx to be loaded/started first.
 
  * Link with pspusbdevice for user mode access or with pspusbdevice_driver for kernel access
 */

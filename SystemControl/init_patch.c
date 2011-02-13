@@ -19,15 +19,20 @@ struct InitHookFunction {
 	u32 *fp_orig;
 };
 
+static SceUID (*_sceKernelLoadModuleUMDEmu)(int apitype, const char * path, int flags, SceKernelLMOption * option);
 static SceUID (*_sceKernelLoadModuleDisc)(const char * path, int flags, SceKernelLMOption * option);
-static SceUID (*_sceKernelLoadModuleWithApiType)(int apitype, const char * path, int flags, SceKernelLMOption * option);
-static SceUID (*_sceKernelLoadModuleWithApiType2)(int apitype, const char * path, int flags, SceKernelLMOption * option);
+static SceUID (*_sceKernelLoadModuleEf0)(int apitype, const char * path, int flags, SceKernelLMOption * option);
+static SceUID (*_sceKernelLoadModuleM2)(int apitype, const char * path, int flags, SceKernelLMOption * option);
 
 static int get_game_tag(const char *path, u32 *tag)
 {
 	SceUID fd;
 	char buf[0x150];
 	int ret;
+
+	if(path == NULL) {
+		return -1;
+	}
 
 	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
@@ -93,6 +98,27 @@ static int load_opnssmp(const char *path, u32 tag)
 	return modid;
 }
 
+static SceUID myKernelLoadModuleUMDEmu(int apitype, const char * path, int flags, SceKernelLMOption * option) 
+{
+	SceUID ret;
+	u32 tag;
+	int retv;
+
+	retv = get_game_tag(path, &tag);
+
+	if (retv == 0) {
+		printk("%s: tag 0x%08X\n", __func__, tag);
+		load_opnssmp(path, tag);
+	} else {
+		printk("%s: get_game_tag -> 0x%08X\n", __func__, retv);
+	}
+
+	ret = _sceKernelLoadModuleUMDEmu(apitype, path, flags, option);
+	printk("%s: %d %s -> 0x%08X\n", __func__, apitype, path, ret);
+
+	return ret;
+}
+
 static SceUID myKernelLoadModuleDisc(const char * path, int flags, SceKernelLMOption * option) 
 {
 	SceUID ret;
@@ -114,7 +140,7 @@ static SceUID myKernelLoadModuleDisc(const char * path, int flags, SceKernelLMOp
 	return ret;
 }
 
-static SceUID myKernelLoadModuleWithApiType(int apitype, const char * path, int flags, SceKernelLMOption * option) 
+static SceUID myKernelLoadModuleEf0(int apitype, const char * path, int flags, SceKernelLMOption * option) 
 {
 	SceUID ret;
 	u32 tag;
@@ -129,13 +155,13 @@ static SceUID myKernelLoadModuleWithApiType(int apitype, const char * path, int 
 		printk("%s: get_game_tag -> 0x%08X\n", __func__, retv);
 	}
 
-	ret = _sceKernelLoadModuleWithApiType(apitype, path, flags, option);
+	ret = _sceKernelLoadModuleEf0(apitype, path, flags, option);
 	printk("%s: %d %s -> 0x%08X\n", __func__, apitype, path, ret);
 
 	return ret;
 }
 
-static SceUID myKernelLoadModuleWithApiType2(int apitype, const char * path, int flags, SceKernelLMOption * option) 
+static SceUID myKernelLoadModuleM2(int apitype, const char * path, int flags, SceKernelLMOption * option) 
 {
 	SceUID ret;
 	u32 tag;
@@ -150,7 +176,7 @@ static SceUID myKernelLoadModuleWithApiType2(int apitype, const char * path, int
 		printk("%s: get_game_tag -> 0x%08X\n", __func__, retv);
 	}
 
-	ret = _sceKernelLoadModuleWithApiType2(apitype, path, flags, option);
+	ret = _sceKernelLoadModuleM2(apitype, path, flags, option);
 	printk("%s: %d %s -> 0x%08X\n", __func__, apitype, path, ret);
 
 	return ret;
@@ -162,9 +188,10 @@ static u32 get_modulemgr_function(u32 nid)
 }
 
 static struct InitHookFunction g_init_functions[] = {
-	{ 0x4986499C, myKernelLoadModuleDisc, (u32*)&_sceKernelLoadModuleDisc, },
-	{ 0xCC77F137, myKernelLoadModuleWithApiType, (u32*)&_sceKernelLoadModuleWithApiType, },
-	{ 0xA8D1F46E, myKernelLoadModuleWithApiType2, (u32*)&_sceKernelLoadModuleWithApiType2, },
+	{ 0x32292450, myKernelLoadModuleUMDEmu, (u32*)&_sceKernelLoadModuleUMDEmu, }, // 0x114
+	{ 0xA8D1F46E, myKernelLoadModuleM2, (u32*)&_sceKernelLoadModuleM2, }, // 0x124
+	{ 0x4986499C, myKernelLoadModuleDisc, (u32*)&_sceKernelLoadModuleDisc, }, // 0x120
+	{ 0xCC77F137, myKernelLoadModuleEf0, (u32*)&_sceKernelLoadModuleEf0, }, // 0x125
 };
 
 void patch_sceInit(void)

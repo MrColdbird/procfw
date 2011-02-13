@@ -55,15 +55,17 @@ static int syspatch_module_chain(SceModule2 *mod)
 #endif
 
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
-		if(PSP_1000 != psp_model) {
-			u32 key_config;
+		u32 key_config;
 
-			key_config = sceKernelInitKeyConfig();
-
-			if (key_config == PSP_INIT_KEYCONFIG_GAME) {
+		key_config = sceKernelInitKeyConfig();
+		
+		if (key_config == PSP_INIT_KEYCONFIG_GAME) {
+			if(PSP_1000 != psp_model) {
 				prepatch_partitions();
 				sync_cache();
 			}
+
+			patch_sceInit();
 		}
 	}
 

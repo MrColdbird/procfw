@@ -25,6 +25,7 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check);
 
 void syspatch_init();
 void setup_module_handler(void);
+void patch_sceInit(void);
 void patch_sceLoaderCore(void);
 void patch_sceLoadExec(void);
 void load_rebootex_config(void);

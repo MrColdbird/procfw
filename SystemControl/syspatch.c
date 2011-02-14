@@ -170,6 +170,7 @@ void syspatch_init()
 	patch_sceLoaderCore();
 	patch_sceMemlmd();
 	patch_sceInterruptManager();
+	patch_sceSystemMemoryManager();
 
 	sync_cache();
 }

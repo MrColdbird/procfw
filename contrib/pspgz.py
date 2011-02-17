@@ -46,7 +46,7 @@ def prx_compress(output, hdr, input, mod_name="", mod_attr=0xFFFFFFFF):
 
 	if mod_name != "":
 		if len(mod_name) < 28:
-			mod_name += "\x00".encode() * (28-len(mod_name))
+			mod_name += "\x00" * (28-len(mod_name))
 		else:
 			mod_name = mod_name[0:28]
 		fileheader = binary_replace(fileheader, mod_name.encode(), 0xA)

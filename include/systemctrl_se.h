@@ -44,7 +44,7 @@ typedef struct
 	int reserved4;
 	int usbcharge;
 	int machidden;
-	int useversion;
+	int reserved_2;
 	int skipgameboot;
 	int hidepic;
 	int plugvsh; 

@@ -11,7 +11,6 @@
 #include "systemctrl.h"
 #include "printk.h"
 
-int SysMemForKernel_458A70B5(void);
 SceUID ModuleMgrForKernel_32292450(int apitype, const char *path, int flags, SceKernelLMOption *option);
 int SysMemForKernel_00E9A04A(void *addr, int size, int prot);
 
@@ -94,6 +93,6 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 
 int kuKernelGetModel(void)
 {
-	return SysMemForKernel_458A70B5();
+	return sceKernelGetModel();
 }
 

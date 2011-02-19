@@ -6,10 +6,12 @@ OBJS = main.o \
 	   syspatch.o \
 	   loadexec_patch.o \
 	   rebootex_conf.o \
+	   init_patch.o \
 	   loadercore_patch.o \
 	   memlmd_patch.o \
 	   interruptman_patch.o \
 	   mediasync_patch.o \
+	   sysmem_patch.o \
 	   version_spoof.o \
 	   march33_patch.o \
 	   nid_resolver.o \

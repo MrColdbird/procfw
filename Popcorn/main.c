@@ -270,13 +270,11 @@ int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void * outd
 		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
 	}
 
-#if 0
 	if (cmd == 0x04100001 || cmd == 0x04100002) {
 		ret = 0;
 		printk("%s: [FAKE] 0x%08X -> 0x%08X\n", __func__, fd, ret);
 		goto exit;
 	}
-#endif
 
 	ret = sceIoIoctl(fd, cmd, indata, inlen, outdata, outlen);
 

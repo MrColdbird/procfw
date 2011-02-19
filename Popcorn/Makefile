@@ -2,7 +2,14 @@ all:
 	../contrib/pspgz.py ../dist/635PROUPDATE/popcorn.prx ../contrib/SystemControl.hdr popcorn.prx M33PopcornManager 0x1007
 
 TARGET = popcorn
-OBJS = main.o icon.o ../Common/utils.o
+
+ifeq ($(OBSERVER), 1)
+OBJS = main_observer.o 
+else
+OBJS = main.o 
+endif
+
+OBJS += icon.o ../Common/utils.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../Common -I../include
 PSP_FW_VERSION=635

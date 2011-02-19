@@ -40,6 +40,8 @@ static inline void set_clock(void)
 	} else if (conf.vshcpuspeed != 0) {
 		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);
 	}
+
+	sync_cache();
 }
 
 static int syspatch_module_chain(SceModule2 *mod)
@@ -53,15 +55,17 @@ static int syspatch_module_chain(SceModule2 *mod)
 #endif
 
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
-		if(PSP_1000 != psp_model) {
-			u32 key_config;
+		u32 key_config;
 
-			key_config = sceKernelInitKeyConfig();
-
-			if (key_config == PSP_INIT_KEYCONFIG_GAME) {
+		key_config = sceKernelInitKeyConfig();
+		
+		if (key_config == PSP_INIT_KEYCONFIG_GAME) {
+			if(PSP_1000 != psp_model) {
 				prepatch_partitions();
 				sync_cache();
 			}
+
+			patch_sceInit();
 		}
 	}
 
@@ -166,6 +170,7 @@ void syspatch_init()
 	patch_sceLoaderCore();
 	patch_sceMemlmd();
 	patch_sceInterruptManager();
+	patch_sceSystemMemoryManager();
 
 	sync_cache();
 }

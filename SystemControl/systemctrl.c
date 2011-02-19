@@ -255,9 +255,9 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 
 	pMod = sceKernelFindModuleByName(szMod);
 
-	if (!pMod)
-	{
-		Kprintf("Cannot find module %s\n", szMod);
+	if (!pMod) {
+		printk("%s: Cannot find %s_%08X in %s\n", __func__, szLib, nid, szMod);
+
 		return 0;
 	}
 
@@ -292,6 +292,8 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 		i += (entry->len * 4);
 	}
 
+	printk("%s: Cannot find %s_%08X in %s\n", __func__, szLib, nid, szMod);
+	
 	return 0;
 }
 

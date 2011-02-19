@@ -962,8 +962,17 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	param->args = strlen(param->argp) + 1;
 
 	if (psp_model == PSP_GO) {
+		char devicename[20];
+
+		ret = get_device_name(devicename, sizeof(devicename), vpbp->name);
+
+		if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
+			apitype = 0x125;
+		} else {
+			apitype = 0x124;
+		}
+
 		param->key = "umdemu";
-	   	apitype = 0x125;
 		loadexec_file = vpbp->name;
 	} else {
 		param->key = "game";

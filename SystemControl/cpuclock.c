@@ -11,24 +11,120 @@
 #include "printk.h"
 #include "libs.h"
 
-static const int g_cpu_list[]={20, 75, 100, 133, 222, 266, 300, 333};
+static const int g_cpu_list[] = {
+	20, 75, 100, 133, 222, 266, 300, 333
+};
+
+static int g_fake_pll = 222;
+static int g_fake_cpu = 222;
+static int g_fake_bus = 111;
+
+typedef struct _PowerFuncRedir {
+	u32 nid;
+	void *fp;
+} PowerFuncRedir;
+
 static u32 g_scePowerSetClockFrequency_orig;
+
+static int myPowerGetPllClockFrequencyInt(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_pll;
+}
+
+static float myPowerGetPllClockFrequencyFloat(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_pll;
+}
+
+static int myPowerGetCpuClockFrequency(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_cpu;
+}
+
+static float myPowerGetCpuClockFrequencyFloat(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_cpu;
+}
+
+static int myPowerGetBusClockFrequency(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_bus;
+}
+
+static float myPowerGetBusClockFrequencyFloat(void)
+{
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return g_fake_bus;
+}
+
+static int myPowerSetClockFrequency(int pllfreq, int cpufreq, int busfreq)
+{
+	g_fake_pll = pllfreq;
+	g_fake_cpu = cpufreq;
+	g_fake_bus = busfreq;
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return 0;
+}
+
+static int myPowerSetCpuClockFrequency(int cpufreq)
+{
+	g_fake_cpu = cpufreq;
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+
+	return 0;
+}
+
+static int myPowerSetBusClockFrequency(int busfreq)
+{
+	g_fake_bus = busfreq;
+	printk("%s: %d/%d/%d\n", __func__, g_fake_pll, g_fake_cpu, g_fake_bus);
+	
+	return 0;
+}
 
 static inline u32 find_power_function(u32 nid)
 {
 	return sctrlHENFindFunction("scePower_Service", "scePower", nid);
 }
 
-static inline void nullify_function(u32 addr)
+static inline void redirect_function(u32 addr, void *new_addr)
 {
 	if (addr == 0) {
-		printk("Warning: nullify_function got a NULL function\n");
+		printk("Warning: redirect_function got a NULL function\n");
+
 		return;
 	}
 
-	_sw(0x03E00008, addr);
-	_sw(0x00001021, addr + 4);
+	_sw(MAKE_JUMP(new_addr), addr);
+	_sw(NOP, addr+4);
 }
+static PowerFuncRedir g_power_func_redir[] = {
+	{ 0x737486F2, myPowerSetClockFrequency },
+	{ 0x545A7F3C, myPowerSetClockFrequency },
+	{ 0xEBD177D6, myPowerSetClockFrequency },
+	{ 0xA4E93389, myPowerSetClockFrequency },
+	{ 0x469989AD, myPowerSetClockFrequency },
+	{ 0x843FBF43, myPowerSetCpuClockFrequency },
+	{ 0xB8D7B3FB, myPowerSetBusClockFrequency },
+	{ 0x34F9C463, myPowerGetPllClockFrequencyInt },
+	{ 0xEA382A27, myPowerGetPllClockFrequencyFloat },
+	{ 0xFEE03A2F, myPowerGetCpuClockFrequency },
+	{ 0xB1A52C83, myPowerGetCpuClockFrequencyFloat },
+	{ 0x478FE6F5, myPowerGetBusClockFrequency },
+	{ 0x9BADB3EB, myPowerGetBusClockFrequencyFloat },
+};
 
 void SetSpeed(int cpuspd, int busspd)
 {
@@ -45,7 +141,7 @@ void SetSpeed(int cpuspd, int busspd)
 		return;
 	}
 
-	fp = find_power_function(0x737486F2); // scePowerSetClockFrequency
+	fp = find_power_function(0x737486F2);
 	g_scePowerSetClockFrequency_orig = fp;
 	_scePowerSetClockFrequency = (void*)fp;
 	_scePowerSetClockFrequency(cpuspd, cpuspd, busspd);
@@ -53,20 +149,10 @@ void SetSpeed(int cpuspd, int busspd)
 	if (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH)
 		return;
 
-	// fp = find_power_function(0x737486F2); // scePowerSetClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0x545A7F3C); // scePowerSetClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0xB8D7B3FB); // scePowerSetBusClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0x843FBF43); // scePowerSetCpuClockFrequency
-	nullify_function(fp);
-	fp = find_power_function(0xEBD177D6);
-	nullify_function(fp);
-	fp = find_power_function(0x469989AD); // 6.3x new function
-	nullify_function(fp);
-
-	sync_cache();
+	for(i=0; i<NELEMS(g_power_func_redir); ++i) {
+		fp = find_power_function(g_power_func_redir[i].nid);
+		redirect_function(fp, g_power_func_redir[i].fp);
+	}
 }
 
 void sctrlHENSetSpeed(int cpuspd, int busspd)

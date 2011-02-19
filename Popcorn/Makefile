@@ -6,10 +6,14 @@ TARGET = popcorn
 ifeq ($(OBSERVER), 1)
 OBJS = main_observer.o 
 else
-OBJS = main.o 
+ifeq ($(PSNSHARE), 1)
+OBJS = main_psnshare.o icon.o
+else
+OBJS = main.o icon.o
+endif
 endif
 
-OBJS += icon.o ../Common/utils.o
+OBJS += ../Common/utils.o ../Common/strsafe.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../Common -I../include
 PSP_FW_VERSION=635

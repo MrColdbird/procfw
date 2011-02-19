@@ -6,8 +6,8 @@ TARGET = popcorn
 ifeq ($(OBSERVER), 1)
 OBJS = main_observer.o 
 else
-ifeq ($(PSNSHARE), 1)
-OBJS = main_psnshare.o icon.o
+ifeq ($(COMPLEX), 1)
+OBJS = main.o icon.o
 else
 OBJS = main.o icon.o
 endif

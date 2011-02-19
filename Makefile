@@ -82,6 +82,7 @@ clean:
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)
 	@cd $(REBOOTEXPXE); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROLPXE); make clean $(DEBUG_OPTION)
+	@cd $(POPCORN); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 
 build_lib:

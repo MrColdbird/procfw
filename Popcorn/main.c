@@ -36,6 +36,7 @@ int myIoRead(int fd, u8 *buf, int size)
 		size = 152;
 		printk("%s: fake rif content %d\n", __func__, size);
 		memset(buf, 0, size);
+		strcpy((char*)(buf+0x10), FAKE_RIF);
 
 		return size;
 	}
@@ -187,60 +188,6 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	return ret;
 }
 
-// 19C
-int setup_PGD_fd(char *path, void *keys, int flags, int filemode, int offset)
-{
-	SceUID fd;
-	u32 signature;
-	int ret;
-
-	fd = sceIoOpen(path, flags, filemode);
-
-	if (fd < 0) {
-		return fd;
-	}
-
-	sceIoLseek(fd, offset, PSP_SEEK_SET);
-	sceIoRead(fd, &signature, 4);
-	
-	if (signature != 0x44475000) {
-		printk("%s: NO PDG signature found, ignore DRM key setting\n", __func__);
-		
-		sceIoLseek(fd, offset, PSP_SEEK_SET);
-
-		return fd;
-	}
-
-	sceIoClose(fd);
-	fd = sceIoOpen(path, flags | 0x40000000, filemode);
-
-	if (fd < 0) {
-		return fd;
-	}
-
-	// setting PDG offset
-	ret = sceIoIoctl(fd, 0x04100002, &offset, 4, NULL, 0);
-
-	if (ret < 0) {
-		sceIoClose(fd);
-
-		return ret;
-	}
-
-	// setting PDG decrypt key
-	ret = sceIoIoctl(fd, 0x04100001, keys, 0x10, NULL, 0);
-
-	if (ret < 0) {
-		sceIoClose(fd);
-
-		return ret;
-	}
-
-	printk("%s: DRM key setup OK\n", __func__);
-	
-	return fd;
-}
-
 int myIoOpen(const char *file, int flag, int mode)
 {
 	int ret;
@@ -249,7 +196,10 @@ int myIoOpen(const char *file, int flag, int mode)
 		printk("%s: [FAKE]\n", __func__);
 		ret = 0x10000;
 	} else {
-		ret = sceIoOpen(file, flag, mode);
+		u32 real_flag;
+
+		real_flag = flag & (~0x40000000);
+		ret = sceIoOpen(file, real_flag, mode);
 	}
 
 	printk("%s: %s 0x%08X -> 0x%08X\n", __func__, file, flag, ret);
@@ -270,9 +220,16 @@ int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void * outd
 		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
 	}
 
-	if (cmd == 0x04100001 || cmd == 0x04100002) {
+	if (cmd == 0x04100001) {
 		ret = 0;
-		printk("%s: [FAKE] 0x%08X -> 0x%08X\n", __func__, fd, ret);
+		printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);
+		goto exit;
+	}
+
+	if (cmd == 0x04100002) {
+		ret = 0;
+		printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);
+		sceIoLseek32(fd, *(u32*)indata, PSP_SEEK_SET);
 		goto exit;
 	}
 
@@ -324,18 +281,15 @@ static int _strncmp(const char *a, const char *b, int size)
 	return ret;
 }
 
-static int (*_check_rif_path)(const char *src, char *dst) = NULL;
+static int (*_get_rif_path)(const char *name, char *path) = NULL;
 
-static int check_rif_path(char *src, char *dst)
+static int get_rif_path(const char *name, char *path)
 {
 	int ret;
 
-	strcpy(src, FAKE_RIF);
-	ret = (*_check_rif_path)(src, dst);
-	strcpy(dst, "ef0:/PSP/LICNESE/");
-	strcat(dst, FAKE_RIF);
-	strcat(dst, ".RIF");
-	printk("%s: %s %s-> 0x%08X\n", __func__, src, dst, ret);
+	strcpy(name, FAKE_RIF);
+	ret = (*_get_rif_path)(name, path);
+	printk("%s: %s %s-> 0x%08X\n", __func__, name, path, ret);
 
 	return ret;
 }
@@ -396,9 +350,9 @@ static void patch_scePops_Manager(void)
 	_sw(MAKE_JUMP(&myIoClose), text_addr+0x00003BC0);
 	_sw(NOP, text_addr+0x00003BC4);
 
-	_check_rif_path = (void*)(text_addr+0x00000190);
-	_sw(MAKE_CALL(&check_rif_path), text_addr+0x00002798);
-	_sw(MAKE_CALL(&check_rif_path), text_addr+0x00002C58);
+	_get_rif_path = (void*)(text_addr+0x00000190);
+	_sw(MAKE_CALL(&get_rif_path), text_addr+0x00002798);
+	_sw(MAKE_CALL(&get_rif_path), text_addr+0x00002C58);
 
 	//removing break instruction
 	_sw(0, text_addr + 0x1E80);

@@ -969,7 +969,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 		if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
 			apitype = 0x125;
 		} else {
-			apitype = 0x124;
+			apitype = 0x123;
 		}
 
 		param->key = "umdemu";

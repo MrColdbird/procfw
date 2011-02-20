@@ -525,11 +525,11 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0x669D93E4, 0xE9BCD519, },  //sceAudioSRCChReserve
 	{ 0x138A70F1, 0x0399579B, },  //sceAudioSRCChRelease
 	{ 0x43645E69, 0x475F41FE, },  //sceAudioSRCOutputBlocking
-	{ 0x80F1F7E0, UNKNOWNNID, }, // sceAudioInit
-	{ 0x210567F7, UNKNOWNNID, }, // sceAudioEnd
+	{ 0x80F1F7E0, 0x65BED4D9, }, // sceAudioInit
+	{ 0x210567F7, 0xFADC7CBB, }, // sceAudioEnd
 	{ 0xA2BEAA6C, 0x0BF0FA03, }, // sceAudioSetFrequency 
-	{ 0xB61595C0, UNKNOWNNID, }, // sceAudioLoopbackTest 
-	{ 0x927AC32B, UNKNOWNNID, }, // sceAudioSetVolumeOffset 
+	{ 0xB61595C0, 0x4FFADD67, }, // sceAudioLoopbackTest 
+	{ 0x927AC32B, 0xED4A5679, }, // sceAudioSetVolumeOffset 
 	{ 0x8C1009B2, 0xD35EFCD9, }, // sceAudioOutput 
 	{ 0x136CAF51, 0xA906D208, }, // sceAudioOutputBlocking 
 	{ 0xE2D56B2D, 0xC847973E, }, // sceAudioOutputPanned 
@@ -537,13 +537,13 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0x5EC81C55, 0xF84226FB, }, // sceAudioChReserve 
 	{ 0x41EFADE7, 0x686AC4F4, }, // sceAudioOneshotOutput 
 	{ 0x6FC46853, 0xA6FD1A21, }, // sceAudioChRelease 
-	{ 0xB011922F, UNKNOWNNID, }, // sceAudio_driver_B011922F 
+	{ 0xB011922F, 0xA388ABDB, }, // sceAudio_driver_B011922F 
 	{ 0xCB2E439E, 0x3F4D81C1, }, // sceAudioSetChannelDataLen 
 	{ 0x95FD0C2D, 0x5A0397C5, }, // sceAudioChangeChannelConfig 
 	{ 0xB7E1D8E7, 0xA25A3346, }, // sceAudioChangeChannelVolume 
-	{ 0x38553111, UNKNOWNNID, }, // sceAudio_driver_38553111 
-	{ 0x5C37C0AE, UNKNOWNNID, }, // sceAudio_driver_5C37C0AE 
-	{ 0xE0727056, UNKNOWNNID, }, // sceAudio_driver_E0727056 
+	{ 0x38553111, 0xE9BCD519, }, // sceAudio_driver_38553111 
+	{ 0x5C37C0AE, 0x0399579B, }, // sceAudio_driver_5C37C0AE 
+	{ 0xE0727056, 0x475F41FE, }, // sceAudio_driver_E0727056 
 	{ 0x086E5895, 0x459D3B55, }, // sceAudioInputBlocking 
 	{ 0x6D4BEC68, 0x84FA80C4, }, // sceAudioInput 
 	{ 0xA708C6A6, 0xE071AB41, }, // sceAudioGetInputLength 
@@ -609,15 +609,15 @@ static nid_entry InitForKernel_nid[] = {
 };
 
 static nid_entry SysTimerForKernel_nid[] = {
-	{ 0xC99073E3, UNKNOWNNID, }, // sceSTimerAlloc
-	{ 0xC105CF38, UNKNOWNNID, }, // sceSTimerFree
-	{ 0xB53534B4, UNKNOWNNID, }, // SysTimerForKernel_B53534B4
-	{ 0x975D8E84, UNKNOWNNID, }, // sceSTimerSetHandler
-	{ 0xA95143E2, UNKNOWNNID, }, // sceSTimerStartCount
-	{ 0x4A01F9D3, UNKNOWNNID, }, // sceSTimerStopCount
-	{ 0x54BB5DB4, UNKNOWNNID, }, // sceSTimerResetCount
-	{ 0x228EDAE4, UNKNOWNNID, }, // sceSTimerGetCount
-	{ 0x53231A15, UNKNOWNNID, }, // SysTimerForKernel_53231A15
+	{ 0xC99073E3, 0x71059CBF, }, // sceSTimerAlloc
+	{ 0xC105CF38, 0xF03AE143, }, // sceSTimerFree
+	{ 0xB53534B4, 0x4467BD60, }, // SysTimerForKernel_B53534B4
+	{ 0x975D8E84, 0x847D785B, }, // sceSTimerSetHandler
+	{ 0xA95143E2, 0x8FB264FB, }, // sceSTimerStartCount
+	{ 0x4A01F9D3, 0xD01C6E08, }, // sceSTimerStopCount
+	{ 0x54BB5DB4, 0x964F73FD, }, // sceSTimerResetCount
+	{ 0x228EDAE4, 0x94BA6594, }, // sceSTimerGetCount
+	{ 0x53231A15, 0xCE5A60D8, }, // SysTimerForKernel_53231A15
 };
 
 static nid_entry sceImpose_driver_nid[] = {

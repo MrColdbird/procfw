@@ -20,6 +20,7 @@ PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 #define ACT_DAT_FD 0x10001
 
 static u32 g_keys_bin_found;
+static u32 g_is_custom_ps1;
 
 static int myIoRead(int fd, u8 *buf, int size)
 {
@@ -278,6 +279,78 @@ static void patch_scePops_Manager(void)
 	_sw(MAKE_CALL(_sceNpDrmGetVersionKey), text_addr+0x000029C4);
 }
 
+static u32 is_custom_ps1(void)
+{
+	SceUID fd = -1;
+	const char *filename;
+	int result, ret;
+	u32 psar_offset, pgd_offset;
+	u8 header[40] __attribute__((aligned(64)));
+
+	filename = sceKernelInitFileName();
+	result = 0;
+
+	if(filename == NULL) {
+		result = 0;
+		goto exit;
+	}
+
+	fd = sceIoOpen(filename, PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		printk("%s: sceIoOpen %s -> 0x%08X\n", __func__, filename, fd);
+		result = 0;
+		goto exit;
+	}
+
+	ret = sceIoRead(fd, header, sizeof(header));
+
+	if(ret != sizeof(header)) {
+		printk("%s: sceIoRead -> 0x%08X\n", __func__, ret);
+		result = 0;
+		goto exit;
+	}
+
+	psar_offset = *(u32*)(header+0x24);
+	sceIoLseek32(fd, psar_offset, PSP_SEEK_SET);
+	ret = sceIoRead(fd, header, sizeof(header));
+
+	if(ret != sizeof(header)) {
+		printk("%s: sceIoRead -> 0x%08X\n", __func__, ret);
+		result = 0;
+		goto exit;
+	}
+
+	pgd_offset = psar_offset;
+
+	if(0 == memcmp(header, "PSTITLE", sizeof("PSTITLE")-1)) {
+		pgd_offset += 0x200;
+	} else {
+		pgd_offset += 0x400;
+	}
+
+	sceIoLseek32(fd, pgd_offset, PSP_SEEK_SET);
+	ret = sceIoRead(fd, header, 4);
+
+	if(ret != 4) {
+		printk("%s: sceIoRead -> 0x%08X\n", __func__, ret);
+		result = 0;
+		goto exit;
+	}
+
+	// PGD offset
+	if(*(u32*)header != 0x44475000) {
+		result = 1;
+	}
+
+exit:
+	if(fd >= 0) {
+		sceIoClose(fd);
+	}
+
+	return result;
+}
+
 int module_start(SceSize args, void* argp)
 {
 	char keypath[128];
@@ -297,6 +370,12 @@ int module_start(SceSize args, void* argp)
 		g_keys_bin_found = 1;
 	} else {
 		g_keys_bin_found = 0;
+	}
+
+	g_is_custom_ps1 = is_custom_ps1();
+
+	if(g_is_custom_ps1) {
+		printk("custom pops found\n");
 	}
 
 	return 0;

@@ -106,7 +106,7 @@ static u8 virtualsfo[408] = {
 VirtualPBP *g_vpbps = NULL;
 int g_vpbps_cnt = 0;
 static int g_sema = -1;
-static int g_gamedfd = -1;
+static int g_gamedfd = -1, g_gamedfd_is_ef0 = 0;
 static VirtualPBP *g_caches = NULL;
 static u32 g_caches_cnt;
 static u8 g_referenced[32];
@@ -999,6 +999,8 @@ static void _vpbp_dopen(void *_dirname)
 SceUID vpbp_dopen(const char * dirname)
 {
 	SceUID result;
+	char devicename[20];
+	int ret;
 
 	lock();
 
@@ -1007,6 +1009,13 @@ SceUID vpbp_dopen(const char * dirname)
 	if (check_path_is_game(dirname)) {
 		sceKernelExtendKernelStack(0x1800, &_vpbp_dopen, (void*)dirname);
 		g_gamedfd = result;
+		ret = get_device_name(devicename, sizeof(devicename), dirname);
+
+		if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
+			g_gamedfd_is_ef0 = 1;
+		} else {
+			g_gamedfd_is_ef0 = 0;
+		}
 	}
 
 	unlock();
@@ -1018,6 +1027,8 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 {
 	int result;
 	static int cur_idx = 0;
+	char devicename[20];
+	int ret, gamedfd_is_ef0;
    
 	lock();
 	result = sceIoDread(fd, dir);
@@ -1030,14 +1041,24 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 		if (cur_idx < g_vpbps_cnt) {
 			VirtualPBP *vpbp = &g_vpbps[cur_idx];
 
-			dir->d_stat.st_mode = 0x11FF;
-			dir->d_stat.st_attr = 0x10;
-			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
-			memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
-			memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
-			memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
-			result = 1;
-			cur_idx++;
+			ret = get_device_name(devicename, sizeof(devicename), vpbp->name);
+
+			if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
+				gamedfd_is_ef0 = 1;
+			} else {
+				gamedfd_is_ef0 = 0;
+			}
+
+			if(gamedfd_is_ef0 == g_gamedfd_is_ef0) {
+				dir->d_stat.st_mode = 0x11FF;
+				dir->d_stat.st_attr = 0x10;
+				sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+				memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+				memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+				memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
+				result = 1;
+				cur_idx++;
+			}
 		}
 	} else {
 		cur_idx = 0;

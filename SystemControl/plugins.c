@@ -68,17 +68,18 @@ static void load_plugins(char * path)
 	if (path == NULL)
 		return;
 	
-	if(psp_model == PSP_GO && (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH || sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_POPS)) {
-		//override device name
-		strncpy(path, "ef0", 3);
-	}
-
 	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
 	if (fd < 0) {
-		printk("%s: open %s failed 0x%08X\n", __func__, path, fd);
+		// retry on ef0
+		strncpy(path, "ef0", 3);
+		fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
-		return;
+		if(fd < 0) {
+			printk("%s: open %s failed 0x%08X\n", __func__, path, fd);
+
+			return;
+		}
 	}
 
 	do {

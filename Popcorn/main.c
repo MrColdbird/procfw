@@ -20,6 +20,9 @@ PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 #define RIF_MAGIC_FD 0x10000
 #define ACT_DAT_FD 0x10001
 
+extern u8 g_icon_png[0x3730];
+
+static u32 g_is_missing_icon0 = 1;
 static u32 g_keys_bin_found;
 static u32 g_is_custom_ps1;
 
@@ -64,6 +67,17 @@ static int myIoRead(int fd, u8 *buf, int size)
 
 			ret = size;
 			goto exit;
+		}
+	}
+	
+	if (g_is_missing_icon0 && size == sizeof(g_icon_png)) {
+		u32 png_signature = 0x474E5089;
+
+		if (0 == memcmp(buf, &png_signature, 4)) {
+			printk("%s: fakes a PNG for icon0\n", __func__);
+			memcpy(buf, g_icon_png, sizeof(g_icon_png));
+
+			return sizeof(g_icon_png);
 		}
 	}
 	
@@ -575,6 +589,53 @@ static int popcorn_patch_chain(SceModule2 *mod)
 	return 0;
 }
 
+int is_missing_icon0(void)
+{
+	u32 icon0_offset = 0;
+	int result = 0;
+	SceUID fd = -1;;
+	const char *filename;
+	u8 header[40] __attribute__((aligned(64)));
+	
+	filename = sceKernelInitFileName();
+
+	if(filename == NULL) {
+		result = 1;
+		goto exit;
+	}
+	
+	fd = sceIoOpen(filename, PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		printk("%s: sceIoOpen %s -> 0x%08X\n", __func__, filename, fd);
+		result = 1;
+		goto exit;
+	}
+	
+	sceIoRead(fd, header, sizeof(header));
+	icon0_offset = *(u32*)(header+0x0c);
+	
+	if (*(u32*)header == 0x474E5089 && // PNG
+			*(u32*)(header+4) == 0xA1A0A0D && // PNG
+			*(u32*)(header+0xc) == 0x52444849 && // IHDR
+			*(u32*)(header+0x10) == 0x50000000 && // 
+			*(u32*)(header+0x14) == *(u32*)(header+0x10)
+	   ) {
+		printk("PNG file found\n");
+		result = 0;
+	} else {
+		printk("PNG file is missing\n");
+		result = 1;
+	}
+
+exit:
+	if(fd >= 0) {
+		sceIoClose(fd);
+	}
+
+	return result;
+}
+
 int module_start(SceSize args, void* argp)
 {
 	char keypath[128];
@@ -600,6 +661,12 @@ int module_start(SceSize args, void* argp)
 
 	if(g_is_custom_ps1) {
 		printk("custom pops found\n");
+	}
+
+	g_is_missing_icon0 = is_missing_icon0();
+
+	if(g_is_missing_icon0) {
+		printk("missing PNG\n");
 	}
 
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);

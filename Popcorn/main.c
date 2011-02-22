@@ -561,17 +561,16 @@ struct PopsPatchOffset {
 	u32 patch_offset;
 };
 
-//TODO
 static struct PopsPatchOffset g_pops_dec_func_offset[] = {
 	{ 0x000D5404, 0x0000DAC0 }, // 01G
 	{ 0x000D64BC, 0x0000DAC0 }, // 02G
-	{ 0x00000000, 0x00000000 }, // 03G
-	{ 0x00000000, 0x00000000 }, // 04G
+	{ 0x000D64BC, 0x0000DAC0 }, // 03G
+	{ 0x000D64FC, 0x0000DB00 }, // 04G
 	{ 0x000D8488, 0x0000E218 }, // 05G
 	{ 0x00000000, 0x00000000 }, // unused
-	{ 0x00000000, 0x00000000 }, // 07G
+	{ 0x000D64FC, 0x0000DB00 }, // 07G
 	{ 0x00000000, 0x00000000 }, // unused
-	{ 0x00000000, 0x00000000 }, // 09G
+	{ 0x000D64FC, 0x0000DB00 }, // 09G
 };
 
 static int patch_decompress_data(u32 text_addr)
@@ -596,17 +595,16 @@ static int patch_decompress_data(u32 text_addr)
 	return 0;
 }
 
-//TODO
 static u32 g_pops_icon0_size_offset[] = {
 	0x00036CF8, // 01G
 	0x00037D34, // 02G
-	0x00000000, // 03G
-	0x00000000, // 04G
+	0x00037D34, // 03G
+	0x00037D74, // 04G
 	0x00039B5C, // 05G
 	0x00000000, // unused
-	0x00000000, // 07G
+	0x00037D74, // 07G
 	0x00000000, // unused
-	0x00000000, // 09G
+	0x00037D74, // 09G
 };
 
 static void patch_icon0_size(u32 text_addr)

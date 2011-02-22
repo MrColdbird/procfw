@@ -13,7 +13,7 @@ OBJS = main.o icon.o
 endif
 endif
 
-OBJS += ../Common/utils.o ../Common/strsafe.o
+OBJS += ../Common/utils.o ../Common/strsafe.o ../Common/libs.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../Common -I../include
 PSP_FW_VERSION=635
@@ -29,6 +29,8 @@ LIBS += -lpspmodulemgr_kernel -lpspsystemctrl_kernel -lpspkubridge
 LIBS += -lpspsemaphore
 
 BUILD_PRX=1
+PRX_EXPORTS = exports.exp
+
 USE_KERNEL_LIBS=1
 USE_KERNEL_LIBC=1
 

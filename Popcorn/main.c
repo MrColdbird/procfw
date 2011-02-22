@@ -22,7 +22,7 @@ PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
 extern u8 g_icon_png[0x3730];
 
-static u32 g_is_missing_icon0 = 1;
+static u32 g_is_missing_icon0;
 static u32 g_keys_bin_found;
 static u32 g_is_custom_ps1;
 
@@ -79,6 +79,15 @@ static int myIoRead(int fd, u8 *buf, int size)
 
 			return sizeof(g_icon_png);
 		}
+	}
+
+	if (g_is_custom_ps1 && size >= 0x41C && buf[0x41B] == 0x27 &&
+			buf[0x41C] == 0x19 &&
+			buf[0x41D] == 0x22 &&
+			buf[0x41E] == 0x41 &&
+			buf[0x41A] == buf[0x41F]) {
+		buf[0x41B] = 0x55;
+		printk("%s: unknown patch loc_6c\n", __func__);
 	}
 	
 	ret = sceIoRead(fd, buf, size);
@@ -547,12 +556,33 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	return ret;
 }
 
-///TODO more model support and a better offset
+struct PopsPatchOffset {
+	u32 stub_offset;
+	u32 patch_offset;
+};
+
+//TODO
+static struct PopsPatchOffset g_pops_dec_func_offset[] = {
+	{ 0x000D5404, 0x0000DAC0 }, // 01G
+	{ 0x000D64BC, 0x0000DAC0 }, // 02G
+	{ 0x00000000, 0x00000000 }, // 03G
+	{ 0x00000000, 0x00000000 }, // 04G
+	{ 0x000D8488, 0x0000E218 }, // 05G
+	{ 0x00000000, 0x00000000 }, // unused
+	{ 0x00000000, 0x00000000 }, // 07G
+	{ 0x00000000, 0x00000000 }, // unused
+	{ 0x00000000, 0x00000000 }, // 09G
+};
+
 static int patch_decompress_data(u32 text_addr)
 {
 	int ret;
-	void *stub_addr = (void*)(text_addr+0x0010C19C); // should be the unused jal scePopsManExitVSHKernel in module_start
+	u32 psp_model;
+	void *stub_addr, *patch_addr;
 
+	psp_model = sceKernelGetModel();
+	stub_addr = (void*)(text_addr+g_pops_dec_func_offset[psp_model].stub_offset);
+	patch_addr = (void*)(text_addr+g_pops_dec_func_offset[psp_model].patch_offset);
 	ret = place_syscall_stub(decompress_data, stub_addr);
 
 	if (ret != 0) {
@@ -561,9 +591,32 @@ static int patch_decompress_data(u32 text_addr)
 		return -1;
 	}
 
-	_sw(MAKE_CALL(stub_addr), text_addr+0x0000E218);
+	_sw(MAKE_CALL(stub_addr), (u32)patch_addr);
 
 	return 0;
+}
+
+//TODO
+static u32 g_pops_icon0_size_offset[] = {
+	0x00036CF8, // 01G
+	0x00037D34, // 02G
+	0x00000000, // 03G
+	0x00000000, // 04G
+	0x00039B5C, // 05G
+	0x00000000, // unused
+	0x00000000, // 07G
+	0x00000000, // unused
+	0x00000000, // 09G
+};
+
+static void patch_icon0_size(u32 text_addr)
+{
+	u32 psp_model;
+	u32 patch_addr;
+	
+	psp_model = sceKernelGetModel();
+	patch_addr = text_addr + g_pops_icon0_size_offset[psp_model];
+	_sw(0x24050000 | (sizeof(g_icon_png) & 0xFFFF), patch_addr);
 }
 
 static int popcorn_patch_chain(SceModule2 *mod)
@@ -580,6 +633,10 @@ static int popcorn_patch_chain(SceModule2 *mod)
 			patch_decompress_data(text_addr);
 		}
 
+		if(!g_is_missing_icon0) {
+			patch_icon0_size(text_addr);
+		}
+
 		sync_cache();
 	}
 
@@ -589,7 +646,7 @@ static int popcorn_patch_chain(SceModule2 *mod)
 	return 0;
 }
 
-int is_missing_icon0(void)
+static int is_missing_icon0(void)
 {
 	u32 icon0_offset = 0;
 	int result = 0;

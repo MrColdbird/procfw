@@ -167,15 +167,15 @@ void patch_mesgled(SceModule* mod1)
 	SceModule2 *mod = (SceModule2*) mod1;
 	u32 text_addr;
 	u32 offsets[] = {
-		0x00001D20,
-		0x00001DD0,
-		0x00001E60,
-		0x00001E60,
-		0x00001EF8,
-		0xDEADBEEF,
-		0x00001E60,
-		0xDEADBEEF,
-		0x00001E60,
+		0x00001D20, // 01g
+		0x00001DD0, // 02g
+		0x00001E60, // 03g
+		0x00001E60, // 04g
+		0x00001EF8, // 05g
+		0xDEADBEEF, // 06g
+		0x00001E60, // 07g
+		0xDEADBEEF, // 08g
+		0x00001E60, // 09g
 	};
    
 	text_addr = mod->text_addr;

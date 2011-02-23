@@ -12,6 +12,11 @@
 #include "strsafe.h"
 #include "libs.h"
 
+struct PopsPatchOffset {
+	u32 stub_offset;
+	u32 patch_offset;
+};
+
 PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
 #define PGD_ID "XX0000-XXXX00000_00-XXXXXXXXXX000XXX"
@@ -53,35 +58,42 @@ static int myIoRead(int fd, u8 *buf, int size)
 			ret = size;
 			goto exit;
 		}
+	}
+	
+	ret = sceIoRead(fd, buf, size);
 
-		if (size == 4) {
-			u32 magic;
+	if(ret != size) {
+		goto exit;
+	}
 
-			magic = 0x464C457F; // ~ELF
+	if (size == 4) {
+		u32 magic;
 
-			if(0 == memcmp(buf, &magic, sizeof(magic))) {
-				magic = 0x5053507E; // ~PSP
-				memcpy(buf, &magic, sizeof(magic));
-				printk("%s: patch ~ELF -> ~PSP\n", __func__);
-			}
+		magic = 0x464C457F; // ~ELF
+
+		if(0 == memcmp(buf, &magic, sizeof(magic))) {
+			magic = 0x5053507E; // ~PSP
+			memcpy(buf, &magic, sizeof(magic));
+			printk("%s: patch ~ELF -> ~PSP\n", __func__);
+		}
+
+		ret = size;
+		goto exit;
+	}
+	
+	if (g_is_missing_icon0 && size == sizeof(g_icon_png)) {
+		u32 png_signature = 0x474E5089;
+		
+		if (0 != memcmp(buf, &png_signature, 4)) {
+			printk("%s: fakes a PNG for icon0\n", __func__);
+			memcpy(buf, g_icon_png, size);
 
 			ret = size;
 			goto exit;
 		}
 	}
 	
-	if (g_is_missing_icon0 && size == sizeof(g_icon_png)) {
-		u32 png_signature = 0x474E5089;
-
-		if (0 == memcmp(buf, &png_signature, 4)) {
-			printk("%s: fakes a PNG for icon0\n", __func__);
-			memcpy(buf, g_icon_png, sizeof(g_icon_png));
-
-			return sizeof(g_icon_png);
-		}
-	}
-
-	if (g_is_custom_ps1 && size >= 0x41C && buf[0x41B] == 0x27 &&
+	if (g_is_custom_ps1 && size >= 0x420 && buf[0x41B] == 0x27 &&
 			buf[0x41C] == 0x19 &&
 			buf[0x41D] == 0x22 &&
 			buf[0x41E] == 0x41 &&
@@ -90,8 +102,6 @@ static int myIoRead(int fd, u8 *buf, int size)
 		printk("%s: unknown patch loc_6c\n", __func__);
 	}
 	
-	ret = sceIoRead(fd, buf, size);
-
 exit:
 	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, fd, pos, size, ret);
 
@@ -144,6 +154,25 @@ static int myIoClose(SceUID fd)
 	return ret;
 }
 
+static inline int is_eboot(const char *path)
+{
+	const char *p;
+
+	p = strrchr(path, '/');
+
+	if(p == NULL) {
+		p = path;
+	} else {
+		p += 1;
+	}
+
+	if (0 == stricmp(p, "EBOOT.PBP")) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static int myIoOpen(const char *file, int flag, int mode)
 {
 	int ret;
@@ -156,7 +185,7 @@ static int myIoOpen(const char *file, int flag, int mode)
 			printk("%s: [FAKE]\n", __func__);
 			ret = ACT_DAT_FD;
 		} else {
-			if(g_is_custom_ps1) {
+			if(g_is_custom_ps1 && is_eboot(file)) {
 				if (flag & 0x40000000) {
 					printk("%s: removed PGD open flag\n", __func__);
 				}
@@ -556,11 +585,6 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	return ret;
 }
 
-struct PopsPatchOffset {
-	u32 stub_offset;
-	u32 patch_offset;
-};
-
 static struct PopsPatchOffset g_pops_dec_func_offset[] = {
 	{ 0x000D5404, 0x0000DAC0 }, // 01G
 	{ 0x000D64BC, 0x0000DAC0 }, // 02G
@@ -626,12 +650,11 @@ static int popcorn_patch_chain(SceModule2 *mod)
 
 		printk("%s: patching pops\n", __func__);
 
-		// decompress_data, the decrypt function, should replaced by decompress_data in custom PS1 EBOOT
 		if(g_is_custom_ps1) {
 			patch_decompress_data(text_addr);
 		}
 
-		if(!g_is_missing_icon0) {
+		if(g_is_missing_icon0) {
 			patch_icon0_size(text_addr);
 		}
 
@@ -669,6 +692,8 @@ static int is_missing_icon0(void)
 	
 	sceIoRead(fd, header, sizeof(header));
 	icon0_offset = *(u32*)(header+0x0c);
+	sceIoLseek32(fd, icon0_offset, PSP_SEEK_SET);
+	sceIoRead(fd, header, sizeof(header));
 	
 	if (*(u32*)header == 0x474E5089 && // PNG
 			*(u32*)(header+4) == 0xA1A0A0D && // PNG
@@ -676,10 +701,9 @@ static int is_missing_icon0(void)
 			*(u32*)(header+0x10) == 0x50000000 && // 
 			*(u32*)(header+0x14) == *(u32*)(header+0x10)
 	   ) {
-		printk("PNG file found\n");
 		result = 0;
 	} else {
-		printk("PNG file is missing\n");
+		printk("%s: PNG file is missing\n", __func__);
 		result = 1;
 	}
 
@@ -719,11 +743,6 @@ int module_start(SceSize args, void* argp)
 	}
 
 	g_is_missing_icon0 = is_missing_icon0();
-
-	if(g_is_missing_icon0) {
-		printk("missing PNG\n");
-	}
-
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
 
 	return 0;

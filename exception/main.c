@@ -137,7 +137,7 @@ void ExceptionHandler(PspDebugRegBlock * regs)
 
 static int crash_thread(SceSize args, void *argp)
 {
-	sceKernelDelayThread(10 * 1000000L);
+	sceKernelDelayThread(30 * 1000000L);
 	printk("%s: crashing...\n", __func__);
 
 	while (1) {

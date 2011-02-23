@@ -33,6 +33,8 @@ static u32 g_is_custom_ps1;
 
 static STMOD_HANDLER g_previous = NULL;
 
+static u8 g_keys[16];
+
 static int myIoRead(int fd, u8 *buf, int size)
 {
 	int ret;
@@ -369,13 +371,12 @@ static int _sceNpDrmGetVersionKey(u8 * key, u8 * act, u8 * rif, u32 flags)
 		get_keypath(keypath, sizeof(keypath));
 
 		if (result == 0) {
-			ret = save_key(keypath, key, 16);
+			memcpy(g_keys, key, sizeof(g_keys));
+			ret = save_key(keypath, g_keys, sizeof(g_keys));
 			printk("%s: save_key -> %d\n", __func__, ret);
 		} else {
-			ret = load_key(keypath, key, 16);
-			printk("%s: load_key[0x%08X] -> %d\n", __func__, result, ret);
-
-			if(ret == 0) {
+			if (g_keys_bin_found) {
+				memcpy(key, g_keys, sizeof(g_keys));
 				result = 0;
 			}
 		}
@@ -728,12 +729,15 @@ int module_start(SceSize args, void* argp)
 
 	get_keypath(keypath, sizeof(keypath));
 	ret = sceIoGetstat(keypath, &stat);
+	g_keys_bin_found = 0;
 
 	if(ret == 0) {
-		printk("keys.bin found\n");
-		g_keys_bin_found = 1;
-	} else {
-		g_keys_bin_found = 0;
+		ret = load_key(keypath, g_keys, sizeof(g_keys));
+
+		if(ret == 0) {
+			g_keys_bin_found = 1;
+			printk("keys.bin found\n");
+		}
 	}
 
 	g_is_custom_ps1 = is_custom_ps1();

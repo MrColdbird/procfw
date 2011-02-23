@@ -15,6 +15,12 @@ enum {
 #define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff)) 
 #define NOP 0
 
+#define REDIRECT_FUNCTION(new_func, original) \
+	do { \
+		_sw(MAKE_JUMP(new_func), (original)); \
+		_sw(NOP, (original)+4); \
+	} while ( 0 );
+
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 

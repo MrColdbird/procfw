@@ -452,6 +452,11 @@ static void patch_scePops_Manager(void)
 	// disable hash check of sceMeAudio_6A3233D9
 	_sw(0x03E00008, text_addr + 0x00000AB8);
 	_sw(0x24020001, text_addr + 0x00000ABC);
+
+	// disable hash check of sceMeAudio_11B1FCF test patch
+	_sw(NOP, text_addr + 0x00000640);
+	_sw(NOP, text_addr + 0x00000658);
+	_sw(NOP, text_addr + 0x00000670);
 }
 
 static u32 is_custom_ps1(void)
@@ -666,6 +671,47 @@ static int popcorn_patch_chain(SceModule2 *mod)
 			patch_icon0_size(text_addr);
 		}
 
+		// test patch
+#if 0
+		u32 test_offset[] = {
+			0x00016A64,
+			0x0001B718,
+			0x0001BD20,
+			0x0001BDF8,
+			0x00025E0C,
+			0x00033AD0,
+		};
+
+		int i; for(i=0; i<NELEMS(test_offset); ++i) {
+			_sh(i | 0x2000, text_addr + test_offset[i]);
+		}
+#endif
+
+#if 0
+		u32 test_offset[] = {
+			0x000169F8, 
+			0x00016A08, 
+			0x00016A18, 
+			0x00016A28, 
+			0x00016A50,
+		};
+
+		int i; for(i=0; i<NELEMS(test_offset); ++i) {
+			_sh(0x8100+i, text_addr + test_offset[i]);
+		}
+#endif
+
+#if 0
+		_sw(NOP, text_addr+0x00016A08);
+		_sw(0x00402021, text_addr+0x00016A08); // move $a0, $v0
+		_sh(0xFFFE, text_addr+0x0001BAD0);
+		_sh(0xFFFD, text_addr+0x0001BB28);
+		_sh(0xFFFC, text_addr+0x0001BCDC);
+		_sh(0xFFFB, text_addr+0x0001BCF4);
+#endif
+
+//		_sw(0xD, text_addr+0x0001BB00);
+		
 		sync_cache();
 	}
 
@@ -721,6 +767,20 @@ exit:
 	return result;
 }
 
+static void setup_psx_fw_version(u32 fw_version)
+{
+	int (*_SysMemUserForUser_315AD3A0)(u32 fw_version);
+	
+	_SysMemUserForUser_315AD3A0 = (void*)sctrlHENFindFunction("sceSystemMemoryManager", "SysMemUserForUser", 0x315AD3A0);
+
+	if (_SysMemUserForUser_315AD3A0 == NULL) {
+		printk("_SysMemUserForUser_315AD3A0 not found\n");
+		reboot_vsh_with_error(0x80000001);
+	}
+
+	_SysMemUserForUser_315AD3A0(fw_version);
+}
+
 int module_start(SceSize args, void* argp)
 {
 	char keypath[128];
@@ -747,6 +807,10 @@ int module_start(SceSize args, void* argp)
 
 	g_is_custom_ps1 = is_custom_ps1();
 	g_is_missing_icon0 = is_missing_icon0();
+
+	if(g_is_custom_ps1) {
+		setup_psx_fw_version(0x03090010);
+	}
 
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
 

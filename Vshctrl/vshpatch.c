@@ -181,12 +181,15 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 static void patch_game_plugin_module(u32 text_addr)
 {
 	//disable executable check for normal homebrew
-	_sw(0x03E00008, text_addr+0x202A8); // jr $ra
-	_sw(0x00001021, text_addr+0x202AC); // move $v0, $zr
+	_sw(0x03E00008, text_addr + 0x000202A8); // jr $ra
+	_sw(0x00001021, text_addr + 0x000202AC); // move $v0, $zr
 
 	//kill ps1 eboot check
-	_sw(0x03E00008, text_addr + 0x20BC8); //jr $ra
-	_sw(0x00001021, text_addr + 0x20BCC); // move $v0, $zr
+	_sw(0x03E00008, text_addr + 0x00020BC8); //jr $ra
+	_sw(0x00001021, text_addr + 0x00020BCC); // move $v0, $zr
+
+	//kill multi-disc ps1 check
+	_sw(0x00000000, text_addr + 0x00014634);
 
 	if (conf.hidepic) {
 		_sw(0x00601021, text_addr + 0x0001D5DC);

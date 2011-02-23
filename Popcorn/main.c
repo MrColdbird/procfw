@@ -17,6 +17,12 @@ struct PopsPatchOffset {
 	u32 patch_offset;
 };
 
+enum {
+	ICON0_OK = 0,
+	ICON0_MISSING = 1,
+	ICON0_CORRUPTED = 2,
+};
+
 PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
 #define PGD_ID "XX0000-XXXX00000_00-XXXXXXXXXX000XXX"
@@ -27,9 +33,10 @@ PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
 
 extern u8 g_icon_png[0x3730];
 
-static u32 g_is_missing_icon0;
+static u32 g_icon0_status;
 static u32 g_keys_bin_found;
 static u32 g_is_custom_ps1;
+static u32 g_eboot_fd = -1;
 
 static STMOD_HANDLER g_previous = NULL;
 
@@ -68,6 +75,8 @@ static int myIoRead(int fd, u8 *buf, int size)
 		goto exit;
 	}
 
+//	hexdump(buf, MIN(16, size));
+
 	if (size == 4) {
 		u32 magic;
 
@@ -83,10 +92,10 @@ static int myIoRead(int fd, u8 *buf, int size)
 		goto exit;
 	}
 	
-	if (g_is_missing_icon0 && size == sizeof(g_icon_png)) {
+	if(size == sizeof(g_icon_png)) {
 		u32 png_signature = 0x474E5089;
-		
-		if (0 != memcmp(buf, &png_signature, 4)) {
+
+		if(g_icon0_status == ICON0_MISSING || ((g_icon0_status == ICON0_CORRUPTED) && 0 == memcmp(buf, &png_signature, 4))) {
 			printk("%s: fakes a PNG for icon0\n", __func__);
 			memcpy(buf, g_icon_png, size);
 
@@ -94,7 +103,7 @@ static int myIoRead(int fd, u8 *buf, int size)
 			goto exit;
 		}
 	}
-	
+
 	if (g_is_custom_ps1 && size >= 0x420 && buf[0x41B] == 0x27 &&
 			buf[0x41C] == 0x19 &&
 			buf[0x41D] == 0x22 &&
@@ -107,6 +116,18 @@ static int myIoRead(int fd, u8 *buf, int size)
 
 exit:
 	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, fd, pos, size, ret);
+
+	return ret;
+}
+
+static int myIoReadAsync(int fd, u8 *buf, int size)
+{
+	int ret;
+	u32 pos;
+
+	pos = sceIoLseek32(fd, 0, SEEK_CUR);
+	ret = sceIoReadAsync(fd, buf, size);
+	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, pos, size, ret);
 
 	return ret;
 }
@@ -152,6 +173,10 @@ static int myIoClose(SceUID fd)
 		ret = sceIoClose(fd);
 	}
 
+	if(g_eboot_fd == fd) {
+		g_eboot_fd = -1;
+	}
+
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 
 	return ret;
@@ -194,6 +219,10 @@ static int myIoOpen(const char *file, int flag, int mode)
 				}
 
 				ret = sceIoOpen(file, flag & ~0x40000000, mode);
+
+				if(ret >= 0) {
+					g_eboot_fd = ret;
+				}
 			} else {
 				ret = sceIoOpen(file, flag, mode);
 			}
@@ -220,7 +249,7 @@ static int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void
 		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
 	}
 
-	if (g_is_custom_ps1) {
+	if (g_is_custom_ps1 && g_eboot_fd == fd) {
 		if (cmd == 0x04100001) {
 			ret = 0;
 			printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);
@@ -228,7 +257,12 @@ static int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void
 		}
 
 		if (cmd == 0x04100002) {
-			sceIoLseek32(fd, *(u32*)indata, PSP_SEEK_SET);
+			ret = sceIoLseek32(fd, *(u32*)indata, PSP_SEEK_SET);
+
+			if(ret < 0) {
+				printk("%s: sceIoLseek32 -> 0x%08X\n", __func__, ret);
+			}
+
 			ret = 0;
 			printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);
 			goto exit;
@@ -457,6 +491,7 @@ static void patch_scePops_Manager(void)
 	REDIRECT_FUNCTION(myIoLseek, text_addr+0x00003BA0);
 	REDIRECT_FUNCTION(myIoIoctl, text_addr+0x00003BA8);
 	REDIRECT_FUNCTION(myIoRead, text_addr+0x00003BB0);
+	REDIRECT_FUNCTION(myIoReadAsync, text_addr+0x00003BC8);
 	REDIRECT_FUNCTION(myIoGetstat, text_addr+0x00003BD0);
 	REDIRECT_FUNCTION(myIoClose, text_addr+0x00003BC0);
 
@@ -693,7 +728,7 @@ static int popcorn_patch_chain(SceModule2 *mod)
 			patch_decompress_data(text_addr);
 		}
 
-		if(g_is_missing_icon0) {
+		if(g_icon0_status) {
 			patch_icon0_size(text_addr);
 		}
 
@@ -706,10 +741,10 @@ static int popcorn_patch_chain(SceModule2 *mod)
 	return 0;
 }
 
-static int is_missing_icon0(void)
+static int get_icon0_status(void)
 {
 	u32 icon0_offset = 0;
-	int result = 0;
+	int result = ICON0_MISSING;
 	SceUID fd = -1;;
 	const char *filename;
 	u8 header[40] __attribute__((aligned(64)));
@@ -717,7 +752,6 @@ static int is_missing_icon0(void)
 	filename = sceKernelInitFileName();
 
 	if(filename == NULL) {
-		result = 1;
 		goto exit;
 	}
 	
@@ -725,7 +759,6 @@ static int is_missing_icon0(void)
 
 	if(fd < 0) {
 		printk("%s: sceIoOpen %s -> 0x%08X\n", __func__, filename, fd);
-		result = 1;
 		goto exit;
 	}
 	
@@ -733,16 +766,21 @@ static int is_missing_icon0(void)
 	icon0_offset = *(u32*)(header+0x0c);
 	sceIoLseek32(fd, icon0_offset, PSP_SEEK_SET);
 	sceIoRead(fd, header, sizeof(header));
-	
-	if (*(u32*)header == 0x474E5089 && // PNG
-			*(u32*)(header+4) == 0xA1A0A0D && // PNG
-			*(u32*)(header+0xc) == 0x52444849 // IHDR
-	   ) {
-		result = 0;
+
+	if(*(u32*)(header+4) == 0xA1A0A0D) {
+		if ( *(u32*)(header+0xc) == 0x52444849 && // IHDR
+				*(u32*)(header+0x10) == 0x50000000 && // 
+				*(u32*)(header+0x14) == *(u32*)(header+0x10)
+		   ) {
+			result = ICON0_OK;
+		} else {
+			result = ICON0_CORRUPTED;
+		}
 	} else {
-		printk("%s: PNG file is missing\n", __func__);
-		result = 1;
+		result = ICON0_MISSING;
 	}
+
+	printk("%s: PNG file status -> %d\n", __func__, result);
 
 exit:
 	if(fd >= 0) {
@@ -789,7 +827,7 @@ int module_start(SceSize args, void* argp)
 	}
 
 	g_is_custom_ps1 = is_custom_ps1();
-	g_is_missing_icon0 = is_missing_icon0();
+	g_icon0_status = get_icon0_status();
 
 	if(g_is_custom_ps1) {
 		setup_psx_fw_version(0x03090010);

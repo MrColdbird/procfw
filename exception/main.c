@@ -41,6 +41,28 @@ static const unsigned char regName[32][5] = {
 	"t8", "t9", "k0", "k1", "gp", "sp", "fp", "ra"
 };
 
+static void reboot_vsh_with_error(u32 error)
+{
+	struct SceKernelLoadExecVSHParam param;	
+	u32 vshmain_args[0x20/4];
+
+	memset(&param, 0, sizeof(param));
+	memset(vshmain_args, 0, sizeof(vshmain_args));
+
+	vshmain_args[0/4] = 0x0400;
+	vshmain_args[4/4] = 0x20;
+	vshmain_args[0x14/4] = error;
+
+	param.size = sizeof(param);
+	param.args = 0x400;
+	param.argp = vshmain_args;
+	param.vshmain_args_size = 0x400;
+	param.vshmain_args = vshmain_args;
+	param.configfile = "/kd/pspbtcnf.txt";
+
+	sctrlKernelExitVSH(&param);
+}
+
 void ExceptionHandler(PspDebugRegBlock * regs)
 {
 	int i, found;
@@ -103,6 +125,8 @@ void ExceptionHandler(PspDebugRegBlock * regs)
 
 	printk_sync();
 
+	sceKernelDelayThread(500000);
+	reboot_vsh_with_error(0xC01DB12D);
 	sceKernelDelayThread(500000);
 	sctrlKernelExitVSH(NULL);
 

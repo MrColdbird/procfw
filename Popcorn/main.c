@@ -100,6 +100,7 @@ static int myIoRead(int fd, u8 *buf, int size)
 			buf[0x41D] == 0x22 &&
 			buf[0x41E] == 0x41 &&
 			buf[0x41A] == buf[0x41F]) {
+//		hexdump(buf, 0x420);
 		buf[0x41B] = 0x55;
 		printk("%s: unknown patch loc_6c\n", __func__);
 	}
@@ -366,6 +367,11 @@ static int _sceNpDrmGetVersionKey(u8 * key, u8 * act, u8 * rif, u32 flags)
 	if (g_is_custom_ps1) {
 		printk("%s: -> 0x%08X\n", __func__, result);
 		result = 0;
+
+		if (g_keys_bin_found) {
+			memcpy(key, g_keys, sizeof(g_keys));
+		}
+		
 		printk("%s:[FAKE] -> 0x%08X\n", __func__, result);
 	} else {
 		get_keypath(keypath, sizeof(keypath));
@@ -509,6 +515,7 @@ static u32 is_custom_ps1(void)
 
 	// PGD offset
 	if(*(u32*)header != 0x44475000) {
+		printk("%s: custom pops found\n", __func__);
 		result = 1;
 	}
 
@@ -698,9 +705,7 @@ static int is_missing_icon0(void)
 	
 	if (*(u32*)header == 0x474E5089 && // PNG
 			*(u32*)(header+4) == 0xA1A0A0D && // PNG
-			*(u32*)(header+0xc) == 0x52444849 && // IHDR
-			*(u32*)(header+0x10) == 0x50000000 && // 
-			*(u32*)(header+0x14) == *(u32*)(header+0x10)
+			*(u32*)(header+0xc) == 0x52444849 // IHDR
 	   ) {
 		result = 0;
 	} else {
@@ -741,12 +746,8 @@ int module_start(SceSize args, void* argp)
 	}
 
 	g_is_custom_ps1 = is_custom_ps1();
-
-	if(g_is_custom_ps1) {
-		printk("custom pops found\n");
-	}
-
 	g_is_missing_icon0 = is_missing_icon0();
+
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
 
 	return 0;

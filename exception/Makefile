@@ -1,5 +1,5 @@
 TARGET = exception
-OBJS = main.o exception_asm.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
+OBJS = main.o exception_asm.o ../Common/utils.o ../Common/strsafe.o
 
 DEBUG=1
 

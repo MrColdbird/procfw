@@ -410,6 +410,41 @@ static int _scePspNpDrm_driver_9A34AC9F(u8 *rif)
 	return result;
 }
 
+static int _sceDrmBBCipherUpdate(void *ckey, u8 *data, int size)
+{
+	return 0;
+}
+
+static int _sceDrmBBCipherInit(void *ckey, int type, int mode, u8 *header_key, u8 *version_key, u32 seed)
+{
+	return 0;
+}
+
+static int _sceDrmBBMacInit(void *mkey, int type)
+{
+	return 0;
+}
+
+static int _sceDrmBBMacUpdate(void *mkey, u8 *buf, int size)
+{
+	return 0;
+}
+
+static int _sceDrmBBCipherFinal(void *ckey)
+{
+	return 0;
+}
+
+static int _sceDrmBBMacFinal(void *mkey, u8 *buf, u8 *vkey)
+{
+	return 0;
+}
+
+static int _sceDrmBBMacFinal2(void *mkey, u8 *out, u8 *vkey)
+{
+	return 0;
+}
+
 static void patch_scePops_Manager(void)
 {
 	SceModule2 *mod;
@@ -418,23 +453,12 @@ static void patch_scePops_Manager(void)
 	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
 	text_addr = mod->text_addr;
 
-	_sw(MAKE_JUMP(&myIoOpen), text_addr+0x00003B98);
-	_sw(NOP, text_addr+0x00003B9C);
-
-	_sw(MAKE_JUMP(&myIoLseek), text_addr+0x00003BA0);
-	_sw(NOP, text_addr+0x00003BA4);
-
-	_sw(MAKE_JUMP(&myIoIoctl), text_addr+0x00003BA8);
-	_sw(NOP, text_addr+0x00003BAC);
-
-	_sw(MAKE_JUMP(&myIoRead), text_addr+0x00003BB0);
-	_sw(NOP, text_addr+0x00003BB4);
-
-	_sw(MAKE_JUMP(&myIoGetstat), text_addr+0x00003BD0);
-	_sw(NOP, text_addr+0x00003BD4);
-
-	_sw(MAKE_JUMP(&myIoClose), text_addr+0x00003BC0);
-	_sw(NOP, text_addr+0x00003BC4);
+	REDIRECT_FUNCTION(myIoOpen, text_addr+0x00003B98);
+	REDIRECT_FUNCTION(myIoLseek, text_addr+0x00003BA0);
+	REDIRECT_FUNCTION(myIoIoctl, text_addr+0x00003BA8);
+	REDIRECT_FUNCTION(myIoRead, text_addr+0x00003BB0);
+	REDIRECT_FUNCTION(myIoGetstat, text_addr+0x00003BD0);
+	REDIRECT_FUNCTION(myIoClose, text_addr+0x00003BC0);
 
 	_get_rif_path = (void*)(text_addr+0x00000190);
 	_sw(MAKE_CALL(&get_rif_path), text_addr+0x00002798);
@@ -447,16 +471,18 @@ static void patch_scePops_Manager(void)
 	_sw(MAKE_CALL(_scePspNpDrm_driver_9A34AC9F), text_addr+0x00002DA8);
 
 	// remove the check in scePopsManLoadModule that only allows loading module below the FW 3.XX
-	_sw(0, text_addr + 0x1E80);
+	_sw(NOP, text_addr + 0x00001E80);
 
-	// disable hash check of sceMeAudio_6A3233D9
-	_sw(0x03E00008, text_addr + 0x00000AB8);
-	_sw(0x24020001, text_addr + 0x00000ABC);
+	if (g_is_custom_ps1) {
+		REDIRECT_FUNCTION(_sceDrmBBCipherInit, text_addr+0x00003CB0);
+		REDIRECT_FUNCTION(_sceDrmBBCipherUpdate, text_addr+0x00003CA8);
+		REDIRECT_FUNCTION(_sceDrmBBCipherFinal, text_addr+0x00003CC8);
 
-	// disable hash check of sceMeAudio_11B1FCF test patch
-	_sw(NOP, text_addr + 0x00000640);
-	_sw(NOP, text_addr + 0x00000658);
-	_sw(NOP, text_addr + 0x00000670);
+		REDIRECT_FUNCTION(_sceDrmBBMacInit, text_addr+0x00003CB8);
+		REDIRECT_FUNCTION(_sceDrmBBMacUpdate, text_addr+0x00003CC0);
+		REDIRECT_FUNCTION(_sceDrmBBMacFinal, text_addr+0x00003CD0);
+		REDIRECT_FUNCTION(_sceDrmBBMacFinal2, text_addr+0x00003CD8);
+	}
 }
 
 static u32 is_custom_ps1(void)
@@ -671,47 +697,6 @@ static int popcorn_patch_chain(SceModule2 *mod)
 			patch_icon0_size(text_addr);
 		}
 
-		// test patch
-#if 0
-		u32 test_offset[] = {
-			0x00016A64,
-			0x0001B718,
-			0x0001BD20,
-			0x0001BDF8,
-			0x00025E0C,
-			0x00033AD0,
-		};
-
-		int i; for(i=0; i<NELEMS(test_offset); ++i) {
-			_sh(i | 0x2000, text_addr + test_offset[i]);
-		}
-#endif
-
-#if 0
-		u32 test_offset[] = {
-			0x000169F8, 
-			0x00016A08, 
-			0x00016A18, 
-			0x00016A28, 
-			0x00016A50,
-		};
-
-		int i; for(i=0; i<NELEMS(test_offset); ++i) {
-			_sh(0x8100+i, text_addr + test_offset[i]);
-		}
-#endif
-
-#if 0
-		_sw(NOP, text_addr+0x00016A08);
-		_sw(0x00402021, text_addr+0x00016A08); // move $a0, $v0
-		_sh(0xFFFE, text_addr+0x0001BAD0);
-		_sh(0xFFFD, text_addr+0x0001BB28);
-		_sh(0xFFFC, text_addr+0x0001BCDC);
-		_sh(0xFFFB, text_addr+0x0001BCF4);
-#endif
-
-//		_sw(0xD, text_addr+0x0001BB00);
-		
 		sync_cache();
 	}
 
@@ -789,8 +774,6 @@ int module_start(SceSize args, void* argp)
 
 	printk_init("ms0:/popcorn.txt");
 	printk("Popcorn: init_file = %s\n", sceKernelInitFileName());
-	patch_scePops_Manager();
-	sync_cache();
 
 	get_keypath(keypath, sizeof(keypath));
 	ret = sceIoGetstat(keypath, &stat);
@@ -813,7 +796,9 @@ int module_start(SceSize args, void* argp)
 	}
 
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);
-
+	patch_scePops_Manager();
+	sync_cache();
+	
 	return 0;
 }
 

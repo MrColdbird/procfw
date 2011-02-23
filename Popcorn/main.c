@@ -104,7 +104,7 @@ static int myIoRead(int fd, u8 *buf, int size)
 		buf[0x41B] = 0x55;
 		printk("%s: unknown patch loc_6c\n", __func__);
 	}
-	
+
 exit:
 	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, fd, pos, size, ret);
 
@@ -189,7 +189,7 @@ static int myIoOpen(const char *file, int flag, int mode)
 			ret = ACT_DAT_FD;
 		} else {
 			if(g_is_custom_ps1 && is_eboot(file)) {
-				if (flag & 0x40000000) {
+				if ((flag & 0x40000000) == 0x40000000) {
 					printk("%s: removed PGD open flag\n", __func__);
 				}
 

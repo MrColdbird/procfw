@@ -3,16 +3,7 @@ all:
 
 TARGET = popcorn
 
-ifeq ($(OBSERVER), 1)
-OBJS = main_observer.o 
-else
-ifeq ($(COMPLEX), 1)
 OBJS = main.o icon.o
-else
-OBJS = main.o icon.o
-endif
-endif
-
 OBJS += ../Common/utils.o ../Common/strsafe.o ../Common/libs.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../Common -I../include

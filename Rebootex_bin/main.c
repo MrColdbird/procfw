@@ -476,7 +476,6 @@ static struct add_module np9660_add_mods[] = {
 	{ "/kd/_galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/_stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module np9660_del_mods[] = {
@@ -510,7 +509,6 @@ static struct add_module march33_add_mods[] = {
 	{ "/kd/_march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/_march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/_stargate.prx", "/kd/me_wrapper.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL },
 };
 
 static struct del_module march33_del_mods[] = {
@@ -561,6 +559,10 @@ int _UnpackBootConfig(char **p_buffer, int length)
 	}
 
 	newsize = patch_bootconf_pops(buffer, length);
+
+	if (newsize > 0) result = newsize;
+
+	newsize = AddPRX(buffer, "/kd/me_wrapper.prx", "/kd/_stargate.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL);
 
 	if (newsize > 0) result = newsize;
 	

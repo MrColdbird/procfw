@@ -724,13 +724,9 @@ int _sceMeAudio_67CD7972(void *buf, int size)
 	int ret;
 	u32 k1;
 
-	if(g_is_custom_ps1) {
-		k1 = pspSdkSetK1(0);
-		ret = (*sceMeAudio_67CD7972)(buf, size);
-		pspSdkSetK1(k1);
-	} else {
-		ret = (*sceMeAudio_67CD7972)(buf, size);
-	}
+	k1 = pspSdkSetK1(0);
+	ret = (*sceMeAudio_67CD7972)(buf, size);
+	pspSdkSetK1(k1);
 
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, size, ret);
 

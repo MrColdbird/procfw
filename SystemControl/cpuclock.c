@@ -99,17 +99,6 @@ static inline u32 find_power_function(u32 nid)
 	return sctrlHENFindFunction("scePower_Service", "scePower", nid);
 }
 
-static inline void redirect_function(u32 addr, void *new_addr)
-{
-	if (addr == 0) {
-		printk("Warning: redirect_function got a NULL function\n");
-
-		return;
-	}
-
-	_sw(MAKE_JUMP(new_addr), addr);
-	_sw(NOP, addr+4);
-}
 static PowerFuncRedir g_power_func_redir[] = {
 	{ 0x737486F2, myPowerSetClockFrequency },
 	{ 0x545A7F3C, myPowerSetClockFrequency },
@@ -151,7 +140,12 @@ void SetSpeed(int cpuspd, int busspd)
 
 	for(i=0; i<NELEMS(g_power_func_redir); ++i) {
 		fp = find_power_function(g_power_func_redir[i].nid);
-		redirect_function(fp, g_power_func_redir[i].fp);
+
+		if(fp != 0) {
+			REDIRECT_FUNCTION(g_power_func_redir[i].fp, fp);
+		} else {
+			printk("%s: scePower_%08X not found\n", __func__, g_power_func_redir[i].nid);
+		}
 	}
 }
 

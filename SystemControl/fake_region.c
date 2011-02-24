@@ -58,7 +58,6 @@ void patch_sceChkreg(void)
 	fp = sctrlHENFindFunction("sceChkreg", "sceChkreg_driver", 0x59F8491D); 
 
 	if (fp && conf.fakeregion) {
-		_sw(MAKE_JUMP(_sceChkregGetPsCode), fp);
-		_sw(0x00000000, fp + 4);
+		REDIRECT_FUNCTION(_sceChkregGetPsCode, fp);
 	}
 }

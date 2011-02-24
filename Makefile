@@ -53,7 +53,6 @@ all:
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/635PROUPDATE
-	@mv $(GALAXYDRIVER)/galaxy.prx $(DISTRIBUTE)/635PROUPDATE
 	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/635PROUPDATE
 	@cp contrib/usbdevice.prx $(DISTRIBUTE)/635PROUPDATE
 	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)

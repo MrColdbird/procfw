@@ -206,12 +206,12 @@ int	sctrlHENIsDevhook()
 
 int sctrlHENGetVersion()
 {
-	return 0x1001; // 0x1000 in TN's code :)
+	return 0x1002; // 0x1000 in TN's code :)
 }
 
 int sctrlHENGetMinorVersion()
 {
-	return 0x4;
+	return 0x0;
 }
 
 PspIoDrv *sctrlHENFindDriver(char *drvname)

@@ -36,7 +36,6 @@ extern u8 g_icon_png[0x3730];
 static u32 g_icon0_status;
 static u32 g_keys_bin_found;
 static u32 g_is_custom_ps1;
-static u32 g_eboot_fd = -1;
 
 static STMOD_HANDLER g_previous = NULL;
 
@@ -75,8 +74,6 @@ static int myIoRead(int fd, u8 *buf, int size)
 		goto exit;
 	}
 
-//	hexdump(buf, MIN(16, size));
-
 	if (size == 4) {
 		u32 magic;
 
@@ -109,7 +106,6 @@ static int myIoRead(int fd, u8 *buf, int size)
 			buf[0x41D] == 0x22 &&
 			buf[0x41E] == 0x41 &&
 			buf[0x41A] == buf[0x41F]) {
-//		hexdump(buf, 0x420);
 		buf[0x41B] = 0x55;
 		printk("%s: unknown patch loc_6c\n", __func__);
 	}
@@ -173,32 +169,45 @@ static int myIoClose(SceUID fd)
 		ret = sceIoClose(fd);
 	}
 
-	if(g_eboot_fd == fd) {
-		g_eboot_fd = -1;
-	}
-
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 
 	return ret;
 }
 
-static inline int is_eboot(const char *path)
+static int check_file_is_decrypted(const char *filename)
 {
-	const char *p;
+	SceUID fd = -1;
+	u32 k1;
+	int result = 0, ret;
+	u8 buf[16] __attribute__((aligned(64)));
 
-	p = strrchr(path, '/');
+	k1 = pspSdkSetK1(0);
+	fd = sceIoOpen(filename, PSP_O_RDONLY, 0777);
 
-	if(p == NULL) {
-		p = path;
-	} else {
-		p += 1;
+	if(fd < 0) {
+		goto exit;
 	}
 
-	if (0 == stricmp(p, "EBOOT.PBP")) {
-		return 1;
+	ret = sceIoRead(fd, buf, sizeof(buf));
+
+	if(ret != sizeof(buf)) {
+		goto exit;
 	}
 
-	return 0;
+	if (*(u32*)buf == 0x44475000) { // PGD
+		goto exit;
+	}
+
+	result = 1;
+
+exit:
+	if(fd >= 0) {
+		sceIoClose(fd);
+	}
+
+	pspSdkSetK1(k1);
+
+	return result;
 }
 
 static int myIoOpen(const char *file, int flag, int mode)
@@ -213,16 +222,9 @@ static int myIoOpen(const char *file, int flag, int mode)
 			printk("%s: [FAKE]\n", __func__);
 			ret = ACT_DAT_FD;
 		} else {
-			if(g_is_custom_ps1 && is_eboot(file)) {
-				if ((flag & 0x40000000) == 0x40000000) {
-					printk("%s: removed PGD open flag\n", __func__);
-				}
-
+			if(g_is_custom_ps1 && check_file_is_decrypted(file)) {
+				printk("%s: removed PGD open flag\n", __func__);
 				ret = sceIoOpen(file, flag & ~0x40000000, mode);
-
-				if(ret >= 0) {
-					g_eboot_fd = ret;
-				}
 			} else {
 				ret = sceIoOpen(file, flag, mode);
 			}
@@ -249,7 +251,7 @@ static int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void
 		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
 	}
 
-	if (g_is_custom_ps1 && g_eboot_fd == fd) {
+	if (g_is_custom_ps1) {
 		if (cmd == 0x04100001) {
 			ret = 0;
 			printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);
@@ -715,6 +717,40 @@ static void patch_icon0_size(u32 text_addr)
 	_sw(0x24050000 | (sizeof(g_icon_png) & 0xFFFF), patch_addr);
 }
 
+static int (*sceMeAudio_67CD7972)(void *buf, int size);
+
+int _sceMeAudio_67CD7972(void *buf, int size)
+{
+	int ret;
+	u32 k1;
+
+	if(g_is_custom_ps1) {
+		k1 = pspSdkSetK1(0);
+		ret = (*sceMeAudio_67CD7972)(buf, size);
+		pspSdkSetK1(k1);
+	} else {
+		ret = (*sceMeAudio_67CD7972)(buf, size);
+	}
+
+	printk("%s: 0x%08X -> 0x%08X\n", __func__, size, ret);
+
+	return ret;
+}
+
+static int (*sceMeAudio_B213763F)(void);
+
+int _sceMeAudio_B213763F(void)
+{
+	int ret;
+	SceModule2 *mod;
+	
+	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
+	ret = (*sceMeAudio_B213763F)();
+	printk("%s: -> 0x%08X\n", __func__, ret);
+
+	return ret;
+}
+
 static int popcorn_patch_chain(SceModule2 *mod)
 {
 	printk("%s: %s\n", __func__, mod->modname);
@@ -731,6 +767,11 @@ static int popcorn_patch_chain(SceModule2 *mod)
 		if(g_icon0_status) {
 			patch_icon0_size(text_addr);
 		}
+
+		sceMeAudio_67CD7972 = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", 0x67CD7972);
+		sceMeAudio_B213763F = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", 0xB213763F);
+		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0x67CD7972, _sceMeAudio_67CD7972, 1);
+		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0xB213763F, _sceMeAudio_B213763F, 1);
 
 		sync_cache();
 	}
@@ -830,7 +871,7 @@ int module_start(SceSize args, void* argp)
 	g_icon0_status = get_icon0_status();
 
 	if(g_is_custom_ps1) {
-		setup_psx_fw_version(0x03090010);
+		setup_psx_fw_version(sceKernelDevkitVersion());
 	}
 
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);

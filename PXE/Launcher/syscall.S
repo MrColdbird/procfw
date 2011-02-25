@@ -21,8 +21,7 @@ get_power_address:
 	addiu $sp, $sp, -8
 	sw $ra, 0($sp)
 	move $a1, $a0
-	lw $v0, _scePowerRegisterCallback
-	jalr $v0
+	jal scePowerRegisterCallbackPrivate
 	move $a0, $0
 	lw $ra, 0($sp)
 	move $v0, $v1

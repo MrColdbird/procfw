@@ -1,5 +1,5 @@
 TARGET = 635kernel
-OBJS = main.o sysmem.o syscall.o ../../Common/utils.o
+OBJS = main.o imports.o syscall.o ../../Common/utils.o
 LIBS = -lpspsystemctrl_user
 LIBDIR = . ../../libs
 CFLAGS = -Os -G0 -Wall -I ../../Common

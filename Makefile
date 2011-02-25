@@ -33,34 +33,27 @@ all:
 # Creating Live-System Reboot Buffer
 	@cd $(REBOOTEXBIN); make
 	@cd $(REBOOTEX); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(REBOOTEX)/Rebootex.prx $(DISTRIBUTE)/635PROUPDATE
+
+# Creating Live-System Components
+	@rm -f ./Common/*.o
+	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating PXE Executable
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROLPXE); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	contrib/pspgz.py $(REBOOTEXPXE)/systemctrl.prx contrib/SystemControl.hdr $(SYSTEMCONTROLPXE)/systemctrl.prx
 	@cd $(REBOOTEXPXE); make
 	@mv $(REBOOTEXPXE)/rebootex.h $(LAUNCHER)
 	@cd $(LAUNCHER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(LAUNCHER)/EBOOT.PBP $(DISTRIBUTE)/635PROUPDATE
-	@mv $(INSTALLER)/installer.prx $(DISTRIBUTE)/635PROUPDATE
-
-# Creating Live-System Components
-	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@rm -f ./Common/*.o
-	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(SATELITE)/satelite.prx $(DISTRIBUTE)/635PROUPDATE
-	@cp $(M33DRIVER)/march33.prx $(DISTRIBUTE)/635PROUPDATE
-	@cp contrib/usbdevice.prx $(DISTRIBUTE)/635PROUPDATE
-	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating Debugging Suite for Live-System
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
-	@cp $(DISTRIBUTE)/635PROUPDATE/* $(DISTRIBUTE)/dbg_installer
 	@cp $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/dbg_installer
 
 clean:

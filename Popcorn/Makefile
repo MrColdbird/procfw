@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/635PROUPDATE/popcorn.prx ../contrib/SystemControl.hdr popcorn.prx M33PopcornManager 0x1007
+	../contrib/pspgz.py popcorn.prx ../contrib/SystemControl.hdr popcorn.prx M33PopcornManager 0x1007
 
 TARGET = popcorn
 

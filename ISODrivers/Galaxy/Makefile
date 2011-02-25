@@ -1,5 +1,5 @@
 all:
-	../../contrib/pspgz.py ../../dist/635PROUPDATE/galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController 0x1006
+	../../contrib/pspgz.py galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController 0x1006
 
 TARGET = galaxy
 OBJS = main.o

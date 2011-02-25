@@ -1,3 +1,6 @@
+all:
+	../../contrib/pspgz.py ../RebootexPXE/systemctrl.prx ../../contrib/SystemControl.hdr systemctrl.prx
+
 TARGET = systemctrl
 OBJS = main.o syspatch.o systemctrl.o kubridge.o modhandler.o elf.o ../../SystemControl/memlmd_patch.o ../../Common/libs.o ../../Common/utils.o ../../Imports/sceResmgr_driver.o ../../Imports/InterruptManagerForKernel.o ../../Imports/LoadCoreForKernel.o ../../Imports/ModuleMgrForKernel.o ../../Imports/SysMemForKernel.o ../../Imports/LoadExecForKernel.o
 

@@ -85,7 +85,7 @@ static int resolve_missing_nid(SceLibraryStubTable *stub, MissingNIDResolver *re
 				stub_addr = stub->stubtable + (i << 3);
 				fp = resolver->entry[j].fp;
 				printk("%s: %s_%08X resolved(fp: 0x%08X)\n", __func__, libname, nid, fp);
-				REDIRECT_FUNCTION(fp, stub_addr);
+				REDIRECT_FUNCTION(fp, (u32)stub_addr);
 				sceKernelDcacheWritebackInvalidateRange(stub_addr, 8);
 				sceKernelIcacheInvalidateRange(stub_addr, 8);
 			}

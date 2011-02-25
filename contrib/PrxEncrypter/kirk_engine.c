@@ -323,7 +323,7 @@ int kirk_forge(u8* inbuff, int insize)
    AES_ctx cmac_key;
    u8 cmac_header_hash[16];
    u8 cmac_data_hash[16];
-   int chk_size,i;
+   int chk_size;
 
    if(is_kirk_initialized == 0) return KIRK_NOT_INITIALIZED;
    if(!(header->mode == KIRK_MODE_CMD1 || header->mode == KIRK_MODE_CMD2 || header->mode == KIRK_MODE_CMD3)) return KIRK_INVALID_MODE;

@@ -1,5 +1,5 @@
 all:
-	../contrib/pspgz.py ../dist/635PROUPDATE/systemctrl.prx ../contrib/SystemControl.hdr systemctrl.prx
+	../contrib/pspgz.py systemctrl.prx ../contrib/SystemControl.hdr systemctrl.prx
 
 TARGET = systemctrl
 OBJS = main.o \

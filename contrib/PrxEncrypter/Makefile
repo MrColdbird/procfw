@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Wall -g -I../kirk -I../common
+CFLAGS = -Wall -Os -I../kirk -I../common
 TARGET = PrxEncrypter
 OBJS = crypto.o kirk_engine.o main.o
 

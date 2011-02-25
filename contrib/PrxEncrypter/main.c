@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <zlib.h>
 
 #include "types.h"
 #include "endian.h"
@@ -144,6 +145,81 @@ int dumpFile(char *name, void *in, int size)
 	return 0;
 }
 
+int get_kirk_size(u8 *key_hdr)
+{
+	int krawSize = *(u32*)(key_hdr+0x70);
+
+	if(krawSize % 0x10) {
+		krawSize += 0x10 - (krawSize % 0x10); // 16 bytes aligned
+	}
+
+	krawSize += 0x110;
+
+	return krawSize;
+}
+
+int is_compressed(u8 *psp_header)
+{
+	if (*(u16*)(psp_header+6) == 1) {
+		return 1;
+	}
+
+	return 0;
+}
+
+int get_elf_size(u8 *psp_header)
+{
+	return *(u32*)(psp_header+0x28);
+}
+
+int gzip_compress(u8 *dst, const u8 *src, int size)
+{
+	int ret;
+	z_stream strm;
+	u8 *elf_compress;
+	const int compress_max_size = 10 * 1024 * 1024;
+
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+
+	elf_compress = malloc(compress_max_size);
+
+	if(elf_compress == NULL) {
+		return -1;
+	}
+
+	ret = deflateInit2(&strm, 9, Z_DEFLATED, 15+16, 8, Z_DEFAULT_STRATEGY);
+
+	if(ret != Z_OK) {
+		printf("%s: compress error\n", __func__);
+		free(elf_compress);
+		
+		return -2;
+	}
+
+	strm.avail_in = size;
+	strm.next_in = (void*)src;
+	strm.avail_out = compress_max_size;
+	strm.next_out = elf_compress;
+
+	ret = deflate(&strm, Z_FINISH);
+
+	if(ret == Z_STREAM_ERROR) {
+		deflateEnd(&strm);
+		printf("%s: compress error\n", __func__);
+		free(elf_compress);
+
+		return -3;
+	}
+
+	memcpy(dst, elf_compress, strm.total_out);
+	deflateEnd(&strm);
+	free(elf_compress);
+
+	return 0;
+}
+
 int main(int argc, char **argv)
 {
 	header_keys keys;
@@ -174,20 +250,23 @@ int main(int argc, char **argv)
 	u8 *kirkHeader = kirkHeader_small;
 	u8 *pspHeader = pspHeader_small;
 
-	int krawSize = *(u32*)(kirkHeader+0x70) + 0x110;
-	krawSize += 0x10 - (krawSize & 0xF); // 16 bytes aligned
+	int krawSize = get_kirk_size(kirkHeader);
 
 	if(elfSize > krawSize - 0x150) {
 		kirkHeader = kirkHeader_big;
 		pspHeader = pspHeader_big;
-		krawSize = *(u32*)(kirkHeader+0x70) + 0x110;
-		krawSize += 0x10 - (krawSize & 0xF);
+		krawSize = get_kirk_size(kirkHeader);
 
 		if(elfSize > krawSize - 0x150) {
 			printf("PRX SIGNER: Elf is to big\n");
 
 			return 0;
 		}
+	}
+
+	if (is_compressed(pspHeader)) {
+		elfSize = get_elf_size(pspHeader);
+		gzip_compress(elf, elf, elfSize);
 	}
 
 	memcpy(kirk_raw, kirkHeader, 0x110);

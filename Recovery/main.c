@@ -425,10 +425,11 @@ int main_thread(SceSize size, void *argp)
 	return 0;
 }
 
+static SceUID thread_id = -1;
+
 int module_start(int argc, char *argv[])
 {
 	int	thid;
-	SceUID thread_id;
 
 	thid = sceKernelCreateThread("recovery_thread", main_thread, 32, 0x8000 ,0 ,0);
 
@@ -443,5 +444,14 @@ int module_start(int argc, char *argv[])
 
 int module_stop(int argc, char *argv[])
 {
+	SceUInt time = 100*1000;
+	int ret;
+
+	ret = sceKernelWaitThreadEnd(thread_id, &time);
+
+	if(ret < 0) {
+		sceKernelTerminateDeleteThread(thread_id);
+	}
+
 	return 0;
 }

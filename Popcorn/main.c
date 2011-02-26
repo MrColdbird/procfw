@@ -733,20 +733,6 @@ int _sceMeAudio_67CD7972(void *buf, int size)
 	return ret;
 }
 
-static int (*sceMeAudio_B213763F)(void);
-
-int _sceMeAudio_B213763F(void)
-{
-	int ret;
-	SceModule2 *mod;
-	
-	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
-	ret = (*sceMeAudio_B213763F)();
-	printk("%s: -> 0x%08X\n", __func__, ret);
-
-	return ret;
-}
-
 static int popcorn_patch_chain(SceModule2 *mod)
 {
 	printk("%s: %s\n", __func__, mod->modname);
@@ -765,9 +751,7 @@ static int popcorn_patch_chain(SceModule2 *mod)
 		}
 
 		sceMeAudio_67CD7972 = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", 0x67CD7972);
-		sceMeAudio_B213763F = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", 0xB213763F);
 		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0x67CD7972, _sceMeAudio_67CD7972, 1);
-		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0xB213763F, _sceMeAudio_B213763F, 1);
 
 		sync_cache();
 	}

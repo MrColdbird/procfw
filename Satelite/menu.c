@@ -40,7 +40,7 @@ const char *region_name[] = {
 	"China",
 };
 
-#define TMENU_MAX 18
+#define TMENU_MAX 19
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -51,7 +51,7 @@ enum{
 	TMENU_XMB_PLUGINS,
 	TMENU_GAME_PLUGINS,
 	TMENU_POPS_PLUGINS,
-//	TMENU_PLUGINS_MGR,
+	TMENU_PLUGINS_MGR,
 	TMENU_USB_CHARGE,
 	TMENU_HIDE_MAC,
 	TMENU_SKIP_GAMEBOOT,
@@ -74,7 +74,7 @@ const char *top_menu_list[TMENU_MAX] ={
 	"XMB  PLUGINS   ",
 	"GAME PLUGINS   ",
 	"POPS PLUGINS   ",
-//	"PLUGINS MANAGER  ->",
+	"PLUGINS MANAGER  ->",
 	"USB CHARGE     ",
 	"HIDE MAC       ",
 	"SKIP GAMEBOOT  ",
@@ -262,7 +262,7 @@ int menu_ctrl(u32 button_on)
 	direction = -2;
 
 	if(button_on & PSP_CTRL_LEFT)   direction = -1;
-	if(button_on & PSP_CTRL_CROSS) direction = 0;
+	if(button_on & g_ctrl_OK) direction = 0;
 	if(button_on & PSP_CTRL_RIGHT)  direction = 1;
 
 	if(direction <= -2)
@@ -289,6 +289,11 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_POPS_PLUGINS:
 			if(direction) change_plugins(direction, 2);
+			break;
+		case TMENU_PLUGINS_MGR:
+			if(direction==0) {
+				return 6; // PLUGIN_MGR flag
+			}
 			break;
 		case TMENU_USB_CHARGE:
 			if(direction) change_bool_option(&cnf.usbcharge, direction);

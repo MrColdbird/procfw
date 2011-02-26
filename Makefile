@@ -13,6 +13,7 @@ ISOLAUNCHER = testsuite/ISOLauncher
 FASTRECOVERY = FastRecovery
 SATELITE = Satelite
 POPCORN = Popcorn
+RECOVERY = Recovery
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -35,6 +36,7 @@ all:
 	@cd $(REBOOTEX); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating Live-System Components
+	@cd $(RECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@rm -f ./Common/*.o
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -70,6 +72,7 @@ clean:
 	@cd $(REBOOTEXPXE); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROLPXE); make clean $(DEBUG_OPTION)
 	@cd $(POPCORN); make clean $(DEBUG_OPTION)
+	@cd $(RECOVERY); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 
 build_lib:

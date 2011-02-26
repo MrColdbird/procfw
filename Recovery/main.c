@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
+#include <time.h>
 #include <pspsdk.h>
 #include <pspdebug.h>
 #include <pspkernel.h>
@@ -23,14 +25,13 @@ PSP_HEAP_SIZE_KB(0);
 #define BUF_WIDTH (512)
 #define SCR_WIDTH (480)
 #define SCR_HEIGHT (272)
-#define PIXEL_SIZE (4) /* change this if you change to another screenmode */
+#define PIXEL_SIZE (4)
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
-#define ZBUF_SIZE (BUF_WIDTH SCR_HEIGHT * 2) /* zbuffer seems to be 16-bit? */
 
-#define EXIT_DELAY   1000000
-#define CHANGE_DELAY 1000000
+#define EXIT_DELAY   500000
+#define CHANGE_DELAY 500000
 #define DRAW_BUF (void*)(0x44000000)
-#define DISPLAY_BUF (void*)(0x44000000 + 512 * 272 * 4)
+#define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
 
 #define printf pspDebugScreenPrintf
 
@@ -41,7 +42,6 @@ static u32 g_last_tick = 0;
 
 static char g_bottom_info[MAX_SCREEN_X+1];
 static int g_bottom_info_color;
-static int g_test_option = 0;
 
 enum {
 	TYPE_NORMAL = 0,
@@ -89,17 +89,27 @@ int menu_change_bool(void *arg)
 	return 0;
 }
 
-struct ChangeInt {
+struct ValueOption {
 	int value;
 	int limit;
 };
 
-static struct ChangeInt g_test_option2 = { 
+static struct ValueOption g_test_option1 = {
+	0,
+	2,
+};
+
+static struct ValueOption g_test_option2 = { 
 	0,
 	4,
 };
 
-int display_test_option(char *buf, int size)
+int display_test_option1(char *buf, int size)
+{
+	return sprintf(buf, "3. bool option = %d", g_test_option1.value);
+}
+
+int display_test_option2(char *buf, int size)
 {
 	return sprintf(buf, "4. value option = %d", g_test_option2.value);
 }
@@ -122,7 +132,7 @@ int limit_int(int value, int direct, int limit)
 
 int menu_change_int(void *arg)
 {
-	struct ChangeInt *c = arg;
+	struct ValueOption *c = arg;
 	char buf[256];
 	int *p = &(c->value);
 
@@ -136,9 +146,9 @@ int menu_change_int(void *arg)
 	return 0;
 }
 
-int change_test_option(void *arg, int direct)
+int change_value_option(void *arg, int direct)
 {
-	struct ChangeInt *c = arg;
+	struct ValueOption *c = arg;
 
 	c->value = limit_int(c->value, direct, c->limit);
 
@@ -148,8 +158,8 @@ int change_test_option(void *arg, int direct)
 struct MenuEntry g_top_menu_entries[] = {
 	{ "1. Empty option", 0, },
 	{ "2. Submenu option", 1, 0xFF00, NULL, NULL, &sub_menu, NULL},
-	{ "3. Bool option", 0, 0, NULL, NULL, &menu_change_bool, &g_test_option },
-	{ NULL, 0, 0, &display_test_option, &change_test_option, &menu_change_int, &g_test_option2 },
+	{ NULL, 0, 0, &display_test_option1, &change_value_option, &menu_change_bool, &g_test_option1 },
+	{ NULL, 0, 0, &display_test_option2, &change_value_option, &menu_change_int, &g_test_option2 },
 };
 
 struct Menu g_top_menu = {
@@ -188,7 +198,7 @@ struct Menu g_sub_menu_2 = {
 };
 
 struct Menu g_sub_menu_3 = {
-	"PRO Sub Menu Dyanmic",
+	"PRO Sub Menu Dynamic",
 	NULL,
 	0,
 	0,
@@ -302,7 +312,7 @@ u32 ctrl_read(void)
 
 void get_confirm_button(void)
 {
-	int result;
+	int result = 0;
 
 	sceUtilityGetSystemParamInt(9, &result);
 
@@ -381,22 +391,23 @@ void menu_loop(struct Menu *menu)
 		draw_menu(menu);
 		key = ctrl_read();
 
-		switch(key) {
-			case PSP_CTRL_UP:
-				get_sel_index(menu, -1);
-				break;
-			case PSP_CTRL_DOWN:
-				get_sel_index(menu, +1);
-				break;
-			case PSP_CTRL_RIGHT:
-				menu_change_value(menu, 1);
-				break;
-			case PSP_CTRL_LEFT:
-				menu_change_value(menu, -1);
-				break;
+		if(key & PSP_CTRL_UP) {
+			get_sel_index(menu, -1);
 		}
 
-		if(key == g_ctrl_OK) {
+		if(key & PSP_CTRL_DOWN) {
+			get_sel_index(menu, +1);
+		}
+
+		if(key & PSP_CTRL_RIGHT) {
+			menu_change_value(menu, 1);
+		}
+
+		if(key & PSP_CTRL_LEFT) {
+			menu_change_value(menu, -1);
+		}
+
+		if(key & g_ctrl_OK) {
 			if(menu->submenu[menu->cur_sel].enter_callback != NULL) {
 				int ret;
 				void *arg;
@@ -406,12 +417,13 @@ void menu_loop(struct Menu *menu)
 			}
 		}
 
-		if(key == g_ctrl_CANCEL) {
+		if(key & g_ctrl_CANCEL) {
 			set_bottom_info("Exiting...", 0xFF);
 			frame_end();
 			frame_start();
 			sceKernelDelayThread(EXIT_DELAY);
 			frame_end();
+			set_bottom_info("", 0);
 			break;
 		}
 
@@ -498,7 +510,7 @@ int sub_menu3(void * arg)
 	struct Menu *menu = &g_sub_menu_3;
 
 	srand(time(0));
-	g_sub_menu_3.submenu_size = rand() % 20;
+	g_sub_menu_3.submenu_size = rand() % 20 + 1;
 	g_sub_menu_3.submenu = vpl_alloc(g_sub_menu_3.submenu_size * sizeof(*g_sub_menu_3.submenu));
 	memset(g_sub_menu_3.submenu, 0, g_sub_menu_3.submenu_size * sizeof(*g_sub_menu_3.submenu));
 

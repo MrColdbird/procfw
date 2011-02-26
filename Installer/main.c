@@ -16,6 +16,7 @@
 #include "systemctrl.h"
 #include "usbdevice.h"
 #include "vshctrl.h"
+#include "recovery.h"
 
 // VSH module can write F0/F1
 PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
@@ -172,6 +173,7 @@ struct InstallList g_file_lists[] = {
 	{ usbdevice, &size_usbdevice, "flash0:/kd/_usbdevice.prx", },
 	{ popcorn, &size_popcorn, "flash0:/kd/_popcorn.prx", },
 	{ satelite, &size_satelite, "flash0:/vsh/module/_satelite.prx", },
+	{ recovery, &size_recovery, "flash0:/vsh/module/_recovery.prx", },
 };
 
 static const char *g_old_cfw_files[] = {

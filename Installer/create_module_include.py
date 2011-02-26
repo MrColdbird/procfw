@@ -12,6 +12,7 @@ def main():
 			"SystemControl/systemctrl.prx",
 			"contrib/usbdevice.prx",
 			"Vshctrl/vshctrl.prx",
+			"Recovery/recovery.prx",
 	]
 
 	for fn in lists:

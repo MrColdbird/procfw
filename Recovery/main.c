@@ -14,6 +14,7 @@
 
 PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
+PSP_HEAP_SIZE_KB(0);
 
 #define CTRL_REPEAT_TIME 0x40000
 #define CUR_SEL_COLOR 0xFF
@@ -66,6 +67,8 @@ struct Menu {
 };
 
 static int sub_menu(void *);
+static int sub_menu2(void *);
+static int sub_menu3(void *);
 
 void set_bottom_info(const char *str, int color);
 void frame_end(void);
@@ -98,7 +101,7 @@ static struct ChangeInt g_test_option2 = {
 
 int display_test_option(char *buf, int size)
 {
-	return sprintf(buf, "4. test value = %d", g_test_option2.value);
+	return sprintf(buf, "4. value option = %d", g_test_option2.value);
 }
 
 int limit_int(int value, int direct, int limit)
@@ -143,9 +146,9 @@ int change_test_option(void *arg, int direct)
 }
 
 struct MenuEntry g_top_menu_entries[] = {
-	{ "1. A", 0, },
-	{ "2. B", 1, 0xFF00, NULL, NULL, &sub_menu, NULL},
-	{ "3. C", 0, 0, NULL, NULL, &menu_change_bool, &g_test_option },
+	{ "1. Empty option", 0, },
+	{ "2. Submenu option", 1, 0xFF00, NULL, NULL, &sub_menu, NULL},
+	{ "3. Bool option", 0, 0, NULL, NULL, &menu_change_bool, &g_test_option },
 	{ NULL, 0, 0, &display_test_option, &change_test_option, &menu_change_int, &g_test_option2 },
 };
 
@@ -158,11 +161,10 @@ struct Menu g_top_menu = {
 };
 
 struct MenuEntry g_sub_menu_entries[] = {
-	{ "1. A", 0, },
-	{ "2. B", 1, 0xFF00, },
-	{ "3. C", 0 },
-	{ "4. D", 1, 0xFF00, },
-	{ "5. E", 1, 0xFF00, },
+	{ "1. Normal option", 0, },
+	{ "2. Green  option", 0, 0xFF00, },
+	{ "3. Submenu option", 1, 0xFF00, NULL, NULL, &sub_menu2, NULL},
+	{ "3. Dynamic Submenu option", 1, 0xFF0000, NULL, NULL, &sub_menu3, NULL},
 };
 
 struct Menu g_sub_menu = {
@@ -171,6 +173,26 @@ struct Menu g_sub_menu = {
 	NELEMS(g_sub_menu_entries),
 	0,
 	0xFF,
+};
+
+struct MenuEntry g_sub_menu_2_entries[] = {
+	{ "1. Normal option", 0, },
+};
+
+struct Menu g_sub_menu_2 = {
+	"PRO Sub Menu 2",
+	g_sub_menu_2_entries,
+	NELEMS(g_sub_menu_2_entries),
+	0,
+	0xFF00,
+};
+
+struct Menu g_sub_menu_3 = {
+	"PRO Sub Menu Dyanmic",
+	NULL,
+	0,
+	0,
+	0xFF00,
 };
 
 void set_screen_xy(int x, int y)
@@ -415,6 +437,72 @@ int sub_menu(void * arg)
 	return 0;
 }
 
+int sub_menu2(void * arg)
+{
+	struct Menu *menu = &g_sub_menu_2;
+
+	menu->cur_sel = 0;
+	menu_loop(menu);
+
+	return 0;
+}
+
+static SceUID g_vpl_uid = -1;
+
+void vpl_init(void)
+{
+	g_vpl_uid = sceKernelCreateVpl("OurVPL", 2, 0, 512*1024, NULL);
+}
+
+void vpl_finish(void)
+{
+	sceKernelDeleteVpl(g_vpl_uid);
+}
+
+void *vpl_alloc(int size)
+{
+	void *p;
+	int ret;
+
+	ret = sceKernelAllocateVpl(g_vpl_uid, size, &p, NULL);
+
+	if(ret == 0)
+		return p;
+
+	return NULL;
+}
+
+void vpl_free(void *p)
+{
+	sceKernelFreeVpl(g_vpl_uid, p);
+}
+
+int sub_menu3(void * arg)
+{
+	struct Menu *menu = &g_sub_menu_3;
+
+	srand(time(0));
+	g_sub_menu_3.submenu_size = rand() % 20;
+	g_sub_menu_3.submenu = vpl_alloc(g_sub_menu_3.submenu_size * sizeof(*g_sub_menu_3.submenu));
+	memset(g_sub_menu_3.submenu, 0, g_sub_menu_3.submenu_size * sizeof(*g_sub_menu_3.submenu));
+
+	int i; for(i=0; i<g_sub_menu_3.submenu_size; ++i) {
+		char buf[20];
+
+		sprintf(buf, "%d. entry", i);
+		g_sub_menu_3.submenu[i].info = strdup(buf);
+	}
+
+	menu->cur_sel = 0;
+	menu_loop(menu);
+
+	for(i=0; i<g_sub_menu_3.submenu_size; ++i) {
+		vpl_free(g_sub_menu_3.submenu[i].info);
+	}
+
+	return 0;
+}
+
 SceUID get_thread_id(const char *name)
 {
 	int ret, count, i;
@@ -480,6 +568,7 @@ void resume_vsh_thread(void)
 
 int main_thread(SceSize size, void *argp)
 {
+	vpl_init();
 	suspend_vsh_thread();
 	pspDebugScreenInit();
 	sceDisplaySetFrameBuf(get_display_buffer(), 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
@@ -489,6 +578,7 @@ int main_thread(SceSize size, void *argp)
 
 	sceDisplaySetFrameBuf((void*)0x44000000, 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
 	resume_vsh_thread();
+	vpl_finish();
 
 	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 

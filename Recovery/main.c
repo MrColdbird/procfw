@@ -5,7 +5,6 @@
 #include <pspkernel.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
-#include <pspgu.h>
 #include <psputility.h>
 
 #include "systemctrl.h"
@@ -27,10 +26,12 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
 #define ZBUF_SIZE (BUF_WIDTH SCR_HEIGHT * 2) /* zbuffer seems to be 16-bit? */
 
-#define printf pspDebugScreenPrintf
+#define EXIT_DELAY   1000000
+#define CHANGE_DELAY 1000000
+#define DRAW_BUF (void*)(0x44000000)
+#define DISPLAY_BUF (void*)(0x44000000 + 512 * 272 * 4)
 
-static unsigned int __attribute__((aligned(16))) g_disp_list[1024];
-static void *buffer = NULL;
+#define printf pspDebugScreenPrintf
 
 static int g_ctrl_OK;
 static int g_ctrl_CANCEL;
@@ -79,7 +80,7 @@ int menu_change_bool(void *arg)
 	sprintf(buf, "%s: %d\n", __func__, *p);
 	set_bottom_info(buf, 0);
 	frame_end();
-	sceKernelDelayThread(1000000);
+	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
 	
 	return 0;
@@ -258,20 +259,6 @@ void draw_menu(struct Menu *menu)
 	draw_button();
 }
 
-void gu_init()
-{
-	sceGuInit();
-	sceGuStart(GU_DIRECT,g_disp_list);
-	sceGuDrawBuffer(GU_PSM_8888,(void*)0,BUF_WIDTH);
-	sceGuDispBuffer(SCR_WIDTH,SCR_HEIGHT,(void*)(512*272*4),BUF_WIDTH);
-	sceGuScissor(0,0,SCR_WIDTH,SCR_HEIGHT);
-	sceGuEnable(GU_SCISSOR_TEST);
-	sceGuFinish();
-	sceGuSync(0,0);
-	sceDisplayWaitVblankStart();
-	sceGuDisplay(GU_TRUE);
-}
-
 u32 ctrl_read(void)
 {
 	SceCtrlData ctl;
@@ -311,20 +298,46 @@ static void get_sel_index(struct Menu *menu, int direct)
 	menu->cur_sel = limit_int(menu->cur_sel, direct, menu->submenu_size);
 }
 
-void frame_end(void)
+static int g_display_flip = 0;
+
+void *get_drawing_buffer(void)
 {
-	sceDisplayWaitVblank();
-	buffer = sceGuSwapBuffers();
-	pspDebugScreenSetOffset((int)buffer);
+	void *buffer;
+
+	if(g_display_flip) {
+		buffer = DRAW_BUF;
+	} else {
+		buffer = DISPLAY_BUF;
+	}
+
+	return buffer;
 }
 
-void clear_screen(void)
+void *get_display_buffer(void)
 {
-	sceGuStart(GU_DIRECT,g_disp_list);
-	sceGuClearColor(0);
-	sceGuClear(GU_COLOR_BUFFER_BIT);
-	sceGuFinish();
-	sceGuSync(0,0);
+	void *buffer;
+
+	if(g_display_flip) {
+		buffer = DISPLAY_BUF;
+	} else {
+		buffer = DRAW_BUF;
+	}
+
+	return buffer;
+}
+
+void frame_start(void)
+{
+	sceDisplayWaitVblank();
+	memset(get_drawing_buffer(), 0, 512*272*4);
+}
+
+void frame_end(void)
+{
+	g_display_flip = !g_display_flip;
+	sceDisplaySetFrameBuf(get_display_buffer(), 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
+	pspDebugScreenSetOffset((int)get_drawing_buffer() - 0x44000000);
+	sceDisplayWaitVblank();
 }
 
 void menu_change_value(struct Menu *menu, int direct)
@@ -342,7 +355,7 @@ void menu_loop(struct Menu *menu)
 	u32 key;
 
 	while (1) {
-		clear_screen();
+		frame_start();
 		draw_menu(menu);
 		key = ctrl_read();
 
@@ -362,15 +375,6 @@ void menu_loop(struct Menu *menu)
 		}
 
 		if(key == g_ctrl_OK) {
-#ifdef DEBUG
-			char info[256];
-
-			sprintf(info, "Enter %s...", menu->submenu[menu->cur_sel].info);
-			set_bottom_info(info, 0xFF00);
-			frame_end();
-			sceKernelDelayThread(1000000);
-			set_bottom_info("", 0);
-#endif
 			if(menu->submenu[menu->cur_sel].enter_callback != NULL) {
 				int ret;
 				void *arg;
@@ -383,8 +387,8 @@ void menu_loop(struct Menu *menu)
 		if(key == g_ctrl_CANCEL) {
 			set_bottom_info("Exiting...", 0xFF);
 			frame_end();
-			sceKernelDelayThread(1000000);
-			clear_screen();
+			frame_start();
+			sceKernelDelayThread(EXIT_DELAY);
 			frame_end();
 			break;
 		}
@@ -411,16 +415,82 @@ int sub_menu(void * arg)
 	return 0;
 }
 
+SceUID get_thread_id(const char *name)
+{
+	int ret, count, i;
+	SceUID ids[128];
+
+	ret = sceKernelGetThreadmanIdList(SCE_KERNEL_TMID_Thread, ids, sizeof(ids), &count);
+
+	if(ret < 0) {
+		return -1;
+	}
+
+	for(i=0; i<count; ++i) {
+		SceKernelThreadInfo info;
+
+		info.size = sizeof(info);
+		ret = sceKernelReferThreadStatus(ids[i], &info);
+
+		if(ret < 0) {
+			continue;
+		}
+
+		if(0 == strcmp(info.name, name)) {
+			return ids[i];
+		}
+	}
+
+	return -2;
+}
+
+void suspend_thread(const char *thread_name)
+{
+	int ret;
+
+	ret = get_thread_id(thread_name);
+
+	if(ret < 0)
+		return;
+
+	sceKernelSuspendThread(ret);
+}
+
+void resume_thread(const char *thread_name)
+{
+	int ret;
+
+	ret = get_thread_id(thread_name);
+
+	if(ret < 0)
+		return;
+
+	sceKernelResumeThread(ret);
+}
+
+void suspend_vsh_thread(void)
+{
+	suspend_thread("SCE_VSH_GRAPHICS");
+}
+
+void resume_vsh_thread(void)
+{
+	resume_thread("SCE_VSH_GRAPHICS");
+}
+
 int main_thread(SceSize size, void *argp)
 {
-	gu_init();
+	suspend_vsh_thread();
 	pspDebugScreenInit();
-	pspDebugScreenSetOffset((int)buffer);
+	sceDisplaySetFrameBuf(get_display_buffer(), 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
 
 	get_confirm_button();
 	main_menu();
 
-	sceKernelExitDeleteThread(0);
+	sceDisplaySetFrameBuf((void*)0x44000000, 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
+	resume_vsh_thread();
+
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 
 	return 0;
 }
@@ -431,7 +501,7 @@ int module_start(int argc, char *argv[])
 {
 	int	thid;
 
-	thid = sceKernelCreateThread("recovery_thread", main_thread, 32, 0x8000 ,0 ,0);
+	thid = sceKernelCreateThread("recovery_thread", main_thread, 16, 0x8000 ,0 ,0);
 
 	thread_id=thid;
 
@@ -444,14 +514,5 @@ int module_start(int argc, char *argv[])
 
 int module_stop(int argc, char *argv[])
 {
-	SceUInt time = 100*1000;
-	int ret;
-
-	ret = sceKernelWaitThreadEnd(thread_id, &time);
-
-	if(ret < 0) {
-		sceKernelTerminateDeleteThread(thread_id);
-	}
-
 	return 0;
 }

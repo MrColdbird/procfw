@@ -1,5 +1,15 @@
 TARGET = 635kernel
 OBJS = main.o imports.o syscall.o ../../Common/utils.o
+EXTRA_CLEAN = Rebootex_prx.h Installer.h
+
+all: $(OBJS)
+
+$(OBJS): pre-build
+
+pre-build:
+	./create_module_include.py
+	touch main.c
+
 LIBS = -lpspsystemctrl_user
 LIBDIR = . ../../libs
 CFLAGS = -Os -G0 -Wall -I ../../Common

@@ -8,6 +8,15 @@
 #include "kubridge.h"
 #include "utils.h"
 
+#include "galaxy.h"
+#include "march33.h"
+#include "popcorn.h"
+#include "satelite.h"
+#include "stargate.h"
+#include "systemctrl.h"
+#include "usbdevice.h"
+#include "vshctrl.h"
+
 // VSH module can write F0/F1
 PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
 
@@ -18,83 +27,32 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;
-int disable_smart_copy = 0;
-static u8 buf[64*1024] __attribute__((aligned(64)));
-static u8 buf1[64*1024] __attribute__((aligned(64)));
-static u8 buf2[64*1024] __attribute__((aligned(64)));
+int disable_smart = 0;
+static u8 g_buf[64*1024] __attribute__((aligned(64)));
 
-int copy_file(const char *src, const char *dst)
+void cleanup_exit(void)
 {
-	SceUID fd = -1, fdw = -1;
-	int ret;
-
-	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
-
-	if (ret < 0) {
-		goto error;
-	}
-
-	fd = ret;
-
-	ret = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-	if (ret < 0) {
-		goto error;
-	}
-
-	fdw = ret;
-	ret = sizeof(buf);
-	ret = sceIoRead(fd, buf, ret);
-
-	while (ret > 0) {
-		ret = sceIoWrite(fdw, buf, ret);
-
-		if (ret < 0) {
-			goto error;
-		}
-
-		ret = sceIoRead(fd, buf, ret);
-	}
-
-	if (ret < 0) {
-		goto error;
-	}
-
-	sceIoClose(fd);
-	sceIoClose(fdw);
-
-	return 0;
-
-error:
-	sceIoClose(fd);
-	sceIoClose(fdw);
-
-	return ret;
+	sceIoRemove("installer.prx");
+	sceIoRemove("Rebootex.prx");
 }
 
-int compare_file(const char *src, const char *dst)
+int compare_file_buffer(const char *path, void *file_buf, int size) 
 {
-	SceUID fd = -1, fdd = -1;
-	int ret, ret2;
-	SceIoStat srcstat, dststat;
+	SceUID fd = -1;
+	int ret;
+	SceIoStat srcstat;
 
-	ret = sceIoGetstat(src, &srcstat);
+	ret = sceIoGetstat(path, &srcstat);
 	
 	if (ret != 0) {
 		goto not_equal;
 	}
 
-	ret = sceIoGetstat(dst, &dststat);
-	
-	if (ret != 0) {
+	if (srcstat.st_size != size) {
 		goto not_equal;
 	}
 
-	if (dststat.st_size != srcstat.st_size) {
-		goto not_equal;
-	}
-
-	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+	ret = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
 	if (ret < 0) {
 		goto not_equal;
@@ -102,28 +60,16 @@ int compare_file(const char *src, const char *dst)
 
 	fd = ret;
 
-	ret = sceIoOpen(dst, PSP_O_RDONLY, 0777);
-
-	if (ret < 0) {
-		goto not_equal;
-	}
-
-	fdd = ret;
-	ret = sizeof(buf1);
-	ret = sceIoRead(fd, buf1, ret);
+	ret = sizeof(g_buf);
+	ret = sceIoRead(fd, g_buf, ret);
 
 	while (ret > 0) {
-		ret2 = sceIoRead(fdd, buf2, ret);
-
-		if (ret2 != ret) {
+		if (memcmp(g_buf, file_buf, ret)) {
 			goto not_equal;
 		}
 
-		if (memcmp(buf1, buf2, ret)) {
-			goto not_equal;
-		}
-
-		ret = sceIoRead(fd, buf1, ret);
+		file_buf += ret;
+		ret = sceIoRead(fd, g_buf, ret);
 	}
 
 	if (ret < 0) {
@@ -131,7 +77,6 @@ int compare_file(const char *src, const char *dst)
 	}
 
 	sceIoClose(fd);
-	sceIoClose(fdd);
 
 	return 0;
 
@@ -139,32 +84,7 @@ not_equal:
 	if (fd >= 0)
 		sceIoClose(fd);
 
-	if (fdd >= 0)
-		sceIoClose(fdd);
-
 	return 1;
-}
-
-int smart_copy_file(const char *src, const char *dst)
-{
-	int ret;
-
-	if (!disable_smart_copy) {
-		ret = compare_file(src, dst);
-
-		if (ret == 0) {
-			return 0;
-		}
-	}
-
-	printf("Writing %s...", dst);
-	ret = copy_file(src, dst);
-
-	if (ret == 0) {
-		printf("OK\n");
-	}
-
-	return ret;
 }
 
 int write_file(const char *path, unsigned char *buf, int size)
@@ -194,6 +114,28 @@ error:
 	return -1;
 }
 
+int smart_write_file(const char *path, unsigned char *buf, int size)
+{
+	int ret;
+
+	if (!disable_smart) {
+		ret = compare_file_buffer(path, buf, size);
+
+		if (ret == 0) {
+			return 0;
+		}
+	}
+
+	printf("Writing %s...", path);
+	ret = write_file(path, buf, size);
+
+	if (ret == 0) {
+		printf("OK\n");
+	}
+
+	return ret;
+}
+
 void init_flash()
 {
 	int ret;
@@ -215,20 +157,21 @@ void usage(void)
 	printf(VERSION_STR " by Coldbird&VF\n");
 }
 
-struct CopyList {
-	char *src;
+struct InstallList {
+	u8 *buf;
+	u32 *size;
 	char *dst;
 };
 
-struct CopyList g_file_lists[] = {
-	{ "systemctrl.prx", "flash0:/kd/_systemctrl.prx", },
-	{ "vshctrl.prx", "flash0:/kd/_vshctrl.prx", },
-	{ "galaxy.prx", "flash0:/kd/_galaxy.prx", },
-	{ "stargate.prx", "flash0:/kd/_stargate.prx", },
-	{ "march33.prx", "flash0:/kd/_march33.prx", },
-	{ "usbdevice.prx", "flash0:/kd/_usbdevice.prx", },
-	{ "satelite.prx", "flash0:/vsh/module/_satelite.prx", },
-	{ "popcorn.prx", "flash0:/kd/_popcorn.prx", },
+struct InstallList g_file_lists[] = {
+	{ systemctrl, &size_systemctrl, "flash0:/kd/_systemctrl.prx", },
+	{ vshctrl, &size_vshctrl, "flash0:/kd/_vshctrl.prx", },
+	{ galaxy, &size_galaxy, "flash0:/kd/_galaxy.prx", },
+	{ stargate, &size_stargate, "flash0:/kd/_stargate.prx", },
+	{ march33, &size_march33, "flash0:/kd/_march33.prx", },
+	{ usbdevice, &size_usbdevice, "flash0:/kd/_usbdevice.prx", },
+	{ popcorn, &size_popcorn, "flash0:/kd/_popcorn.prx", },
+	{ satelite, &size_satelite, "flash0:/vsh/module/_satelite.prx", },
 };
 
 static const char *g_old_cfw_files[] = {
@@ -252,7 +195,7 @@ int install_cfw(void)
 	}
 
 	for(i=0; i<NELEMS(g_file_lists); ++i) {
-		ret = smart_copy_file(g_file_lists[i].src, g_file_lists[i].dst);
+		ret = smart_write_file(g_file_lists[i].dst, g_file_lists[i].buf, *g_file_lists[i].size);
 
 		if (ret != 0)
 			goto exit;
@@ -275,7 +218,7 @@ int install_cfw(void)
 	return 0;
 
 exit:
-	printf("\nCopy file error (0x%08x)! Install aborted.\n", ret);
+	printf("\nWrite file error (0x%08x)! Install aborted.\n", ret);
 
 	return -1;
 }
@@ -338,6 +281,7 @@ void start_reboot(int mode)
 		delay = 5000000;
 	}
 
+	cleanup_exit();
 	sceKernelDelayThread(delay);
 	sceKernelExitGame();
 }
@@ -379,6 +323,7 @@ int main(int argc, char *argv[])
 
 	if (key & PSP_CTRL_RTRIGGER) {
 		printf("Exiting...\n");
+		cleanup_exit();
 		sceKernelDelayThread(100000);
 		sceKernelExitGame();
 	}
@@ -413,7 +358,7 @@ int main(int argc, char *argv[])
 	sceCtrlReadBufferPositive(&ctl, 1);
 
 	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
-		disable_smart_copy = 1;
+		disable_smart = 1;
 	}
 
 	if (key & PSP_CTRL_CROSS) {
@@ -453,6 +398,7 @@ exit:
 		key = ctl.Buttons;
 	}
 
+	cleanup_exit();
 	sceKernelExitGame();
 
 	return 0;

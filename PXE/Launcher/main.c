@@ -15,6 +15,9 @@
 #include "utils.h"
 #include "printk.h"
 
+#include "installer.h"
+#include "Rebootex_prx.h"
+
 PSP_MODULE_INFO("635kernel", PSP_MODULE_USER, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
@@ -335,6 +338,46 @@ void input_dump_kmem(void)
 	}
 }
 
+int write_file(const char *path, unsigned char *buf, int size)
+{
+	SceUID fd;
+	int ret;
+
+	fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+
+	if (fd < 0) {
+		goto error;
+	}
+
+	ret = sceIoWrite(fd, buf, size);
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	sceIoClose(fd);
+
+	return 0;
+error:
+	if (fd >= 0)
+		sceIoClose(fd);
+
+	return -1;
+}
+
+void write_files(const char *base)
+{
+	char fn[256];
+
+	strcpy(fn, base);
+	strcat(fn, "installer.prx");
+	write_file(fn, installer, size_installer);
+
+	strcpy(fn, base);
+	strcat(fn, "Rebootex.prx");
+	write_file(fn, Rebootex_prx, size_Rebootex_prx);
+}
+
 //entry point
 int main(int argc, char * argv[])
 {
@@ -345,8 +388,12 @@ int main(int argc, char * argv[])
 
 	//puzzle installer path
 	strcpy(installerpath, argv[0]);
+
 	char * slash = strrchr(installerpath, '/');
-	if (slash) strcpy(slash + 1, "installer.prx");
+	if (slash) slash[1] = '\0';
+	
+	write_files(installerpath);
+	strcat(installerpath, "installer.prx");
 
 	//create empty callback
 	int cbid = -1;

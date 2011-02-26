@@ -13,4 +13,4 @@ a.bin:
 	bin2c rebootex.bin rebootex.h rebootex
 
 clean:
-	rm -rf *~ *.s *.o *.elf *.bin rebootex.h systemctrl.h systemctrl.prx installer.h installer.prx
+	rm -rf *~ *.s *.o *.elf *.bin rebootex.h systemctrl.h systemctrl.prx

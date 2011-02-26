@@ -10,7 +10,7 @@ ASFLAGS = $(CFLAGS)
 
 PRX_EXPORTS = exports.exp
 
-LIBS = -lpspsystemctrl_user -lpspkubridge -lpspgu
+LIBS = -lpspsystemctrl_user -lpspkubridge
 LIBDIR = . ../libs
 LDFLAGS =
 

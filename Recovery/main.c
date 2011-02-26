@@ -13,6 +13,7 @@
 #include "systemctrl_se.h"
 #include "vshctrl.h"
 #include "utils.h"
+#include "vpl.h"
 
 PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
@@ -457,52 +458,6 @@ int sub_menu2(void * arg)
 	menu_loop(menu);
 
 	return 0;
-}
-
-static SceUID g_vpl_uid = -1;
-
-void vpl_init(void)
-{
-	g_vpl_uid = sceKernelCreateVpl("OurVPL", 2, 0, 512*1024, NULL);
-}
-
-void vpl_finish(void)
-{
-	sceKernelDeleteVpl(g_vpl_uid);
-}
-
-void *vpl_alloc(int size)
-{
-	void *p;
-	int ret;
-
-	ret = sceKernelAllocateVpl(g_vpl_uid, size, &p, NULL);
-
-	if(ret == 0)
-		return p;
-
-	return NULL;
-}
-
-void *vpl_strdup(const char *str)
-{
-	int len;
-	void *p;
-
-	len = strlen(str) + 1;
-	p = vpl_alloc(len);
-
-	if(p == NULL)
-		return p;
-
-	strcpy(p, str);
-
-	return p;
-}
-
-void vpl_free(void *p)
-{
-	sceKernelFreeVpl(g_vpl_uid, p);
 }
 
 int sub_menu3(void * arg)

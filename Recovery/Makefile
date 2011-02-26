@@ -1,5 +1,5 @@
 TARGET = recovery
-OBJS = main.o ../Common/utils.o
+OBJS = main.o vpl.o ../Common/utils.o
 
 BUILD_PRX=1
 PSP_FW_VERSION=635

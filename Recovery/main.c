@@ -472,6 +472,22 @@ void *vpl_alloc(int size)
 	return NULL;
 }
 
+void *vpl_strdup(const char *str)
+{
+	int len;
+	void *p;
+
+	len = strlen(str) + 1;
+	p = vpl_alloc(len);
+
+	if(p == NULL)
+		return p;
+
+	strcpy(p, str);
+
+	return p;
+}
+
 void vpl_free(void *p)
 {
 	sceKernelFreeVpl(g_vpl_uid, p);
@@ -490,7 +506,7 @@ int sub_menu3(void * arg)
 		char buf[20];
 
 		sprintf(buf, "%d. entry", i);
-		g_sub_menu_3.submenu[i].info = strdup(buf);
+		g_sub_menu_3.submenu[i].info = vpl_strdup(buf);
 	}
 
 	menu->cur_sel = 0;

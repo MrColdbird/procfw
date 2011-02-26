@@ -98,8 +98,26 @@ static int stargate_module_chain(SceModule2 *mod)
 	return 0;
 }
 
+static inline int is_homebrews_runlevel(void)
+{
+	int apitype;
+
+	apitype = sceKernelInitApitype();
+	
+	if(apitype == 0x152 || apitype == 0x141) {
+		return 1;
+	}
+
+	return 0;
+}
+
+
 int module_start(SceSize args, void *argp)
 {
+	if(is_homebrews_runlevel()) {
+		return 1;
+	}
+
 	printk_init("ms0:/log_stargate.txt");
 	printk("stargate started\n");
 	patch_sceMesgLed();

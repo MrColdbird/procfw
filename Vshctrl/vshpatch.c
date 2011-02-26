@@ -73,6 +73,16 @@ static int vshpatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(0 == strcmp(mod->modname, "update_plugin_module")) {
+		patch_update_plugin_module(text_addr);
+		sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
+		patch_SceUpdateDL_Library(text_addr);
+		sync_cache();
+	}
+
 	if (previous)
 		return (*previous)(mod);
 

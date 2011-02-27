@@ -130,21 +130,13 @@ static int menu_ctrl(struct Menu *menu)
 
 	if(key & PSP_CTRL_UP) {
 		get_sel_index(menu, -1);
-	}
-
-	if(key & PSP_CTRL_DOWN) {
+	} else if(key & PSP_CTRL_DOWN) {
 		get_sel_index(menu, +1);
-	}
-
-	if(key & PSP_CTRL_RIGHT) {
+	} else if(key & PSP_CTRL_RIGHT) {
 		menu_change_value(menu, 1);
-	}
-
-	if(key & PSP_CTRL_LEFT) {
+	} else if(key & PSP_CTRL_LEFT) {
 		menu_change_value(menu, -1);
-	}
-
-	if(key & g_ctrl_OK) {
+	} else if(key & g_ctrl_OK) {
 		struct MenuEntry *entry;
 		int (*enter_callback)(struct MenuEntry *);
 
@@ -161,18 +153,14 @@ static int menu_ctrl(struct Menu *menu)
 		if(enter_callback != NULL) {
 			(*enter_callback)(entry);
 		}
-	}
-
-	if(key & g_ctrl_CANCEL) {
+	} else if(key & g_ctrl_CANCEL) {
 		set_bottom_info("> Exiting...", 0xFF);
 		frame_end();
 		sceKernelDelayThread(EXIT_DELAY);
 		set_bottom_info("", 0);
 
 		return 1;
-	}
-
-	if(key & PSP_CTRL_SELECT) {
+	} else if(key & PSP_CTRL_SELECT) {
 		recovery_exit();
 		
 		return 1;

@@ -43,7 +43,4 @@ int scePaf_15AFC8D3_snprintf(char *buffer,int c , const char *format, ...);
 int scePaf_6BD7452C_memcpy(void *path , void *name , int size);
 int scePaf_98DE3BA6_strcpy(char *path , const char *name);
 
-extern int g_ctrl_OK;
-extern int g_ctrl_CANCEL;
-
 #endif

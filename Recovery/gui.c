@@ -8,6 +8,7 @@
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <psputility.h>
+#include <psppower.h>
 
 #include "systemctrl.h"
 #include "systemctrl_se.h"
@@ -19,23 +20,7 @@
 static char g_bottom_info[MAX_SCREEN_X+1];
 static int g_bottom_info_color;
 
-int limit_int(int value, int direct, int limit)
-{
-	if(limit == 0)
-		return 0;
-
-	value += direct;
-
-	if(value >= limit) {
-		value = value % limit;
-	} else if(value < 0) {
-		value = limit - ((-value) % limit);
-	}
-
-	return value;
-}
-
-void set_screen_xy(int x, int y)
+static void set_screen_xy(int x, int y)
 {
 	pspDebugScreenSetXY(x, y);
 }
@@ -50,20 +35,13 @@ static void write_string_with_color(const char *str, int color)
 	pspDebugScreenSetTextColor(0xFFFFFFFF);
 }
 
-void write_info_bottom(void)
+static void write_bottom_info(void)
 {
 	set_screen_xy(2, MAX_SCREEN_Y-3);
 	write_string_with_color(g_bottom_info, g_bottom_info_color);
 }
 
-void set_bottom_info(const char *str, int color)
-{
-	strcpy(g_bottom_info, str);
-	g_bottom_info_color = color;
-	write_info_bottom();
-}
-
-static void draw_button(void)
+static void draw_bottom_line(void)
 {
 	int i;
 
@@ -74,15 +52,18 @@ static void draw_button(void)
 	}
 }
 
-void draw_menu(struct Menu *menu)
+static void menu_draw(struct Menu *menu)
 {
 	int x, y, i;
 
 	x = 1, y = 1;
 	set_screen_xy(x, y);
+	write_string_with_color("PRO Recovery Menu", 0xFF);
+	x = 1, y = 2;
+	set_screen_xy(x, y);
 	write_string_with_color(menu->banner, menu->banner_color);
 
-	x = 3, y = 5;
+	x = 3, y = 4;
 	set_screen_xy(x, y);
 
 	for(i=0; i<menu->submenu_size; ++i) {
@@ -121,8 +102,8 @@ void draw_menu(struct Menu *menu)
 		set_screen_xy(x, ++y);
 	}
 
-	write_info_bottom();
-	draw_button();
+	write_bottom_info();
+	draw_bottom_line();
 }
 
 static void get_sel_index(struct Menu *menu, int direct)
@@ -130,8 +111,89 @@ static void get_sel_index(struct Menu *menu, int direct)
 	menu->cur_sel = limit_int(menu->cur_sel, direct, menu->submenu_size);
 }
 
+static void menu_change_value(struct Menu *menu, int direct)
+{
+	struct MenuEntry *entry = &menu->submenu[menu->cur_sel];
+
+	if(entry->change_value_callback == NULL)
+		return;
+
+	(*entry->change_value_callback)(entry, direct);
+}
+
+// exit menu when returns 1
+static int menu_ctrl(struct Menu *menu)
+{
+	u32 key;
+
+	key = ctrl_read();
+
+	if(key & PSP_CTRL_UP) {
+		get_sel_index(menu, -1);
+	}
+
+	if(key & PSP_CTRL_DOWN) {
+		get_sel_index(menu, +1);
+	}
+
+	if(key & PSP_CTRL_RIGHT) {
+		menu_change_value(menu, 1);
+	}
+
+	if(key & PSP_CTRL_LEFT) {
+		menu_change_value(menu, -1);
+	}
+
+	if(key & g_ctrl_OK) {
+		struct MenuEntry *entry;
+		int (*enter_callback)(struct MenuEntry *);
+
+		entry = &menu->submenu[menu->cur_sel];
+		enter_callback = entry->enter_callback;
+
+		if(enter_callback != NULL) {
+			(*enter_callback)(entry);
+		}
+	}
+
+	if(key & g_ctrl_CANCEL) {
+		set_bottom_info("> Exiting...", 0xFF);
+		frame_end();
+		sceKernelDelayThread(EXIT_DELAY);
+		set_bottom_info("", 0);
+
+		return 1;
+	}
+
+	return 0;
+}
+
+int limit_int(int value, int direct, int limit)
+{
+	if(limit == 0)
+		return 0;
+
+	value += direct;
+
+	if(value >= limit) {
+		value = value % limit;
+	} else if(value < 0) {
+		value = limit - ((-value) % limit);
+	}
+
+	return value;
+}
+
+void set_bottom_info(const char *str, int color)
+{
+	strcpy(g_bottom_info, str);
+	g_bottom_info_color = color;
+	write_bottom_info();
+}
+
 void frame_start(void)
 {
+	scePowerTick(0);
 	sceDisplayWaitVblank();
 	memset(get_drawing_buffer(), 0, 512*272*4);
 }
@@ -144,60 +206,17 @@ void frame_end(void)
 	sceDisplayWaitVblank();
 }
 
-static void menu_change_value(struct Menu *menu, int direct)
-{
-	struct MenuEntry *entry = &menu->submenu[menu->cur_sel];
-
-	if(entry->change_value_callback == NULL)
-		return;
-
-	(*entry->change_value_callback)(entry->arg, direct);
-}
-
 void menu_loop(struct Menu *menu)
 {
-	u32 key;
+	int ret;
 
 	while (1) {
 		frame_start();
-		draw_menu(menu);
-		key = ctrl_read();
+		menu_draw(menu);
+		ret = menu_ctrl(menu);
 
-		if(key & PSP_CTRL_UP) {
-			get_sel_index(menu, -1);
-		}
-
-		if(key & PSP_CTRL_DOWN) {
-			get_sel_index(menu, +1);
-		}
-
-		if(key & PSP_CTRL_RIGHT) {
-			menu_change_value(menu, 1);
-		}
-
-		if(key & PSP_CTRL_LEFT) {
-			menu_change_value(menu, -1);
-		}
-
-		if(key & g_ctrl_OK) {
-			if(menu->submenu[menu->cur_sel].enter_callback != NULL) {
-				int ret;
-				void *arg;
-
-				arg = menu->submenu[menu->cur_sel].arg;
-				ret = (*menu->submenu[menu->cur_sel].enter_callback)(arg);
-			}
-		}
-
-		if(key & g_ctrl_CANCEL) {
-			set_bottom_info("Exiting...", 0xFF);
-			frame_end();
-			frame_start();
-			sceKernelDelayThread(EXIT_DELAY);
-			frame_end();
-			set_bottom_info("", 0);
+		if(ret != 0)
 			break;
-		}
 
 		frame_end();
 	}

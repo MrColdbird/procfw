@@ -15,11 +15,13 @@
 #include "utils.h"
 #include "vpl.h"
 
+#define VPL_POOL_SIZE (128 * 1024)
+
 static SceUID g_vpl_uid = -1;
 
 void vpl_init(void)
 {
-	g_vpl_uid = sceKernelCreateVpl("OurVPL", 2, 0, 512*1024, NULL);
+	g_vpl_uid = sceKernelCreateVpl("OurVPL", 2, 0, VPL_POOL_SIZE, NULL);
 }
 
 void vpl_finish(void)

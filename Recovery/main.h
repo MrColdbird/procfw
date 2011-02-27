@@ -6,19 +6,19 @@ enum {
 	TYPE_SUBMENU = 1,
 };
 
-struct ValueOption {
-	int value;
-	int limit;
-};
-
 struct MenuEntry {
 	char *info;
 	int type;
 	int color;
 	int (*display_callback)(char *, int);
-	int (*change_value_callback)(void*, int);
-	int (*enter_callback)(void*);
+	int (*change_value_callback)(struct MenuEntry *, int);
+	int (*enter_callback)(struct MenuEntry *);
 	void *arg;
+};
+
+struct ValueOption {
+	int *value;
+	int limit;
 };
 
 struct Menu {
@@ -48,6 +48,7 @@ struct Menu {
 extern int g_ctrl_OK;
 extern int g_ctrl_CANCEL;
 extern int g_display_flip;
+extern SEConfig g_config;
 
 u32 ctrl_read(void);
 void *get_drawing_buffer(void);
@@ -60,5 +61,11 @@ void frame_end(void);
 void menu_loop(struct Menu *menu);
 
 void main_menu(void);
+
+const char *get_bool_name(int boolean);
+const char* get_fake_region_name(int fakeregion);
+
+void suspend_vsh_thread(void);
+void resume_vsh_thread(void);
 
 #endif

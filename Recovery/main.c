@@ -175,21 +175,23 @@ void *get_display_buffer(void)
 	return buffer;
 }
 
+void recovery_exit(void)
+{
+	sctrlSESetConfig(&g_config);
+	resume_vsh_thread();
+	vpl_finish();
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+}
+
 int main_thread(SceSize size, void *argp)
 {
+	sctrlSEGetConfig(&g_config);
 	vpl_init();
 	suspend_vsh_thread();
 	pspDebugScreenInit();
-
-//	sctrlSEGetConfig(&g_config);
 	get_confirm_button();
 	main_menu();
-
-	resume_vsh_thread();
-	vpl_finish();
-
-//	sctrlSESetConfig(&g_config);
-	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+	recovery_exit();
 
 	return 0;
 }

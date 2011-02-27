@@ -172,6 +172,12 @@ static int menu_ctrl(struct Menu *menu)
 		return 1;
 	}
 
+	if(key & PSP_CTRL_SELECT) {
+		recovery_exit();
+		
+		return 1;
+	}
+
 	return 0;
 }
 

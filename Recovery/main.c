@@ -45,6 +45,8 @@ static u32 g_last_tick = 0;
 
 int g_display_flip;
 
+SEConfig g_config;
+
 u32 ctrl_read(void)
 {
 	SceCtrlData ctl;
@@ -174,12 +176,14 @@ int main_thread(SceSize size, void *argp)
 	suspend_vsh_thread();
 	pspDebugScreenInit();
 
+//	sctrlSEGetConfig(&g_config);
 	get_confirm_button();
 	main_menu();
 
 	resume_vsh_thread();
 	vpl_finish();
 
+//	sctrlSESetConfig(&g_config);
 	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 
 	return 0;

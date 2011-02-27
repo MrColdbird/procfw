@@ -16,63 +16,70 @@
 #include "vpl.h"
 #include "main.h"
 
-static int sub_menu(void *);
-static int sub_menu2(void *);
-static int sub_menu3(void *);
+extern int scePowerRequestColdReset(int unk);
+extern int scePowerRequestStandby(void);
+extern int scePowerRequestSuspend(void);
+
+static int configuration_menu(struct MenuEntry *entry);
+static int cpu_speed_menu(struct MenuEntry *entry);
+
+static int test_option1, test_option2;
 
 static struct ValueOption g_test_option1 = {
-	0,
+	&test_option1,
 	2,
 };
 
 static struct ValueOption g_test_option2 = { 
-	0,
+	&test_option2,
 	4,
 };
 
 static int display_test_option1(char *buf, int size)
 {
-	return sprintf(buf, "3. bool option = %d", g_test_option1.value);
+	return sprintf(buf, "3. bool option = %d", test_option1);
 }
 
 static int display_test_option2(char *buf, int size)
 {
-	return sprintf(buf, "4. value option = %d", g_test_option2.value);
+	return sprintf(buf, "4. value option = %d", test_option2);
 }
 
-static int change_value_option(void *arg, int direct)
+static int display_fake_region(char *buf, int size)
 {
-	struct ValueOption *c = (struct ValueOption*)arg;
-
-	c->value = limit_int(c->value, direct, c->limit);
+	sprintf(buf, "Fake region (%s)", get_fake_region_name(g_config.fakeregion));
 
 	return 0;
 }
 
-static int menu_change_int(void *arg)
-{
-	struct ValueOption *c = arg;
-	char buf[256];
-	int *p = &(c->value);
+static struct ValueOption g_fake_region_option = {
+	&g_config.fakeregion,
+	FAKE_REGION_CHINA+1,
+};
 
-	*p = limit_int(*p, 1, c->limit);
-	sprintf(buf, "%s: %d\n", __func__, *p);
-	set_bottom_info(buf, 0);
-	frame_end();
-	sceKernelDelayThread(1000000);
-	set_bottom_info("", 0);
+static int change_option(struct MenuEntry *entry, int direct)
+{
+	struct ValueOption *c = (struct ValueOption*)entry->arg;
+
+	*c->value = limit_int(*c->value, direct, c->limit);
+
+	return 0;
+}
+
+static int change_option_by_enter(struct MenuEntry *entry)
+{
+	char buf[256], *p;
 	
-	return 0;
-}
+	change_option(entry, 1);
+	strcpy(buf, "> ");
+	p = buf + strlen(buf);
 
-static int menu_change_bool(void *arg)
-{
-	u32 *p = (u32*)arg;
-	char buf[256];
+	if(entry->display_callback != NULL) {
+		(entry->display_callback)(p, sizeof(buf) - (p - buf));
+	} else {
+		strcpy(p, entry->info);
+	}
 
-	*p = !*p;
-
-	sprintf(buf, "%s: %d\n", __func__, *p);
 	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
@@ -81,98 +88,185 @@ static int menu_change_bool(void *arg)
 	return 0;
 }
 
+static struct ValueOption g_mac_hidden_option = {
+	&g_config.machidden,
+	2,
+};
+
+static struct ValueOption g_usb_charge_option = {
+	&g_config.usbcharge,
+	2,
+};
+
+static struct ValueOption g_skip_gameboot_option = {
+	&g_config.skipgameboot,
+	2,
+};
+
+static struct ValueOption g_hide_pic_option = {
+	&g_config.hidepic,
+	2,
+};
+
+static int display_usb_charge(char *buf, int size)
+{
+	sprintf(buf, "Charge battery when USB cable plugged (%s)", get_bool_name(g_config.usbcharge));
+
+	return 0;
+}
+
+static int display_hidden_mac(char *buf, int size)
+{
+	sprintf(buf, "Hide MAC address (%s)", get_bool_name(g_config.machidden));
+
+	return 0;
+}
+
+static int display_skip_gameboot(char *buf, int size)
+{
+	sprintf(buf, "Skip Game Boot Screen (%s)", get_bool_name(g_config.skipgameboot));
+
+	return 0;
+}
+
+static int display_hide_pic(char *buf, int size)
+{
+	sprintf(buf, "Hide PIC0.PNG and PIC1.PNG in game menu (%s)", get_bool_name(g_config.hidepic));
+
+	return 0;
+}
+
+static struct MenuEntry g_configuration_menu_entries[] = {
+	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
+	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option},
+	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option},
+	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option},
+	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option},
+};
+
+static struct Menu g_configuration_menu = {
+	"Configuration",
+	g_configuration_menu_entries,
+	NELEMS(g_configuration_menu_entries),
+	0,
+	0xFF,
+};
+
+static int shutdown_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestStandby();
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int suspend_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestSuspend();
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int reset_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestColdReset(0);
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int reset_vsh(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	sctrlKernelExitVSH(NULL);
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
 static struct MenuEntry g_top_menu_entries[] = {
-	{ "1. Empty option", 0, },
-	{ "2. Submenu option", 1, 0xFF00, NULL, NULL, &sub_menu, NULL},
-	{ NULL, 0, 0, &display_test_option1, &change_value_option, &menu_change_bool, &g_test_option1 },
-	{ NULL, 0, 0, &display_test_option2, &change_value_option, &menu_change_int, &g_test_option2 },
+	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
+	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
+	{ "Plugins", 1, 0, NULL, NULL, NULL, NULL },
+	{ "Registery hacks", 0, 0, NULL, NULL, NULL, NULL },
+	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
+	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
+	{ "Reset device", 0, 0, NULL, NULL, &reset_device, NULL },
+	{ "Reset VSH", 0, 0, NULL, NULL, &reset_vsh, NULL },
+	{ NULL, 0, 0, &display_test_option1, &change_option, &change_option_by_enter, &g_test_option1 },
+	{ NULL, 0, 0, &display_test_option2, &change_option, &change_option_by_enter, &g_test_option2 },
 };
 
 static struct Menu g_top_menu = {
-	"PRO Recovery Menu",
+	"Main Menu",
 	g_top_menu_entries,
 	NELEMS(g_top_menu_entries),
 	0,
 	0xFF,
 };
 
-static struct MenuEntry g_sub_menu_entries[] = {
-	{ "1. Normal option", 0, },
-	{ "2. Green  option", 0, 0xFF00, },
-	{ "3. Submenu option", 1, 0xFF00, NULL, NULL, &sub_menu2, NULL},
-	{ "3. Dynamic Submenu option", 1, 0xFF0000, NULL, NULL, &sub_menu3, NULL},
+static int configuration_menu(struct MenuEntry *entry)
+{
+	struct Menu *menu = &g_configuration_menu;
+
+	sctrlSEGetConfig(&g_config);
+	menu->cur_sel = 0;
+	menu_loop(menu);
+	sctrlSESetConfig(&g_config);
+
+	return 0;
+}
+
+static int display_xmb(char *buf, int size)
+{
+	return 0;
+}
+
+static int display_game(char *buf, int size)
+{
+	return 0;
+}
+
+static int display_pops(char *buf, int size)
+{
+	return 0;
+}
+
+struct ValueOption g_xmb_clock_option = {
 };
 
-static struct Menu g_sub_menu = {
-	"PRO Sub Menu",
-	g_sub_menu_entries,
-	NELEMS(g_sub_menu_entries),
+struct ValueOption g_game_clock_option = {
+};
+
+struct ValueOption g_pops_clock_option = {
+};
+
+static struct MenuEntry g_cpu_speed_menu_entries[] = {
+	{ NULL, 0, 0, &display_xmb, &change_option, &change_option_by_enter, &g_xmb_clock_option},
+	{ NULL, 0, 0, &display_game, &change_option, &change_option_by_enter, &g_game_clock_option},
+	{ NULL, 0, 0, &display_pops, &change_option, &change_option_by_enter, &g_pops_clock_option},
+};
+
+static struct Menu g_cpu_speed_menu = {
+	"CPU Speed",
+	g_cpu_speed_menu_entries,
+	NELEMS(g_cpu_speed_menu_entries),
 	0,
 	0xFF,
 };
 
-static struct MenuEntry g_sub_menu_2_entries[] = {
-	{ "1. Normal option", 0, },
-};
-
-static struct Menu g_sub_menu_2 = {
-	"PRO Sub Menu 2",
-	g_sub_menu_2_entries,
-	NELEMS(g_sub_menu_2_entries),
-	0,
-	0xFF00,
-};
-
-static struct Menu g_sub_menu_3 = {
-	"PRO Sub Menu Dynamic",
-	NULL,
-	0,
-	0,
-	0xFF00,
-};
-
-static int sub_menu(void * arg)
+static int cpu_speed_menu(struct MenuEntry *entry)
 {
-	struct Menu *menu = &g_sub_menu;
+	struct Menu *menu = &g_cpu_speed_menu;
 
+	sctrlSEGetConfig(&g_config);
 	menu->cur_sel = 0;
 	menu_loop(menu);
-
-	return 0;
-}
-
-static int sub_menu2(void * arg)
-{
-	struct Menu *menu = &g_sub_menu_2;
-
-	menu->cur_sel = 0;
-	menu_loop(menu);
-
-	return 0;
-}
-
-static int sub_menu3(void * arg)
-{
-	struct Menu *menu = &g_sub_menu_3;
-
-	srand(time(0));
-	menu->submenu_size = rand() % 20 + 1;
-	menu->submenu = vpl_alloc(menu->submenu_size * sizeof(*menu->submenu));
-	memset(menu->submenu, 0, menu->submenu_size * sizeof(*menu->submenu));
-
-	int i; for(i=0; i<menu->submenu_size; ++i) {
-		char buf[20];
-
-		sprintf(buf, "%d. entry", i);
-		menu->submenu[i].info = vpl_strdup(buf);
-	}
-
-	menu->cur_sel = 0;
-	menu_loop(menu);
-
-	for(i=0; i<menu->submenu_size; ++i) {
-		vpl_free(menu->submenu[i].info);
-	}
+	sctrlSESetConfig(&g_config);
 
 	return 0;
 }

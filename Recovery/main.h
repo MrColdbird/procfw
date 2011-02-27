@@ -65,4 +65,7 @@ void main_menu(void);
 const char *get_bool_name(int boolean);
 const char* get_fake_region_name(int fakeregion);
 
+void suspend_vsh_thread(void);
+void resume_vsh_thread(void);
+
 #endif

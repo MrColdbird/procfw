@@ -16,6 +16,10 @@
 #include "vpl.h"
 #include "main.h"
 
+extern int scePowerRequestColdReset(int unk);
+extern int scePowerRequestStandby(void);
+extern int scePowerRequestSuspend(void);
+
 static int configuration_menu(struct MenuEntry *entry);
 
 static int test_option1, test_option2;
@@ -121,14 +125,51 @@ static struct Menu g_configuration_menu = {
 	0xFF,
 };
 
+static int shutdown_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestStandby();
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int suspend_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestSuspend();
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int reset_device(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	scePowerRequestColdReset(0);
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
+static int reset_vsh(struct MenuEntry *entry)
+{
+	resume_vsh_thread();
+	sctrlKernelExitVSH(NULL);
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
 static struct MenuEntry g_top_menu_entries[] = {
 	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
 	{ "CPU Speed", 0, 0, NULL, NULL, NULL, NULL },
 	{ "Plugins", 0, 0, NULL, NULL, NULL, NULL },
-	{ "Register hacks", 0, 0, NULL, NULL, NULL, NULL },
-	{ "Suspend device", 0, 0, NULL, NULL, NULL, NULL },
-	{ "Reset device", 0, 0, NULL, NULL, NULL, NULL },
-	{ "Reset VSH", 0, 0, NULL, NULL, NULL, NULL },
+	{ "Registery hacks", 0, 0, NULL, NULL, NULL, NULL },
+	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
+	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
+	{ "Reset device", 0, 0, NULL, NULL, &reset_device, NULL },
+	{ "Reset VSH", 0, 0, NULL, NULL, &reset_vsh, NULL },
 	{ NULL, 0, 0, &display_test_option1, &change_option, &change_option_by_enter, &g_test_option1 },
 	{ NULL, 0, 0, &display_test_option2, &change_option, &change_option_by_enter, &g_test_option2 },
 };

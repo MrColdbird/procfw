@@ -21,6 +21,7 @@ extern int scePowerRequestStandby(void);
 extern int scePowerRequestSuspend(void);
 
 static int configuration_menu(struct MenuEntry *entry);
+static int cpu_speed_menu(struct MenuEntry *entry);
 
 static int test_option1, test_option2;
 
@@ -97,9 +98,19 @@ static struct ValueOption g_usb_charge_option = {
 	2,
 };
 
+static struct ValueOption g_skip_gameboot_option = {
+	&g_config.skipgameboot,
+	2,
+};
+
+static struct ValueOption g_hide_pic_option = {
+	&g_config.hidepic,
+	2,
+};
+
 static int display_usb_charge(char *buf, int size)
 {
-	sprintf(buf, "Charge battery when USB cable plugged(%s)", get_bool_name(g_config.usbcharge));
+	sprintf(buf, "Charge battery when USB cable plugged (%s)", get_bool_name(g_config.usbcharge));
 
 	return 0;
 }
@@ -111,10 +122,26 @@ static int display_hidden_mac(char *buf, int size)
 	return 0;
 }
 
+static int display_skip_gameboot(char *buf, int size)
+{
+	sprintf(buf, "Skip Game Boot Screen (%s)", get_bool_name(g_config.skipgameboot));
+
+	return 0;
+}
+
+static int display_hide_pic(char *buf, int size)
+{
+	sprintf(buf, "Hide PIC0.PNG and PIC1.PNG in game menu (%s)", get_bool_name(g_config.hidepic));
+
+	return 0;
+}
+
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option},
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option},
+	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option},
+	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option},
 };
 
 static struct Menu g_configuration_menu = {
@@ -163,8 +190,8 @@ static int reset_vsh(struct MenuEntry *entry)
 
 static struct MenuEntry g_top_menu_entries[] = {
 	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
-	{ "CPU Speed", 0, 0, NULL, NULL, NULL, NULL },
-	{ "Plugins", 0, 0, NULL, NULL, NULL, NULL },
+	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
+	{ "Plugins", 1, 0, NULL, NULL, NULL, NULL },
 	{ "Registery hacks", 0, 0, NULL, NULL, NULL, NULL },
 	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
 	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
@@ -185,6 +212,56 @@ static struct Menu g_top_menu = {
 static int configuration_menu(struct MenuEntry *entry)
 {
 	struct Menu *menu = &g_configuration_menu;
+
+	sctrlSEGetConfig(&g_config);
+	menu->cur_sel = 0;
+	menu_loop(menu);
+	sctrlSESetConfig(&g_config);
+
+	return 0;
+}
+
+static int display_xmb(char *buf, int size)
+{
+	return 0;
+}
+
+static int display_game(char *buf, int size)
+{
+	return 0;
+}
+
+static int display_pops(char *buf, int size)
+{
+	return 0;
+}
+
+struct ValueOption g_xmb_clock_option = {
+};
+
+struct ValueOption g_game_clock_option = {
+};
+
+struct ValueOption g_pops_clock_option = {
+};
+
+static struct MenuEntry g_cpu_speed_menu_entries[] = {
+	{ NULL, 0, 0, &display_xmb, &change_option, &change_option_by_enter, &g_xmb_clock_option},
+	{ NULL, 0, 0, &display_game, &change_option, &change_option_by_enter, &g_game_clock_option},
+	{ NULL, 0, 0, &display_pops, &change_option, &change_option_by_enter, &g_pops_clock_option},
+};
+
+static struct Menu g_cpu_speed_menu = {
+	"CPU Speed",
+	g_cpu_speed_menu_entries,
+	NELEMS(g_cpu_speed_menu_entries),
+	0,
+	0xFF,
+};
+
+static int cpu_speed_menu(struct MenuEntry *entry)
+{
+	struct Menu *menu = &g_cpu_speed_menu;
 
 	sctrlSEGetConfig(&g_config);
 	menu->cur_sel = 0;

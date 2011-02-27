@@ -134,29 +134,9 @@ int load_start_module(char *path)
 	return ret;
 }
 
-int g_ctrl_OK;
-int g_ctrl_CANCEL;
-
-void get_confirm_button(void)
-{
-	int result = 0;
-
-	sceUtilityGetSystemParamInt(9, &result);
-
-	if (result == 0) { // Circle?
-		g_ctrl_OK = PSP_CTRL_CIRCLE;
-		g_ctrl_CANCEL = PSP_CTRL_CROSS;
-	} else {
-		g_ctrl_OK = PSP_CTRL_CROSS;
-		g_ctrl_CANCEL = PSP_CTRL_CIRCLE;
-	}
-}
-
 int TSRThread(SceSize args, void *argp)
 {
 	sceKernelChangeThreadPriority(0, 8);
-	get_confirm_button();
-
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 

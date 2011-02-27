@@ -38,7 +38,7 @@ enum{
 //	TMENU_XMB_PLUGINS,
 //	TMENU_GAME_PLUGINS,
 //	TMENU_POPS_PLUGINS,
-	TMENU_PLUGINS_MGR,
+	TMENU_RECOVERY_MENU,
 //	TMENU_USB_CHARGE,
 //	TMENU_HIDE_MAC,
 //	TMENU_SKIP_GAMEBOOT,
@@ -61,7 +61,7 @@ const char *top_menu_list[TMENU_MAX] ={
 //	"XMB  PLUGINS   ",
 //	"GAME PLUGINS   ",
 //	"POPS PLUGINS   ",
-	"PLUGINS MANAGER  ->",
+	"RECOVERY MENU  ->",
 //	"USB CHARGE     ",
 //	"HIDE MAC       ",
 //	"SKIP GAMEBOOT  ",
@@ -122,8 +122,8 @@ int menu_draw(void)
 				case TMENU_RESET_VSH:
 					xPointer = pointer[7];
 					break;
-				case TMENU_PLUGINS_MGR:
-					xPointer = 160;
+				case TMENU_RECOVERY_MENU:
+					xPointer = 168;
 					break;
 				case TMENU_SHUTDOWN_DEVICE:
 					xPointer = 176;
@@ -231,7 +231,8 @@ int menu_ctrl(u32 button_on)
 	direction = -2;
 
 	if(button_on & PSP_CTRL_LEFT)   direction = -1;
-	if(button_on & g_ctrl_OK) direction = 0;
+	if(button_on & PSP_CTRL_CROSS) direction = 0;
+	if(button_on & PSP_CTRL_CIRCLE) direction = 0;
 	if(button_on & PSP_CTRL_RIGHT)  direction = 1;
 
 	if(direction <= -2)
@@ -250,9 +251,9 @@ int menu_ctrl(u32 button_on)
 		case TMENU_UMD_MODE:
 			if(direction) change_umd_mode( direction );
 			break;
-		case TMENU_PLUGINS_MGR:
+		case TMENU_RECOVERY_MENU:
 			if(direction==0) {
-				return 6; // PLUGIN_MGR flag
+				return 6; // Recovery menu flag
 			}
 			break;
 		case TMENU_SHUTDOWN_DEVICE:			

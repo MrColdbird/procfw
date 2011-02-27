@@ -365,7 +365,8 @@ static int cpu_speed_menu(struct MenuEntry *entry)
 
 static int active_wma(struct MenuEntry *entry)
 {
-	set_bottom_info(__func__, 0);
+	set_registry_value("/CONFIG/MUSIC", "wma_play", 1);
+	set_bottom_info("WMA actived", 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -375,7 +376,9 @@ static int active_wma(struct MenuEntry *entry)
 
 static int active_flash(struct MenuEntry *entry)
 {
-	set_bottom_info(__func__, 0);
+	set_registry_value("/CONFIG/BROWSER", "flash_activated", 1);
+	set_registry_value("/CONFIG/BROWSER", "flash_play", 1);
+	set_bottom_info("Flash actived", 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -385,7 +388,12 @@ static int active_flash(struct MenuEntry *entry)
 
 static int swap_buttons(struct MenuEntry *entry)
 {
-	set_bottom_info(__func__, 0);
+	u32 value;
+
+	get_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", &value);
+	value = !value;
+	set_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", value); 
+	set_bottom_info("Buttons swapped", 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);

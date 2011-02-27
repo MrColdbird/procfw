@@ -76,4 +76,6 @@ int get_bus_freq(int number);
 void suspend_vsh_thread(void);
 void resume_vsh_thread(void);
 
+void recovery_exit(void);
+
 #endif

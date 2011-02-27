@@ -27,20 +27,7 @@ const char *iso[]={
 	"Sony NP9660"
 };
 
-const char *region_name[] = {
-	"Disabled",
-	"Japan",
-	"America",
-	"Europe",
-	"Korea",
-	"Australia",
-	"Hongkong",
-	"Taiwan",
-	"Russia",
-	"China",
-};
-
-#define TMENU_MAX 19
+#define TMENU_MAX 10
 
 enum{
 	TMENU_XMB_CLOCK,
@@ -48,16 +35,16 @@ enum{
 	TMENU_USB_DEVICE,
 	TMENU_UMD_MODE,
 //	TMENU_UMD_VIDEO,
-	TMENU_XMB_PLUGINS,
-	TMENU_GAME_PLUGINS,
-	TMENU_POPS_PLUGINS,
+//	TMENU_XMB_PLUGINS,
+//	TMENU_GAME_PLUGINS,
+//	TMENU_POPS_PLUGINS,
 	TMENU_PLUGINS_MGR,
-	TMENU_USB_CHARGE,
-	TMENU_HIDE_MAC,
-	TMENU_SKIP_GAMEBOOT,
-	TMENU_HIDE_PIC,
-	TMENU_FLASH_PROT,
-	TMENU_FAKE_REGION,
+//	TMENU_USB_CHARGE,
+//	TMENU_HIDE_MAC,
+//	TMENU_SKIP_GAMEBOOT,
+//	TMENU_HIDE_PIC,
+//	TMENU_FLASH_PROT,
+//	TMENU_FAKE_REGION,
 	TMENU_SHUTDOWN_DEVICE,
 	TMENU_SUSPEND_DEVICE,
 	TMENU_RESET_DEVICE,
@@ -71,16 +58,16 @@ const char *top_menu_list[TMENU_MAX] ={
 	"USB DEVICE     ",
 	"UMD ISO MODE   ",
 //	"ISO VIDEO MOUNT",
-	"XMB  PLUGINS   ",
-	"GAME PLUGINS   ",
-	"POPS PLUGINS   ",
+//	"XMB  PLUGINS   ",
+//	"GAME PLUGINS   ",
+//	"POPS PLUGINS   ",
 	"PLUGINS MANAGER  ->",
-	"USB CHARGE     ",
-	"HIDE MAC       ",
-	"SKIP GAMEBOOT  ",
-	"HIDE PIC       ",
-	"FLASH PROTECT  ",
-	"FAKE REGION    ",
+//	"USB CHARGE     ",
+//	"HIDE MAC       ",
+//	"SKIP GAMEBOOT  ",
+//	"HIDE PIC       ",
+//	"FLASH PROTECT  ",
+//	"FAKE REGION    ",
 	"SHUTDOWN DEVICE",
 	"SUSPEND DEVICE",
 	"RESET DEVICE",
@@ -135,6 +122,9 @@ int menu_draw(void)
 				case TMENU_RESET_VSH:
 					xPointer = pointer[7];
 					break;
+				case TMENU_PLUGINS_MGR:
+					xPointer = 160;
+					break;
 				case TMENU_SHUTDOWN_DEVICE:
 					xPointer = 176;
 					break;
@@ -164,15 +154,6 @@ int menu_draw(void)
 static inline const char *get_enable_disable(int opt)
 {
 	return enable_disable[opt != 0 ? 1 : 0];
-}
-
-static inline const char *get_region_name(int region)
-{
-	if (region < NELEMS(region_name)) {
-		return region_name[region];
-	}
-
-	return region_name[0];
 }
 
 int menu_setup(void)
@@ -223,19 +204,7 @@ int menu_setup(void)
 	}	
 
 	item_str[TMENU_USB_DEVICE] = bridge;
-
-	//plugins
-	item_str[TMENU_XMB_PLUGINS]  = get_enable_disable(cnf.plugvsh);
-	item_str[TMENU_GAME_PLUGINS] = get_enable_disable(cnf.pluggame);
-	item_str[TMENU_POPS_PLUGINS] = get_enable_disable(cnf.plugpop);
-
 	item_str[TMENU_UMD_MODE] = iso[cnf.umdmode];
-	item_str[TMENU_USB_CHARGE]  = get_enable_disable(cnf.usbcharge);
-	item_str[TMENU_HIDE_MAC]  = get_enable_disable(cnf.machidden);
-	item_str[TMENU_SKIP_GAMEBOOT]  = get_enable_disable(cnf.skipgameboot);
-	item_str[TMENU_HIDE_PIC]  = get_enable_disable(cnf.hidepic);
-	item_str[TMENU_FLASH_PROT]  = get_enable_disable(cnf.flashprot);
-	item_str[TMENU_FAKE_REGION]  = get_region_name(cnf.fakeregion);
 	
 	return 0;
 }
@@ -281,37 +250,10 @@ int menu_ctrl(u32 button_on)
 		case TMENU_UMD_MODE:
 			if(direction) change_umd_mode( direction );
 			break;
-		case TMENU_XMB_PLUGINS:
-			if(direction) change_plugins(direction, 0);
-			break;
-		case TMENU_GAME_PLUGINS:
-			if(direction) change_plugins(direction, 1);
-			break;
-		case TMENU_POPS_PLUGINS:
-			if(direction) change_plugins(direction, 2);
-			break;
 		case TMENU_PLUGINS_MGR:
 			if(direction==0) {
 				return 6; // PLUGIN_MGR flag
 			}
-			break;
-		case TMENU_USB_CHARGE:
-			if(direction) change_bool_option(&cnf.usbcharge, direction);
-			break;
-		case TMENU_HIDE_MAC:
-			if(direction) change_bool_option(&cnf.machidden, direction);
-			break;
-		case TMENU_SKIP_GAMEBOOT:
-			if(direction) change_bool_option(&cnf.skipgameboot, direction);
-			break;
-		case TMENU_HIDE_PIC:
-			if(direction) change_bool_option(&cnf.hidepic, direction);
-			break;
-		case TMENU_FLASH_PROT:
-			if(direction) change_bool_option(&cnf.flashprot, direction);
-			break;
-		case TMENU_FAKE_REGION:
-			if(direction) change_region(direction, NELEMS(region_name)-1);
 			break;
 		case TMENU_SHUTDOWN_DEVICE:			
 			if(direction==0) {

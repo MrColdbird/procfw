@@ -255,7 +255,6 @@ static int configuration_menu(struct MenuEntry *entry)
 {
 	struct Menu *menu = &g_configuration_menu;
 
-	sctrlSEGetConfig(&g_config);
 	menu->cur_sel = 0;
 	menu_loop(menu);
 	sctrlSESetConfig(&g_config);
@@ -307,9 +306,39 @@ struct ValueOption g_game_clock_option = {
 	9
 };
 
+static void update_clock_config(void)
+{
+	g_config.vshcpuspeed = get_cpu_freq(g_xmb_clock_number);
+	g_config.vshbusspeed = get_bus_freq(g_xmb_clock_number);
+	g_config.umdisocpuspeed = get_cpu_freq(g_game_clock_number);
+	g_config.umdisobusspeed = get_bus_freq(g_game_clock_number);
+
+	if(g_config.vshcpuspeed == 0) {
+		sctrlHENSetSpeed(222, 111);
+	} else {
+		sctrlHENSetSpeed(g_config.vshcpuspeed, g_config.vshbusspeed);
+	}
+}
+
+static int change_clock_option(struct MenuEntry *entry, int direct)
+{
+	change_option(entry, direct);
+	update_clock_config();
+
+	return 0;
+}
+
+static int change_clock_option_by_enter(struct MenuEntry *entry)
+{
+	change_option_by_enter(entry);
+	update_clock_config();
+
+	return 0;
+}
+
 static struct MenuEntry g_cpu_speed_menu_entries[] = {
-	{ NULL, 0, 0, &display_xmb, &change_option, &change_option_by_enter, &g_xmb_clock_option},
-	{ NULL, 0, 0, &display_game, &change_option, &change_option_by_enter, &g_game_clock_option},
+	{ NULL, 0, 0, &display_xmb, &change_clock_option, &change_clock_option_by_enter, &g_xmb_clock_option},
+	{ NULL, 0, 0, &display_game, &change_clock_option, &change_clock_option_by_enter, &g_game_clock_option},
 };
 
 static struct Menu g_cpu_speed_menu = {
@@ -324,18 +353,11 @@ static int cpu_speed_menu(struct MenuEntry *entry)
 {
 	struct Menu *menu = &g_cpu_speed_menu;
 
-	sctrlSEGetConfig(&g_config);
 	g_xmb_clock_number = get_cpu_number(g_config.vshcpuspeed);
 	g_game_clock_number = get_cpu_number(g_config.umdisocpuspeed);
 	menu->cur_sel = 0;
 	menu_loop(menu);
 
-	g_config.vshcpuspeed = get_cpu_freq(g_xmb_clock_number);
-	g_config.vshbusspeed = get_bus_freq(g_xmb_clock_number);
-
-	g_config.umdisocpuspeed = get_cpu_freq(g_game_clock_number);
-	g_config.umdisobusspeed = get_bus_freq(g_game_clock_number);
-	
 	sctrlSESetConfig(&g_config);
 
 	return 0;

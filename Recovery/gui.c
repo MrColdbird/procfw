@@ -151,6 +151,13 @@ static int menu_ctrl(struct Menu *menu)
 		entry = &menu->submenu[menu->cur_sel];
 		enter_callback = entry->enter_callback;
 
+		if(entry->type == TYPE_SUBMENU) {
+			set_bottom_info("> Entering...", 0xFF);
+			frame_end();
+			sceKernelDelayThread(ENTER_DELAY);
+			set_bottom_info("", 0);
+		}
+		
 		if(enter_callback != NULL) {
 			(*enter_callback)(entry);
 		}

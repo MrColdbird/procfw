@@ -29,7 +29,6 @@ struct Menu {
 	int banner_color;
 };
 
-#define CTRL_REPEAT_TIME 0x40000
 #define CUR_SEL_COLOR 0xFF
 #define MAX_SCREEN_X 68
 #define MAX_SCREEN_Y 33
@@ -38,6 +37,9 @@ struct Menu {
 #define SCR_HEIGHT (272)
 #define PIXEL_SIZE (4)
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
+#define CTRL_DELAY   100000
+#define CTRL_DEADZONE_DELAY 500000
+#define ENTER_DELAY  500000
 #define EXIT_DELAY   500000
 #define CHANGE_DELAY 500000
 #define DRAW_BUF (void*)(0x44000000)
@@ -51,6 +53,7 @@ extern int g_display_flip;
 extern SEConfig g_config;
 
 u32 ctrl_read(void);
+void ctrl_waitreleasekey(u32 key);
 void *get_drawing_buffer(void);
 void *get_display_buffer(void);
 
@@ -64,6 +67,11 @@ void main_menu(void);
 
 const char *get_bool_name(int boolean);
 const char* get_fake_region_name(int fakeregion);
+const char *get_iso_name(int iso_mode);
+int get_cpu_number(int cpu);
+int get_bus_number(int cpu);
+int get_cpu_freq(int number);
+int get_bus_freq(int number);
 
 void suspend_vsh_thread(void);
 void resume_vsh_thread(void);

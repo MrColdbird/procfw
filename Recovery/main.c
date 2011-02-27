@@ -20,7 +20,6 @@ PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 PSP_HEAP_SIZE_KB(0);
 
-#define CTRL_REPEAT_TIME 0x40000
 #define CUR_SEL_COLOR 0xFF
 #define MAX_SCREEN_X 68
 #define MAX_SCREEN_Y 33
@@ -30,8 +29,6 @@ PSP_HEAP_SIZE_KB(0);
 #define PIXEL_SIZE (4)
 #define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
 
-#define EXIT_DELAY   500000
-#define CHANGE_DELAY 500000
 #define DRAW_BUF (void*)(0x44000000)
 #define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
 
@@ -42,6 +39,7 @@ int g_ctrl_CANCEL;
 
 static u32 g_last_btn = 0;
 static u32 g_last_tick = 0;
+static u32 g_deadzone_tick = 0;
 
 int g_display_flip;
 
@@ -54,14 +52,21 @@ u32 ctrl_read(void)
 	sceCtrlReadBufferPositive(&ctl, 1);
 
 	if (ctl.Buttons == g_last_btn) {
-		if (ctl.TimeStamp - g_last_tick < CTRL_REPEAT_TIME)
+		if (ctl.TimeStamp - g_deadzone_tick < CTRL_DEADZONE_DELAY) {
 			return 0;
+		}
+
+		if (ctl.TimeStamp - g_last_tick < CTRL_DELAY) {
+			return 0;
+		}
+
+		g_last_tick = ctl.TimeStamp;
 
 		return g_last_btn;
 	}
 
 	g_last_btn = ctl.Buttons;
-	g_last_tick = ctl.TimeStamp;
+	g_deadzone_tick = g_last_tick = ctl.TimeStamp;
 
 	return g_last_btn;
 }

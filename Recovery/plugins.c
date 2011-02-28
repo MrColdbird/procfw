@@ -25,6 +25,12 @@ struct Plugin {
 	int type;
 };
 
+enum {
+	ON_MS0 = 0,
+	ON_EF0,
+	ON_EH0,
+};
+
 static struct Plugin *g_vsh_list;
 static struct Plugin *g_game_list;
 static struct Plugin *g_pops_list;
@@ -34,6 +40,8 @@ static int g_vsh_cnt, g_game_cnt, g_pops_cnt;
 static int plugins_ef0_menu(struct MenuEntry *entry);
 static int plugins_eh0_menu(struct MenuEntry *entry);
 static int plugins_ms0_menu(struct MenuEntry *entry);
+
+static int g_type;
 
 static struct Menu g_plugins_menu = {
 	"Plugins",
@@ -149,9 +157,19 @@ static int save_plugin(const char *path, struct Plugin *plugin, int size)
 
 static int save_plugins(void)
 {
-	save_plugin("ms0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
-	save_plugin("ms0:/seplugins/game.txt", g_game_list, g_game_cnt);
-	save_plugin("ms0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
+	if(g_type == ON_MS0) {
+		save_plugin("ms0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
+		save_plugin("ms0:/seplugins/game.txt", g_game_list, g_game_cnt);
+		save_plugin("ms0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
+	} else if(g_type == ON_EF0) {
+		save_plugin("ef0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
+		save_plugin("ef0:/seplugins/game.txt", g_game_list, g_game_cnt);
+		save_plugin("ef0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
+	} else if(g_type == ON_EH0) {
+		save_plugin("eh0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
+		save_plugin("eh0:/seplugins/game.txt", g_game_list, g_game_cnt);
+		save_plugin("eh0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
+	}
 
 	return 0;
 }
@@ -233,12 +251,13 @@ static void create_submenus(struct Menu *menu)
 		return;
 	}
 
-	menu->submenu = entry;
-	menu->submenu_size = total;
-
+	memset(entry, 0, total * sizeof(entry[0]));
 	create_submenu(entry, g_vsh_list, g_vsh_cnt);
 	create_submenu(entry+g_vsh_cnt, g_game_list, g_game_cnt);
 	create_submenu(entry+g_vsh_cnt+g_game_cnt, g_pops_list, g_pops_cnt);
+
+	menu->submenu = entry;
+	menu->submenu_size = total;
 }
 
 static struct MenuEntry g_plugins_pspgo[] = {
@@ -320,9 +339,9 @@ static int plugins_menu_on_device(struct MenuEntry *entry, struct Menu *menu, co
 
 	sprintf(path, "%s/seplugins/vsh.txt", devicename);
 	load_plugins(path, g_vsh_list, &g_vsh_cnt, TYPE_VSH);
-	sprintf(path, "%s/seplugins/vsh.txt", devicename);
+	sprintf(path, "%s/seplugins/game.txt", devicename);
 	load_plugins(path, g_game_list, &g_game_cnt, TYPE_GAME);
-	sprintf(path, "%s/seplugins/vsh.txt", devicename);
+	sprintf(path, "%s/seplugins/pops.txt", devicename);
 	load_plugins(path, g_pops_list, &g_pops_cnt, TYPE_POPS);
 	create_submenus(menu);
 
@@ -337,16 +356,22 @@ static int plugins_menu_on_device(struct MenuEntry *entry, struct Menu *menu, co
 
 static int plugins_ef0_menu(struct MenuEntry *entry)
 {
+	g_type = ON_EF0;
+
 	return plugins_menu_on_device(entry, &g_ef0_plugins_menu, "ef0:");
 }
 
 static int plugins_eh0_menu(struct MenuEntry *entry)
 {
+	g_type = ON_EH0;
+
 	return plugins_menu_on_device(entry, &g_eh0_plugins_menu, "eh0:");
 }
 
 static int plugins_ms0_menu(struct MenuEntry *entry)
 {
+	g_type = ON_MS0;
+
 	return plugins_menu_on_device(entry, &g_ms0_plugins_menu, "ms0:");
 }
 

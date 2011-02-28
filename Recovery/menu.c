@@ -23,6 +23,7 @@ extern int scePowerRequestSuspend(void);
 static int configuration_menu(struct MenuEntry *entry);
 static int registery_hack_menu(struct MenuEntry *entry);
 static int cpu_speed_menu(struct MenuEntry *entry);
+static int advanced_menu(struct MenuEntry *entry);
 
 static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
@@ -139,6 +140,24 @@ static int display_flash_protect(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static struct MenuEntry g_configuration_menu_entries[] = {
+	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
+	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
+	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
+	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
+	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
+	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
+	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect },
+};
+
+static struct Menu g_configuration_menu = {
+	"Configuration",
+	g_configuration_menu_entries,
+	NELEMS(g_configuration_menu_entries),
+	0,
+	0xFF,
+};
+
 static int display_xmb_plugin(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "XMB Plugin (%s)", get_bool_name(g_config.plugvsh));
@@ -175,26 +194,30 @@ static struct ValueOption g_pops_plugin_option = {
 	2,
 };
 
-static struct MenuEntry g_configuration_menu_entries[] = {
-	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
-	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
-	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
-	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
-	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
-	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
-	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect },
+static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
 	{ NULL, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
 };
 
-static struct Menu g_configuration_menu = {
-	"Configuration",
-	g_configuration_menu_entries,
-	NELEMS(g_configuration_menu_entries),
+static struct Menu g_advanced_menu = {
+	"Advanced",
+	g_advanced_menu_entries,
+	NELEMS(g_advanced_menu_entries),
 	0,
 	0xFF,
 };
+
+static int advanced_menu(struct MenuEntry *entry)
+{
+	struct Menu *menu = &g_advanced_menu;
+
+	menu->cur_sel = 0;
+	menu_loop(menu);
+	sctrlSESetConfig(&g_config);
+
+	return 0;
+}
 
 static int shutdown_device(struct MenuEntry *entry)
 {
@@ -234,6 +257,7 @@ static int reset_vsh(struct MenuEntry *entry)
 
 static struct MenuEntry g_top_menu_entries[] = {
 	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
+	{ "Advanced", 1, 0, NULL, NULL, &advanced_menu, NULL},
 	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
 	{ "Plugins", 1, 0, NULL, NULL, &plugins_menu, NULL },
 	{ "Registery hacks", 1, 0, NULL, NULL, &registery_hack_menu, NULL },

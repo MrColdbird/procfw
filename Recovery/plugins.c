@@ -31,6 +31,10 @@ static struct Plugin *g_pops_list;
 
 static int g_vsh_cnt, g_game_cnt, g_pops_cnt;
 
+static int plugins_ef0_menu(struct MenuEntry *entry);
+static int plugins_eh0_menu(struct MenuEntry *entry);
+static int plugins_ms0_menu(struct MenuEntry *entry);
+
 static struct Menu g_plugins_menu = {
 	"Plugins",
 	NULL,
@@ -199,28 +203,25 @@ static void create_submenu(struct MenuEntry *entry, struct Plugin *plugins, int 
 	}
 }
 
-static void del_submenu(void)
+static void free_submenu(struct Menu *menu)
 {
 	int i;
-	struct MenuEntry *entry;
 
-	if(g_plugins_menu.submenu == NULL) {
+	if(menu->submenu == NULL) {
 		return;
 	}
 
-	for(i=0; i<g_plugins_menu.submenu_size; ++i) {
-		if(g_plugins_menu.submenu->info != NULL) {
-			vpl_free(g_plugins_menu.submenu->info);
+	for(i=0; i<menu->submenu_size; ++i) {
+		if(menu->submenu->info != NULL) {
+			vpl_free(menu->submenu->info);
 		}
-
-		entry++;
 	}
 
-	g_plugins_menu.submenu = NULL;
-	g_plugins_menu.submenu_size = 0;
+	menu->submenu = NULL;
+	menu->submenu_size = 0;
 }
 
-static void create_menu(void)
+static void create_submenus(struct Menu *menu)
 {
 	struct MenuEntry *entry;
 	int total;
@@ -232,50 +233,40 @@ static void create_menu(void)
 		return;
 	}
 
-	g_plugins_menu.submenu = entry;
-	g_plugins_menu.submenu_size = total;
+	menu->submenu = entry;
+	menu->submenu_size = total;
 
 	create_submenu(entry, g_vsh_list, g_vsh_cnt);
 	create_submenu(entry+g_vsh_cnt, g_game_list, g_game_cnt);
 	create_submenu(entry+g_vsh_cnt+g_game_cnt, g_pops_list, g_pops_cnt);
 }
 
-int plugins_menu(struct MenuEntry *entry)
-{
-	struct Menu *menu = &g_plugins_menu;
-	int psp_model;
+static struct MenuEntry g_plugins_pspgo[] = {
+	{ "System storage", 1, 0, NULL, NULL, &plugins_ef0_menu, NULL},
+	{ "Memory stick", 1, 0, NULL, NULL, &plugins_eh0_menu, NULL},
+};
 
+int init_plugin_list(void)
+{
 	g_vsh_list = vpl_alloc(sizeof(g_vsh_list[0]) * MAX_PLUGINS_SIZE);
 	g_game_list = vpl_alloc(sizeof(g_game_list[0]) * MAX_PLUGINS_SIZE);
 	g_pops_list = vpl_alloc(sizeof(g_pops_list[0]) * MAX_PLUGINS_SIZE);
 
 	if(g_vsh_list == NULL || g_game_list == NULL || g_pops_list == NULL) {
-		goto exit;
+		return -1;
 	}
 
 	memset(g_vsh_list, 0, sizeof(g_vsh_list[0]) * MAX_PLUGINS_SIZE);
 	memset(g_game_list, 0, sizeof(g_game_list[0]) * MAX_PLUGINS_SIZE);
 	memset(g_pops_list, 0, sizeof(g_pops_list[0]) * MAX_PLUGINS_SIZE);
 
-	psp_model = kuKernelGetModel();
+	g_vsh_cnt = g_game_cnt = g_pops_cnt = 0;
 
-	if(psp_model == PSP_GO) {
-		load_plugins("ef0:/seplugins/vsh.txt", g_vsh_list, &g_vsh_cnt, TYPE_VSH);
-		load_plugins("ef0:/seplugins/game.txt", g_game_list, &g_game_cnt, TYPE_GAME);
-		load_plugins("ef0:/seplugins/pops.txt", g_pops_list, &g_pops_cnt, TYPE_POPS);
-		create_menu();
-	} else {
-		load_plugins("ms0:/seplugins/vsh.txt", g_vsh_list, &g_vsh_cnt, TYPE_VSH);
-		load_plugins("ms0:/seplugins/game.txt", g_game_list, &g_game_cnt, TYPE_GAME);
-		load_plugins("ms0:/seplugins/pops.txt", g_pops_list, &g_pops_cnt, TYPE_POPS);
-		create_menu();
-	}
+	return 0;
+}
 
-	menu->cur_sel = 0;
-	menu_loop(menu);
-	del_submenu();
-
-exit:
+void free_plugin_list(void)
+{
 	if(g_vsh_list != NULL) {
 		vpl_free(g_vsh_list);
 		g_vsh_list = NULL;
@@ -290,6 +281,92 @@ exit:
 		vpl_free(g_pops_list);
 		g_pops_list = NULL;
 	}
+}
+
+static struct Menu g_ef0_plugins_menu = {
+	"Plugins on system storage",
+	NULL,
+	0,
+	0,
+	0xFF,
+};
+
+static struct Menu g_eh0_plugins_menu = {
+	"Plugins on memory stick",
+	NULL,
+	0,
+	0,
+	0xFF,
+};
+
+static struct Menu g_ms0_plugins_menu = {
+	"Plugins",
+	NULL,
+	0,
+	0,
+	0xFF,
+};
+
+static int plugins_menu_on_device(struct MenuEntry *entry, struct Menu *menu, const char *devicename)
+{
+	int ret;
+	char path[256];
+
+	ret = init_plugin_list();
+
+	if(ret < 0) {
+		return ret;
+	}
+
+	sprintf(path, "%s/seplugins/vsh.txt", devicename);
+	load_plugins(path, g_vsh_list, &g_vsh_cnt, TYPE_VSH);
+	sprintf(path, "%s/seplugins/vsh.txt", devicename);
+	load_plugins(path, g_game_list, &g_game_cnt, TYPE_GAME);
+	sprintf(path, "%s/seplugins/vsh.txt", devicename);
+	load_plugins(path, g_pops_list, &g_pops_cnt, TYPE_POPS);
+	create_submenus(menu);
+
+	menu->cur_sel = 0;
+	menu_loop(menu);
+
+	free_submenu(menu);
+	free_plugin_list();
 
 	return 0;
+}
+
+static int plugins_ef0_menu(struct MenuEntry *entry)
+{
+	return plugins_menu_on_device(entry, &g_ef0_plugins_menu, "ef0:");
+}
+
+static int plugins_eh0_menu(struct MenuEntry *entry)
+{
+	return plugins_menu_on_device(entry, &g_eh0_plugins_menu, "eh0:");
+}
+
+static int plugins_ms0_menu(struct MenuEntry *entry)
+{
+	return plugins_menu_on_device(entry, &g_ms0_plugins_menu, "ms0:");
+}
+
+int plugins_menu(struct MenuEntry *entry)
+{
+	int psp_model;
+
+	psp_model = kuKernelGetModel();
+
+	if(psp_model == PSP_GO) {
+		struct Menu *menu = &g_plugins_menu;
+
+		menu->submenu = g_plugins_pspgo;
+		menu->submenu_size = NELEMS(g_plugins_pspgo);
+		menu->cur_sel = 0;
+
+		menu_loop(menu);
+
+		return 0;
+	}
+
+	return plugins_ms0_menu(entry);
 }

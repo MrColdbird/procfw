@@ -6,11 +6,17 @@ enum {
 	TYPE_SUBMENU = 1,
 };
 
+enum {
+	TYPE_VSH = 0,
+	TYPE_GAME,
+	TYPE_POPS,
+};
+
 struct MenuEntry {
 	char *info;
 	int type;
 	int color;
-	int (*display_callback)(char *, int);
+	int (*display_callback)(struct MenuEntry*, char *, int);
 	int (*change_value_callback)(struct MenuEntry *, int);
 	int (*enter_callback)(struct MenuEntry *);
 	void *arg;
@@ -72,6 +78,7 @@ int get_cpu_number(int cpu);
 int get_bus_number(int cpu);
 int get_cpu_freq(int number);
 int get_bus_freq(int number);
+const char *get_plugin_name(int type);
 
 void suspend_vsh_thread(void);
 void resume_vsh_thread(void);
@@ -80,5 +87,7 @@ void recovery_exit(void);
 
 int get_registry_value(const char *dir, const char *name, unsigned int *val);
 int set_registry_value(const char *dir, const char *name, unsigned int val);
+
+int plugins_menu(struct MenuEntry *entry);
 
 #endif

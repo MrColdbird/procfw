@@ -24,7 +24,7 @@ static int configuration_menu(struct MenuEntry *entry);
 static int registery_hack_menu(struct MenuEntry *entry);
 static int cpu_speed_menu(struct MenuEntry *entry);
 
-static int display_fake_region(char *buf, int size)
+static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Fake region (%s)", get_fake_region_name(g_config.fakeregion));
 
@@ -59,7 +59,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 	p = buf + strlen(buf);
 
 	if(entry->display_callback != NULL) {
-		(entry->display_callback)(p, sizeof(buf) - (p - buf));
+		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
 	} else {
 		strcpy(p, entry->info);
 	}
@@ -97,63 +97,63 @@ static struct ValueOption g_flash_protect = {
 	2,
 };
 
-static int display_iso_mode(char *buf, int size)
+static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "ISO mode (%s)", get_iso_name(g_config.umdmode));
 
 	return 0;
 }
 
-static int display_usb_charge(char *buf, int size)
+static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Charge battery when USB cable plugged (%s)", get_bool_name(g_config.usbcharge));
 
 	return 0;
 }
 
-static int display_hidden_mac(char *buf, int size)
+static int display_hidden_mac(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Hide MAC address (%s)", get_bool_name(g_config.machidden));
 
 	return 0;
 }
 
-static int display_skip_gameboot(char *buf, int size)
+static int display_skip_gameboot(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Skip Game Boot Screen (%s)", get_bool_name(g_config.skipgameboot));
 
 	return 0;
 }
 
-static int display_hide_pic(char *buf, int size)
+static int display_hide_pic(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Hide PIC0.PNG and PIC1.PNG in game menu (%s)", get_bool_name(g_config.hidepic));
 
 	return 0;
 }
 
-static int display_flash_protect(char *buf, int size)
+static int display_flash_protect(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Protect flash in USB device mount (%s)", get_bool_name(g_config.flashprot));
 
 	return 0;
 }
 
-static int display_xmb_plugin(char *buf, int size)
+static int display_xmb_plugin(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "XMB Plugin (%s)", get_bool_name(g_config.plugvsh));
 
 	return 0;
 }
 
-static int display_game_plugin(char *buf, int size)
+static int display_game_plugin(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Game Plugin (%s)", get_bool_name(g_config.pluggame));
 
 	return 0;
 }
 
-static int display_pops_plugin(char *buf, int size)
+static int display_pops_plugin(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Pops Plugin (%s)", get_bool_name(g_config.plugpop));
 
@@ -235,7 +235,7 @@ static int reset_vsh(struct MenuEntry *entry)
 static struct MenuEntry g_top_menu_entries[] = {
 	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
 	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
-	{ "Plugins", 1, 0, NULL, NULL, NULL, NULL },
+	{ "Plugins", 1, 0, NULL, NULL, &plugins_menu, NULL },
 	{ "Registery hacks", 1, 0, NULL, NULL, &registery_hack_menu, NULL },
 	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
 	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
@@ -264,7 +264,7 @@ static int configuration_menu(struct MenuEntry *entry)
 
 static int g_xmb_clock_number, g_game_clock_number;
 
-static int display_xmb(char *buf, int size)
+static int display_xmb(struct MenuEntry* entry, char *buf, int size)
 {
 	int cpu, bus;
 
@@ -280,7 +280,7 @@ static int display_xmb(char *buf, int size)
 	return 0;
 }
 
-static int display_game(char *buf, int size)
+static int display_game(struct MenuEntry* entry, char *buf, int size)
 {
 	int cpu, bus;
 

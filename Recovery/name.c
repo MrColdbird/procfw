@@ -22,10 +22,10 @@ static const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
 const char *get_bool_name(int boolean)
 {
 	if(boolean) {
-		return "ON";
+		return "Enabled";
 	}
 
-	return "OFF";
+	return "Disabled";
 }
 
 const char* get_fake_region_name(int fakeregion)
@@ -110,4 +110,18 @@ int get_bus_freq(int number)
 	}
 
 	return 0;
+}
+
+const char *get_plugin_name(int type)
+{
+	switch(type) {
+		case TYPE_VSH:
+			return "VSH";
+		case TYPE_GAME:
+			return "GAME";
+		case TYPE_POPS:
+			return "POPS";
+	}
+
+	return "FIXME";
 }

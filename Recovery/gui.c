@@ -69,32 +69,35 @@ static void menu_draw(struct Menu *menu)
 	for(i=0; i<menu->submenu_size; ++i) {
 		char buf[256], *p;
 		int color;
+		struct MenuEntry* entry;
+
+		entry = &menu->submenu[i];
 
 		if(menu->cur_sel == i) {
 			color = CUR_SEL_COLOR;
 			strcpy(buf, "* ");
 		}
 		else {
-			color = menu->submenu[i].color;
+			color = entry->color;
 			strcpy(buf, "  ");
 		}
 
 		p = buf + strlen(buf);
 
-		if(menu->submenu[i].info != NULL) {
-			sprintf(p, "%s", menu->submenu[i].info);
+		if(entry->info != NULL) {
+			sprintf(p, "%s", entry->info);
 		} else {
-			int (*display_callback)(char *, int);
+			int (*display_callback)(struct MenuEntry* , char *, int);
 			
-			display_callback = (*menu->submenu[i].display_callback);
+			display_callback = (*entry->display_callback);
 			if (display_callback != NULL) {
-				(*display_callback)(p, sizeof(buf) - (p - buf));
+				(*display_callback)(entry, p, sizeof(buf) - (p - buf));
 			} else {
 				strcpy(p, "FIXME");
 			}
 		}
 
-		if(menu->submenu[i].type == TYPE_SUBMENU) {
+		if(entry->type == TYPE_SUBMENU) {
 			strcat(p, " ->");
 		}
 

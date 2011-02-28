@@ -210,6 +210,16 @@ static void patch_game_plugin_module(u32 text_addr)
 		_sw(MAKE_CALL(text_addr+0x00019294), text_addr + 0x00018F14);
 		_sw(0x24040002, text_addr + 0x00018F18);
 	}
+
+	// disable check for custom psx eboot restore 
+	// rif file check
+	_sw(0x00001021, text_addr+0x000203AC);
+	// rif content memcmp check
+	_sw(NOP, text_addr+0x000203D4);
+	// some type check, branch it
+	_sw(0x10000010, text_addr+0x000203E8);
+	// fake npdrm call
+	_sw(0x00001021, text_addr+0x0002042C);
 }
 
 static void patch_msvideo_main_plugin_module(u32 text_addr)

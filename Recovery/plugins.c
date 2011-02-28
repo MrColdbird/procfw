@@ -174,20 +174,28 @@ static int save_plugins(void)
 	return 0;
 }
 
+static int change_value_callback(struct MenuEntry *entry, int direct)
+{
+	struct Plugin *plugin = (struct Plugin*)entry->arg;
+
+	plugin->enabled = limit_int(plugin->enabled, direct, 2);
+	save_plugins();
+
+	return 0;
+}
+
 static int enter_callback(struct MenuEntry *entry)
 {
 	char buf[256];
-	struct Plugin *plugin = (struct Plugin*)entry->arg;
-
-	plugin->enabled = limit_int(plugin->enabled, 1, 2);
+	
+	change_value_callback(entry, 1);
 
 	(*entry->display_callback)(entry, buf, 256);
 	set_bottom_info(buf, 0);
 	frame_end();
-	save_plugins();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
-	
+
 	return 0;
 }
 
@@ -215,6 +223,7 @@ static void create_submenu(struct MenuEntry *entry, struct Plugin *plugins, int 
 
 	for(i=0; i<plugins_cnt; ++i) {
 		entry->display_callback = &display_callback;
+		entry->change_value_callback = &change_value_callback;
 		entry->enter_callback = &enter_callback;
 		entry->arg = &plugins[i];
 		entry++;

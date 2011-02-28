@@ -107,7 +107,7 @@ static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
 
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Charge battery when USB cable plugged (%s)", get_bool_name(g_config.usbcharge));
+	sprintf(buf, "Charge battery when USB cable is plugged in (%s)", get_bool_name(g_config.usbcharge));
 
 	return 0;
 }
@@ -260,7 +260,7 @@ static struct MenuEntry g_top_menu_entries[] = {
 	{ "Advanced", 1, 0, NULL, NULL, &advanced_menu, NULL},
 	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
 	{ "Plugins", 1, 0, NULL, NULL, &plugins_menu, NULL },
-	{ "Registery hacks", 1, 0, NULL, NULL, &registery_hack_menu, NULL },
+	{ "Registry hacks", 1, 0, NULL, NULL, &registery_hack_menu, NULL },
 	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
 	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
 	{ "Reset device", 0, 0, NULL, NULL, &reset_device, NULL },
@@ -390,7 +390,7 @@ static int cpu_speed_menu(struct MenuEntry *entry)
 static int active_wma(struct MenuEntry *entry)
 {
 	set_registry_value("/CONFIG/MUSIC", "wma_play", 1);
-	set_bottom_info("WMA actived", 0);
+	set_bottom_info("WMA activated", 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -402,7 +402,7 @@ static int active_flash(struct MenuEntry *entry)
 {
 	set_registry_value("/CONFIG/BROWSER", "flash_activated", 1);
 	set_registry_value("/CONFIG/BROWSER", "flash_play", 1);
-	set_bottom_info("Flash actived", 0);
+	set_bottom_info("Flash activated", 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -426,13 +426,13 @@ static int swap_buttons(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_registery_menu_entries[] = {
-	{ "Active WMA", 0, 0, NULL, NULL, &active_wma, NULL },
-	{ "Active Flash", 0, 0, NULL, NULL, &active_flash, NULL },
+	{ "Activate WMA", 0, 0, NULL, NULL, &active_wma, NULL },
+	{ "Activate Flash", 0, 0, NULL, NULL, &active_flash, NULL },
 	{ "Swap O/X buttons", 0, 0, NULL, NULL, &swap_buttons, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {
-	"Registery Hack",
+	"Registry Hack",
 	g_registery_menu_entries,
 	NELEMS(g_registery_menu_entries),
 	0,

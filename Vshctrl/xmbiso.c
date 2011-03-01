@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <pspsdk.h>
 #include "virtual_pbp.h"
+#include "strsafe.h"
 
 #define MAGIC_DFD_FOR_DELETE 0x9000
 #define MAGIC_DFD_FOR_DELETE_2 0x9001
@@ -17,6 +18,7 @@
 static char g_iso_dir[128];
 static char g_temp_delete_dir[128];
 static int g_delete_eboot_injected = 0;
+static SceUID g_iso_dfd = -1;
 
 static int is_iso_dir(const char *path)
 {
@@ -33,10 +35,13 @@ static int is_iso_dir(const char *path)
 	if (p <= path + 1 || p[-1] != ':')
 		return 0;
 
-	if (0 != strncmp(p, "/PSP/GAME/" ISO_ID, sizeof("/PSP/GAME/" ISO_ID)-1))
-		return 0;
+	p = strstr(p, ISO_ID);
 
-	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
+	if (NULL == p) {
+		return 0;
+	}
+
+	p += sizeof(ISO_ID) - 1;
 	p += 8;
 
 	while(*p != '\0' && *p == '/')
@@ -63,14 +68,50 @@ static int is_iso_eboot(const char* path)
 	if (p <= path + 1 || p[-1] != ':')
 		return 0;
 
-	if (0 != strncmp(p, "/PSP/GAME/" ISO_ID, sizeof("/PSP/GAME/" ISO_ID)-1))
-		return 0;
+	p = strstr(p, ISO_ID);
 
-	p += sizeof("/PSP/GAME/" ISO_ID) - 1;
+	if (NULL == p) {
+		return 0;
+	}
+
+	p += sizeof(ISO_ID) - 1;
 	p += 8;
 
 	if (0 != strcmp(p, "/EBOOT.PBP"))
 		return 0;
+
+	return 1;
+}
+
+static inline int is_game_dir(const char *dirname)
+{
+	const char *p;
+	char path[256];
+	SceIoStat stat;
+
+	p = strchr(dirname, '/');
+
+	if (p == NULL) {
+		return 0;
+	}
+
+	if (0 != strnicmp(p, "/PSP/GAME", sizeof("/PSP/GAME")-1)) {
+		return 0;
+	}
+
+	STRCPY_S(path, dirname);
+	STRCAT_S(path, "/EBOOT.PBP");
+
+	if(0 == sceIoGetstat(path, &stat)) {
+		return 0;
+	}
+
+	STRCPY_S(path, dirname);
+	STRCAT_S(path, "/PARAM.PBP");
+
+	if(0 == sceIoGetstat(path, &stat)) {
+		return 0;
+	}
 
 	return 1;
 }
@@ -98,9 +139,30 @@ SceUID gamedopen(const char * dirname)
 		return result;
 	}
    
-	k1 = pspSdkSetK1(0);
-	result = vpbp_dopen(dirname);
-	pspSdkSetK1(k1);
+	if(is_game_dir(dirname)) {
+		char path[256];
+		const char *p;
+		
+		get_device_name(path, sizeof(path), dirname);
+		STRCAT_S(path, "/ISO");
+
+		p = strstr(dirname, "/PSP/GAME");
+
+		if(p != NULL) {
+			p += sizeof("/PSP/GAME") - 1;
+			STRCAT_S(path, p);
+		}
+
+		k1 = pspSdkSetK1(0);
+		g_iso_dfd = vpbp_dopen(path);
+		pspSdkSetK1(k1);
+
+		if(result < 0) {
+			result = g_iso_dfd;
+		}
+	}
+
+	result = sceIoDopen(dirname);
 
 //	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
 
@@ -112,7 +174,7 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 {
 	int result;
 	u32 k1;
-   
+
 	if(fd == MAGIC_DFD_FOR_DELETE || fd == MAGIC_DFD_FOR_DELETE_2) {
 		if (0 == g_delete_eboot_injected) {
 			u32 k1;
@@ -139,10 +201,13 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 		return result;
 	}
 
-	k1 = pspSdkSetK1(0);
-	result = vpbp_dread(fd, dir);
-	pspSdkSetK1(k1);
+	result = sceIoDread(fd, dir);
 
+	if(result <= 0) {
+		k1 = pspSdkSetK1(0);
+		result = vpbp_dread(g_iso_dfd, dir);
+		pspSdkSetK1(k1);
+	}
 
 	return result;
 }
@@ -161,9 +226,14 @@ int gamedclose(SceUID fd)
 		return result;
 	}
 	
-	k1 = pspSdkSetK1(0);
-	result = vpbp_dclose(fd);
-	pspSdkSetK1(k1);
+	if(g_iso_dfd >= 0 && g_iso_dfd != result) {
+		k1 = pspSdkSetK1(0);
+		vpbp_dclose(g_iso_dfd);
+		pspSdkSetK1(k1);
+		g_iso_dfd = -1;
+	}
+
+	result = sceIoDclose(fd);
 
 	return result;
 }

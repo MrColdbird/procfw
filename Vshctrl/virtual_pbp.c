@@ -106,7 +106,7 @@ static u8 virtualsfo[408] = {
 VirtualPBP *g_vpbps = NULL;
 int g_vpbps_cnt = 0;
 static int g_sema = -1;
-static int g_gamedfd = -1, g_gamedfd_is_ef0 = 0;
+static int g_gamedfd_is_ef0 = 0;
 static VirtualPBP *g_caches = NULL;
 static u32 g_caches_cnt;
 static u8 g_referenced[32];
@@ -448,16 +448,9 @@ static int rebuild_vpbps(const char *dirname)
 {
 	SceUID dfd;
 	int ret, i, nextdir;
-	char isopath[20];
 	SceIoDirent dir;
 	
-	ret = get_device_name(isopath, sizeof(isopath), dirname);
-
-	if (ret < 0)
-		return -32;
-
-	STRCAT_S(isopath, "/ISO");
-	dfd = sceIoDopen(isopath);
+	dfd = sceIoDopen(dirname);
 	
 	if (dfd < 0)
 		return dfd;
@@ -490,7 +483,7 @@ static int rebuild_vpbps(const char *dirname)
 	}
 
 	memset(g_vpbps, 0, g_vpbps_cnt * sizeof(g_vpbps[0]));
-	dfd = sceIoDopen(isopath);
+	dfd = sceIoDopen(dirname);
 
 	i = 0;
 	
@@ -503,7 +496,7 @@ static int rebuild_vpbps(const char *dirname)
 
 			vpbp = &g_vpbps[i];
 
-			STRCPY_S(vpbp->name, isopath);
+			STRCPY_S(vpbp->name, dirname);
 			STRCAT_S(vpbp->name, "/");
 			STRCAT_S(vpbp->name, dir.d_name);
 			memcpy(&vpbp->ctime, &dir.d_stat.st_ctime, sizeof(vpbp->ctime));
@@ -526,23 +519,6 @@ static int rebuild_vpbps(const char *dirname)
 	} while(nextdir > 0);
 
 	sceIoDclose(dfd);
-
-	return 0;
-}
-
-static inline int check_path_is_game(const char *dirname)
-{
-	const char *p;
-
-	p = strchr(dirname, '/');
-
-	if (p == NULL) {
-		return 0;
-	}
-
-	if (0 == stricmp(p, "/PSP/GAME")) {
-		return 1;
-	}
 
 	return 0;
 }
@@ -990,37 +966,60 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 static void _vpbp_dopen(void *_dirname)
 {
+	int ret;
 	const char * dirname = _dirname;
 
 	load_cache();
 	rebuild_vpbps(dirname);
+
+	ret = get_device_name(devicename, sizeof(devicename), dirname);
+
+	if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
+		g_gamedfd_is_ef0 = 1;
+	} else {
+		g_gamedfd_is_ef0 = 0;
+	}
 }
 
 SceUID vpbp_dopen(const char * dirname)
 {
 	SceUID result;
 	char devicename[20];
-	int ret;
 
 	lock();
-
 	result = sceIoDopen(dirname);
-
-	if (check_path_is_game(dirname)) {
-		sceKernelExtendKernelStack(0x1800, &_vpbp_dopen, (void*)dirname);
-		g_gamedfd = result;
-		ret = get_device_name(devicename, sizeof(devicename), dirname);
-
-		if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
-			g_gamedfd_is_ef0 = 1;
-		} else {
-			g_gamedfd_is_ef0 = 0;
-		}
-	}
-
+	sceKernelExtendKernelStack(0x1800, &_vpbp_dopen, (void*)dirname);
 	unlock();
 
 	return result;
+}
+
+static int get_iso_sub_name(char *sub, int size, const char *path)
+{
+	const char *p, *q;
+	
+	p = strchr(path, '/');
+
+	if(p == NULL)
+		return 0;
+
+	p++;
+	p = strchr(p, '/');
+
+	if(p == NULL)
+		return 0;
+
+	p++;
+	q = strchr(p, '/');
+
+	if(q == NULL)
+		return 0;
+
+	memset(sub, 0, size);
+	strncpy_s(sub, size, p, q-p);
+	printk("%s: %s\n", __func__, sub);
+
+	return 1;
 }
 
 int vpbp_dread(SceUID fd, SceIoDirent * dir)
@@ -1028,12 +1027,13 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	int result;
 	static int cur_idx = 0;
 	char devicename[20];
+	char sub_category[80];
 	int ret, gamedfd_is_ef0;
    
 	lock();
 	result = sceIoDread(fd, dir);
 
-	if (fd == g_gamedfd && result == 0 && g_vpbps != NULL) {
+	if (result == 0 && g_vpbps != NULL) {
 		while(cur_idx < g_vpbps_cnt && !g_vpbps[cur_idx].enabled) {
 			cur_idx++;
 		}
@@ -1052,7 +1052,13 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 			if(gamedfd_is_ef0 == g_gamedfd_is_ef0) {
 				dir->d_stat.st_mode = 0x11FF;
 				dir->d_stat.st_attr = 0x10;
-				sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+
+				if(get_iso_sub_name(sub_category, sizeof(sub_category), vpbp->name)) {
+					sprintf(dir->d_name, "%s/%s%08X", sub_category, ISO_ID, cur_idx);
+				} else {
+					sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+				}
+
 				memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
 				memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
 				memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
@@ -1074,11 +1080,7 @@ int vpbp_dclose(SceUID fd)
 	int result;
 
 	result = sceIoDclose(fd);
-
-	if (fd == g_gamedfd) {
-		save_cache();
-		g_gamedfd = -1;
-	}
+	save_cache();
 
 	return result;
 }
@@ -1096,8 +1098,6 @@ int vpbp_reset(void)
 		g_caches = NULL;
 		g_caches_cnt = 0;
 	}
-
-	g_gamedfd = -1;
 
 	return 0;
 }

@@ -18,8 +18,7 @@
 static char g_iso_dir[128];
 static char g_temp_delete_dir[128];
 static int g_delete_eboot_injected = 0;
-static SceUID g_game_dfd = -1;
-static SceUID g_iso_dfd = -1, g_iso_dfd_2 = -1;
+static SceUID g_iso_dfd = -1;
 
 static int is_iso_dir(const char *path)
 {
@@ -142,21 +141,7 @@ SceUID gamedopen(const char * dirname)
    
 	result = sceIoDopen(dirname);
 	
-	if(0 == stricmp(dirname+4, "/PSP/GAME")) {
-		char path[256];
-		const char *p;
-		
-		get_device_name(path, sizeof(path), dirname);
-		STRCAT_S(path, "/ISO");
-		
-		k1 = pspSdkSetK1(0);
-		g_iso_dfd = vpbp_dopen(path);
-		pspSdkSetK1(k1);
-
-		if(result < 0) {
-			result = g_iso_dfd;
-		}
-	} else if(is_game_dir(dirname)) {
+	if(is_game_dir(dirname)) {
 		char path[256];
 		const char *p;
 		
@@ -171,20 +156,15 @@ SceUID gamedopen(const char * dirname)
 		}
 
 		k1 = pspSdkSetK1(0);
-		g_iso_dfd_2 = vpbp_dopen(path);
+		g_iso_dfd = vpbp_dopen(path);
 		pspSdkSetK1(k1);
 
 		if(result < 0) {
-			result = g_iso_dfd_2;
+			result = g_iso_dfd;
 		}
 	}
 
-	if(0 == stricmp(dirname+4, "/PSP/GAME") && result >= 0) {
-		g_game_dfd = result;
-	}
-	
-	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
-	printk("%s: game 0x%08X iso 0x%08X 0x%08X\n", __func__, g_game_dfd, g_iso_dfd, g_iso_dfd_2);
+//	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
 
 	return result;
 }
@@ -225,18 +205,9 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 
 	if(result <= 0) {
 		k1 = pspSdkSetK1(0);
-
-		if (g_game_dfd == fd) {
-			result = vpbp_dread(g_iso_dfd, dir);
-		} else {
-			result = vpbp_dread(g_iso_dfd_2, dir);
-		}
-
+		result = vpbp_dread(g_iso_dfd, dir);
 		pspSdkSetK1(k1);
 	}
-
-	printk("%s: 0x%08X %s -> 0x%08X\n", __func__, fd, dir->d_name, result);
-	printk("%s: game 0x%08X iso 0x%08X 0x0%08X\n", __func__, g_game_dfd, g_iso_dfd, g_iso_dfd_2);
 
 	return result;
 }
@@ -255,21 +226,14 @@ int gamedclose(SceUID fd)
 		return result;
 	}
 	
-	k1 = pspSdkSetK1(0);
-
-	if(g_game_dfd >= 0 && g_game_dfd == fd) {
+	if(g_iso_dfd >= 0 && g_iso_dfd != result) {
+		k1 = pspSdkSetK1(0);
 		vpbp_dclose(g_iso_dfd);
+		pspSdkSetK1(k1);
 		g_iso_dfd = -1;
-		g_game_dfd = -1;
-	} else {
-		vpbp_dclose(g_iso_dfd_2);
-		g_iso_dfd_2 = -1;
 	}
 
 	result = sceIoDclose(fd);
-	pspSdkSetK1(k1);
-	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, result);
-	printk("%s: game 0x%08X iso 0x%08X 0x0%08X\n", __func__, g_game_dfd, g_iso_dfd, g_iso_dfd_2);
 
 	return result;
 }

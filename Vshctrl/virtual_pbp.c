@@ -110,7 +110,7 @@ static VirtualPBP *g_caches = NULL;
 static u32 g_caches_cnt;
 static u8 g_referenced[32];
 static u8 g_need_update = 0;
-static char g_dopen_path[128], g_dopen_path2[128];
+static char g_dopen_path[256];
 
 static inline u32 get_isocache_magic(void)
 {
@@ -913,10 +913,7 @@ SceUID vpbp_dopen(const char * dirname)
 	SceUID result;
 
 	lock();
-
-	STRCPY_S(g_dopen_path2, g_dopen_path);
 	STRCPY_S(g_dopen_path, dirname);
-
 	result = sceIoDopen(dirname);
 	load_cache();
 	unlock();
@@ -1023,7 +1020,6 @@ int vpbp_dclose(SceUID fd)
 
 	result = sceIoDclose(fd);
 	save_cache();
-	STRCPY_S(g_dopen_path, g_dopen_path2);
 
 	return result;
 }

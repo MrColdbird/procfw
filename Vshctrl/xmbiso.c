@@ -139,6 +139,8 @@ SceUID gamedopen(const char * dirname)
 		return result;
 	}
    
+	result = sceIoDopen(dirname);
+	
 	if(is_game_dir(dirname)) {
 		char path[256];
 		const char *p;
@@ -161,8 +163,6 @@ SceUID gamedopen(const char * dirname)
 			result = g_iso_dfd;
 		}
 	}
-
-	result = sceIoDopen(dirname);
 
 //	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
 

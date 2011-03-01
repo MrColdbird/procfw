@@ -968,6 +968,7 @@ static void _vpbp_dopen(void *_dirname)
 {
 	int ret;
 	const char * dirname = _dirname;
+	char devicename[20];
 
 	load_cache();
 	rebuild_vpbps(dirname);

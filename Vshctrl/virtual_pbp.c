@@ -106,11 +106,11 @@ static u8 virtualsfo[408] = {
 VirtualPBP *g_vpbps = NULL;
 int g_vpbps_cnt = 0;
 static int g_sema = -1;
-static int g_gamedfd_is_ef0 = 0;
 static VirtualPBP *g_caches = NULL;
 static u32 g_caches_cnt;
 static u8 g_referenced[32];
 static u8 g_need_update = 0;
+static char g_dopen_path[256];
 
 static inline u32 get_isocache_magic(void)
 {
@@ -444,83 +444,27 @@ static int build_vpbp(VirtualPBP *vpbp)
 	return ret;
 }
 
-static int rebuild_vpbps(const char *dirname)
+void *oe_realloc(void *ptr, int size)
 {
-	SceUID dfd;
-	int ret, i, nextdir;
-	SceIoDirent dir;
+	void *p;
 	
-	dfd = sceIoDopen(dirname);
-	
-	if (dfd < 0)
-		return dfd;
+	p = oe_malloc(size);
 
-	i = 0;
-
-	do {
-		memset(&dir, 0, sizeof(dir));
-		ret = sceIoDread(dfd, &dir);
-
-		if (is_iso(&dir)) {
-			i++;
-		}
-	} while(ret > 0);
-
-	g_vpbps_cnt = i;
-	printk("%s: have %d ISO(s)\n", __func__, g_vpbps_cnt);
-	sceIoDclose(dfd);
-
-	if (g_vpbps != NULL) {
-		oe_free(g_vpbps);
+	if(p != NULL && ptr != NULL) {
+		memcpy(p, ptr, size);
+		oe_free(ptr);
 	}
 
-	g_vpbps = oe_malloc(g_vpbps_cnt * sizeof(g_vpbps[0]));
+	return p;
+}
 
-	if (g_vpbps == NULL) {
-		printk("%s: g_vpbps cannot allocate\n", __func__);
+static VirtualPBP *vpbp_realloc(VirtualPBP *vpbp, int size)
+{
+	VirtualPBP *v;
 
-		return -20;
-	}
+	v = (VirtualPBP*) oe_realloc(vpbp, size * sizeof(vpbp[0]));
 
-	memset(g_vpbps, 0, g_vpbps_cnt * sizeof(g_vpbps[0]));
-	dfd = sceIoDopen(dirname);
-
-	i = 0;
-	
-	do {
-		memset(&dir, 0, sizeof(dir));
-		nextdir = sceIoDread(dfd, &dir);
-
-		if (is_iso(&dir)) {
-			VirtualPBP *vpbp;
-
-			vpbp = &g_vpbps[i];
-
-			STRCPY_S(vpbp->name, dirname);
-			STRCAT_S(vpbp->name, "/");
-			STRCAT_S(vpbp->name, dir.d_name);
-			memcpy(&vpbp->ctime, &dir.d_stat.st_ctime, sizeof(vpbp->ctime));
-			memcpy(&vpbp->mtime, &dir.d_stat.st_mtime, sizeof(vpbp->mtime));
-
-			ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
-
-			if (ret < 0) {
-				ret = build_vpbp(vpbp);
-
-				if (ret < 0) {
-					continue;
-				}
-			}
-
-			printk("%s: ISO %s -> %s%08X added\n",
-				   	__func__, vpbp->name, ISO_ID, i);
-			i++;
-		}
-	} while(nextdir > 0);
-
-	sceIoDclose(dfd);
-
-	return 0;
+	return v;
 }
 
 int vpbp_init(void)
@@ -964,32 +908,14 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	return ret;
 }
 
-static void _vpbp_dopen(void *_dirname)
-{
-	int ret;
-	const char * dirname = _dirname;
-	char devicename[20];
-
-	load_cache();
-	rebuild_vpbps(dirname);
-
-	ret = get_device_name(devicename, sizeof(devicename), dirname);
-
-	if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
-		g_gamedfd_is_ef0 = 1;
-	} else {
-		g_gamedfd_is_ef0 = 0;
-	}
-}
-
 SceUID vpbp_dopen(const char * dirname)
 {
 	SceUID result;
-	char devicename[20];
 
 	lock();
+	STRCPY_S(g_dopen_path, dirname);
 	result = sceIoDopen(dirname);
-	sceKernelExtendKernelStack(0x1800, &_vpbp_dopen, (void*)dirname);
+	load_cache();
 	unlock();
 
 	return result;
@@ -1026,51 +952,63 @@ static int get_iso_sub_name(char *sub, int size, const char *path)
 int vpbp_dread(SceUID fd, SceIoDirent * dir)
 {
 	int result;
-	static int cur_idx = 0;
-	char devicename[20];
+	int cur_idx;
 	char sub_category[80];
-	int ret, gamedfd_is_ef0;
+	int ret;
    
 	lock();
 	result = sceIoDread(fd, dir);
 
-	if (result == 0 && g_vpbps != NULL) {
-		while(cur_idx < g_vpbps_cnt && !g_vpbps[cur_idx].enabled) {
-			cur_idx++;
+	if (result > 0 && is_iso(dir)) {
+		VirtualPBP *vpbp;
+
+		vpbp = vpbp_realloc(g_vpbps, g_vpbps_cnt+1);
+
+		if(vpbp == NULL) {
+			result = -42;
+			goto exit;
 		}
-		
-		if (cur_idx < g_vpbps_cnt) {
-			VirtualPBP *vpbp = &g_vpbps[cur_idx];
 
-			ret = get_device_name(devicename, sizeof(devicename), vpbp->name);
+		g_vpbps = vpbp;
+		g_vpbps_cnt++;
+		cur_idx = g_vpbps_cnt-1;
+		vpbp = &g_vpbps[cur_idx];
 
-			if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
-				gamedfd_is_ef0 = 1;
-			} else {
-				gamedfd_is_ef0 = 0;
-			}
+		STRCPY_S(vpbp->name, g_dopen_path);
+		STRCAT_S(vpbp->name, "/");
+		STRCAT_S(vpbp->name, dir->d_name);
+		memcpy(&vpbp->ctime, &dir->d_stat.st_ctime, sizeof(vpbp->ctime));
+		memcpy(&vpbp->mtime, &dir->d_stat.st_mtime, sizeof(vpbp->mtime));
 
-			if(gamedfd_is_ef0 == g_gamedfd_is_ef0) {
-				dir->d_stat.st_mode = 0x11FF;
-				dir->d_stat.st_attr = 0x10;
+		ret = get_cache(vpbp->name, &vpbp->mtime, vpbp);
 
-				if(get_iso_sub_name(sub_category, sizeof(sub_category), vpbp->name)) {
-					sprintf(dir->d_name, "%s/%s%08X", sub_category, ISO_ID, cur_idx);
-				} else {
-					sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
-				}
+		if (ret < 0) {
+			ret = build_vpbp(vpbp);
 
-				memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
-				memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
-				memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
-				result = 1;
-				cur_idx++;
+			if (ret < 0) {
+				result = -43;
+				goto exit;
 			}
 		}
-	} else {
-		cur_idx = 0;
+
+		printk("%s: ISO %s -> %s%08X added\n", __func__, vpbp->name, ISO_ID, cur_idx);
+
+		if(get_iso_sub_name(sub_category, sizeof(sub_category), vpbp->name)) {
+			sprintf(dir->d_name, "%s/%s%08X", sub_category, ISO_ID, cur_idx);
+		} else {
+			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
+		}
+
+		dir->d_stat.st_mode = 0x11FF;
+		dir->d_stat.st_attr = 0x10;
+
+		memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+		memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+		memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
+		result = 1;
 	}
-
+	
+exit:
 	unlock();
 
 	return result;
@@ -1086,7 +1024,7 @@ int vpbp_dclose(SceUID fd)
 	return result;
 }
 
-int vpbp_reset(void)
+int vpbp_reset(int cache)
 {
 	if (g_vpbps != NULL) {
 		oe_free(g_vpbps);
@@ -1094,10 +1032,12 @@ int vpbp_reset(void)
 		g_vpbps_cnt = 0;
 	}
 
-	if (g_caches != NULL) {
-		oe_free(g_caches);
-		g_caches = NULL;
-		g_caches_cnt = 0;
+	if(cache == 1) {
+		if (g_caches != NULL) {
+			oe_free(g_caches);
+			g_caches = NULL;
+			g_caches_cnt = 0;
+		}
 	}
 
 	return 0;

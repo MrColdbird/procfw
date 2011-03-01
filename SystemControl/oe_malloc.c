@@ -39,7 +39,7 @@ void *oe_malloc(size_t size)
 	void *p;
 
 	p = sceKernelAllocHeapMemory(heapid, size);
-	printk("%s: %d@0x%08X\n", __func__, size, (u32)p);
+//	printk("%s: %d@0x%08X\n", __func__, size, (u32)p);
 
 	return p;
 }

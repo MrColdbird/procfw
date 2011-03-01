@@ -39,6 +39,6 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param);
 SceUID vpbp_dopen(const char * dirname);
 int vpbp_dread(SceUID fd, SceIoDirent * dir);
 int vpbp_dclose(SceUID fd);
-int vpbp_reset(void);
+int vpbp_reset(int cache);
 
 #endif

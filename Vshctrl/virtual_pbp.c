@@ -12,6 +12,7 @@
 #include "strsafe.h"
 #include "virtual_pbp.h"
 #include "main.h"
+#include "dirent_track.h"
 
 typedef struct __attribute__((packed))
 {
@@ -110,7 +111,6 @@ static VirtualPBP *g_caches = NULL;
 static u32 g_caches_cnt;
 static u8 g_referenced[32];
 static u8 g_need_update = 0;
-static char g_dopen_path[256];
 
 static inline u32 get_isocache_magic(void)
 {
@@ -913,7 +913,6 @@ SceUID vpbp_dopen(const char * dirname)
 	SceUID result;
 
 	lock();
-	STRCPY_S(g_dopen_path, dirname);
 	result = sceIoDopen(dirname);
 	load_cache();
 	unlock();
@@ -955,13 +954,24 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	int cur_idx;
 	char sub_category[80];
 	int ret;
-   
-	lock();
-	result = sceIoDread(fd, dir);
+	struct IoDirentEntry *entry;
 
-	while(result > 0 && !is_iso(dir)) {
-		result = sceIoDread(fd, dir);
+	lock();
+
+	entry = dirent_search(fd);
+
+	if(entry == NULL) {
+		result = -44;
+		goto exit;
 	}
+	
+	result = sceIoDread(entry->iso_dfd, dir);
+
+#if 0
+	while(result > 0 && !is_iso(dir)) {
+		result = sceIoDread(entry->iso_dfd, dir);
+	}
+#endif
 
 	if (result > 0 && is_iso(dir)) {
 		VirtualPBP *vpbp;
@@ -977,8 +987,10 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 		g_vpbps_cnt++;
 		cur_idx = g_vpbps_cnt-1;
 		vpbp = &g_vpbps[cur_idx];
-
-		STRCPY_S(vpbp->name, g_dopen_path);
+		STRCPY_S(vpbp->name, entry->path);
+		vpbp->name[4] = '\0';
+		STRCAT_S(vpbp->name, "/ISO");
+		STRCAT_S(vpbp->name, entry->path + sizeof("xxx:/PSP/GAME") - 1);
 		STRCAT_S(vpbp->name, "/");
 		STRCAT_S(vpbp->name, dir->d_name);
 		memcpy(&vpbp->ctime, &dir->d_stat.st_ctime, sizeof(vpbp->ctime));

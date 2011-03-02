@@ -11,6 +11,7 @@
 #include <pspsdk.h>
 #include "virtual_pbp.h"
 #include "strsafe.h"
+#include "dirent_track.h"
 
 #define MAGIC_DFD_FOR_DELETE 0x9000
 #define MAGIC_DFD_FOR_DELETE_2 0x9001
@@ -18,7 +19,6 @@
 static char g_iso_dir[128];
 static char g_temp_delete_dir[128];
 static int g_delete_eboot_injected = 0;
-static SceUID g_iso_dfd = -1;
 
 static int is_iso_dir(const char *path)
 {
@@ -142,8 +142,10 @@ SceUID gamedopen(const char * dirname)
 	result = sceIoDopen(dirname);
 	
 	if(is_game_dir(dirname)) {
+		struct IoDirentEntry *entry;
 		char path[256];
 		const char *p;
+		int iso_dfd;
 		
 		get_device_name(path, sizeof(path), dirname);
 		STRCAT_S(path, "/ISO");
@@ -155,16 +157,28 @@ SceUID gamedopen(const char * dirname)
 			STRCAT_S(path, p);
 		}
 
+		entry = dirent_get_unused();
+
+		if(entry == NULL) {
+			printk("%s: dirent_get_unused -> NULL\n", __func__);
+
+			result = -1;
+			goto exit;
+		}
+
 		k1 = pspSdkSetK1(0);
-		g_iso_dfd = vpbp_dopen(path);
+		iso_dfd = vpbp_dopen(path);
 		pspSdkSetK1(k1);
 
 		if(result < 0) {
-			result = g_iso_dfd;
+			result = iso_dfd;
 		}
+		
+		dirent_add(entry, result, iso_dfd, dirname);
 	}
 
-//	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
+exit:
+	printk("%s: %s -> 0x%08X\n", __func__, dirname, result);
 
 	return result;
 }
@@ -204,10 +218,18 @@ int gamedread(SceUID fd, SceIoDirent * dir)
 	result = sceIoDread(fd, dir);
 
 	if(result <= 0) {
-		k1 = pspSdkSetK1(0);
-		result = vpbp_dread(g_iso_dfd, dir);
-		pspSdkSetK1(k1);
+		struct IoDirentEntry *entry;
+
+		entry = dirent_search(fd);
+
+		if(entry != NULL) {
+			k1 = pspSdkSetK1(0);
+			result = vpbp_dread(fd, dir);
+			pspSdkSetK1(k1);
+		}
 	}
+
+	printk("%s: 0x%08X %s -> 0x%08X\n", __func__, fd, dir->d_name, result);
 
 	return result;
 }
@@ -217,6 +239,7 @@ int gamedclose(SceUID fd)
 {
 	int result;
 	u32 k1;
+	struct IoDirentEntry *entry;
    
 	if(fd == MAGIC_DFD_FOR_DELETE || fd == MAGIC_DFD_FOR_DELETE_2) {
 		result = 0;
@@ -226,14 +249,26 @@ int gamedclose(SceUID fd)
 		return result;
 	}
 	
-	if(g_iso_dfd >= 0 && g_iso_dfd != result) {
-		k1 = pspSdkSetK1(0);
-		vpbp_dclose(g_iso_dfd);
-		pspSdkSetK1(k1);
-		g_iso_dfd = -1;
+	entry=dirent_search(fd);
+
+	if(entry != NULL) {
+		if(entry->iso_dfd == fd) {
+			k1 = pspSdkSetK1(0);
+			vpbp_dclose(entry->iso_dfd);
+			pspSdkSetK1(k1);
+
+			result = 0;
+		} else {
+			result = sceIoDclose(fd);
+		}
+
+		dirent_remove(entry);
+	} else {
+		result = sceIoDclose(fd);
 	}
 
-	result = sceIoDclose(fd);
+exit:
+	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, result);
 
 	return result;
 }

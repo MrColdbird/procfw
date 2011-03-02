@@ -98,6 +98,11 @@ static struct ValueOption g_hide_pic_option = {
 	2,
 };
 
+static struct ValueOption g_use_version = {
+	&g_config.useversion,
+	2,
+};
+
 static struct ValueOption g_flash_protect = {
 	&g_config.flashprot,
 	2,
@@ -152,6 +157,13 @@ static int display_flash_protect(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_use_version(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "Use version.txt (%s)", get_bool_name(g_config.useversion));
+
+	return 0;
+}
+
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
@@ -161,6 +173,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect },
+	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version},
 };
 
 static struct Menu g_configuration_menu = {

@@ -19,7 +19,7 @@ int versionspoofer(u8 *buf, u32 size, u32* newsize)
 	int result = sceResmgr_driver_9DC14891(buf, size, newsize);
 
 	//version.txt spotted!
-	if(strstr((const char*)buf, "release:")) {
+	if(conf.useversion && strstr((const char*)buf, "release:")) {
 		//increase permission level
 		u32 k1 = pspSdkSetK1(0);
 

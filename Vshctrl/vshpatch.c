@@ -32,8 +32,8 @@ static void patch_sysconf_plugin_module(SceModule2 *mod);
 static void patch_game_plugin_module(u32 text_addr);
 static void patch_vsh_module(SceModule2 * mod);
 
-static void hook_iso_file_io(SceModule2 * mod);
-static void hook_iso_directory_io(SceModule2 * mod);
+static void hook_iso_file_io(void);
+static void hook_iso_directory_io(void);
 static void patch_sceCtrlReadBufferPositive(SceModule2 *mod); 
 static void patch_Gameboot(SceModule2 *mod); 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
@@ -51,14 +51,11 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "game_plugin_module")) {
 		patch_game_plugin_module(text_addr);
-		hook_iso_file_io(mod);
-		hook_iso_directory_io(mod);
 		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "vsh_module")) {
 		patch_vsh_module(mod);
-		hook_iso_file_io(mod);
 		sync_cache();
 	}
 
@@ -252,7 +249,7 @@ static void patch_vsh_module(SceModule2 * mod)
 	int i = 0; for(; i < NELEMS(nids); i++) hook_import_bynid((SceModule *)mod, "sceVshBridge", nids[i], gameloadexec, 1);
 }
 
-static void hook_iso_file_io(SceModule2 * mod)
+static void hook_iso_file_io(void)
 {
 	HookUserFunctions hook_list[] = {
 		{ 0x109F50BC, gameopen,    },
@@ -267,11 +264,17 @@ static void hook_iso_file_io(SceModule2 * mod)
 	};
 
 	int i; for(i=0; i<NELEMS(hook_list); ++i) {
-		hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", hook_list[i].nid, hook_list[i].func, 1);
+		void *fp;
+
+		fp = (void*)sctrlHENFindFunction("sceIOFileManager", "IoFileMgrForUser", hook_list[i].nid);
+
+		if(fp != NULL) {
+			sctrlHENPatchSyscall(fp, hook_list[i].func);
+		}
 	}
 }
 
-static void hook_iso_directory_io(SceModule2 * mod)
+static void hook_iso_directory_io(void)
 {
 	HookUserFunctions hook_list[] = {
 		{ 0xB29DDF9C, gamedopen  }, 
@@ -280,7 +283,13 @@ static void hook_iso_directory_io(SceModule2 * mod)
 	};
 
 	int i; for(i=0; i<NELEMS(hook_list); ++i) {
-		hook_import_bynid((SceModule *)mod, "IoFileMgrForUser", hook_list[i].nid, hook_list[i].func, 1);
+		void *fp;
+
+		fp = (void*)sctrlHENFindFunction("sceIOFileManager", "IoFileMgrForUser", hook_list[i].nid);
+
+		if(fp != NULL) {
+			sctrlHENPatchSyscall(fp, hook_list[i].func);
+		}
 	}
 }
 
@@ -290,6 +299,8 @@ int vshpatch_init(void)
 	previous = sctrlHENSetStartModuleHandler(&vshpatch_module_chain);
 	patch_sceUSB_Driver();
 	vpbp_init();
+	hook_iso_file_io();
+	hook_iso_directory_io();
 
 	return 0;
 }

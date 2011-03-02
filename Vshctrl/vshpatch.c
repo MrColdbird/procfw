@@ -75,7 +75,7 @@ static int vshpatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	if(0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
+	if(conf.useownupdate && 0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
 		patch_SceUpdateDL_Library(text_addr);
 		sync_cache();
 	}

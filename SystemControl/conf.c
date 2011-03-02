@@ -160,6 +160,7 @@ void load_default_conf(SEConfig *config)
 	config->fakeregion = FAKE_REGION_DISABLED;
 	config->skiplogo = 1;
 	config->useversion = 1;
+	config->useownupdate = 1;
 }
 
 void load_config(void)

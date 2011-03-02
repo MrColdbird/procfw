@@ -136,7 +136,7 @@ static int display_hidden_mac(struct MenuEntry* entry, char *buf, int size)
 
 static int display_skip_logo(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Skip Sony Logo at Startup(%s)", get_bool_name(g_config.skiplogo));
+	sprintf(buf, "Skip Sony Logo at Startup (%s)", get_bool_name(g_config.skiplogo));
 
 	return 0;
 }

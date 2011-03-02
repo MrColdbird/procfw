@@ -959,6 +959,10 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	lock();
 	result = sceIoDread(fd, dir);
 
+	while(result > 0 && !is_iso(dir)) {
+		result = sceIoDread(fd, dir);
+	}
+
 	if (result > 0 && is_iso(dir)) {
 		VirtualPBP *vpbp;
 

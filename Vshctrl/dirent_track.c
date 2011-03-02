@@ -70,6 +70,8 @@ struct IoDirentEntry *dirent_search(SceUID orig)
 		}
 	}
 
+	p = NULL;
+
 exit:
 //	printk("%s: 0x%08X -> 0x%08X\n", __func__, orig, (u32)p);
 

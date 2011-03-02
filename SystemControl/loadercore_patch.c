@@ -373,4 +373,6 @@ void patch_sceLoaderCore(void)
 #ifdef DEBUG
 	hook_import_bynid((SceModule*)loadcore, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
+
+	patch_sceKernelStartModule(loadcore->text_addr);
 }

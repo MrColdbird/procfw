@@ -6,8 +6,8 @@ OBJS = main.o \
 	   syspatch.o \
 	   loadexec_patch.o \
 	   rebootex_conf.o \
-	   init_patch.o \
 	   loadercore_patch.o \
+	   startmodule_patch.o \
 	   memlmd_patch.o \
 	   interruptman_patch.o \
 	   mediasync_patch.o \

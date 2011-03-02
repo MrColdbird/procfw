@@ -25,13 +25,13 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check);
 
 void syspatch_init();
 void setup_module_handler(void);
-void patch_sceInit(void);
 void patch_sceLoaderCore(void);
 void patch_sceLoadExec(void);
 void load_rebootex_config(void);
 void patch_sceMemlmd(void);
 void patch_sceInterruptManager(void);
 void patch_sceSystemMemoryManager(void);
+void patch_sceKernelStartModule(u32 loadcore_text_addr);
 
 #ifdef DEBUG
 void validate_stub(SceModule *pMod);
@@ -52,7 +52,7 @@ void patch_np(u32 text_addr, u8 mayor, u8 minor);
 void patch_sceMediaSync(u32 text_addr);
 void patch_pspMarch33_Driver(u32 text_addr);
 
-void load_plugin(void);
+int load_plugins(void);
 int load_start_module(char *path);
 
 void usb_charge(void);

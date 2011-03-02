@@ -83,6 +83,11 @@ static struct ValueOption g_usb_charge_option = {
 	2,
 };
 
+static struct ValueOption g_skip_logo_option = {
+	&g_config.skiplogo,
+	2,
+};
+
 static struct ValueOption g_skip_gameboot_option = {
 	&g_config.skipgameboot,
 	2,
@@ -119,6 +124,13 @@ static int display_hidden_mac(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_skip_logo(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "Skip Sony Logo at Startup(%s)", get_bool_name(g_config.skiplogo));
+
+	return 0;
+}
+
 static int display_skip_gameboot(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "Skip Game Boot Screen (%s)", get_bool_name(g_config.skipgameboot));
@@ -145,6 +157,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
+	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect },

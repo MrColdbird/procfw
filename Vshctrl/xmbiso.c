@@ -267,7 +267,6 @@ int gamedclose(SceUID fd)
 		result = sceIoDclose(fd);
 	}
 
-exit:
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, result);
 
 	return result;

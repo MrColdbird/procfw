@@ -158,6 +158,7 @@ void load_default_conf(SEConfig *config)
 	config->usbdevice = 0;
 	config->flashprot = 1;
 	config->fakeregion = FAKE_REGION_DISABLED;
+	config->skiplogo = 1;
 }
 
 void load_config(void)

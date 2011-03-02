@@ -53,6 +53,7 @@ typedef struct
 	int flashprot;
 	int skiplogo;
 	int useversion;
+	int useownupdate;
 } SEConfig;
 
 /**

@@ -103,6 +103,11 @@ static struct ValueOption g_use_version = {
 	2,
 };
 
+static struct ValueOption g_use_ownupdate = {
+	&g_config.useownupdate,
+	2,
+};
+
 static struct ValueOption g_flash_protect = {
 	&g_config.flashprot,
 	2,
@@ -159,7 +164,14 @@ static int display_flash_protect(struct MenuEntry* entry, char *buf, int size)
 
 static int display_use_version(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Use version.txt (%s)", get_bool_name(g_config.useversion));
+	sprintf(buf, "Use version.txt in ms0:/seplugins (%s)", get_bool_name(g_config.useversion));
+
+	return 0;
+}
+
+static int display_use_ownupdate(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "Use Custom Update Server (%s)", get_bool_name(g_config.useownupdate));
 
 	return 0;
 }
@@ -174,6 +186,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect },
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version},
+	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate},
 };
 
 static struct Menu g_configuration_menu = {

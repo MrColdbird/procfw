@@ -60,7 +60,7 @@ static char *get_line(int fd, char *linebuf, int bufsiz)
 	return linebuf;
 }
 
-static void load_plugins(char * path)
+static void load_plugin(char * path)
 {
 	char linebuf[256], *p;
 	int fd;
@@ -111,7 +111,7 @@ static void load_plugins(char * path)
 	sceIoClose(fd);
 }
 
-static int plugin_thread(SceSize args, void * argp)
+int load_plugins(void)
 {
 	unsigned int key = sceKernelInitKeyConfig();
 
@@ -129,21 +129,8 @@ static int plugin_thread(SceSize args, void * argp)
 	}
 
 	//load mode specific plugins
-	load_plugins(bootconf);
-
-	//kill loader thread
-	sceKernelExitDeleteThread(0);
+	load_plugin(bootconf);
 
 	//return success
 	return 0;
-}
-
-void load_plugin(void)
-{
-	SceUID thid;
-
-	thid = sceKernelCreateThread("plugin_thread", plugin_thread, 0x1A, 0x800, 0, NULL);
-
-	if(thid >= 0)
-		sceKernelStartThread(thid, 0, NULL);
 }

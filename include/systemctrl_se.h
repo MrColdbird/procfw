@@ -51,6 +51,7 @@ typedef struct
 	int pluggame;
 	int plugpop;
 	int flashprot;
+	int skiplogo;
 } SEConfig;
 
 /**

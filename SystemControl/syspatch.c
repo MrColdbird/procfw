@@ -64,8 +64,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 				prepatch_partitions();
 				sync_cache();
 			}
-
-			patch_sceInit();
 		}
 	}
 
@@ -84,8 +82,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceMediaSync(mod->text_addr);
 		sync_cache();
-
-		load_plugin();
 		usb_charge();
 	}
 

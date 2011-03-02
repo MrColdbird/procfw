@@ -111,7 +111,6 @@ static inline int is_homebrews_runlevel(void)
 	return 0;
 }
 
-
 int module_start(SceSize args, void *argp)
 {
 	if(is_homebrews_runlevel()) {

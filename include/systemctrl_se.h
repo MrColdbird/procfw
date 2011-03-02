@@ -52,6 +52,7 @@ typedef struct
 	int plugpop;
 	int flashprot;
 	int skiplogo;
+	int useversion;
 } SEConfig;
 
 /**

@@ -66,6 +66,25 @@ static void menu_draw(struct Menu *menu)
 	x = 3, y = 4;
 	set_screen_xy(x, y);
 
+	{
+		char buf[10];
+		int color;
+
+		if(menu->cur_sel == 0) {
+			strcpy(buf, "* ");
+			color = CUR_SEL_COLOR;
+		} else {
+			strcpy(buf, "  ");
+			color = 0;
+		}
+
+		strcat(buf, "Back");
+		write_string_with_color(buf, color);
+	}
+
+	x = 3, y = 6;
+	set_screen_xy(x, y);
+
 	for(i=0; i<menu->submenu_size; ++i) {
 		char buf[256], *p;
 		int color;
@@ -73,7 +92,7 @@ static void menu_draw(struct Menu *menu)
 
 		entry = &menu->submenu[i];
 
-		if(menu->cur_sel == i) {
+		if(menu->cur_sel == i+1) {
 			color = CUR_SEL_COLOR;
 			strcpy(buf, "* ");
 		}
@@ -111,12 +130,12 @@ static void menu_draw(struct Menu *menu)
 
 static void get_sel_index(struct Menu *menu, int direct)
 {
-	menu->cur_sel = limit_int(menu->cur_sel, direct, menu->submenu_size);
+	menu->cur_sel = limit_int(menu->cur_sel, direct, menu->submenu_size+1);
 }
 
 static void menu_change_value(struct Menu *menu, int direct)
 {
-	struct MenuEntry *entry = &menu->submenu[menu->cur_sel];
+	struct MenuEntry *entry = &menu->submenu[menu->cur_sel-1];
 
 	if(entry->change_value_callback == NULL)
 		return;
@@ -143,7 +162,11 @@ static int menu_ctrl(struct Menu *menu)
 		struct MenuEntry *entry;
 		int (*enter_callback)(struct MenuEntry *);
 
-		entry = &menu->submenu[menu->cur_sel];
+		if(menu->cur_sel == 0) {
+			goto exit;
+		}
+
+		entry = &menu->submenu[menu->cur_sel-1];
 		enter_callback = entry->enter_callback;
 
 		if(entry->type == TYPE_SUBMENU) {
@@ -157,6 +180,7 @@ static int menu_ctrl(struct Menu *menu)
 			(*enter_callback)(entry);
 		}
 	} else if(key & g_ctrl_CANCEL) {
+exit:
 		set_bottom_info("> Exiting...", 0xFF);
 		frame_end();
 		sceKernelDelayThread(EXIT_DELAY);

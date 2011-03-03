@@ -218,6 +218,13 @@ static int display_pops_plugin(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_use_nodrm(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "Use NoDRM Engine (%s)", get_bool_name(g_config.usenodrm));
+
+	return 0;
+}
+
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
 	2,
@@ -233,10 +240,16 @@ static struct ValueOption g_pops_plugin_option = {
 	2,
 };
 
+static struct ValueOption g_use_nodrm_option = {
+	&g_config.usenodrm,
+	2,
+};
+
 static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
 	{ NULL, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
+	{ NULL, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
 };
 
 static struct Menu g_advanced_menu = {

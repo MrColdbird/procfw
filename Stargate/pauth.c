@@ -5,6 +5,7 @@
 #include <string.h>
 #include "printk.h"
 #include "libs.h"
+#include "systemctrl_se.h"
 #include "stargate.h"
 #include "utils.h"
 

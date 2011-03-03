@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "systemctrl_private.h"
 #include "kubridge.h"
 #include "utils.h"
@@ -27,6 +28,7 @@ PSP_MODULE_INFO("stargate", 0x1007, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 static STMOD_HANDLER previous;
+SEConfig conf;
 
 #define MAX_MODULE_NUMBER 256
 
@@ -77,22 +79,25 @@ static int stargate_module_chain(SceModule2 *mod)
 
 	// for MHP3rd: a 6.36 game
 	hook_import_bynid((SceModule*)mod, "scePauth", 0x98B83B5D, myPauth_98B83B5D, 1);
-	patch_drm_imports((SceModule*)mod);
 	patch_utility((SceModule*)mod);
 	patch_load_module((SceModule*)mod);
 
 	// m33 mode: until npdrm loaded
-	if(0 == strcmp(mod->modname, "scePspNpDrm_Driver")) {
-		int ret;
+	if(conf.usenodrm) {
+		if(0 == strcmp(mod->modname, "scePspNpDrm_Driver")) {
+			int ret;
 
-		fix_weak_imports();
-		ret = nodrm_get_npdrm_functions();
+			fix_weak_imports();
+			ret = nodrm_get_npdrm_functions();
 
 #ifdef DEBUG
-		if (ret < 0) {
-			printk("%s: nodrm_get_npdrm_functions -> %d\n", __func__, ret);
-		}
+			if (ret < 0) {
+				printk("%s: nodrm_get_npdrm_functions -> %d\n", __func__, ret);
+			}
 #endif
+		}
+
+		patch_drm_imports((SceModule*)mod);
 	}
 	
 	return 0;
@@ -119,12 +124,15 @@ int module_start(SceSize args, void *argp)
 
 	printk_init("ms0:/log_stargate.txt");
 	printk("stargate started\n");
+	sctrlSEGetConfig(&conf);
 	patch_sceMesgLed();
 	myPauth_init();
 	load_module_get_function();
-	nodrm_init();
-	nodrm_get_normal_functions();
-	nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
+
+	if(conf.usenodrm) {
+		nodrm_init();
+		nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
+	}
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
 

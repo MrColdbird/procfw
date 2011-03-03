@@ -191,15 +191,15 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
-	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
-	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
-	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
+	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
+	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect_option },
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
-	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
+	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},
+	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
 };
 
 static struct Menu g_configuration_menu = {

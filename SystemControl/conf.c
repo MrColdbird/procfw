@@ -162,6 +162,7 @@ void load_default_conf(SEConfig *config)
 	config->useversion = 1;
 	config->useownupdate = 1;
 	config->usenodrm = 1;
+	config->hibblock = 1;
 }
 
 void load_config(void)

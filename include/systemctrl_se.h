@@ -54,6 +54,7 @@ typedef struct
 	int skiplogo;
 	int useversion;
 	int useownupdate;
+	int usenodrm;
 } SEConfig;
 
 /**

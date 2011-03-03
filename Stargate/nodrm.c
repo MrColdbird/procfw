@@ -677,24 +677,17 @@ static NoDrmHookEntry g_nodrm_hook_map[] = {
 	{ "ModuleMgrForUser", 0xF2D8D1B4, &myKernelLoadModuleNpDrm },
 };
 
-int nodrm_get_normal_functions(void)
-{
-	_sceKernelLoadModuleNpDrm = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0xF2D8D1B4);
-
-	if (_sceKernelLoadModuleNpDrm == NULL) return -4;
-
-	return 0;
-}
-
 int nodrm_get_npdrm_functions(void)
 {
 	_sceNpDrmRenameCheck = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x275987D1);
 	_sceNpDrmEdataSetupKey = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x08D98894);
 	_sceNpDrmEdataGetDataSize = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_user", 0x219EF5CC);
+	_sceKernelLoadModuleNpDrm = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForUser", 0xF2D8D1B4);
 
 	if (_sceNpDrmRenameCheck == NULL) return -1;
 	if (_sceNpDrmEdataSetupKey == NULL) return -2;
 	if (_sceNpDrmEdataGetDataSize == NULL) return -3;
+	if (_sceKernelLoadModuleNpDrm == NULL) return -4;
 
 	return 0;
 }

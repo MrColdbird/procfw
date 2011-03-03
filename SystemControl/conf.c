@@ -161,6 +161,7 @@ void load_default_conf(SEConfig *config)
 	config->skiplogo = 1;
 	config->useversion = 1;
 	config->useownupdate = 1;
+	config->usenodrm = 1;
 }
 
 void load_config(void)

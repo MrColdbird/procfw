@@ -111,7 +111,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 		vshmain_args[1] = 0x20;
 		vshmain_args[16] = 1;
 		vshmain_args[160] = 1;
-		vshmain_args[161] = 0x40003;
+		vshmain_args[161] = 0x50007;
 
 		ret = sceKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
 		oe_free(vshmain_args);

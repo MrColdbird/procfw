@@ -55,6 +55,7 @@ typedef struct
 	int useversion;
 	int useownupdate;
 	int usenodrm;
+	int hibblock;
 } SEConfig;
 
 /**

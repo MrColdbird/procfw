@@ -36,6 +36,7 @@ static void hook_iso_file_io(void);
 static void hook_iso_directory_io(void);
 static void patch_sceCtrlReadBufferPositive(SceModule2 *mod); 
 static void patch_Gameboot(SceModule2 *mod); 
+static void patch_hibblock(SceModule2 *mod); 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
 
 static int vshpatch_module_chain(SceModule2 *mod)
@@ -62,6 +63,11 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
 		patch_sceCtrlReadBufferPositive(mod);
 		patch_Gameboot(mod);
+
+		if(psp_model == PSP_GO && conf.hibblock) {
+			patch_hibblock(mod);
+		}
+
 		sync_cache();
 	}
 
@@ -107,6 +113,12 @@ static void patch_Gameboot(SceModule2 *mod)
 {
 	_sw(MAKE_CALL(Gameboot_Patched), mod->text_addr + 0x1A14);
 	GameBoot = (void*)(mod->text_addr+0x5618);
+}
+
+static void patch_hibblock(SceModule2 *mod)
+{
+	_sw(0x03E00008, mod->text_addr + 0x000051A8);
+	_sw(0x00001021, mod->text_addr + 0x000051AC);
 }
 
 static inline void ascii2utf16(char *dest, const char *src)

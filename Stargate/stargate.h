@@ -10,6 +10,7 @@ void patch_sceMesgLed(void);
 
 int nodrm_init(void);
 void patch_drm_imports(SceModule *mod);
+void patch_analog_imports(SceModule *mod);
 void patch_utility(SceModule *mod);
 int nodrm_get_normal_functions(void);
 int nodrm_get_npdrm_functions(void);

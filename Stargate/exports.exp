@@ -39,6 +39,10 @@ PSP_EXPORT_FUNC(myKernelLoadModuleNpDrm)
 PSP_EXPORT_FUNC(myUtilityLoadModule)
 PSP_EXPORT_FUNC(myUtilityUnloadModule)
 PSP_EXPORT_FUNC(myKernelLoadModule)
+PSP_EXPORT_FUNC(myCtrlPeekBufferPositive)
+PSP_EXPORT_FUNC(myCtrlPeekBufferNegative)
+PSP_EXPORT_FUNC(myCtrlReadBufferPositive)
+PSP_EXPORT_FUNC(myCtrlReadBufferNegative)
 PSP_EXPORT_END
 
 PSP_END_EXPORTS

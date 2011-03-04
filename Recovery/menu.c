@@ -183,7 +183,7 @@ static int display_use_ownupdate(struct MenuEntry* entry, char *buf, int size)
 
 static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Prevent hibernation deletion (PSP-Go only) (%s)", get_bool_name(g_config.hibblock));
+	sprintf(buf, "Prevent Hibernation Deletion (PSP-Go only) (%s)", get_bool_name(g_config.hibblock));
 
 	return 0;
 }
@@ -238,6 +238,13 @@ static int display_use_nodrm(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_use_noanalog(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "Block Analog Input in Game (%s)", get_bool_name(g_config.noanalog));
+
+	return 0;
+}
+
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
 	2,
@@ -258,11 +265,17 @@ static struct ValueOption g_use_nodrm_option = {
 	2,
 };
 
+static struct ValueOption g_use_noanalog_option = {
+	&g_config.noanalog,
+	2,
+};
+
 static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
 	{ NULL, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
 	{ NULL, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
+	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 };
 
 static struct Menu g_advanced_menu = {

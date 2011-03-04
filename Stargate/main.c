@@ -99,6 +99,10 @@ static int stargate_module_chain(SceModule2 *mod)
 
 		patch_drm_imports((SceModule*)mod);
 	}
+
+	if(conf.noanalog) {
+		patch_analog_imports((SceModule*)mod);
+	}
 	
 	return 0;
 }

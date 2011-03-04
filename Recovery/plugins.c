@@ -186,11 +186,13 @@ static int change_value_callback(struct MenuEntry *entry, int direct)
 
 static int enter_callback(struct MenuEntry *entry)
 {
-	char buf[256];
+	char buf[256], *p;
 	
 	change_value_callback(entry, 1);
 
-	(*entry->display_callback)(entry, buf, 256);
+	strcpy(buf, "> ");
+	p = buf + strlen(buf);
+	(*entry->display_callback)(entry, p, 256 - (p - buf));
 	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);

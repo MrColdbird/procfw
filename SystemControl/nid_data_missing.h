@@ -49,4 +49,7 @@ MissingNIDResolver *g_missing_resolver[] = {
 	&missing_sceSyscon_driver,
 };
 
+MissingNIDResolver *g_missing_resolver_user[] = {
+};
+
 #endif

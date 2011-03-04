@@ -43,6 +43,7 @@ enum {
 	ACTIVATE_WMA,
 	ACTIVATE_FLASH,
 	SWAP_BUTTONS,
+	RUN_RECOVERY_EBOOT,
 	SHUTDOWN_DEVICE,
 	SUSPEND_DEVICE,
 	RESET_DEVICE,
@@ -102,6 +103,9 @@ struct Menu {
 #define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
 
 #define printf pspDebugScreenPrintf
+
+#define RECOVERY_EBOOT_PATH "ms0:/PSP/GAME/RECOVERY/EBOOT.PBP"
+#define RECOVERY_EBOOT_PATH_EF0 "ef0:/PSP/GAME/RECOVERY/EBOOT.PBP"
 
 extern int g_ctrl_OK;
 extern int g_ctrl_CANCEL;

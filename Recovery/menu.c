@@ -53,6 +53,7 @@ const char * g_messages[] = {
 	"Pops Plugin",
 	"NoDRM Engine",
 	"Block Analog Input in Game",
+	"Old Plugin Support (PSP-Go only) ",
 	"CPU Speed",
 	"XMB CPU/BUS",
 	"Game CPU/BUS",
@@ -297,6 +298,13 @@ static int display_use_noanalog(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_use_oldplugin(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[OLD_PLUGINS_SUPPORT], get_bool_name(g_config.oldplugin));
+
+	return 0;
+}
+
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
 	2,
@@ -322,12 +330,18 @@ static struct ValueOption g_use_noanalog_option = {
 	2,
 };
 
+static struct ValueOption g_use_oldplugin = {
+	&g_config.oldplugin,
+	2,
+};
+
 static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
 	{ NULL, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
 	{ NULL, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
+	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
 };
 
 static struct Menu g_advanced_menu = {

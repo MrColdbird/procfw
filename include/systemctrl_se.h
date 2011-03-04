@@ -57,6 +57,7 @@ typedef struct
 	int usenodrm;
 	int hibblock;
 	int noanalog;
+	int oldplugin;
 } SEConfig;
 
 /**

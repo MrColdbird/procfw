@@ -9,6 +9,39 @@
 
 #define PLUGIN_PATH "ms0:/seplugins/"
 
+static void patch_devicename(SceUID modid)
+{
+	SceModule2 *mod;
+	int i;
+
+	mod = (SceModule2*)sceKernelFindModuleByUID(modid);
+
+	if(mod == NULL) {
+		return;
+	}
+
+	for(i=0; i<mod->nsegment; ++i) {
+		u32 addr;
+		u32 end;
+
+		end = mod->segmentaddr[i] + mod->segmentsize[i];
+
+		for(addr = mod->segmentaddr[i]; addr < end; addr += 4) {
+			char *str = (char*)addr;
+
+			if (0 == strncmp(str, "ms0", 3)) {
+				str[0] = 'e';
+				str[1] = 'f';
+			} else if (0 == strncmp(str, "fatms", 5)) {
+				str[3] = 'e';
+				str[4] = 'f';
+			}
+		}
+	}
+
+	sync_cache();
+}
+
 int load_start_module(char *path)
 {
 	int ret;
@@ -17,9 +50,8 @@ int load_start_module(char *path)
 
 	modid = sceKernelLoadModule(path, 0, NULL);
 
-	if(modid < 0 && psp_model == PSP_GO) {
-		strncpy(path, "ef0", 3);
-		modid = sceKernelLoadModule(path, 0, NULL);
+	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef0:/", sizeof("ef0:/")-1)) {
+		patch_devicename(modid);
 	}
 
 	status = 0;

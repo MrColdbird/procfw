@@ -9,6 +9,7 @@
 #include <pspdisplay.h>
 #include <psputility.h>
 
+#include "kubridge.h"
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "vshctrl.h"
@@ -67,6 +68,7 @@ const char * g_messages[] = {
 	"Activate WMA",
 	"Activate Flash",
 	"Swap O/X buttons",
+	"Run ms0:/PSP/GAME/RECOVERY/EBOOT.PBP",
 	"Shutdown device",
 	"Suspend device",
 	"Reset device",
@@ -383,7 +385,33 @@ static int reset_vsh(struct MenuEntry *entry)
 	return 0;
 }
 
+static int run_recovery_eboot(struct MenuEntry *entry)
+{
+	struct SceKernelLoadExecVSHParam param;
+	int ret;
+	SceIoStat stat;
+	u32 psp_model;
+
+	memset(&param, 0, sizeof(param));
+	param.size = sizeof(param);
+	param.key = "game";
+	psp_model = kuKernelGetModel();
+
+	if(psp_model == PSP_GO && sceIoGetstat(RECOVERY_EBOOT_PATH_EF0, &stat) == 0) {
+		param.args = strlen(RECOVERY_EBOOT_PATH_EF0)+1;
+		param.argp = RECOVERY_EBOOT_PATH_EF0;
+		ret = sctrlKernelLoadExecVSHWithApitype(0x152, RECOVERY_EBOOT_PATH_EF0, &param);
+	}
+
+	param.args = strlen(RECOVERY_EBOOT_PATH)+1;
+	param.argp = RECOVERY_EBOOT_PATH;
+	ret = sctrlKernelLoadExecVSHWithApitype(0x141, RECOVERY_EBOOT_PATH, &param);
+
+	return ret;
+}
+
 static struct MenuEntry g_top_menu_entries[] = {
+	{ "Run ms0:/PSP/GAME/RECOVERY/EBOOT.PBP", 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
 	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
 	{ "Advanced", 1, 0, NULL, NULL, &advanced_menu, NULL},
 	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },

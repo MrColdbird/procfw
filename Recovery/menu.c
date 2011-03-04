@@ -25,9 +25,59 @@ static int registery_hack_menu(struct MenuEntry *entry);
 static int cpu_speed_menu(struct MenuEntry *entry);
 static int advanced_menu(struct MenuEntry *entry);
 
+const char * g_messages[] = {
+	"PRO Recovery Menu",
+	"Main Menu",
+	"Entering",
+	"Exiting",
+	"Back",
+	"Default",
+	"Enabled",
+	"Disabled",
+	"Configuration",
+	"Fake Region",
+	"ISO Mode",
+	"Charge battery when USB cable is plugged in",
+	"Hide MAC address",
+	"Skip Sony Logo at Startup",
+	"Skip Game Boot Screen",
+	"Hide PIC0.PNG and PIC1.PNG in game menu",
+	"Protect flash in USB device mount",
+	"Use version.txt in ms0:/seplugins",
+	"Use Custom Update Server",
+	"Prevent Hibernation Deletion (PSP-Go only)",
+	"Advanced",
+	"XMB Plugin",
+	"Game Plugin",
+	"Pops Plugin",
+	"NoDRM Engine",
+	"Block Analog Input in Game",
+	"CPU Speed",
+	"XMB CPU/BUS",
+	"Game CPU/BUS",
+	"Plugins",
+	"System storage",
+	"Plugins on system storage",
+	"Plugins on memory stick",
+	"Memory stick",
+	"Registry hacks",
+	"WMA activated",
+	"Flash activated",
+	"Buttons swapped",
+	"Activate WMA",
+	"Activate Flash",
+	"Swap O/X buttons",
+	"Shutdown device",
+	"Suspend device",
+	"Reset device",
+	"Reset VSH",
+};
+
+static u8 message_test[NELEMS(g_messages) == RESET_VSH + 1 ? 0 : -1];
+
 static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Fake region (%s)", get_fake_region_name(g_config.fakeregion));
+	sprintf(buf, "%-48s %-11s", g_messages[FAKE_REGION], get_fake_region_name(g_config.fakeregion));
 
 	return 0;
 }
@@ -120,70 +170,70 @@ static struct ValueOption g_hibblock_option = {
 
 static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "ISO mode (%s)", get_iso_name(g_config.umdmode));
+	sprintf(buf, "%-48s %-11s", g_messages[ISO_MODE], get_iso_name(g_config.umdmode));
 
 	return 0;
 }
 
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Charge battery when USB cable is plugged in (%s)", get_bool_name(g_config.usbcharge));
+	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
 
 	return 0;
 }
 
 static int display_hidden_mac(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Hide MAC address (%s)", get_bool_name(g_config.machidden));
+	sprintf(buf, "%-48s %-11s", g_messages[HIDE_MAC], get_bool_name(g_config.machidden));
 
 	return 0;
 }
 
 static int display_skip_logo(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Skip Sony Logo at Startup (%s)", get_bool_name(g_config.skiplogo));
+	sprintf(buf, "%-48s %-11s", g_messages[SKIP_SONY_LOGO], get_bool_name(g_config.skiplogo));
 
 	return 0;
 }
 
 static int display_skip_gameboot(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Skip Game Boot Screen (%s)", get_bool_name(g_config.skipgameboot));
+	sprintf(buf, "%-48s %-11s", g_messages[SKIP_GAME_BOOT], get_bool_name(g_config.skipgameboot));
 
 	return 0;
 }
 
 static int display_hide_pic(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Hide PIC0.PNG and PIC1.PNG in game menu (%s)", get_bool_name(g_config.hidepic));
+	sprintf(buf, "%-48s %-11s", g_messages[HIDE_PIC], get_bool_name(g_config.hidepic));
 
 	return 0;
 }
 
 static int display_flash_protect(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Protect flash in USB device mount (%s)", get_bool_name(g_config.flashprot));
+	sprintf(buf, "%-48s %-11s", g_messages[FLASH_PROTECT], get_bool_name(g_config.flashprot));
 
 	return 0;
 }
 
 static int display_use_version(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Use version.txt in ms0:/seplugins (%s)", get_bool_name(g_config.useversion));
+	sprintf(buf, "%-48s %-11s", g_messages[USE_VERSION_TXT], get_bool_name(g_config.useversion));
 
 	return 0;
 }
 
 static int display_use_ownupdate(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Use Custom Update Server (%s)", get_bool_name(g_config.useownupdate));
+	sprintf(buf, "%-48s %-11s", g_messages[USE_CUSTOM_UPDATE_SERVER], get_bool_name(g_config.useownupdate));
 
 	return 0;
 }
 
 static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Prevent Hibernation Deletion (PSP-Go only) (%s)", get_bool_name(g_config.hibblock));
+	sprintf(buf, "%-48s %-11s", g_messages[PREVENT_HIB_DEL], get_bool_name(g_config.hibblock));
 
 	return 0;
 }
@@ -193,8 +243,8 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
-	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
 	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
+	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect_option },
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
@@ -212,35 +262,35 @@ static struct Menu g_configuration_menu = {
 
 static int display_xmb_plugin(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "XMB Plugin (%s)", get_bool_name(g_config.plugvsh));
+	sprintf(buf, "%-48s %-11s", g_messages[XMB_PLUGIN], get_bool_name(g_config.plugvsh));
 
 	return 0;
 }
 
 static int display_game_plugin(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Game Plugin (%s)", get_bool_name(g_config.pluggame));
+	sprintf(buf, "%-48s %-11s", g_messages[GAME_PLUGIN], get_bool_name(g_config.pluggame));
 
 	return 0;
 }
 
 static int display_pops_plugin(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Pops Plugin (%s)", get_bool_name(g_config.plugpop));
+	sprintf(buf, "%-48s %-11s", g_messages[POPS_PLUGIN], get_bool_name(g_config.plugpop));
 
 	return 0;
 }
 
 static int display_use_nodrm(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Use NoDRM Engine (%s)", get_bool_name(g_config.usenodrm));
+	sprintf(buf, "%-48s %-11s", g_messages[USE_NODRM_ENGINE], get_bool_name(g_config.usenodrm));
 
 	return 0;
 }
 
 static int display_use_noanalog(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "Block Analog Input in Game (%s)", get_bool_name(g_config.noanalog));
+	sprintf(buf, "%-48s %-11s", g_messages[BLOCK_ANALOG_INPUT], get_bool_name(g_config.noanalog));
 
 	return 0;
 }
@@ -373,10 +423,12 @@ static int display_xmb(struct MenuEntry* entry, char *buf, int size)
 	cpu = get_cpu_freq(g_xmb_clock_number);
 	bus = get_bus_freq(g_xmb_clock_number);
 
+	sprintf(buf, "%s:", g_messages[XMB_CPU_BUS]);
+
 	if(cpu == 0 || bus == 0) {
-		sprintf(buf, "XMB CPU/BUS: %s/%s", "Default", "Default");
+		sprintf(buf, "%-40s %s/%s", buf, g_messages[DEFAULT], g_messages[DEFAULT]);
 	} else {
-		sprintf(buf, "XMB CPU/BUS: %d/%d", cpu, bus);
+		sprintf(buf, "%-40s %d/%d", buf, cpu, bus);
 	}
 
 	return 0;
@@ -389,10 +441,12 @@ static int display_game(struct MenuEntry* entry, char *buf, int size)
 	cpu = get_cpu_freq(g_game_clock_number);
 	bus = get_bus_freq(g_game_clock_number);
 
+	sprintf(buf, "%s:", g_messages[GAME_CPU_BUS]);
+
 	if(cpu == 0 || bus == 0) {
-		sprintf(buf, "Game CPU/BUS: %s/%s", "Default", "Default");
+		sprintf(buf, "%-40s %s/%s", buf, g_messages[DEFAULT], g_messages[DEFAULT]);
 	} else {
-		sprintf(buf, "Game CPU/BUS: %d/%d", cpu, bus);
+		sprintf(buf, "%-40s %d/%d", buf, cpu, bus);
 	}
 
 	return 0;
@@ -468,7 +522,7 @@ static int cpu_speed_menu(struct MenuEntry *entry)
 static int active_wma(struct MenuEntry *entry)
 {
 	set_registry_value("/CONFIG/MUSIC", "wma_play", 1);
-	set_bottom_info("WMA activated", 0);
+	set_bottom_info(g_messages[WMA_ACTIVATED], 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -480,7 +534,7 @@ static int active_flash(struct MenuEntry *entry)
 {
 	set_registry_value("/CONFIG/BROWSER", "flash_activated", 1);
 	set_registry_value("/CONFIG/BROWSER", "flash_play", 1);
-	set_bottom_info("Flash activated", 0);
+	set_bottom_info(g_messages[FLASH_ACTIVATED], 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -495,7 +549,7 @@ static int swap_buttons(struct MenuEntry *entry)
 	get_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", &value);
 	value = !value;
 	set_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", value); 
-	set_bottom_info("Buttons swapped", 0);
+	set_bottom_info(g_messages[SWAP_BUTTONS], 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -530,6 +584,7 @@ static int registery_hack_menu(struct MenuEntry *entry)
 void main_menu(void)
 {
 	struct Menu *menu = &g_top_menu;
+	(void)message_test;
 	
 	menu->cur_sel = 0;
 	menu_loop(menu);

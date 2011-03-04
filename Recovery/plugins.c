@@ -212,7 +212,8 @@ static int display_callback(struct MenuEntry* entry, char *buf, int size)
 		name = plugin->name;
 	}
 
-	sprintf(buf, "%s [%s] (%s)", name, get_plugin_name(plugin->type), get_bool_name(plugin->enabled));
+	sprintf(buf, "%s [%s]", name, get_plugin_name(plugin->type));
+	sprintf(buf, "%-48s %-11s", buf, get_bool_name(plugin->enabled));
 
 	return 0;
 }

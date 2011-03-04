@@ -1,3 +1,5 @@
+Acknowledge:
+
 Total_Noob: For the initial discovery of the Power-Kernel-Exploit in 6.20 OFW.
 Coldbird: For initial reverse of the TN Kernel Exploit, Hacks to make it 6.3X compatible and several other things CFW related.
 VirtuousFlame: For the ISO Loading Code, Custom PSX EBOOT Support and most of the CFW related code.

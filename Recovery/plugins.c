@@ -28,7 +28,6 @@ struct Plugin {
 enum {
 	ON_MS0 = 0,
 	ON_EF0,
-	ON_EH0,
 };
 
 static struct Plugin *g_vsh_list;
@@ -38,7 +37,6 @@ static struct Plugin *g_pops_list;
 static int g_vsh_cnt, g_game_cnt, g_pops_cnt;
 
 static int plugins_ef0_menu(struct MenuEntry *entry);
-static int plugins_eh0_menu(struct MenuEntry *entry);
 static int plugins_ms0_menu(struct MenuEntry *entry);
 
 static int g_type;
@@ -165,10 +163,6 @@ static int save_plugins(void)
 		save_plugin("ef0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
 		save_plugin("ef0:/seplugins/game.txt", g_game_list, g_game_cnt);
 		save_plugin("ef0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
-	} else if(g_type == ON_EH0) {
-		save_plugin("eh0:/seplugins/vsh.txt", g_vsh_list, g_vsh_cnt);
-		save_plugin("eh0:/seplugins/game.txt", g_game_list, g_game_cnt);
-		save_plugin("eh0:/seplugins/pops.txt", g_pops_list, g_pops_cnt);
 	}
 
 	return 0;
@@ -274,7 +268,7 @@ static void create_submenus(struct Menu *menu)
 
 static struct MenuEntry g_plugins_pspgo[] = {
 	{ "System storage", 1, 0, NULL, NULL, &plugins_ef0_menu, NULL},
-	{ "Memory stick", 1, 0, NULL, NULL, &plugins_eh0_menu, NULL},
+	{ "Memory stick", 1, 0, NULL, NULL, &plugins_ms0_menu, NULL},
 };
 
 int init_plugin_list(void)
@@ -322,16 +316,8 @@ static struct Menu g_ef0_plugins_menu = {
 	0xFF,
 };
 
-static struct Menu g_eh0_plugins_menu = {
-	"Plugins on memory stick",
-	NULL,
-	0,
-	0,
-	0xFF,
-};
-
 static struct Menu g_ms0_plugins_menu = {
-	"Plugins",
+	"Plugins on memory stick",
 	NULL,
 	0,
 	0,
@@ -371,13 +357,6 @@ static int plugins_ef0_menu(struct MenuEntry *entry)
 	g_type = ON_EF0;
 
 	return plugins_menu_on_device(entry, &g_ef0_plugins_menu, "ef0:");
-}
-
-static int plugins_eh0_menu(struct MenuEntry *entry)
-{
-	g_type = ON_EH0;
-
-	return plugins_menu_on_device(entry, &g_eh0_plugins_menu, "eh0:");
 }
 
 static int plugins_ms0_menu(struct MenuEntry *entry)

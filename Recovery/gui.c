@@ -58,7 +58,7 @@ static void menu_draw(struct Menu *menu)
 
 	x = 1, y = 1;
 	set_screen_xy(x, y);
-	write_string_with_color("PRO Recovery Menu", 0xFF);
+	write_string_with_color(g_messages[PRO_RECOVERY_MENU], 0xFF);
 	x = 1, y = 2;
 	set_screen_xy(x, y);
 	write_string_with_color(menu->banner, menu->banner_color);
@@ -78,7 +78,7 @@ static void menu_draw(struct Menu *menu)
 			color = 0;
 		}
 
-		strcat(buf, "Back");
+		strcat(buf, g_messages[BACK]);
 		write_string_with_color(buf, color);
 	}
 
@@ -147,6 +147,7 @@ static void menu_change_value(struct Menu *menu, int direct)
 static int menu_ctrl(struct Menu *menu)
 {
 	u32 key;
+	char buf[80];
 
 	key = ctrl_read();
 
@@ -170,7 +171,8 @@ static int menu_ctrl(struct Menu *menu)
 		enter_callback = entry->enter_callback;
 
 		if(entry->type == TYPE_SUBMENU) {
-			set_bottom_info("> Entering...", 0xFF);
+			sprintf(buf, "> %s...", g_messages[ENTERING]);
+			set_bottom_info(buf, 0xFF);
 			frame_end();
 			sceKernelDelayThread(ENTER_DELAY);
 			set_bottom_info("", 0);
@@ -181,7 +183,8 @@ static int menu_ctrl(struct Menu *menu)
 		}
 	} else if(key & g_ctrl_CANCEL) {
 exit:
-		set_bottom_info("> Exiting...", 0xFF);
+		sprintf(buf, "> %s...", g_messages[EXITING]);
+		set_bottom_info(buf, 0xFF);
 		frame_end();
 		sceKernelDelayThread(EXIT_DELAY);
 		set_bottom_info("", 0);

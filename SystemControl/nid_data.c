@@ -1133,6 +1133,16 @@ static nid_entry sceCodec_driver_nid[] = {
 	{ 0x20C61103, 0xD26B6CCE, }, 
 };
 
+static nid_entry scePaf_nid[] = {
+	{ 0x2BE8DDBB, 0x4DCF9203, },
+	{ 0xE8CCC611, 0xB70C91FD, },
+	{ 0xCDDCFFB3, 0xAEF47B29, },
+	{ 0x48BB05D5, 0x9E9FFBFB, },
+	{ 0x22FB4177, 0x1F538758, },
+	{ 0xBC8DC92B, 0xCDE9615E, },
+	{ 0xE3D530AE, 0x1B952318, },
+};
+
 resolver_config nid_fix[] = {
 #define NID_ENTRY(libname) \
 	{ #libname, NELEMS(libname##_nid), libname##_nid, }
@@ -1170,6 +1180,7 @@ resolver_config nid_fix[] = {
 	NID_ENTRY(sceMesgLed_driver),
 	NID_ENTRY(sceClockgen_driver),
 	NID_ENTRY(sceCodec_driver),
+	NID_ENTRY(scePaf),
 #undef NID_ENTRY
 };
 

@@ -29,6 +29,7 @@ typedef struct _MissingNIDResolver {
 } MissingNIDResolver;
 
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
+static int (*sceKernelLinkLibraryEntriesForUser)(u32 unk0, void *buf, int size) = NULL;
 
 resolver_config* get_nid_resolver(const char *libname)
 {
@@ -221,6 +222,54 @@ int _sceKernelLinkLibraryEntries(void *buf, int size)
 	return ret;
 }
 
+int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
+{
+	int ret, offset, i;
+	u32 stubcount;
+	struct SceLibraryStubTable *stub;
+	resolver_config *resolver;
+
+	offset = 0;
+
+	while(offset < size) {
+		stub = buf + offset;
+		stubcount = stub->stubcount;
+
+		resolver = get_nid_resolver(stub->libname);
+
+		if(resolver != NULL) {
+			for (i=0; i<stubcount; i++) {
+				u32 newnid;
+
+				newnid = resolve_nid(resolver, stub->nidtable[i]);
+
+				if(newnid != stub->nidtable[i]) {
+					stub->nidtable[i] = newnid;
+				}
+			}
+		}
+
+		offset += stub->len << 2;
+	}
+
+	ret = (*sceKernelLinkLibraryEntriesForUser)(unk0, buf, size);
+
+	offset = 0;
+
+	while(offset < size) {
+		stub = buf + offset;
+		stubcount = stub->stubcount;
+
+		for(i=0; i<NELEMS(g_missing_resolver_user); ++i) {
+			resolve_missing_nid(stub, g_missing_resolver_user[i]);
+		}
+		
+		offset += stub->len << 2;
+	}
+
+	return ret;
+}
+
 void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
@@ -233,7 +282,9 @@ void setup_nid_resolver(void)
 	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
 
 	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
+	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr+0x00002924);
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr+0x00008198);
 	sync_cache();
 }
 

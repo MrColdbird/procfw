@@ -967,11 +967,11 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	
 	result = sceIoDread(entry->iso_dfd, dir);
 
-#if 0
-	while(result > 0 && !is_iso(dir)) {
-		result = sceIoDread(entry->iso_dfd, dir);
+	if(sceKernelFindModuleByName("Game_Categories_Light") == NULL) {
+		while(result > 0 && !is_iso(dir)) {
+			result = sceIoDread(entry->iso_dfd, dir);
+		}
 	}
-#endif
 
 	if (result > 0 && is_iso(dir)) {
 		VirtualPBP *vpbp;

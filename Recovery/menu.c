@@ -549,8 +549,11 @@ static int cpu_speed_menu(struct MenuEntry *entry)
 
 static int active_wma(struct MenuEntry *entry)
 {
+	char buf[80];
+
 	set_registry_value("/CONFIG/MUSIC", "wma_play", 1);
-	set_bottom_info(g_messages[WMA_ACTIVATED], 0);
+	sprintf(buf, "> %s", g_messages[WMA_ACTIVATED]);
+	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -560,9 +563,12 @@ static int active_wma(struct MenuEntry *entry)
 
 static int active_flash(struct MenuEntry *entry)
 {
+	char buf[80];
+
+	sprintf(buf, "> %s", g_messages[FLASH_ACTIVATED]);
 	set_registry_value("/CONFIG/BROWSER", "flash_activated", 1);
 	set_registry_value("/CONFIG/BROWSER", "flash_play", 1);
-	set_bottom_info(g_messages[FLASH_ACTIVATED], 0);
+	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);
@@ -573,11 +579,13 @@ static int active_flash(struct MenuEntry *entry)
 static int swap_buttons(struct MenuEntry *entry)
 {
 	u32 value;
+	char buf[80];
 
+	sprintf(buf, "> %s", g_messages[SWAP_BUTTONS]);
 	get_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", &value);
 	value = !value;
 	set_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", value); 
-	set_bottom_info(g_messages[SWAP_BUTTONS], 0);
+	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
 	set_bottom_info("", 0);

@@ -56,6 +56,7 @@ typedef struct
 	int useownupdate;
 	int usenodrm;
 	int hibblock;
+	int noanalog;
 } SEConfig;
 
 /**

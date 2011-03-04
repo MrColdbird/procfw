@@ -174,6 +174,10 @@ SceUID gamedopen(const char * dirname)
 		iso_dfd = vpbp_dopen(path);
 		pspSdkSetK1(k1);
 
+		if(iso_dfd < 0) {
+			goto exit;
+		}
+
 		if(result < 0) {
 			result = iso_dfd;
 		}

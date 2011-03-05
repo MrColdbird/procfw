@@ -610,7 +610,7 @@ static int swap_buttons(struct MenuEntry *entry)
 static struct MenuEntry g_registery_menu_entries[] = {
 	{ "Activate WMA", 0, 0, NULL, NULL, &active_wma, NULL },
 	{ "Activate Flash", 0, 0, NULL, NULL, &active_flash, NULL },
-	{ "Swap O/X buttons", 0, 0, NULL, NULL, &swap_buttons, NULL },
+	{ "Swap O/X buttons (needs Reset VSH to take effect)", 0, 0, NULL, NULL, &swap_buttons, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {

@@ -914,7 +914,11 @@ SceUID vpbp_dopen(const char * dirname)
 
 	lock();
 	result = sceIoDopen(dirname);
-	load_cache();
+
+	if (result >= 0 && strlen(dirname) > 4 && 0 == stricmp(dirname+4, "/ISO")) {
+		load_cache();
+	}
+
 	unlock();
 
 	return result;
@@ -943,7 +947,6 @@ static int get_iso_sub_name(char *sub, int size, const char *path)
 
 	memset(sub, 0, size);
 	strncpy_s(sub, size, p, q-p);
-	printk("%s: %s\n", __func__, sub);
 
 	return 1;
 }
@@ -1033,9 +1036,17 @@ exit:
 int vpbp_dclose(SceUID fd)
 {
 	int result;
+	struct IoDirentEntry *entry;
+
+	lock();
+	entry = dirent_search(fd);
+
+	if (entry != NULL && strlen(entry->path) > 4 && 0 == stricmp(entry->path+4, "/PSP/GAME")) {
+		save_cache();
+	}
 
 	result = sceIoDclose(fd);
-	save_cache();
+	unlock();
 
 	return result;
 }

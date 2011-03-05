@@ -266,6 +266,10 @@ int gamedclose(SceUID fd)
 			pspSdkSetK1(k1);
 
 			result = 0;
+		} else if (entry->dfd == fd) {
+			k1 = pspSdkSetK1(0);
+			result = vpbp_dclose(fd);
+			pspSdkSetK1(k1);
 		} else {
 			result = sceIoDclose(fd);
 		}

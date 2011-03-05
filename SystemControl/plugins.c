@@ -49,8 +49,13 @@ int load_start_module(char *path)
 	int status;
 
 	modid = sceKernelLoadModule(path, 0, NULL);
+	if(modid < 0) {
+		if(strnicmp(path, "ef", 2) == 0) strncpy(path, "ms", 2);
+		else strncpy(path, "ef", 2);
+		modid = sceKernelLoadModule(path, 0, NULL);
+	}
 
-	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef0:/", sizeof("ef0:/")-1)) {
+	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
 		patch_devicename(modid);
 	}
 
@@ -104,7 +109,7 @@ static void load_plugin(char * path)
 
 	if (fd < 0) {
 		// retry on ef0
-		strncpy(path, "ef0", 3);
+		strncpy(path, "ef", 2);
 		fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
 		if(fd < 0) {

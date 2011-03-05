@@ -49,9 +49,14 @@ int load_start_module(char *path)
 	int status;
 
 	modid = sceKernelLoadModule(path, 0, NULL);
+
 	if(modid < 0) {
-		if(strnicmp(path, "ef", 2) == 0) strncpy(path, "ms", 2);
-		else strncpy(path, "ef", 2);
+		if(0 == strnicmp(path, "ef", 2)) {
+			strncpy(path, "ms", 2);
+		} else { 
+			strncpy(path, "ef", 2);
+		}
+
 		modid = sceKernelLoadModule(path, 0, NULL);
 	}
 

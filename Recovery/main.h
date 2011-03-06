@@ -65,7 +65,7 @@ enum {
 };
 
 struct MenuEntry {
-	char *info;
+	const char **info;
 	int type;
 	int color;
 	int (*display_callback)(struct MenuEntry*, char *, int);
@@ -80,7 +80,7 @@ struct ValueOption {
 };
 
 struct Menu {
-	char *banner;
+	const char **banner;
 	struct MenuEntry *submenu;
 	int submenu_size;
 	int cur_sel;

@@ -68,7 +68,7 @@ const char * g_messages[] = {
 	"Buttons swapped",
 	"Activate WMA",
 	"Activate Flash",
-	"Swap O/X buttons",
+	"Swap O/X buttons (needs Reset VSH to take effect)",
 	"Run ms0:/PSP/GAME/RECOVERY/EBOOT.PBP",
 	"Shutdown device",
 	"Suspend device",
@@ -115,7 +115,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 	if(entry->display_callback != NULL) {
 		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
 	} else {
-		strcpy(p, entry->info);
+		strcpy(p, *entry->info);
 	}
 
 	set_bottom_info(buf, 0);
@@ -256,7 +256,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 };
 
 static struct Menu g_configuration_menu = {
-	"Configuration",
+	&g_messages[CONFIGURATION],
 	g_configuration_menu_entries,
 	NELEMS(g_configuration_menu_entries),
 	0,
@@ -345,7 +345,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 };
 
 static struct Menu g_advanced_menu = {
-	"Advanced",
+	&g_messages[ADVANCED],
 	g_advanced_menu_entries,
 	NELEMS(g_advanced_menu_entries),
 	0,
@@ -425,20 +425,20 @@ static int run_recovery_eboot(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_top_menu_entries[] = {
-	{ "Run ms0:/PSP/GAME/RECOVERY/EBOOT.PBP", 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
-	{ "Configuration", 1, 0, NULL, NULL, &configuration_menu, NULL},
-	{ "Advanced", 1, 0, NULL, NULL, &advanced_menu, NULL},
-	{ "CPU Speed", 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
-	{ "Plugins", 1, 0, NULL, NULL, &plugins_menu, NULL },
-	{ "Registry hacks", 1, 0, NULL, NULL, &registery_hack_menu, NULL },
-	{ "Shutdown device", 0, 0, NULL, NULL, &shutdown_device, NULL },
-	{ "Suspend device", 0, 0, NULL, NULL, &suspend_device, NULL },
-	{ "Reset device", 0, 0, NULL, NULL, &reset_device, NULL },
-	{ "Reset VSH", 0, 0, NULL, NULL, &reset_vsh, NULL },
+	{ &g_messages[RUN_RECOVERY_EBOOT], 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
+	{ &g_messages[CONFIGURATION], 1, 0, NULL, NULL, &configuration_menu, NULL},
+	{ &g_messages[ADVANCED], 1, 0, NULL, NULL, &advanced_menu, NULL},
+	{ &g_messages[CPU_SPEED], 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
+	{ &g_messages[PLUGINS], 1, 0, NULL, NULL, &plugins_menu, NULL },
+	{ &g_messages[REGISTERY_HACKS], 1, 0, NULL, NULL, &registery_hack_menu, NULL },
+	{ &g_messages[SHUTDOWN_DEVICE], 0, 0, NULL, NULL, &shutdown_device, NULL },
+	{ &g_messages[SUSPEND_DEVICE], 0, 0, NULL, NULL, &suspend_device, NULL },
+	{ &g_messages[RESET_DEVICE], 0, 0, NULL, NULL, &reset_device, NULL },
+	{ &g_messages[RESET_VSH], 0, 0, NULL, NULL, &reset_vsh, NULL },
 };
 
 static struct Menu g_top_menu = {
-	"Main Menu",
+	&g_messages[MAIN_MENU],
 	g_top_menu_entries,
 	NELEMS(g_top_menu_entries),
 	0,
@@ -540,7 +540,7 @@ static struct MenuEntry g_cpu_speed_menu_entries[] = {
 };
 
 static struct Menu g_cpu_speed_menu = {
-	"CPU Speed",
+	&g_messages[CPU_SPEED],
 	g_cpu_speed_menu_entries,
 	NELEMS(g_cpu_speed_menu_entries),
 	0,
@@ -608,13 +608,13 @@ static int swap_buttons(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_registery_menu_entries[] = {
-	{ "Activate WMA", 0, 0, NULL, NULL, &active_wma, NULL },
-	{ "Activate Flash", 0, 0, NULL, NULL, &active_flash, NULL },
-	{ "Swap O/X buttons (needs Reset VSH to take effect)", 0, 0, NULL, NULL, &swap_buttons, NULL },
+	{ &g_messages[ACTIVATE_WMA], 0, 0, NULL, NULL, &active_wma, NULL },
+	{ &g_messages[ACTIVATE_FLASH], 0, 0, NULL, NULL, &active_flash, NULL },
+	{ &g_messages[SWAP_BUTTONS], 0, 0, NULL, NULL, &swap_buttons, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {
-	"Registry Hack",
+	&g_messages[REGISTERY_HACKS],
 	g_registery_menu_entries,
 	NELEMS(g_registery_menu_entries),
 	0,

@@ -8,6 +8,7 @@ def main():
 			"ISODrivers/March33/march33.prx",
 			"Popcorn/popcorn.prx",
 			"Satelite/satelite.prx",
+			"Category/category.prx",
 			"Stargate/stargate.prx",
 			"SystemControl/systemctrl.prx",
 			"contrib/usbdevice.prx",

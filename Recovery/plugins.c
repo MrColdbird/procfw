@@ -20,7 +20,7 @@
 #define MAX_PLUGINS_SIZE 32
 
 struct Plugin {
-	char name[256];
+	char *name;
 	int enabled;
 	int type;
 };
@@ -111,7 +111,7 @@ static int load_plugins(const char *config_path, struct Plugin *plugins, int *pl
 		}
 
 		if (*q == '\0') {
-			strcpy(plugins->name, p);
+			plugins->name = vpl_strdup(p);
 			plugins->enabled = 1;
 			plugins->type = type;
 			plugins++;
@@ -126,7 +126,8 @@ static int load_plugins(const char *config_path, struct Plugin *plugins, int *pl
 				break;
 		}
 
-		strncpy(plugins->name, p, q-p);
+		*q = '\0';
+		plugins->name = vpl_strdup(p);
 		plugins->type = type;
 
 		if (p[len-1] == '0') {
@@ -308,22 +309,33 @@ int init_plugin_list(void)
 	return 0;
 }
 
-void free_plugin_list(void)
+static void free_plugin_list(struct Plugin* plugin, int size)
 {
-	if(g_vsh_list != NULL) {
-		vpl_free(g_vsh_list);
-		g_vsh_list = NULL;
+	int i;
+
+	if(plugin == NULL) {
+		return;
 	}
 
-	if(g_game_list != NULL) {
-		vpl_free(g_game_list);
-		g_game_list = NULL;
+	for(i=0; i<size; ++i) {
+		if(plugin[i].name) {
+			vpl_free(plugin[i].name);
+		}
 	}
 
-	if(g_pops_list != NULL) {
-		vpl_free(g_pops_list);
-		g_pops_list = NULL;
-	}
+	vpl_free(plugin);
+}
+
+static void free_plugin_lists(void)
+{
+	free_plugin_list(g_vsh_list, MAX_PLUGINS_SIZE);
+	g_vsh_list = NULL;
+
+	free_plugin_list(g_game_list, MAX_PLUGINS_SIZE);
+	g_game_list = NULL;
+	
+	free_plugin_list(g_pops_list, MAX_PLUGINS_SIZE);
+	g_pops_list = NULL;
 }
 
 static struct Menu g_ef0_plugins_menu = {
@@ -365,7 +377,7 @@ static int plugins_menu_on_device(struct MenuEntry *entry, struct Menu *menu, co
 	menu_loop(menu);
 
 	free_submenu(menu);
-	free_plugin_list();
+	free_plugin_lists();
 
 	return 0;
 }

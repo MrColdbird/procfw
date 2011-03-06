@@ -103,6 +103,7 @@ struct Menu {
 #define CHANGE_DELAY 500000
 #define DRAW_BUF (void*)(0x44000000)
 #define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
+#define MAX_MENU_NUMBER_PER_PAGE (MAX_SCREEN_Y-5-2-5)
 
 #define printf pspDebugScreenPrintf
 

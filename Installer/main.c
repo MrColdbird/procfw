@@ -12,6 +12,7 @@
 #include "march33.h"
 #include "popcorn.h"
 #include "satelite.h"
+#include "category.h"
 #include "stargate.h"
 #include "systemctrl.h"
 #include "usbdevice.h"
@@ -173,6 +174,7 @@ struct InstallList g_file_lists[] = {
 	{ usbdevice, &size_usbdevice, "flash0:/kd/_usbdevice.prx", },
 	{ popcorn, &size_popcorn, "flash0:/kd/_popcorn.prx", },
 	{ satelite, &size_satelite, "flash0:/vsh/module/_satelite.prx", },
+	{ category, &size_category, "flash0:/vsh/module/_category.prx", },
 	{ recovery, &size_recovery, "flash0:/vsh/module/_recovery.prx", },
 };
 

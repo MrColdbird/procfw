@@ -58,6 +58,7 @@ typedef struct
 	int hibblock;
 	int noanalog;
 	int oldplugin;
+	int category;
 } SEConfig;
 
 /**

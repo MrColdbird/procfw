@@ -83,8 +83,7 @@ int GetCategoryType(int index)
 	int ret_cnt = 0;
 	Category *p = NULL;
 
-	while(1)
-	{
+	while(1) {
 		p = GetNextCategory(p);
 
 		if(!p)

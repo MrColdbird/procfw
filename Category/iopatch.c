@@ -61,6 +61,13 @@ int sceIoDclosePatched(SceUID fd)
 	return sceIoDclose( fd );
 }
 
+static void build_dname(char *d_name, const char *category, const char *orig_dname)
+{
+	char name[256];
+
+	scePaf_strcpy(name, orig_dname);
+	scePaf_snprintf(d_name, 256, "%s/%s", category, name);
+}
 
 int sceIoDreadPatched (SceUID fd, SceIoDirent *dir)
 {
@@ -74,52 +81,37 @@ CONTINUE_LABEL:
 		if( dopen_subuid >= 0)
 		{
 			int ret = sceIoDread( dopen_subuid , dir );
-			if( ret > 0)//more directory
-			{
+			if( ret > 0) /* more directory */ {
 				if( dir->d_name[0] == '.')
 					goto CONTINUE_LABEL;
 
-				scePaf_strcpy( dir->d_name + 128 , dir->d_name );
+				build_dname(dir->d_name, opened_dirname+14, dir->d_name);
 
-				scePaf_snprintf( dir->d_name , 128 ,"%s/%s", opened_dirname + 14 , dir->d_name + 128 );
-
-				if(dir->d_private)
-				{
-
-					
+				if(dir->d_private) {
 					scePaf_strcpy( dir->d_private + 13 , dir->d_name );
 				}
-			}
-			else
-			{
+			} else {
 				sceIoDclose( dopen_subuid );
 				dopen_subuid = -1;
 				goto CONTINUE_LABEL;		
 			}		
 			return_vaue = ret;
-		}
-		else		
-		{
+		} else {
 			int ret = sceIoDread( fd , dir );		
 			return_vaue = ret;
-			if( ret > 0)//more directory		
-			{
-
+			if( ret > 0) /* more directory */ {
 				if( dir->d_name[0] != '.' 
-					&& FIO_S_ISDIR( dir->d_stat.st_mode ))
-				{				
+					&& FIO_S_ISDIR( dir->d_stat.st_mode )) {				
 					SceIoStat stat;
 
 					memset( &stat , 0 , sizeof(SceIoStat) );
 
 					scePaf_snprintf( opened_dirname + 13 , 128 ,"/%s/EBOOT.PBP", dir->d_name );
 
-					if( sceIoGetstat( opened_dirname ,  &stat ) < 0 )
-					{
+					if( sceIoGetstat( opened_dirname ,  &stat ) < 0 ) {
 						scePaf_snprintf(opened_dirname + 13 , 128 ,"/%s/PARAM.PBP", dir->d_name);
 
-						if(sceIoGetstat( opened_dirname ,  &stat ) < 0)
-						{
+						if(sceIoGetstat( opened_dirname ,  &stat ) < 0) {
 							u64 tick;
 
 							sceRtcGetTick( (pspTime*)&(dir->d_stat.st_mtime) , &tick );
@@ -129,27 +121,18 @@ CONTINUE_LABEL:
 
 							dopen_subuid = sceIoDopen( opened_dirname );						
 							goto CONTINUE_LABEL;
-
 						}
-
 					}
 							
-					if(uncategory_flag )				
-					{
+					if(uncategory_flag ) {
 						goto CONTINUE_LABEL;										
 					}
 				}
-			}
-			else if(uncategory_flag == 0)							
-			{
+			} else if(uncategory_flag == 0) {
 				enable_uncategory = 1;											
 			}
-
 		}
-
-	}
-	else
-	{
+	} else {
 		return_vaue = sceIoDread( fd , dir );
 	}
 

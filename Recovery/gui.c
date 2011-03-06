@@ -71,7 +71,7 @@ static void menu_draw(struct Menu *menu)
 		int color;
 
 		if(menu->cur_sel == 0) {
-			strcpy(buf, "* ");
+			strcpy(buf, "> ");
 			color = CUR_SEL_COLOR;
 		} else {
 			strcpy(buf, "  ");
@@ -100,7 +100,7 @@ static void menu_draw(struct Menu *menu)
 
 		if(menu->cur_sel == i+1) {
 			color = CUR_SEL_COLOR;
-			strcpy(buf, "* ");
+			strcpy(buf, "> ");
 		} else {
 			color = entry->color;
 			strcpy(buf, "  ");

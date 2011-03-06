@@ -104,8 +104,8 @@ static char *get_line(int fd, char *linebuf, int bufsiz)
 
 static void load_plugin(char * path)
 {
-	char linebuf[256], *p;
-	int fd;
+	char linebuf[256], *p, *q;
+	int fd, len;
 
 	if (path == NULL)
 		return;
@@ -126,27 +126,36 @@ static void load_plugin(char * path)
 
 	do {
 		p = get_line(fd, linebuf, sizeof(linebuf));
-		
-		if (p != NULL) {
-			int len;
 
-			printk("%s: %s\n", __func__, p);
-			len = strlen(p);
+		if(p == NULL)
+			break;
 
-			if (len >= 1 && p[len-1] == '1') {
-				char *q;
+		len = strlen(p);
 
-				q=strrchr(p, ' ');
+		if(len == 0) {
+			continue;
+		}
 
-				if (q != NULL) {
-					char mod_path[256];
+		for(q=p; *q != ' ' && *q != '\t' && *q != '\0'; ++q) {
+		}
 
-					memset(mod_path, 0, sizeof(mod_path));
-					strncpy_s(mod_path, sizeof(mod_path), p, q-p);
-					printk("%s module path: %s\n", __func__, mod_path);
-					load_start_module(mod_path);
-				}
-			}
+		if (*q == '\0') {
+			printk("%s module path: %s\n", __func__, p);
+			load_start_module(p);
+			continue;
+		}
+
+		while(len >= 1) {
+			if(p[len-1] == ' ' || p[len-1] == '\t')
+				len--;
+			else
+				break;
+		}
+
+		if(p[len-1] != '0') {
+			*q = '\0';
+			printk("%s module path: %s\n", __func__, p);
+			load_start_module(p);
 		}
 	} while (p != NULL);
 

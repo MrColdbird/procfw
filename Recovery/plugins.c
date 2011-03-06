@@ -98,25 +98,43 @@ static int load_plugins(const char *config_path, struct Plugin *plugins, int *pl
 	do {
 		p = get_line(fd, linebuf, sizeof(linebuf));
 
-		if(p == NULL) {
+		if(p == NULL)
 			break;
-		}
 
-		q=strrchr(p, ' ');
-
-		if(q == NULL)
-			continue;
-
-		strncpy(plugins->name, p, q-p);
 		len = strlen(p);
 
-		if (len >= 1 && p[len-1] == '1') {
-			plugins->enabled = 1;
-		} else {
-			plugins->enabled = 0;
+		if(len == 0) {
+			continue;
 		}
 
+		for(q=p; *q != ' ' && *q != '\t' && *q != '\0'; ++q) {
+		}
+
+		if (*q == '\0') {
+			strcpy(plugins->name, p);
+			plugins->enabled = 1;
+			plugins->type = type;
+			plugins++;
+			(*plugins_cnt)++;
+			continue;
+		}
+
+		while(len >= 1) {
+			if(p[len-1] == ' ' || p[len-1] == '\t')
+				len--;
+			else
+				break;
+		}
+
+		strncpy(plugins->name, p, q-p);
 		plugins->type = type;
+
+		if (p[len-1] == '0') {
+			plugins->enabled = 0;
+		} else {
+			plugins->enabled = 1;
+		}
+
 		plugins++;
 		(*plugins_cnt)++;
 	} while (*plugins_cnt < MAX_PLUGINS_SIZE);

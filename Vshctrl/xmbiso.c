@@ -41,7 +41,7 @@ static int is_iso_dir(const char *path)
 		return 0;
 	}
 
-	p += sizeof(ISO_ID) - 1;
+	p = strrchr(path, '@') + 1;
 	p += 8;
 
 	while(*p != '\0' && *p == '/')
@@ -74,7 +74,7 @@ static int is_iso_eboot(const char* path)
 		return 0;
 	}
 
-	p += sizeof(ISO_ID) - 1;
+	p = strrchr(path, '@') + 1;
 	p += 8;
 
 	if (0 != strcmp(p, "/EBOOT.PBP"))

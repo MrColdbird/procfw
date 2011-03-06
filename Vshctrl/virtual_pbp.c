@@ -158,7 +158,7 @@ static VirtualPBP* get_vpbp_by_path(const char *path)
 		return NULL;
 	}
 
-	p += sizeof(ISO_ID)-1;
+	p = strrchr(path, '@') + 1;
 	isoindex = strtol(p, NULL, 16);
 
 	if (isoindex < 0 || isoindex >= g_vpbps_cnt) {
@@ -924,39 +924,27 @@ SceUID vpbp_dopen(const char * dirname)
 	return result;
 }
 
-static int get_iso_sub_name(char *sub, int size, const char *path)
+static int add_fake_dirent(SceIoDirent *dir, int vpbp_idx)
 {
-	const char *p, *q;
-	
-	p = strchr(path, '/');
+	VirtualPBP *vpbp;
 
-	if(p == NULL)
-		return 0;
+	vpbp = &g_vpbps[vpbp_idx];
+	sprintf(dir->d_name, "%s%08X", ISO_ID, vpbp_idx);
+	printk("%s: ISO %s -> %s added\n", __func__, vpbp->name, dir->d_name);
 
-	p++;
-	p = strchr(p, '/');
+	dir->d_stat.st_mode = 0x11FF;
+	dir->d_stat.st_attr = 0x10;
 
-	if(p == NULL)
-		return 0;
-
-	p++;
-	q = strchr(p, '/');
-
-	if(q == NULL)
-		return 0;
-
-	memset(sub, 0, size);
-	strncpy_s(sub, size, p, q-p);
+	memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
+	memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
 
 	return 1;
 }
 
 int vpbp_dread(SceUID fd, SceIoDirent * dir)
 {
-	int result;
-	int cur_idx;
-	char sub_category[80];
-	int ret;
+	int result, cur_idx, ret;
 	struct IoDirentEntry *entry;
 
 	lock();
@@ -1010,23 +998,9 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 			}
 		}
 
-		printk("%s: ISO %s -> %s%08X added\n", __func__, vpbp->name, ISO_ID, cur_idx);
-
-		if(get_iso_sub_name(sub_category, sizeof(sub_category), vpbp->name)) {
-			sprintf(dir->d_name, "%s/%s%08X", sub_category, ISO_ID, cur_idx);
-		} else {
-			sprintf(dir->d_name, "%s%08X", ISO_ID, cur_idx);
-		}
-
-		dir->d_stat.st_mode = 0x11FF;
-		dir->d_stat.st_attr = 0x10;
-
-		memcpy(&dir->d_stat.st_ctime, &vpbp->ctime, sizeof(ScePspDateTime));
-		memcpy(&dir->d_stat.st_mtime, &vpbp->ctime, sizeof(ScePspDateTime));
-		memcpy(&dir->d_stat.st_atime, &vpbp->ctime, sizeof(ScePspDateTime));
-		result = 1;
+		result = add_fake_dirent(dir, cur_idx);
 	}
-	
+
 exit:
 	unlock();
 

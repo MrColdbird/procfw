@@ -970,7 +970,7 @@ int vpbp_dread(SceUID fd, SceIoDirent * dir)
 	
 	result = sceIoDread(entry->iso_dfd, dir);
 
-	if(sceKernelFindModuleByName("Game_Categories_Light") == NULL) {
+	if(sceKernelFindModuleByName("Game_Categories_Light") == NULL && !conf.category) {
 		while(result > 0 && !is_iso(dir)) {
 			result = sceIoDread(entry->iso_dfd, dir);
 		}

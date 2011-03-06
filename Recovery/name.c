@@ -22,35 +22,43 @@ static const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
 const char *get_bool_name(int boolean)
 {
 	if(boolean) {
-		return "Enabled";
+		return g_messages[ENABLED];
 	}
 
-	return "Disabled";
+	return g_messages[DISABLED];
 }
 
 const char* get_fake_region_name(int fakeregion)
 {
 	switch(fakeregion) {
 		case FAKE_REGION_DISABLED:
-			return "Disabled";
+			return g_messages[DISABLED];
 		case FAKE_REGION_JAPAN:
-			return "Japan";
+			return g_messages[JAPAN];
 		case FAKE_REGION_AMERICA:
-			return "America";
+			return g_messages[AMERICA];
 		case FAKE_REGION_EUROPE:
-			return "Europe";
+			return g_messages[EUROPE];
 		case FAKE_REGION_KOREA:
-			return "Korea";
+			return g_messages[KOREA];
+		case FAKE_REGION_UNK:
+			return g_messages[UNITED_KINGDOM];
+		case FAKE_REGION_UNK2:
+			return g_messages[MEXIQUE];
 		case FAKE_REGION_AUSTRALIA:
-			return "Australia";
+			return g_messages[AUSTRALIA];
 		case FAKE_REGION_HONGKONG:
-			return "Hongkong";
+			return g_messages[HONGKONG];
 		case FAKE_REGION_TAIWAN:
-			return "Taiwan";
+			return g_messages[TAIWAN];
 		case FAKE_REGION_RUSSIA:
-			return "Taiwan";
+			return g_messages[RUSSIA];
 		case FAKE_REGION_CHINA:
-			return "China";
+			return g_messages[CHINA];
+		case FAKE_REGION_DEBUG_TYPE_I:
+			return g_messages[DEBUG_TYPE_I];
+		case FAKE_REGION_DEBUG_TYPE_II:
+			return g_messages[DEBUG_TYPE_II];
 	}
 
 	return "FIXME";

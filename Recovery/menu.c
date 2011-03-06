@@ -74,9 +74,22 @@ const char * g_messages[] = {
 	"Suspend device",
 	"Reset device",
 	"Reset VSH",
+	"Japan",
+	"America",
+	"Europe",
+	"Korea",
+	"United Kingdom",
+	"Mexique",
+	"Australia",
+	"Hongkong",
+	"Taiwan",
+	"Russia",
+	"China",
+	"Debug Type I",
+	"Debug Type II",
 };
 
-static u8 message_test[NELEMS(g_messages) == RESET_VSH + 1 ? 0 : -1];
+static u8 message_test[NELEMS(g_messages) == DEBUG_TYPE_II + 1 ? 0 : -1];
 
 static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
@@ -92,7 +105,7 @@ static struct ValueOption g_iso_mode_option = {
 
 static struct ValueOption g_fake_region_option = {
 	&g_config.fakeregion,
-	FAKE_REGION_CHINA+1,
+	FAKE_REGION_DEBUG_TYPE_II+1,
 };
 
 static int change_option(struct MenuEntry *entry, int direct)

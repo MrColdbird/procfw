@@ -10,33 +10,28 @@
 #include "main.h"
 #include "utils.h"
 
-static int get_pscode_from_region(int region)
+static u8 get_pscode_from_region(int region)
 {
-	switch(region) {
-		case FAKE_REGION_JAPAN:
-			return 3;
-		case FAKE_REGION_AMERICA:
-			return 4;
-		case FAKE_REGION_EUROPE:
-			return 5;
-		case FAKE_REGION_KOREA:
-			return 6;
-		case FAKE_REGION_AUSTRALIA:
-			return 9;
-		case FAKE_REGION_HONGKONG:
-			return 0xA;
-		case FAKE_REGION_TAIWAN:
-			return 0xB;
-		case FAKE_REGION_RUSSIA:
-			return 0xC;
-		case FAKE_REGION_CHINA:
-			return 0xD;
+	u8 code;
+
+	code = region;
+	
+	if(code < 12) {
+		code += 2;
+	} else {
+		code -= 11;
 	}
 
-	return 0xB;
+	if(code == 2) {
+		code = 3;
+	}
+
+	printk("%s: region %d code %d\n", __func__, region, code);
+
+	return code;
 }
 
-static int _sceChkregGetPsCode(char *pscode)
+static int _sceChkregGetPsCode(u8 *pscode)
 {
 	pscode[0] = 1;
 	pscode[1] = 0;

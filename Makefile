@@ -12,6 +12,7 @@ STARGATE = Stargate
 ISOLAUNCHER = testsuite/ISOLauncher
 FASTRECOVERY = FastRecovery
 SATELITE = Satelite
+CATEGORY = Category
 POPCORN = Popcorn
 RECOVERY = Recovery
 DISTRIBUTE = dist
@@ -43,6 +44,7 @@ all:
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CATEGORY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating PXE Executable
@@ -68,6 +70,7 @@ clean:
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
+	@cd $(CATEGORY); make clean $(DEBUG_OPTION)
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)
 	@cd $(REBOOTEXPXE); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROLPXE); make clean $(DEBUG_OPTION)

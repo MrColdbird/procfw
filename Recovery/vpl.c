@@ -15,8 +15,6 @@
 #include "utils.h"
 #include "vpl.h"
 
-#define VPL_POOL_SIZE (32 * 1024)
-
 static SceUID g_vpl_uid = -1;
 
 void vpl_init(void)
@@ -78,9 +76,8 @@ void *vpl_realloc(void *ptr, size_t size)
 		memset(p, 0, size);
 	} else {
 		memcpy(p, ptr, size);
+		vpl_free(ptr);
 	}
-
-	vpl_free(ptr);
 
 	return p;
 }

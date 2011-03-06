@@ -15,7 +15,7 @@
 #include "utils.h"
 #include "vpl.h"
 
-#define VPL_POOL_SIZE (128 * 1024)
+#define VPL_POOL_SIZE (32 * 1024)
 
 static SceUID g_vpl_uid = -1;
 
@@ -62,4 +62,25 @@ char *vpl_strdup(const char *str)
 void vpl_free(void *p)
 {
 	sceKernelFreeVpl(g_vpl_uid, p);
+}
+
+void *vpl_realloc(void *ptr, size_t size)
+{
+	void *p;
+
+	p = vpl_alloc(size);
+
+	if(p == NULL) {
+		return p;
+	}
+
+	if(ptr == NULL) {
+		memset(p, 0, size);
+	} else {
+		memcpy(p, ptr, size);
+	}
+
+	vpl_free(ptr);
+
+	return p;
 }

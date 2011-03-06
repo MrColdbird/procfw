@@ -140,8 +140,6 @@ static void load_plugin(char * path)
 		}
 
 		if (*q == '\0') {
-			printk("%s module path: %s\n", __func__, p);
-			load_start_module(p);
 			continue;
 		}
 
@@ -152,7 +150,7 @@ static void load_plugin(char * path)
 				break;
 		}
 
-		if(p[len-1] != '0') {
+		if(p[len-1] == '1') {
 			*q = '\0';
 			printk("%s module path: %s\n", __func__, p);
 			load_start_module(p);

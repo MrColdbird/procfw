@@ -5,7 +5,7 @@ void vpl_init(void);
 void vpl_finish(void);
 
 void *vpl_alloc(int size);
-void *vpl_strdup(const char *str);
+char *vpl_strdup(const char *str);
 void vpl_free(void *p);
 
 #endif

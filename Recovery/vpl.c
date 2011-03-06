@@ -42,16 +42,17 @@ void *vpl_alloc(int size)
 	return NULL;
 }
 
-void *vpl_strdup(const char *str)
+char *vpl_strdup(const char *str)
 {
 	int len;
-	void *p;
+	char *p;
 
 	len = strlen(str) + 1;
 	p = vpl_alloc(len);
 
-	if(p == NULL)
+	if(p == NULL) {
 		return p;
+	}
 
 	strcpy(p, str);
 

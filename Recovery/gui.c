@@ -61,7 +61,7 @@ static void menu_draw(struct Menu *menu)
 	write_string_with_color(g_messages[PRO_RECOVERY_MENU], 0xFF);
 	x = 1, y = 2;
 	set_screen_xy(x, y);
-	write_string_with_color(menu->banner, menu->banner_color);
+	write_string_with_color(*menu->banner, menu->banner_color);
 
 	x = 3, y = 4;
 	set_screen_xy(x, y);
@@ -104,7 +104,7 @@ static void menu_draw(struct Menu *menu)
 		p = buf + strlen(buf);
 
 		if(entry->info != NULL) {
-			sprintf(p, "%s", entry->info);
+			sprintf(p, "%s", *entry->info);
 		} else {
 			int (*display_callback)(struct MenuEntry* , char *, int);
 			

@@ -134,7 +134,7 @@ static int load_plugins(const char *config_path, struct Plugin **plugins, int *p
 			}
 
 			plug->name = vpl_strdup(p);
-			plug->enabled = 1;
+			plug->enabled = 0;
 			plug->type = type;
 			continue;
 		}
@@ -156,10 +156,10 @@ static int load_plugins(const char *config_path, struct Plugin **plugins, int *p
 		plug->name = vpl_strdup(p);
 		plug->type = type;
 
-		if (p[len-1] == '0') {
-			plug->enabled = 0;
-		} else {
+		if (p[len-1] == '1') {
 			plug->enabled = 1;
+		} else {
+			plug->enabled = 0;
 		}
 	} while (1);
 

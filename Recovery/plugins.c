@@ -271,18 +271,11 @@ static void create_submenu(struct MenuEntry *entry, struct Plugin *plugins, int 
 
 static void free_submenu(struct Menu *menu)
 {
-	int i;
-
 	if(menu->submenu == NULL) {
 		return;
 	}
 
-	for(i=0; i<menu->submenu_size; ++i) {
-		if(menu->submenu->info != NULL) {
-			vpl_free(menu->submenu->info);
-		}
-	}
-
+	vpl_free(menu->submenu);
 	menu->submenu = NULL;
 	menu->submenu_size = 0;
 }

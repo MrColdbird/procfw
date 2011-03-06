@@ -95,8 +95,7 @@ static void menu_draw(struct Menu *menu)
 		if(menu->cur_sel == i+1) {
 			color = CUR_SEL_COLOR;
 			strcpy(buf, "* ");
-		}
-		else {
+		} else {
 			color = entry->color;
 			strcpy(buf, "  ");
 		}
@@ -135,7 +134,13 @@ static void get_sel_index(struct Menu *menu, int direct)
 
 static void menu_change_value(struct Menu *menu, int direct)
 {
-	struct MenuEntry *entry = &menu->submenu[menu->cur_sel-1];
+	struct MenuEntry *entry;
+
+	if(menu->cur_sel == 0) {
+		return;
+	}
+
+	entry = &menu->submenu[menu->cur_sel-1];
 
 	if(entry->change_value_callback == NULL)
 		return;

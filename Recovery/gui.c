@@ -54,7 +54,7 @@ static void draw_bottom_line(void)
 
 static void menu_draw(struct Menu *menu)
 {
-	int x, y, i;
+	int x, y, i, cur_page_start, total_page;
 
 	x = 1, y = 1;
 	set_screen_xy(x, y);
@@ -85,7 +85,13 @@ static void menu_draw(struct Menu *menu)
 	x = 3, y = 6;
 	set_screen_xy(x, y);
 
-	for(i=0; i<menu->submenu_size; ++i) {
+	if(menu->cur_sel == 0) {
+		cur_page_start = 0;
+	} else {
+		cur_page_start = (menu->cur_sel-1) / MAX_MENU_NUMBER_PER_PAGE * MAX_MENU_NUMBER_PER_PAGE;
+	}
+
+	for(i=cur_page_start; i<MIN(menu->submenu_size, cur_page_start+MAX_MENU_NUMBER_PER_PAGE); ++i) {
 		char buf[256], *p;
 		int color;
 		struct MenuEntry* entry;
@@ -121,6 +127,18 @@ static void menu_draw(struct Menu *menu)
 
 		write_string_with_color(buf, color);
 		set_screen_xy(x, ++y);
+	}
+
+	total_page = (menu->submenu_size+MAX_MENU_NUMBER_PER_PAGE-1) / MAX_MENU_NUMBER_PER_PAGE;
+
+	if(total_page > 1) {
+		char buf[20];
+		x = MAX_SCREEN_X - 15;
+		y = 4;
+
+		sprintf(buf, "Page %d/%d", (cur_page_start/MAX_MENU_NUMBER_PER_PAGE)+1, total_page);
+		set_screen_xy(x, y);
+		write_string_with_color(buf, 0);
 	}
 
 	write_bottom_info();
@@ -164,6 +182,18 @@ static int menu_ctrl(struct Menu *menu)
 		menu_change_value(menu, 1);
 	} else if(key & PSP_CTRL_LEFT) {
 		menu_change_value(menu, -1);
+	} else if(key & PSP_CTRL_LTRIGGER) {
+		if(menu->cur_sel > MAX_MENU_NUMBER_PER_PAGE) {
+			menu->cur_sel -= MAX_MENU_NUMBER_PER_PAGE;
+		} else {
+			menu->cur_sel = 0;
+		}
+	} else if(key & PSP_CTRL_RTRIGGER) {
+		if(menu->cur_sel + MAX_MENU_NUMBER_PER_PAGE < menu->submenu_size) {
+			menu->cur_sel += MAX_MENU_NUMBER_PER_PAGE;
+		} else {
+			menu->cur_sel = menu->submenu_size;
+		}
 	} else if(key & g_ctrl_OK) {
 		struct MenuEntry *entry;
 		int (*enter_callback)(struct MenuEntry *);

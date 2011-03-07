@@ -68,6 +68,7 @@ enum {
 	CHINA,
 	DEBUG_TYPE_I,
 	DEBUG_TYPE_II,
+	ADHOC_TUNNEL_MODE,
 };
 
 extern const char * g_messages[];

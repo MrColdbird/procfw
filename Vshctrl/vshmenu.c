@@ -29,7 +29,7 @@ int vctrlVSHRegisterVshMenu(int (* ctrl)(SceCtrlData *, int))
 	return 0;
 }
 
-int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
+int vctrlVSHUpdateConfig(SEConfig *config)
 {
 	u32 k1;
 	int ret;
@@ -37,6 +37,18 @@ int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
    	k1 = pspSdkSetK1(0);
 	memcpy(&conf, config, sizeof(conf));
 	ret = sctrlSESetConfig(&conf);
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+int vctrlVSHExitVSHMenu(SEConfig *config, char *videoiso, int disctype)
+{
+	u32 k1;
+	int ret;
+
+   	k1 = pspSdkSetK1(0);
+	ret = vctrlVSHUpdateConfig(config);
 
 	if (conf.vshcpuspeed != 0) {
 		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);

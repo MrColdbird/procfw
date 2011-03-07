@@ -863,8 +863,8 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	//set iso mode for reboot
 	sctrlSESetBootConfFileIndex(config.umdmode);
 
-	//high memory disabled because it hurts pspgo resuming interrupted game
-//	sctrlHENSetMemory(55, 0);
+	//split 2g+ memory for user and kernel use in online mode
+	if (config.adhoctunnel) sctrlHENSetMemory(36, 12);
 
 	printk("%s: ISO %s, UMD mode %d\n", __func__, vpbp->name, config.umdmode);
 	

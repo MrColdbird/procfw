@@ -652,7 +652,13 @@ int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32
 	_btcnf_module newmod; _memset(&newmod, 0, sizeof(newmod));
 
 	newmod.module_path = prxname_offset - header->modnamestart;
-	newmod.flags = 0x80010000 | (flags & 0xFFFF);
+
+	if(flags >= 0xFFFF) {
+		newmod.flags = flags;
+	} else {
+		newmod.flags = 0x80010000 | (flags & 0xFFFF);
+	}
+
 	_memmove(&module[modnum + 1], &module[modnum + 0], buffer + header->modnameend - (unsigned int)&module[modnum + 0]);
 	_memcpy(&module[modnum + 0], &newmod, sizeof(newmod));
 	header->nmodules++;

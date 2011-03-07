@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "vpl.h"
 #include "main.h"
+#include "pspusbdevice.h"
 
 extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
@@ -38,6 +39,12 @@ const char * g_messages[] = {
 	"Configuration",
 	"Fake Region",
 	"ISO Mode",
+	"XMB USB Device",
+	"Flash 0",
+	"Flash 1",
+	"Flash 2",
+	"Flash 3",
+	"UMD Disc",
 	"Charge battery when USB cable is plugged in",
 	"Hide MAC address",
 	"Skip Sony Logo at Startup",
@@ -101,6 +108,11 @@ static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 static struct ValueOption g_iso_mode_option = {
 	&g_config.umdmode,
 	MODE_NP9660+1,
+};
+
+static struct ValueOption g_xmb_usbdevice_option = {
+	&g_config.usbdevice,
+	PSP_USBDEVICE_UMD9660+1+1,
 };
 
 static struct ValueOption g_fake_region_option = {
@@ -191,6 +203,13 @@ static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_xmb_usbdevice(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[XMB_USBDEVICE], get_usbdevice_name(g_config.usbdevice));
+
+	return 0;
+}
+
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
@@ -256,6 +275,7 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
+	{ NULL, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },

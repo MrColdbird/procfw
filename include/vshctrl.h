@@ -40,6 +40,7 @@ int vctrlVSHRegisterVshMenu(int (* ctrl)(SceCtrlData *, int));
 */
 int vctrlVSHExitVSHMenu(SEConfig *conf, char *videoiso, int disctype);
 
+int vctrlVSHUpdateConfig(SEConfig *config);
 
 #endif
 

@@ -172,6 +172,7 @@ int load_plugins(void)
 	} //game mode
 	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
 		bootconf = PLUGIN_PATH "game.txt";
+		if (conf.adhoctunnel) load_start_module("flash0:/kd/_onlinebridge.prx");
 	} //ps1 mode
 	else if(conf.plugpop && key == PSP_INIT_KEYCONFIG_POPS) {
 		bootconf = PLUGIN_PATH "pops.txt";

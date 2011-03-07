@@ -13,6 +13,12 @@ enum {
 	CONFIGURATION,
 	FAKE_REGION,
 	ISO_MODE,
+	XMB_USBDEVICE,
+	FLASH0,
+	FLASH1,
+	FLASH2,
+	FLASH3,
+	UMD9660,
 	USB_CHARGE,
 	HIDE_MAC,
 	SKIP_SONY_LOGO,
@@ -143,6 +149,7 @@ void main_menu(void);
 const char *get_bool_name(int boolean);
 const char* get_fake_region_name(int fakeregion);
 const char *get_iso_name(int iso_mode);
+const char* get_usbdevice_name(int usbdevice);
 int get_cpu_number(int cpu);
 int get_bus_number(int cpu);
 int get_cpu_freq(int number);

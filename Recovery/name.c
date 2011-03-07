@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "vpl.h"
 #include "main.h"
+#include "pspusbdevice.h"
 
 static const int cpu_list[]={0, 20, 75, 100, 133, 222, 266, 300, 333};
 static const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
@@ -129,6 +130,28 @@ const char *get_plugin_name(int type)
 			return "GAME";
 		case TYPE_POPS:
 			return "POPS";
+	}
+
+	return "FIXME";
+}
+
+const char* get_usbdevice_name(int usbdevice)
+{
+	if(usbdevice == 0) {
+		return g_messages[MEMORY_STICK];
+	}
+
+	switch(usbdevice-1) {
+		case PSP_USBDEVICE_FLASH0:
+			return g_messages[FLASH0];
+		case PSP_USBDEVICE_FLASH1:
+			return g_messages[FLASH1];
+		case PSP_USBDEVICE_FLASH2:
+			return g_messages[FLASH2];
+		case PSP_USBDEVICE_FLASH3:
+			return g_messages[FLASH3];
+		case PSP_USBDEVICE_UMD9660:
+			return g_messages[UMD9660];
 	}
 
 	return "FIXME";

@@ -94,9 +94,10 @@ const char * g_messages[] = {
 	"China",
 	"Debug Type I",
 	"Debug Type II",
+	"Adhoc Tunnel Mode (2g+ only)",
 };
 
-static u8 message_test[NELEMS(g_messages) == DEBUG_TYPE_II + 1 ? 0 : -1];
+static u8 message_test[NELEMS(g_messages) == ADHOC_TUNNEL_MODE + 1 ? 0 : -1];
 
 static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
@@ -196,6 +197,11 @@ static struct ValueOption g_hibblock_option = {
 	2,
 };
 
+static struct ValueOption g_adhoc_tunnel_option = {
+	&g_config.adhoctunnel,
+	2,
+};
+
 static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[ISO_MODE], get_iso_name(g_config.umdmode));
@@ -273,6 +279,13 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 	return 0;
 }
 
+static int display_adhoc_tunnel(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[ADHOC_TUNNEL_MODE], get_bool_name(g_config.adhoctunnel));
+
+	return 0;
+}
+
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
@@ -286,6 +299,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
+	{ NULL, 0, 0, &display_adhoc_tunnel, &change_option, &change_option_by_enter, &g_adhoc_tunnel_option },
 };
 
 static struct Menu g_configuration_menu = {

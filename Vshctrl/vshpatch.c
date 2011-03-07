@@ -254,6 +254,9 @@ static void patch_vsh_module(SceModule2 * mod)
 	_sw(0, mod->text_addr+0x11FD8);
 	_sw(0, mod->text_addr+0x11FE0);
 
+	//disable psp go resume feature on online mode
+	if(psp_model == PSP_GO && conf.adhoctunnel) _sw(0, mod->text_addr + 0xCEB8);
+
 	//loadexec calls to vsh_bridge
 	u32 nids[2] = { /* ms0 */ 0x59BBA567, /* ef0 */ 0xD4BA5699 };
 

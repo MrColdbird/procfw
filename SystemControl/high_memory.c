@@ -24,6 +24,8 @@ static unsigned int * (*get_partition)(int pid) = (void *)(0x88003E34);
 
 static u8 g_p8_size = 4;
 
+static inline int is_homebrews_runlevel(void);
+
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
 {
@@ -46,7 +48,7 @@ void patch_umdcache(u32 text_addr)
 
 void unlock_high_memory(u32 forced)
 {
-	if(!forced && !g_high_memory_enabled) {
+	if(!is_homebrews_runlevel() && !forced && !g_high_memory_enabled) {
 		return;
 	}
 	

@@ -4,7 +4,7 @@ class FakeTime:
     def time(self):
         return 1225856967.109
 
-import sys, os, struct, gzip, hashlib
+import sys, os, struct, gzip, hashlib, StringIO
 
 gzip.time = FakeTime()
 
@@ -25,21 +25,15 @@ def prx_compress(output, hdr, input, mod_name="", mod_attr=0xFFFFFFFF):
 		return -1
 
 	uncompsize = os.stat(input).st_size
+
 	f_in=open(input, 'rb')
-
-	try:
-		os.remove("tmp.gz")
-	except OSError:
-		pass
-
-	f=gzip.GzipFile("tmp.gz", 'wb')
+	temp=StringIO.StringIO()
+	f=gzip.GzipFile(fileobj=temp, mode='wb')
 	f.writelines(f_in)
 	f.close()
 	f_in.close()
-
-	a=open('tmp.gz', 'rb')
-	prx=a.read()
-	a.close()
+	prx=temp.getvalue()
+	temp.close()
 
 	digest=hashlib.md5(prx).digest()
 	filesize = len(fileheader) + len(prx)

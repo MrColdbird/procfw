@@ -10,6 +10,7 @@
 #include <psputilsforkernel.h>
 #include <psppower.h>
 #include <string.h>
+#include <zlib.h>
 #include "systemctrl.h"
 #include "rebootex.h"
 #include "utils.h"
@@ -19,7 +20,7 @@
 #include "Rebootex_prx.h"
 
 PSP_MODULE_INFO("635kernel", PSP_MODULE_USER, 1, 0);
-PSP_HEAP_SIZE_KB(0);
+PSP_HEAP_SIZE_KB(128);
 
 //installer path
 char installerpath[256];
@@ -37,6 +38,8 @@ int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid);
 
 //unregister callback function - its slotcheck is bugged too. ;)
 int scePowerUnregisterCallbackPrivate(unsigned int slot);
+
+u8 decompress_buf[1024*1024L];
 
 //load reboot wrapper
 int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
@@ -365,17 +368,70 @@ error:
 	return -1;
 }
 
+int gzip_decompress(u8 *dst, const u8 *src, int size)
+{
+	int ret;
+	z_stream strm;
+
+	strm.zalloc = Z_NULL;
+	strm.zfree = Z_NULL;
+	strm.opaque = Z_NULL;
+
+	ret = inflateInit2(&strm, 15+16);
+
+	if(ret != Z_OK) {
+		return -1;
+	}
+
+	strm.avail_in = size;
+	strm.next_in = (void*)src;
+	strm.avail_out = 1024*1024L;
+	strm.next_out = decompress_buf;
+
+	ret = inflate(&strm, Z_FINISH);
+
+	if(ret == Z_STREAM_ERROR) {
+		inflateEnd(&strm);
+
+		return -3;
+	}
+
+	memcpy(dst, decompress_buf, strm.total_out);
+	deflateEnd(&strm);
+
+	return strm.total_out;
+}
+
+static u8 file_buffer[1024 * 1024L];
+
 void write_files(const char *base)
 {
 	char fn[256];
+	int newsize;
+
+	newsize = gzip_decompress(file_buffer, installer, size_installer);
+
+	if(newsize < 0) {
+		pspDebugScreenPrintf("cannot decompress installer %d\n", newsize);
+
+		return;
+	}
 
 	strcpy(fn, base);
 	strcat(fn, "installer.prx");
-	write_file(fn, installer, size_installer);
+	write_file(fn, file_buffer, newsize);
+
+	newsize = gzip_decompress(file_buffer, Rebootex_prx, size_Rebootex_prx);
+	
+	if(newsize < 0) {
+		pspDebugScreenPrintf("cannot decompress rebootex %d\n", newsize);
+		
+		return;
+	}
 
 	strcpy(fn, base);
 	strcat(fn, "Rebootex.prx");
-	write_file(fn, Rebootex_prx, size_Rebootex_prx);
+	write_file(fn, file_buffer, newsize);
 }
 
 //entry point
@@ -385,6 +441,8 @@ int main(int argc, char * argv[])
 	int result = 0;
 	u32 power_buf_address = 0;
 	u32 fw_version;
+
+	pspDebugScreenInit();
 
 	//puzzle installer path
 	strcpy(installerpath, argv[0]);
@@ -400,7 +458,6 @@ int main(int argc, char * argv[])
 
 	printk_init("ms0:/launcher.txt");
 	printk("Hello exploit\r\n");
-	pspDebugScreenInit();
 
 	fw_version = sceKernelDevkitVersion();
 

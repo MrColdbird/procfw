@@ -93,12 +93,12 @@ static int vshpatch_module_chain(SceModule2 *mod)
 }
 
 // sceDisplay_driver_73CA5F45
-static int (*GameBoot) (void) = NULL;
+static int (*sceDisplaySetHoldMode)(int a0) = NULL;
 
-static int Gameboot_Patched(void)
+static int _sceDisplaySetHoldMode(int a0)
 {
 	if (conf.skipgameboot == 0) {
-		return GameBoot();
+		return (*sceDisplaySetHoldMode)(a0);
 	}
 
 	return 0;
@@ -111,8 +111,8 @@ static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
 
 static void patch_Gameboot(SceModule2 *mod)
 {
-	_sw(MAKE_CALL(Gameboot_Patched), mod->text_addr + 0x1A14);
-	GameBoot = (void*)(mod->text_addr+0x5618);
+	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + 0x1A14);
+	sceDisplaySetHoldMode = (void*)(mod->text_addr+0x5618);
 }
 
 static void patch_hibblock(SceModule2 *mod)

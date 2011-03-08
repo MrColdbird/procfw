@@ -10,7 +10,7 @@ pre-build:
 	./create_module_include.py
 	touch main.c
 
-LIBS = -lpspsystemctrl_user
+LIBS = -lpspsystemctrl_user -lz
 LIBDIR = . ../../libs
 CFLAGS = -Os -G0 -Wall -I ../../Common
 CXXFLAGS = $(CFLAGS)

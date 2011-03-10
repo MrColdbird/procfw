@@ -73,8 +73,11 @@ const char * g_messages[] = {
 	"WMA activated",
 	"Flash activated",
 	"Buttons swapped",
+	"Confirm Button: X",
+	"Confirm Button: O",
 	"Activate WMA",
 	"Activate Flash",
+	"Swap O/X buttons",
 	"Swap O/X buttons (needs Reset VSH to take effect)",
 	"Run ms0:/PSP/GAME/RECOVERY/EBOOT.PBP",
 	"Shutdown device",
@@ -628,10 +631,16 @@ static int swap_buttons(struct MenuEntry *entry)
 	u32 value;
 	char buf[80];
 
-	sprintf(buf, "> %s", g_messages[SWAP_BUTTONS]);
 	get_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", &value);
 	value = !value;
 	set_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", value); 
+
+	if(value) {
+		sprintf(buf, "> %s %s", g_messages[SWAP_BUTTONS], g_messages[CONFIRM_BUTTON_IS_X]);
+	} else {
+		sprintf(buf, "> %s %s", g_messages[SWAP_BUTTONS], g_messages[CONFIRM_BUTTON_IS_O]);
+	}
+
 	set_bottom_info(buf, 0);
 	frame_end();
 	sceKernelDelayThread(CHANGE_DELAY);
@@ -643,7 +652,7 @@ static int swap_buttons(struct MenuEntry *entry)
 static struct MenuEntry g_registery_menu_entries[] = {
 	{ &g_messages[ACTIVATE_WMA], 0, 0, NULL, NULL, &active_wma, NULL },
 	{ &g_messages[ACTIVATE_FLASH], 0, 0, NULL, NULL, &active_flash, NULL },
-	{ &g_messages[SWAP_BUTTONS], 0, 0, NULL, NULL, &swap_buttons, NULL },
+	{ &g_messages[SWAP_BUTTONS_FULL], 0, 0, NULL, NULL, &swap_buttons, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {

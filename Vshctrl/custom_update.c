@@ -31,6 +31,10 @@ void patch_SceUpdateDL_Library(u32 text_addr)
 {
 	char *p;
 
+	if(NULL == sceKernelFindModuleByName("update_plugin_module")) {
+		return;
+	}
+	
 	p = (char*)(text_addr+0x000032BC);
 
 	if(psp_model == PSP_GO) {

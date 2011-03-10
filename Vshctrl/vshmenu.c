@@ -108,6 +108,9 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		if (sceKernelFindModuleByName("camera_plugin_module"))
 			goto exit;
 
+		if (sceKernelFindModuleByName("psn_plugin_module"))
+			goto exit;
+
 		if (!(ctrl->Buttons & PSP_CTRL_SELECT))
 			goto exit;
 

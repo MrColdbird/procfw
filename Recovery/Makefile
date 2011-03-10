@@ -1,5 +1,5 @@
 TARGET = recovery
-OBJS = main.o vpl.o menu.o gui.o name.o registery.o plugins.o imports.o
+OBJS = main.o vpl.o menu.o gui.o name.o registery.o plugins.o usb.o imports.o
 
 BUILD_PRX=1
 PSP_FW_VERSION=635
@@ -10,7 +10,7 @@ ASFLAGS = $(CFLAGS)
 
 PRX_EXPORTS = exports.exp
 
-LIBS = -lpspsystemctrl_user -lpspkubridge -lpsppower -lpspreg
+LIBS = -lpspsystemctrl_user -lpspkubridge -lpsppower -lpspreg -lpspusb -lpspusbstor -lpspusbdevice
 LIBDIR = . ../libs
 LDFLAGS =
 

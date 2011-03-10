@@ -36,6 +36,9 @@ const char * g_messages[] = {
 	"Default",
 	"Enabled",
 	"Disabled",
+	"Toggle USB",
+	"USB Enabled",
+	"USB Disabled",
 	"Configuration",
 	"Fake Region",
 	"ISO Mode",
@@ -461,6 +464,7 @@ static int run_recovery_eboot(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_top_menu_entries[] = {
+	{ &g_messages[TOGGLE_USB], 0, 0, NULL, NULL, &toggle_usb, NULL },
 	{ &g_messages[RUN_RECOVERY_EBOOT], 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
 	{ &g_messages[CONFIGURATION], 1, 0, NULL, NULL, &configuration_menu, NULL},
 	{ &g_messages[ADVANCED], 1, 0, NULL, NULL, &advanced_menu, NULL},

@@ -177,6 +177,7 @@ void *get_display_buffer(void)
 
 void recovery_exit(void)
 {
+	exit_usb();
 	vctrlVSHUpdateConfig(&g_config);
 	resume_vsh_thread();
 	vpl_finish();

@@ -10,6 +10,9 @@ enum {
 	DEFAULT,
 	ENABLED,
 	DISABLED,
+	TOGGLE_USB,
+	USB_ENABLED,
+	USB_DISABLED,
 	CONFIGURATION,
 	FAKE_REGION,
 	ISO_MODE,
@@ -168,5 +171,8 @@ int get_registry_value(const char *dir, const char *name, unsigned int *val);
 int set_registry_value(const char *dir, const char *name, unsigned int val);
 
 int plugins_menu(struct MenuEntry *entry);
+
+int toggle_usb(struct MenuEntry *entry);
+void exit_usb(void);
 
 #endif

@@ -255,10 +255,14 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 
 	pMod = sceKernelFindModuleByName(szMod);
 
-	if (!pMod) {
-		printk("%s: Cannot find %s_%08X in %s\n", __func__, szLib, nid, szMod);
+	if(!pMod) {
+		pMod = sceKernelFindModuleByAddress((u32)szMod);
 
-		return 0;
+		if (!pMod) {
+			printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, nid);
+
+			return 0;
+		}
 	}
 
 	int i = 0;
@@ -266,25 +270,21 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	entTab = pMod->ent_top;
 	entLen = pMod->ent_size;
 
-	while(i < entLen)
-	{
+	while(i < entLen) {
 		int count;
 		int total;
 		unsigned int *vars;
 
 		entry = (struct SceLibraryEntryTable *) (entTab + i);
 
-		if(entry->libname == szLib || (entry->libname && !strcmp(entry->libname, szLib)))
-		{
+		if(entry->libname == szLib || (entry->libname && szLib && 0 == strcmp(entry->libname, szLib))) {
 			total = entry->stubcount + entry->vstubcount;
 			vars = entry->entrytable;
 
-			if(entry->stubcount > 0)
-			{
-				for(count = 0; count < entry->stubcount; count++)
-				{
+			if(total > 0) {
+				for(count=0; count<total; count++) {
 					if (vars[count] == nid)
-						return vars[count+total];					
+						return vars[count+total];
 				}
 			}
 		}
@@ -292,7 +292,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 		i += (entry->len * 4);
 	}
 
-	printk("%s: Cannot find %s_%08X in %s\n", __func__, szLib, nid, szMod);
+	printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, nid);
 	
 	return 0;
 }

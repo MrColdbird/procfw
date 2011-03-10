@@ -175,12 +175,34 @@ static char * ownstrtok(char * s, const char * delim)
 
 #include "nid_data_missing.h"
 
+static int module_can_skip_nid_resolve(void *buf)
+{
+	int ret;
+	u32 *version;
+
+	/* check module_sdk_version */
+	version = (u32*)sctrlHENFindFunction(buf, NULL, 0x11B97506);
+	ret = 0;
+
+	if(version != NULL) {
+		if ((*version >> 16) == psp_fw_version >> 16) {
+			ret = 1;
+		}
+	}
+
+	return ret;
+}
+
 int _sceKernelLinkLibraryEntries(void *buf, int size)
 {
 	int ret, offset, i;
 	u32 stubcount;
 	struct SceLibraryStubTable *stub;
 	resolver_config *resolver;
+
+	if(module_can_skip_nid_resolve(buf)) {
+		return (*sceKernelLinkLibraryEntries)(buf, size);
+	}
 
 	offset = 0;
 
@@ -228,6 +250,10 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	u32 stubcount;
 	struct SceLibraryStubTable *stub;
 	resolver_config *resolver;
+
+	if(module_can_skip_nid_resolve(buf)) {
+		return (*sceKernelLinkLibraryEntriesForUser)(unk0, buf, size);
+	}
 
 	offset = 0;
 

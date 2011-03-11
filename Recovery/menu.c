@@ -49,6 +49,7 @@ const char * g_messages[] = {
 	"Flash 3",
 	"UMD Disc",
 	"Charge battery when USB cable is plugged in",
+	"Use Slim Color on PSP-1000",
 	"Hide MAC address",
 	"Skip Sony Logo at Startup",
 	"Skip Game Boot Screen",
@@ -167,6 +168,11 @@ static struct ValueOption g_usb_charge_option = {
 	2,
 };
 
+static struct ValueOption g_slim_color_option = {
+	&g_config.slimcolor,
+	2,
+};
+
 static struct ValueOption g_skip_logo_option = {
 	&g_config.skiplogo,
 	2,
@@ -219,6 +225,13 @@ static int display_xmb_usbdevice(struct MenuEntry* entry, char *buf, int size)
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
+
+	return 0;
+}
+
+static int display_slim_color(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[SLIM_COLOR], get_bool_name(g_config.slimcolor));
 
 	return 0;
 }
@@ -292,6 +305,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
+	{ NULL, 0, 0, &display_slim_color, &change_option, &change_option_by_enter, &g_slim_color_option },
 };
 
 static struct Menu g_configuration_menu = {

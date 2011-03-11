@@ -140,10 +140,11 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 				if (ret == 0) {
 					printk("%s: tag 0x%08X\n", __func__, tag);
 					load_opnssmp(path, tag);
-					opnssmp_loaded = 1;
 				} else {
 					printk("%s: get_game_tag -> 0x%08X\n", __func__, ret);
 				}
+
+				opnssmp_loaded = 1;
 			}
 		}
 	}

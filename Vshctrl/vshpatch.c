@@ -193,11 +193,6 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	}
 
 	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
-
-	if (psp_model == 0 && conf.slimcolor) {
-		_sw(_lw(text_addr + 0x00007664), text_addr + 0x00007660);
-		_sw(0x24020001, text_addr + 0x00007664);
-	}
 	
 	sync_cache();
 }

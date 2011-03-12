@@ -17,6 +17,7 @@
 #include "usbdevice.h"
 #include "vshctrl.h"
 #include "recovery.h"
+#include "config.h"
 
 // VSH module can write F0/F1
 PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
@@ -165,15 +166,15 @@ struct InstallList {
 };
 
 struct InstallList g_file_lists[] = {
-	{ systemctrl, &size_systemctrl, "flash0:/kd/_systemctrl.prx", },
-	{ vshctrl, &size_vshctrl, "flash0:/kd/_vshctrl.prx", },
-	{ galaxy, &size_galaxy, "flash0:/kd/_galaxy.prx", },
-	{ stargate, &size_stargate, "flash0:/kd/_stargate.prx", },
-	{ march33, &size_march33, "flash0:/kd/_march33.prx", },
-	{ usbdevice, &size_usbdevice, "flash0:/kd/_usbdevice.prx", },
-	{ popcorn, &size_popcorn, "flash0:/kd/_popcorn.prx", },
-	{ satelite, &size_satelite, "flash0:/vsh/module/_satelite.prx", },
-	{ recovery, &size_recovery, "flash0:/vsh/module/_recovery.prx", },
+	{ systemctrl, &size_systemctrl, PATH_SYSTEMCTRL, },
+	{ vshctrl, &size_vshctrl, PATH_VSHCTRL, },
+	{ galaxy, &size_galaxy, PATH_GALAXY, },
+	{ stargate, &size_stargate, PATH_STARGATE, },
+	{ march33, &size_march33, PATH_MARCH33, },
+	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
+	{ popcorn, &size_popcorn, PATH_POPCORN, },
+	{ satelite, &size_satelite, PATH_SATELITE, },
+	{ recovery, &size_recovery, PATH_RECOVERY, },
 };
 
 static const char *g_old_cfw_files[] = {

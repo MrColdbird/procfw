@@ -1,6 +1,7 @@
 #include <pspsdk.h>
 #include "rebootex_conf.h"
 #include "utils.h"
+#include "config.h"
 
 #define REBOOT_START 0x88600000
 #define REBOOTEX_CONFIG_START 0x88FB0000
@@ -439,7 +440,7 @@ int patch_bootconf_vsh(char *buffer, int length)
 	int newsize, result;
 
 	result = length;
-	newsize = AddPRX(buffer, "/kd/vshbridge.prx", "/kd/_vshctrl.prx", VSH_RUNLEVEL );
+	newsize = AddPRX(buffer, "/kd/vshbridge.prx", PATH_VSHCTRL+sizeof(PATH_FLASH0)-2, VSH_RUNLEVEL );
 
 	if (newsize > 0) result = newsize;
 
@@ -451,7 +452,7 @@ int patch_bootconf_pops(char *buffer, int length)
 	int newsize, result;
 
 	result = length;
-	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", "/kd/_popcorn.prx", POPS_RUNLEVEL);
+	newsize = AddPRX(buffer, "/kd/usersystemlib.prx", PATH_POPCORN+sizeof(PATH_FLASH0)-2, POPS_RUNLEVEL);
 
 	if (newsize > 0) result = newsize;
 
@@ -472,8 +473,8 @@ struct del_module {
 static struct add_module np9660_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
 	{ "/kd/npdrm.prx", "/kd/iofilemgr_dnas.prx", GAME_RUNLEVEL },
-	{ "/kd/_galaxy.prx", "/kd/np9660.prx", UMDEMU_RUNLEVEL },
-	{ "/kd/_galaxy.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+	{ PATH_GALAXY+sizeof(PATH_FLASH0)-2, "/kd/np9660.prx", UMDEMU_RUNLEVEL },
+	{ PATH_GALAXY+sizeof(PATH_FLASH0)-2, "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 };
@@ -506,8 +507,8 @@ int patch_bootconf_np9660(char *buffer, int length)
 
 static struct add_module march33_add_mods[] = {
 	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
-	{ "/kd/_march33.prx", "/kd/utility.prx", GAME_RUNLEVEL },
-	{ "/kd/_march33.prx", "/kd/isofs.prx", UMDEMU_RUNLEVEL },
+	{ PATH_MARCH33+sizeof(PATH_FLASH0)-2, "/kd/utility.prx", GAME_RUNLEVEL },
+	{ PATH_MARCH33+sizeof(PATH_FLASH0)-2, "/kd/isofs.prx", UMDEMU_RUNLEVEL },
 	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
 };
 
@@ -548,7 +549,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 	buffer = (void*)BOOTCONFIG_TEMP_BUFFER;
 	_memcpy(buffer, *p_buffer, length);
 	*p_buffer = buffer;
-	newsize = AddPRX(buffer, "/kd/init.prx", "/kd/_systemctrl.prx", 0x00EF);
+	newsize = AddPRX(buffer, "/kd/init.prx", PATH_SYSTEMCTRL+sizeof(PATH_FLASH0)-2, 0x00EF);
 
 	if (newsize > 0) result = newsize;
 
@@ -562,7 +563,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 
 	if (newsize > 0) result = newsize;
 
-	newsize = AddPRX(buffer, "/kd/me_wrapper.prx", "/kd/_stargate.prx", GAME_RUNLEVEL | UMDEMU_RUNLEVEL);
+	newsize = AddPRX(buffer, "/kd/me_wrapper.prx", PATH_STARGATE+sizeof(PATH_FLASH0)-2, GAME_RUNLEVEL | UMDEMU_RUNLEVEL);
 
 	if (newsize > 0) result = newsize;
 	

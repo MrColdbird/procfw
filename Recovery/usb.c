@@ -26,7 +26,7 @@ struct UsbModule {
 };
 
 static struct UsbModule g_usb_modules[] = {
-	{ "flash0:/kd/_usbdevice.prx", -1, },
+	{ PATH_USBDEVICE, -1, },
 	{ "flash0:/kd/semawm.prx", -1, },
 	{ "flash0:/kd/usbstor.prx", -1, },
 	{ "flash0:/kd/usbstormgr.prx", -1, },

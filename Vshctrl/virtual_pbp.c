@@ -216,6 +216,31 @@ static int get_sfo_string(const char *sfo, const char *name, char *output, int o
 	return  -40;
 }
 
+static int get_sfo_u32(const char *sfo, const char *name, u32 *output)
+{
+	SFOHeader *header = (SFOHeader *)sfo;
+	SFODir *entries = (SFODir *)(sfo+0x14);
+	int i;
+
+	if(header->signature != 0x46535000) {
+		return -39;
+	}
+
+	for (i=0; i<header->nitems; i++) {
+		if (0 == strcmp(sfo+header->fields_table_offs+entries[i].field_offs, name)) {
+			if(entries[i].type != 0x04) {
+				return -41;
+			}
+
+			*output = *(u32*)(sfo+header->values_table_offs+entries[i].val_offs);
+
+			return 0;
+		}
+	}
+
+	return  -40;
+}
+
 static int add_cache(VirtualPBP *vpbp)
 {
 	int i;
@@ -606,6 +631,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 			void *buf, *buf_64;
 			char sfotitle[64];
 			char disc_id[12];
+			u32 parental_level = 1;
 
 			buf = oe_malloc(SECTOR_SIZE+64);
 
@@ -638,10 +664,13 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 
 					return ret;
 				}
-				
+
+				get_sfo_u32(buf_64, "PARENTAL_LEVEL", &parental_level);
+
 				oe_free(buf);
 				memcpy(virtualsfo+0x118, sfotitle, 64);
 				memcpy(virtualsfo+0xf0, disc_id, 12);
+				memcpy(virtualsfo+0x108, &parental_level, sizeof(parental_level));
 				re = MIN(remaining, sizeof(virtualsfo) - (vpbp->file_pointer - vpbp->header[2]));
 				memcpy(data, virtualsfo+vpbp->file_pointer-vpbp->header[2], re);
 				vpbp->file_pointer += re;

@@ -92,7 +92,7 @@ const char * g_messages[] = {
 	"Europe",
 	"Korea",
 	"United Kingdom",
-	"Mexique",
+	"Mexico",
 	"Australia",
 	"Hongkong",
 	"Taiwan",

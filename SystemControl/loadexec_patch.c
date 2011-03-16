@@ -14,6 +14,7 @@
 #include "../Rebootex_bin/rebootex.h"
 #include "rebootex_conf.h"
 #include "strsafe.h"
+#include "systemctrl_patch_offset.h"
 
 static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 rebootex_config rebootex_conf;
@@ -56,8 +57,8 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 void patch_sceLoadExec(void)
 {
 	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
-	unsigned int offsets[4];
 	u32 text_addr;
+	struct sceLoadExecPatch *patch;
 
 	if (loadexec == NULL) {
 		return;
@@ -66,32 +67,26 @@ void patch_sceLoadExec(void)
 	text_addr = loadexec->text_addr;
 
 	if(psp_model == PSP_GO) {
-		offsets[0] = 0x00002F90;
-		offsets[1] = 0x00002FDC;
-		offsets[2] = 0x0000260C;
-		offsets[3] = 0x00002650;
+		patch = &g_offs->loadexec_patch_05g;
 	} else {
-		offsets[0] = 0x00002D44;    // call to LoadReboot
-		offsets[1] = 0x00002D90;    // lui $at, 0x8860
-		offsets[2] = 0x000023B8;    // k1 loadexec patch
-		offsets[3] = 0x000023FC;    // loadexec userlevel patch
+		patch = &g_offs->loadexec_patch;
 	}
 
 	//replace LoadReboot function
-	_sw(MAKE_CALL(load_reboot), loadexec->text_addr + offsets[0]);
+	_sw(MAKE_CALL(load_reboot), loadexec->text_addr + patch->LoadRebootCall);
 
 	//patch Rebootex position to 0x88FC0000
-	_sw(0x3C0188FC, loadexec->text_addr + offsets[1]); // lui $at, 0x88FC
+	_sw(0x3C0188FC, loadexec->text_addr + patch->RebootAddress); // lui $at, 0x88FC
 
 	//save LoadReboot function
-	LoadReboot = (void*)loadexec->text_addr;
+	LoadReboot = (void*)(loadexec->text_addr + patch->LoadReboot);
 
 	//allow user $k1 configs to call sceKernelLoadExecWithApiType
-	_sw(0x1000000C, loadexec->text_addr + offsets[2]);
+	_sw(0x1000000C, loadexec->text_addr + patch->sceKernelLoadExecWithApiTypeCheck1);
 	//allow all user levels to call sceKernelLoadExecWithApiType
-	_sw(0, loadexec->text_addr + offsets[3]);
+	_sw(NOP, loadexec->text_addr + patch->sceKernelLoadExecWithApiTypeCheck2);
 
 	//allow all user levels to call sceKernelExitVSHVSH
-	_sw(0x10000008, loadexec->text_addr + 0x0000168C);
-	_sw(0, loadexec->text_addr + 0x000016C0);
+	_sw(0x10000008, loadexec->text_addr + patch->sceKernelExitVSHVSHCheck1);
+	_sw(NOP, loadexec->text_addr + patch->sceKernelExitVSHVSHCheck2);
 }

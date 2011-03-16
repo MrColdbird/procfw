@@ -31,7 +31,8 @@ OBJS = main.o \
 	   fake_region.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
-	   ../Common/strsafe.o
+	   ../Common/strsafe.o \
+	   ../Common/systemctrl_patch_offset.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \

@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "nid_resolver.h"
 #include "strsafe.h"
+#include "systemctrl_patch_offset.h"
 
 extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_45C6125B(const char *file, struct SceKernelLoadExecVSHParam *param);
@@ -147,9 +148,9 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	text_addr = mod->text_addr;
 
 	if (psp_model == PSP_GO) {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x000025C0); // 0x00002558 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype); // 0x00002558 in 6.20
 	} else {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x0000236C); // 0x00002304 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype); // 0x00002304 in 6.20
 	}
 
 	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
@@ -170,7 +171,7 @@ int sctrlKernelSetUserLevel(int level)
 	ret = sceKernelGetUserLevel();
 	mod = (SceModule2*) sceKernelFindModuleByName("sceThreadManager");
 	text_addr = mod->text_addr;
-	_sw((level^8)<<28, *(u32*)(text_addr+0x00019E80)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
+	_sw((level^8)<<28, *(u32*)(text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetUserLevel)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
 
 	pspSdkSetK1(k1);
 
@@ -185,8 +186,8 @@ int sctrlKernelSetDevkitVersion(int version)
 	k1 = pspSdkSetK1(0);
 	ret = sceKernelDevkitVersion();
 
-	_sh((version>>16), 0x88011998); // 0x88011AAC in 6.20
-	_sh((version&0xFFFF), 0x880119A0); // 0x88011AB4 in 6.20
+	_sh((version>>16), g_offs->systemctrl_export_patch.sctrlKernelSetDevkitVersion); // 0x88011AAC in 6.20
+	_sh((version&0xFFFF), g_offs->systemctrl_export_patch.sctrlKernelSetDevkitVersion+4); // 0x88011AB4 in 6.20
 
 	sync_cache();
 	pspSdkSetK1(k1);
@@ -223,7 +224,7 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 
 	k1 = pspSdkSetK1(0);
 	mod = (SceModule2*) sceKernelFindModuleByName("sceIOFileManager");
-	find_driver = (void*)(mod->text_addr + 0x00002A44); // 0x00002A38 in 6.20/6.31
+	find_driver = (void*)(mod->text_addr + g_offs->systemctrl_export_patch.sctrlHENFindDriver); // 0x00002A38 in 6.20/6.31
 	p = find_driver(drvname);
 
 	if (p != NULL) {
@@ -373,7 +374,7 @@ int sctrlKernelSetUMDEmuFile(const char *iso)
 	}
 
 	STRCPY_S(g_iso_filename, iso);
-	*(const char**)(modmgr->text_addr+0x000099B8) = g_iso_filename;
+	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetUMDEmuFile) = g_iso_filename;
 
 	return 0;
 }
@@ -389,7 +390,7 @@ int sctrlKernelSetInitFileName(char *filename)
 	}
 
 	STRCPY_S(g_initfilename, filename);
-	*(const char**)(modmgr->text_addr+0x000099B4) = g_initfilename;
+	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetInitFileName) = g_initfilename;
 
 	return 0;
 }

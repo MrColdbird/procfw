@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "kubridge.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 int (*g_on_module_start)(SceModule2*) = NULL;
 
@@ -40,29 +41,29 @@ void setup_module_handler(void)
 		return;
 	
 	//backup function pointer (dword_622C)
-	ProbeExec3 = (void*)mod->text_addr + 0x00008864;
+	ProbeExec3 = (void*)mod->text_addr + g_offs->module_handler_patch.ProbeExec3;
 
 	//override function (sub_0045C)
-	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + 0x00007C6C);
+	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + g_offs->module_handler_patch.ProbeExec3Call);
 
-	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr+0x000087E4);
+	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr + g_offs->module_handler_patch.sceKernelCheckExecFileImport);
 
-	PartitionCheck = (void*)mod->text_addr + 0x00007FE0;
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + 0x0000652C);
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + 0x000068A8);
+	PartitionCheck = (void*)mod->text_addr + g_offs->module_handler_patch.PartitionCheck;
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall1);
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall2);
 
 	//no device check patches
-	_sw(NOP, mod->text_addr + 0x00000760);
-	_sw(0x24020000, mod->text_addr + 0x000007C0);
-	_sw(NOP, mod->text_addr + 0x000030B0);
-	_sw(NOP, mod->text_addr + 0x0000310C);
-	_sw(0x10000009, mod->text_addr + 0x00003138);
-	_sw(NOP, mod->text_addr + 0x00003444);
-	_sw(NOP, mod->text_addr + 0x0000349C);
-	_sw(0x10000010, mod->text_addr + 0x000034C8);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck1);
+	_sw(0x24020000, mod->text_addr + g_offs->module_handler_patch.DeviceCheck2);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck3);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck4);
+	_sw(0x10000009, mod->text_addr + g_offs->module_handler_patch.DeviceCheck5);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck6);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck7);
+	_sw(0x10000010, mod->text_addr + g_offs->module_handler_patch.DeviceCheck8);
 
-	_prologue_module = (void*)(mod->text_addr+0x00008134);
-	_sw(MAKE_CALL(prologue_module), mod->text_addr+0x00007058);
+	_prologue_module = (void*)(mod->text_addr + g_offs->module_handler_patch.PrologueModule);
+	_sw(MAKE_CALL(prologue_module), mod->text_addr + g_offs->module_handler_patch.PrologueModuleCall);
 
 #ifdef DEBUG
 	setup_validate_stub((SceModule*)mod);

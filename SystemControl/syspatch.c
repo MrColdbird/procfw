@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "nid_resolver.h"
+#include "systemctrl_patch_offset.h"
 
 static STMOD_HANDLER previous;
 
@@ -150,13 +151,13 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 static void patch_sceWlan_Driver(u32 text_addr)
 {
-	_sw(0, text_addr + 0x000026C0);
+	_sw(0, text_addr + g_offs->wlan_driver_patch.FreqCheck);
 }
 
 static void patch_scePower_Service(u32 text_addr)
 {
 	// scePowerGetBacklightMaximum always returns 4
-	_sw(0, text_addr + 0x00000E10);
+	_sw(0, text_addr + g_offs->power_service_patch.scePowerGetBacklightMaximumCheck);
 }
 
 void syspatch_init()

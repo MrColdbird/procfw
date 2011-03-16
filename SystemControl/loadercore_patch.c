@@ -13,6 +13,7 @@
 #include "elf.h"
 #include "nid_resolver.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 //original functions
 int (* ProbeExec1)(unsigned char * buffer, int * check) = NULL;
@@ -323,50 +324,50 @@ void patch_sceLoaderCore(void)
 	//find module
 	SceModule2 * loadcore = (SceModule2 *)sceKernelFindModuleByName("sceLoaderCore");
 
-	//patch sceKernelCheckExecFile (sub_00C10)
-	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + 0x00007DC0);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x00001570);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x000015C0);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x00004BE8);
+	//patch sceKernelCheckExecFile (sub_0C10)
+	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFile);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall1);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall2);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall3);
 
 	//6.35 relocation fix for rt7
 	//fake relocation type 7 to be treated like 0
 	//patches handler table so jr $t5 returns properly on type 7 ;)
 	u32 faketype = 0;
 	u32 origtype = 7;
-	_sw(*(u32 *)(loadcore->text_addr + 0x00008274 + faketype * 4), loadcore->text_addr + 0x00008274 + origtype * 4);
+	_sw(*(u32 *)(loadcore->text_addr + g_offs->loadercore_patch.ReloactionTable + faketype * 4), loadcore->text_addr + g_offs->loadercore_patch.ReloactionTable + origtype * 4);
 
 	//patch ProbeExec1 (sub_001AC)
-	ProbeExec1 = (void*)loadcore->text_addr + 0x0000679C; //dword_6248
-	_sw(MAKE_CALL(_ProbeExec1), loadcore->text_addr + 0x000047E4);
+	ProbeExec1 = (void*)loadcore->text_addr + g_offs->loadercore_patch.ProbeExec1; //dword_6248
+	_sw(MAKE_CALL(_ProbeExec1), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec1Call);
 
 	//patch ProbeExec2 (sub_004E8)
-	ProbeExec2 = (void*)loadcore->text_addr + 0x000066F4; //dword_6364
-	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + 0x000049E4);
-	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + 0x00006A14);
+	ProbeExec2 = (void*)loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2; //dword_6364
+	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2Call1);
+	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2Call2);
 
 	//enable syscall exports (?)
-	_sw(0x3C090000, loadcore->text_addr + 0x000040A4);
+	_sw(0x3C090000, loadcore->text_addr + g_offs->loadercore_patch.EnableSyscallExport);
 	
 	//undo check #1
-	_sw(0, loadcore->text_addr + 0x000076E4); //bnez
+	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck1); //bnez
 
 	//undo check #2
-	_sw(0, loadcore->text_addr + 0x00005C34); //beqzl
-	_sw(0, loadcore->text_addr + 0x00005C38); //lui (likely branch instruction)
+	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck2); //beqzl
+	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck2 + 4); //lui (likely branch instruction)
 
 	//undo check #3
-	_sw(0, loadcore->text_addr + 0x00005D44); //beqzl
-	_sw(0, loadcore->text_addr + 0x00005D48); //lui (likely branch instruction)
+	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3); //beqzl
+	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3 + 4); //lui (likely branch instruction)
 	
 	//undo rebootex patches
 	void * memlmd_3F2AC9C6 = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0x3F2AC9C6);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005CC8);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005CF8);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005D90);
+	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call1);
+	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call2);
+	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call3);
 	void * memlmd_E42AFE2E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0xE42AFE2E);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x000041A4);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x00005CA4);
+	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call1);
+	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call2);
 
 	setup_nid_resolver();
 

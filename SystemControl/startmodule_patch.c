@@ -7,6 +7,7 @@
 #include "printk.h"
 #include "strsafe.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 static int plugin_loaded = 0;
 static int opnssmp_loaded = 0;
@@ -162,7 +163,7 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 	u32 import;
 
 	// patch init's sceKernelStartModule import from its bootstart offset
-	import = ((u32)bootstart)+0x00000270;
+	import = ((u32)bootstart)+g_offs->start_module_patch.sceKernelStartModuleBootStartOffset;
 	REDIRECT_FUNCTION(_sceKernelStartModule, import);
 	sync_cache();
 
@@ -171,6 +172,6 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 
 void patch_sceKernelStartModule(u32 loadcore_text_addr)
 {
-	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr+0x00001DA8);
-	_sw(0x02E02021, loadcore_text_addr+0x00001DAC); // move $a0, $s7
+	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall);
+	_sw(0x02E02021, loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall+4); // move $a0, $s7
 }

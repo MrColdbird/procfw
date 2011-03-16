@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "nid_resolver.h"
+#include "systemctrl_patch_offset.h"
 
 typedef struct _CustomResolver {
 	void *import_addr;
@@ -303,15 +304,11 @@ void setup_nid_resolver(void)
 	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
 	loadcore = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
 
-	// Sony removed sceKernelIcacheClearAll's export
-	// It's at 0x000077CC+@LoadCore@ in 6.35
-	missing_LoadCoreForKernel_entries[0].fp = (0x000077CC + loadcore->text_addr);
-
-	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
-	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr+0x00002924);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr+0x00008198);
-	sync_cache();
+	missing_LoadCoreForKernel_entries[0].fp = (loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelIcacheClearAll);
+	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntries);
+	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUser);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesCall);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUserCall);
 }
 
 void resolve_syscon_driver(SceModule *mod)
@@ -323,5 +320,5 @@ void resolve_syscon_driver(SceModule *mod)
 	if(syscon == NULL)
 		return;
 
-	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + 0x00002C6C); // _sceSysconPowerStandby
+	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + g_offs->nid_resolver_patch.sceSysconPowerStandby);
 }

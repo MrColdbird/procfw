@@ -11,6 +11,7 @@
 #include "strsafe.h"
 #include "rebootex_conf.h"
 #include "main.h"
+#include "systemctrl_patch_offset.h"
 
 typedef struct __attribute__((packed))
 {
@@ -107,25 +108,26 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 {
 	const char* init_file;
 
-	sceSystemFileGetIndex = (void*)(scemediasync_text_addr + 0x00000F40);
+	sceSystemFileGetIndex = (void*)(scemediasync_text_addr + g_offs->mediasync_patch.sceSystemFileGetIndex);
 
 	if (rebootex_conf.iso_mode != NORMAL_MODE) {
 		// patch MsCheckMedia
 		// MsCheckMedia: mediasync used it to check EBOOT.PBP
 		// Let it return 1 always
-		_sw(0x03E00008, scemediasync_text_addr+0x00000744);
-		_sw(0x24020001, scemediasync_text_addr+0x00000748);
+		_sw(0x03E00008, scemediasync_text_addr+g_offs->mediasync_patch.MsCheckMediaCheck);
+		_sw(0x24020001, scemediasync_text_addr+g_offs->mediasync_patch.MsCheckMediaCheck+4);
 
 		// patch DiscCheckMedia
-		_sw(0x1000001D, scemediasync_text_addr+0x000003C4);
-		_sw(0x1000001D, scemediasync_text_addr+0x00000DC8);
+		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck);
+		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck+4);
 	}
 
-	_sw(0x1000FFDB, scemediasync_text_addr+0x000010B4);
+	// patch MsSystemFile
+	_sw(0x1000FFDB, scemediasync_text_addr+g_offs->mediasync_patch.MsSystemFileCheck);
 
 	// Patch check on homebrews without DISC_ID
-	_sw(NOP, scemediasync_text_addr+0x00000FC0);
-	_sw(NOP, scemediasync_text_addr+0x00000FDC);
+	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck);
+	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck+4);
 
 	if(g_p2_size != 24 || g_p9_size != 24) {
 		printk("%s: p2/p9 %d/%d\n", __func__, g_p2_size, g_p9_size);
@@ -138,7 +140,7 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 		init_file = sceKernelInitFileName();
 
 		if(is_pbp(init_file)) {
-			_sw(MAKE_CALL(_sceSystemFileGetIndex), scemediasync_text_addr+0x0000097C);
+			_sw(MAKE_CALL(_sceSystemFileGetIndex), scemediasync_text_addr+g_offs->mediasync_patch.sceSystemFileGetIndexCall);
 		}
 	}
 }

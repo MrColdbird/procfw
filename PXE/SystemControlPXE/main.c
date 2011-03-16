@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "syspatch.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 PSP_MODULE_INFO("SystemControl", 0x3007, 2, 5);
 
@@ -24,6 +25,8 @@ STMOD_HANDLER previous = NULL;
 //psp model number
 u32 psp_model = 0;
 
+u32 psp_fw_version = 0;
+
 //installer path buffer
 extern char installerpath[256];
 
@@ -32,6 +35,9 @@ int module_start(SceSize args, void* argp)
 {
 	//save psp model for patching
 	psp_model = *(u32*)(0x88FB0000);
+
+	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
 
 	//link to log file
 	printk_init("ms0:/pxesysctrl.txt");
@@ -52,4 +58,3 @@ int module_start(SceSize args, void* argp)
 	
 	return 0;
 }
-

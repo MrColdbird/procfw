@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
+#include "systemctrl_patch_offset.h"
 
 typedef struct _MemPart {
 	u32 *meminfo;
@@ -19,12 +20,16 @@ typedef struct _MemPart {
 
 int g_high_memory_enabled = 0;
 
-//in system memory manager
-static unsigned int * (*get_partition)(int pid) = (void *)(0x88003E34);
-
 static u8 g_p8_size = 4;
 
 static inline int is_homebrews_runlevel(void);
+
+static inline u32 *get_partition(int pid)
+{
+	u32 * (*get_memory_partition)(int pid) = (void *)(g_offs->high_memory_patch.get_partition);
+
+	return (*get_memory_partition)(pid);
+}
 
 //prevent umd-cache in homebrew, so we can drain the cache partition.
 void patch_umdcache(u32 text_addr)
@@ -42,8 +47,8 @@ void patch_umdcache(u32 text_addr)
 		return;
 	
 	//kill module start
-	_sw(0x03E00008, text_addr + 0x000009C8);
-	_sw(0x24020001, text_addr + 0x000009CC);
+	_sw(0x03E00008, text_addr + g_offs->high_memory_patch.umd_cache_module_start);
+	_sw(0x24020001, text_addr + g_offs->high_memory_patch.umd_cache_module_start+4);
 }
 
 void unlock_high_memory(u32 forced)
@@ -110,12 +115,6 @@ static void modify_partition(MemPart *part)
 	((u32*)(meminfo[4]))[5] = (size << 21) | 0xFC;
 }
 
-static void delete_part_11(void)
-{
-	// P11 pointer in sysmem+0x00003EF8
-	_sw(0, 0x880145e8);
-}
-
 static inline int is_homebrews_runlevel(void)
 {
 	int apitype;
@@ -133,21 +132,14 @@ void prepatch_partitions(void)
 {
 	MemPart p8, p11;
 
-	(void)(delete_part_11);
-
 	if(!is_homebrews_runlevel()) {
 		printk("%s: no need to patch partition, quit\n", __func__);
 
 		return;
 	}
 
-#if 0
-	// Enable this 4MB but it will crash on standby
-	delete_part_11();
-#endif
-
-	p8.meminfo = (*get_partition)(8);
-	p11.meminfo = (*get_partition)(11);
+	p8.meminfo = get_partition(8);
+	p11.meminfo = get_partition(11);
 
 	g_p8_size = p8.size = 1;
 	
@@ -173,8 +165,8 @@ void patch_partitions(void)
 	// shut up gcc warning
 	(void)display_meminfo;
 
-	p2.meminfo = (*get_partition)(2);
-	p9.meminfo = (*get_partition)(9);
+	p2.meminfo = get_partition(2);
+	p9.meminfo = get_partition(9);
 
 	if(g_p2_size == 24 && g_p9_size == 24) {
 		p2.size = MAX_HIGH_MEMSIZE;
@@ -184,7 +176,7 @@ void patch_partitions(void)
 		p9.size = g_p9_size;
 	}
 
-	if((*get_partition)(11) != NULL) {
+	if(get_partition(11) != NULL) {
 		max_user_part_size = 56 - 4 - g_p8_size;
 	} else {
 		max_user_part_size = 56 - g_p8_size;

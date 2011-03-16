@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
+#include "systemctrl_patch_offset.h"
 
 // func_6360
 static int (*memlmd_unsigner)(u8 *prx, u32 size, u32 use_polling);
@@ -107,41 +108,29 @@ void patch_sceMemlmd(void)
 {
 	//find module
 	SceModule2 * memlmd = (SceModule2*) sceKernelFindModuleByName("sceMemlmd");
-
-	//patch offsets
-	unsigned int patches[6];
+	struct MemlmdPatch *patch;
 
 	//32mb psp
 	if(psp_model == 0)
 	{
-		patches[0] = 0x00000F88;
-		patches[1] = 0x000011D0;
-		patches[2] = 0x00001150;
-		patches[3] = 0x000011A4;
-		patches[4] = 0x00000E88;
-		patches[5] = 0x00000EEC;
+		patch = &g_offs->memlmd_patch_01g;
 	}
 	//64mb psps
 	else
 	{
-		patches[0] = 0x00001078;
-		patches[1] = 0x000012C0;
-		patches[2] = 0x00001240;
-		patches[3] = 0x00001294;
-		patches[4] = 0x00000F78;
-		patches[5] = 0x00000FDC;
+		patch = &g_offs->memlmd_patch_other;
 	}
 
 	//patches
-	memlmd_unsigner = (void*)memlmd->text_addr + patches[0]; // inner function which unsigns a PRX module 
-	sceMemlmdInitializeScrambleKey = (void*)memlmd->text_addr + patches[1];
+	memlmd_unsigner = (void*)memlmd->text_addr + patch->memlmd_unsigner; // inner function which unsigns a PRX module 
+	sceMemlmdInitializeScrambleKey = (void*)memlmd->text_addr + patch->sceMemlmdInitializeScrambleKey;
 
-	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[2]); // the offset where memlmd_3F2AC9C6 call memlmd_unsigner
-	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[3]); // the offset where memlmd_97DA82BC call memlmd_unsigner
-	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[4]); // the offset where memlmd_E42AFE2E call memlmd_decrypt
-	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[5]); // the offset where memlmd_D56F8AEC call memlmd_decrypt
+	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patch->memlmd_unsigner_call1); // the offset where memlmd_3F2AC9C6 call memlmd_unsigner
+	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patch->memlmd_unsigner_call2); // the offset where memlmd_97DA82BC call memlmd_unsigner
+	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patch->memlmd_decrypt_call1); // the offset where memlmd_E42AFE2E call memlmd_decrypt
+	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patch->memlmd_decrypt_call2); // the offset where memlmd_D56F8AEC call memlmd_decrypt
 
-	memlmd_decrypt = (void*)memlmd->text_addr + 0x00000134; // inner function which decrypt a PRX module
+	memlmd_decrypt = (void*)memlmd->text_addr + patch->memlmd_decrypt; // inner function which decrypt a PRX module
 }
 
 static int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2);
@@ -166,17 +155,7 @@ void patch_mesgled(SceModule* mod1)
 {
 	SceModule2 *mod = (SceModule2*) mod1;
 	u32 text_addr;
-	u32 offsets[] = {
-		0x00001D20, // 01g
-		0x00001DD0, // 02g
-		0x00001E60, // 03g
-		0x00001E60, // 04g
-		0x00001EF8, // 05g
-		0xDEADBEEF, // 06g
-		0x00001E60, // 07g
-		0xDEADBEEF, // 08g
-		0x00001E60, // 09g
-	};
+	u32 *offsets = g_offs->mesgled_patch.mesg_decrypt_homebrew;
    
 	text_addr = mod->text_addr;
 	mesgled_decrypt = (void*)(text_addr+0xE0);

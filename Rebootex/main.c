@@ -45,11 +45,11 @@ void patch_sceLoadExec(int mode)
 	text_addr = loadexec->text_addr;
 
 	if(psp_model == PSP_GO) { // PSP-N1000
-		offsets[0] = 0x2F90;
-		offsets[1] = 0x2FDC;
+		offsets[0] = 0x00002F90;
+		offsets[1] = 0x00002FDC;
 	} else {
-		offsets[0] = 0x2D44;    // call to LoadReboot
-		offsets[1] = 0x2D90;    // lui $at, 0x8860
+		offsets[0] = 0x00002D44;    // call to LoadReboot
+		offsets[1] = 0x00002D90;    // lui $at, 0x8860
 	}
 	
 	//save LoadReboot function
@@ -90,7 +90,7 @@ int module_start(SceSize args, void* argp)
 {
 	int thid;
 	//SysMemForKernel_458A70B5
-	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0xA13C;
+	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0x0000A13C;
 
 	//save psp model
 	psp_model = _sceKernelGetModel();

@@ -16,15 +16,15 @@ struct SysmemPatch {
 };
 
 static struct SysmemPatch g_sysmem_patch[] = {
-	{ 0x9A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
-	{ 0x9B4C, 0x12 }, // SysMemUserForUser_342061E5
-	{ 0x9BE4, 0x18 }, // SysMemUserForUser_315AD3A0
-	{ 0x9C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
-	{ 0x9D68, 0x15 }, // SysMemUserForUser_057E7380
-	{ 0x9E0C, 0x15 }, // SysMemUserForUser_91DE343C
-	{ 0x9EB0, 0x12 }, // SysMemUserForUser_7893F79A
-	{ 0x9F48, 0x18 }, // SysMemUserForUser_35669D4C
-	{ 0x9FF8, 0x12 }, // SysMemUserForUser_1B4217BC
+	{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
+	{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
+	{ 0x00009BE4, 0x18 }, // SysMemUserForUser_315AD3A0
+	{ 0x00009C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
+	{ 0x00009D68, 0x15 }, // SysMemUserForUser_057E7380
+	{ 0x00009E0C, 0x15 }, // SysMemUserForUser_91DE343C
+	{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
+	{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
+	{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 };
 
 void patch_sceSystemMemoryManager(void)

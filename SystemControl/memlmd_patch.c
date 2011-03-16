@@ -14,7 +14,7 @@ static int (*memlmd_unsigner)(u8 *prx, u32 size, u32 use_polling);
 
 // func_6238
 // unk - pass 0
-static int (*memlmd_8450109F)(u32 unk, void *hash_addr);
+static int (*sceMemlmdInitializeScrambleKey)(u32 unk, void *hash_addr);
 
 // func_6230
 static int (*memlmd_decrypt)(u8 *prx, u32 size, u32 *newsize, u32 use_polling);
@@ -93,7 +93,7 @@ static int _memlmd_decrypt(u8 *prx, u32 size, u32 *newsize, u32 use_polling)
 	}
 
 	// re-calculate key with xor seed
-	if ((*memlmd_8450109F)(0, (void*)0xBFC00200) < 0)
+	if ((*sceMemlmdInitializeScrambleKey)(0, (void*)0xBFC00200) < 0)
 		return ret;
 
 	if (_memlmd_unsigner(prx, size, use_polling) < 0) {
@@ -114,34 +114,34 @@ void patch_sceMemlmd(void)
 	//32mb psp
 	if(psp_model == 0)
 	{
-		patches[0] = 0x0F88;
-		patches[1] = 0x11D0;
-		patches[2] = 0x1150;
-		patches[3] = 0x11A4;
-		patches[4] = 0x0E88;
-		patches[5] = 0x0EEC;
+		patches[0] = 0x00000F88;
+		patches[1] = 0x000011D0;
+		patches[2] = 0x00001150;
+		patches[3] = 0x000011A4;
+		patches[4] = 0x00000E88;
+		patches[5] = 0x00000EEC;
 	}
 	//64mb psps
 	else
 	{
-		patches[0] = 0x1078;
-		patches[1] = 0x12C0;
-		patches[2] = 0x1240;
-		patches[3] = 0x1294;
-		patches[4] = 0x0F78;
-		patches[5] = 0x0FDC;
+		patches[0] = 0x00001078;
+		patches[1] = 0x000012C0;
+		patches[2] = 0x00001240;
+		patches[3] = 0x00001294;
+		patches[4] = 0x00000F78;
+		patches[5] = 0x00000FDC;
 	}
 
 	//patches
 	memlmd_unsigner = (void*)memlmd->text_addr + patches[0]; // inner function which unsigns a PRX module 
-	memlmd_8450109F = (void*)memlmd->text_addr + patches[1]; // memlmd_8450109F: the 0xBFC00200 xor key setup function
+	sceMemlmdInitializeScrambleKey = (void*)memlmd->text_addr + patches[1];
 
 	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[2]); // the offset where memlmd_3F2AC9C6 call memlmd_unsigner
 	_sw(MAKE_CALL(_memlmd_unsigner), memlmd->text_addr + patches[3]); // the offset where memlmd_97DA82BC call memlmd_unsigner
 	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[4]); // the offset where memlmd_E42AFE2E call memlmd_decrypt
 	_sw(MAKE_CALL(_memlmd_decrypt), memlmd->text_addr + patches[5]); // the offset where memlmd_D56F8AEC call memlmd_decrypt
 
-	memlmd_decrypt = (void*)memlmd->text_addr + 0x0134; // inner function which decrypt a PRX module
+	memlmd_decrypt = (void*)memlmd->text_addr + 0x00000134; // inner function which decrypt a PRX module
 }
 
 static int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2);

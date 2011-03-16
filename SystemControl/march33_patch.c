@@ -10,5 +10,5 @@
 
 void patch_pspMarch33_Driver(u32 march33_text_addr)
 {
-	_sw(0, march33_text_addr+0x9E8);
+	_sw(0, march33_text_addr+0x000009E8);
 }

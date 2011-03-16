@@ -160,7 +160,7 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 	u32 import;
 
 	// patch init's sceKernelStartModule import from its bootstart offset
-	import = ((u32)bootstart)+0x270;
+	import = ((u32)bootstart)+0x00000270;
 	REDIRECT_FUNCTION(_sceKernelStartModule, import);
 	sync_cache();
 

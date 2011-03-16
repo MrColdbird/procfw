@@ -17,6 +17,8 @@ static int get_game_tag(const char *path, u32 *tag)
 	char buf[0x150];
 	int ret;
 
+	*tag = (u32)-1;
+
 	if(path == NULL) {
 		return -1;
 	}
@@ -137,7 +139,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 				ret = get_game_tag(path, &tag);
 
-				if (ret == 0) {
+				if (ret == 0 && tag != (u32)-1) {
 					printk("%s: tag 0x%08X\n", __func__, tag);
 					load_opnssmp(path, tag);
 				} else {

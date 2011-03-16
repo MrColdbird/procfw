@@ -147,9 +147,9 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	text_addr = mod->text_addr;
 
 	if (psp_model == PSP_GO) {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x25C0); // 0x2558 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x000025C0); // 0x00002558 in 6.20
 	} else {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x236C); // 0x2304 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + 0x0000236C); // 0x00002304 in 6.20
 	}
 
 	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
@@ -170,7 +170,7 @@ int sctrlKernelSetUserLevel(int level)
 	ret = sceKernelGetUserLevel();
 	mod = (SceModule2*) sceKernelFindModuleByName("sceThreadManager");
 	text_addr = mod->text_addr;
-	_sw((level^8)<<28, *(u32*)(text_addr+0x19E80)+0x14); // 0x19E80 and 0x14 in 6.20, 6.31 remains the same
+	_sw((level^8)<<28, *(u32*)(text_addr+0x00019E80)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
 
 	pspSdkSetK1(k1);
 
@@ -223,7 +223,7 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 
 	k1 = pspSdkSetK1(0);
 	mod = (SceModule2*) sceKernelFindModuleByName("sceIOFileManager");
-	find_driver = (void*)(mod->text_addr + 0x2A44); // 0x2A38 in 6.20/6.31
+	find_driver = (void*)(mod->text_addr + 0x00002A44); // 0x00002A38 in 6.20/6.31
 	p = find_driver(drvname);
 
 	if (p != NULL) {
@@ -373,7 +373,7 @@ int sctrlKernelSetUMDEmuFile(const char *iso)
 	}
 
 	STRCPY_S(g_iso_filename, iso);
-	*(const char**)(modmgr->text_addr+0x99B8) = g_iso_filename;
+	*(const char**)(modmgr->text_addr+0x000099B8) = g_iso_filename;
 
 	return 0;
 }
@@ -389,7 +389,7 @@ int sctrlKernelSetInitFileName(char *filename)
 	}
 
 	STRCPY_S(g_initfilename, filename);
-	*(const char**)(modmgr->text_addr+0x99B4) = g_initfilename;
+	*(const char**)(modmgr->text_addr+0x000099B4) = g_initfilename;
 
 	return 0;
 }

@@ -66,15 +66,15 @@ void patch_sceLoadExec(void)
 	text_addr = loadexec->text_addr;
 
 	if(psp_model == PSP_GO) {
-		offsets[0] = 0x2F90;
-		offsets[1] = 0x2FDC;
-		offsets[2] = 0x260C;
-		offsets[3] = 0x2650;
+		offsets[0] = 0x00002F90;
+		offsets[1] = 0x00002FDC;
+		offsets[2] = 0x0000260C;
+		offsets[3] = 0x00002650;
 	} else {
-		offsets[0] = 0x2D44;    // call to LoadReboot
-		offsets[1] = 0x2D90;    // lui $at, 0x8860
-		offsets[2] = 0x23B8;    // k1 loadexec patch
-		offsets[3] = 0x23FC;    // loadexec userlevel patch
+		offsets[0] = 0x00002D44;    // call to LoadReboot
+		offsets[1] = 0x00002D90;    // lui $at, 0x8860
+		offsets[2] = 0x000023B8;    // k1 loadexec patch
+		offsets[3] = 0x000023FC;    // loadexec userlevel patch
 	}
 
 	//replace LoadReboot function
@@ -92,6 +92,6 @@ void patch_sceLoadExec(void)
 	_sw(0, loadexec->text_addr + offsets[3]);
 
 	//allow all user levels to call sceKernelExitVSHVSH
-	_sw(0x10000008, loadexec->text_addr + 0x168C);
-	_sw(0, loadexec->text_addr + 0x16C0);
+	_sw(0x10000008, loadexec->text_addr + 0x0000168C);
+	_sw(0, loadexec->text_addr + 0x000016C0);
 }

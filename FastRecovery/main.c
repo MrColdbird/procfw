@@ -91,12 +91,12 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 int kernelSyscall(void);
 u32 get_power_address(int cbid);
 
-// restore offset 0x9650~0x9730 in sysmem
+// restore offset 0x00009650~0x00009730 in sysmem
 void restore_sysmem(void)
 {
 	u32 address, data_address;
 
-	address = 0x88000000 + 0xA110;
+	address = 0x88000000 + 0x0000A110;
 	data_address = 0x88013B40;
 
 #define INTR(intr) \
@@ -195,13 +195,13 @@ int kernel_permission_call(void)
 	_sceKernelDcacheWritebackInvalidateAll();
 
 	//LoadCoreForKernel_EF8A0BEA
-	SceModule2 * (* _sceKernelFindModuleByName)(const char * libname) = (void *)0x88017000 + 0x72D8;
+	SceModule2 * (* _sceKernelFindModuleByName)(const char * libname) = (void *)0x88017000 + 0x000072D8;
 
 	//find LoadExec module
 	SceModule2 * loadexec = _sceKernelFindModuleByName("sceLoadExec");
 
 	//SysMemForKernel_458A70B5
-	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0xA13C;
+	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0x0000A13C;
 
 	//save psp model
 	model = _sceKernelGetModel();
@@ -212,15 +212,15 @@ int kernel_permission_call(void)
 	//psp N1000
 	if(model == 4)
 	{
-		offsets[0] = 0x2F90;
-		offsets[1] = 0x2FDC;
+		offsets[0] = 0x00002F90;
+		offsets[1] = 0x00002FDC;
 	}
 
 	//psp 1000-4000
 	else
 	{
-		offsets[0] = 0x2D44;
-		offsets[1] = 0x2D90;
+		offsets[0] = 0x00002D44;
+		offsets[1] = 0x00002D90;
 	}
 
 	//replace LoadReboot function
@@ -245,7 +245,7 @@ int kernel_permission_call(void)
 	return 0xC01DB15D;
 }
 
-//hacked sysmem function (0xA230)
+//hacked sysmem function (0x0000A230)
 int SysMemUserForUser_D8DE5C1E(int arg1, int arg2, int (* callback)(void), int arg4, int branchkiller);
 
 static u16 g_working_intr_prefix[] = {
@@ -373,7 +373,7 @@ int main(int argc, char * argv[])
 	}
 
 	//override sysmem function
-	unsigned int smpos = 0xA110; for(; smpos < 0xA1F0; smpos += 16)
+	unsigned int smpos = 0x0000A110; for(; smpos < 0x0000A1F0; smpos += 16)
 	{
 		//calculate slot
 		unsigned int slot = get_power_slot_by_address(((u32)0x88000000)+smpos, power_buf_address);

@@ -42,8 +42,8 @@ void patch_umdcache(u32 text_addr)
 		return;
 	
 	//kill module start
-	_sw(0x03E00008, text_addr + 0x9C8);
-	_sw(0x24020001, text_addr + 0x9CC);
+	_sw(0x03E00008, text_addr + 0x000009C8);
+	_sw(0x24020001, text_addr + 0x000009CC);
 }
 
 void unlock_high_memory(u32 forced)

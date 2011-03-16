@@ -304,8 +304,8 @@ void setup_nid_resolver(void)
 	loadcore = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
 
 	// Sony removed sceKernelIcacheClearAll's export
-	// It's at 0x77CC+@LoadCore@ in 6.35
-	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
+	// It's at 0x000077CC+@LoadCore@ in 6.35
+	missing_LoadCoreForKernel_entries[0].fp = (0x000077CC + loadcore->text_addr);
 
 	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
 	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr+0x00002924);

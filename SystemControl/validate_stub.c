@@ -79,6 +79,6 @@ void setup_validate_stub(SceModule *mod)
 {
 	SceModule2 *modulemgr = (SceModule2*)mod;
 
-	start_module = (void*)(modulemgr->text_addr + 0x7004);
-	_sw(MAKE_CALL(_start_module), modulemgr->text_addr+0x290);
+	start_module = (void*)(modulemgr->text_addr + 0x00007004);
+	_sw(MAKE_CALL(_start_module), modulemgr->text_addr+0x00000290);
 }

@@ -237,17 +237,17 @@ void patch_sceMesgLed()
 	mesgled_decrypt = (void*)(text_addr+0xE0);
 
 	if (psp_model == PSP_GO) {
-		_sw(intr, text_addr+0x3614);
-		_sw(intr, text_addr+0x38AC);
+		_sw(intr, text_addr+0x00003614);
+		_sw(intr, text_addr+0x000038AC);
 	} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
-		_sw(intr, text_addr+0x32A8);
-		_sw(intr, text_addr+0x3540);
+		_sw(intr, text_addr+0x000032A8);
+		_sw(intr, text_addr+0x00003540);
 	} else if (psp_model == PSP_2000) {
-		_sw(intr, text_addr+0x2F08);
-		_sw(intr, text_addr+0x31A0);
+		_sw(intr, text_addr+0x00002F08);
+		_sw(intr, text_addr+0x000031A0);
 	} else if (psp_model == PSP_1000) {
-		_sw(intr, text_addr+0x2B28); // sceMesgLed_driver_CA17E61A
-		_sw(intr, text_addr+0x2DC0); // sceMesgLed_driver_E9BF25D2
+		_sw(intr, text_addr+0x00002B28); // sceMesgLed_driver_CA17E61A
+		_sw(intr, text_addr+0x00002DC0); // sceMesgLed_driver_E9BF25D2
 	}
 
 	sync_cache();

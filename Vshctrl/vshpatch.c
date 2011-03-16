@@ -111,8 +111,8 @@ static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
 
 static void patch_Gameboot(SceModule2 *mod)
 {
-	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + 0x1A14);
-	sceDisplaySetHoldMode = (void*)(mod->text_addr+0x5618);
+	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + 0x00001A14);
+	sceDisplaySetHoldMode = (void*)(mod->text_addr+0x00005618);
 }
 
 static void patch_hibblock(SceModule2 *mod)
@@ -180,14 +180,14 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 		sprintf(str, "6.35 PRO-%c%d", 'A'+(sctrlHENGetVersion()&0xF)-1, minor_version);
 	}
 
-	p = (void*)(text_addr + 0x2A1FC);
+	p = (void*)(text_addr + 0x0002A1FC);
 	ascii2utf16(p, str);
 
-	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr+0x18F3C); // lui $v0, 
-	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr+0x18F40); // or $v0, $v0, 
+	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr+0x00018F3C); // lui $v0, 
+	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr+0x00018F40); // or $v0, $v0, 
 
 	if (conf.machidden) {
-		p = (void*)(text_addr + 0x2E4D8);
+		p = (void*)(text_addr + 0x0002E4D8);
 		sprintf(str, "[ Hidden: 0%dg ]", psp_model+1);
 		ascii2utf16(p, str);
 	}
@@ -250,9 +250,9 @@ static void patch_msvideo_main_plugin_module(u32 text_addr)
 static void patch_vsh_module(SceModule2 * mod)
 {
 	//enable homebrew boot
-	_sw(0, mod->text_addr+0x12230);
-	_sw(0, mod->text_addr+0x11FD8);
-	_sw(0, mod->text_addr+0x11FE0);
+	_sw(0, mod->text_addr+0x00012230);
+	_sw(0, mod->text_addr+0x00011FD8);
+	_sw(0, mod->text_addr+0x00011FE0);
 
 	//loadexec calls to vsh_bridge
 	u32 nids[2] = { /* ms0 */ 0x59BBA567, /* ef0 */ 0xD4BA5699 };

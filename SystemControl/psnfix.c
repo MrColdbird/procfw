@@ -11,16 +11,16 @@ void patch_npsignup(u32 text_addr)
 void patch_npsignin(u32 text_addr)
 {
 	//kill connection error
-	_sw(0x10000008, text_addr + 0x6C94);
+	_sw(0x10000008, text_addr + 0x00006C94);
 
 	//ImageVersion = 0x10000000
-	_sw(0x3C041000, text_addr + 0x9664);
+	_sw(0x3C041000, text_addr + 0x00009664);
 }
 
 //fake hardcoded np version for npmatching library (psp2, fat princess, etc.)
 void patch_np(u32 text_addr, u8 mayor, u8 minor)
 {
 	//np firmware version spoof
-	_sb(mayor, text_addr + 0x4604);
-	_sb(minor, text_addr + 0x460C);
+	_sb(mayor, text_addr + 0x00004604);
+	_sb(minor, text_addr + 0x0000460C);
 }

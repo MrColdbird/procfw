@@ -23,6 +23,7 @@
 #include "strsafe.h"
 #include "libs.h"
 #include "stargate.h"
+#include "stargate_patch_offset.h"
 
 PSP_MODULE_INFO("stargate", 0x1007, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
@@ -126,6 +127,7 @@ int module_start(SceSize args, void *argp)
 		return 1;
 	}
 
+	setup_patch_offset_table(sceKernelDevkitVersion());
 	printk_init("ms0:/log_stargate.txt");
 	printk("stargate started\n");
 	sctrlSEGetConfig(&conf);
@@ -139,6 +141,7 @@ int module_start(SceSize args, void *argp)
 	}
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
-
+	sync_cache();
+	
 	return 0;
 }

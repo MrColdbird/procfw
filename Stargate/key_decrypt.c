@@ -21,6 +21,7 @@
 #include "kubridge.h"
 #include "utils.h"
 #include "printk.h"
+#include "stargate_patch_offset.h"
 
 static u8 g_key_d91609f0[16] = {
 	0xD0, 0x36, 0x12, 0x75, 0x80, 0x56, 0x20, 0x43,
@@ -236,19 +237,12 @@ void patch_sceMesgLed()
 	text_addr = mod->text_addr;
 	mesgled_decrypt = (void*)(text_addr+0xE0);
 
-	if (psp_model == PSP_GO) {
-		_sw(intr, text_addr+0x00003614);
-		_sw(intr, text_addr+0x000038AC);
-	} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
-		_sw(intr, text_addr+0x000032A8);
-		_sw(intr, text_addr+0x00003540);
-	} else if (psp_model == PSP_2000) {
-		_sw(intr, text_addr+0x00002F08);
-		_sw(intr, text_addr+0x000031A0);
-	} else if (psp_model == PSP_1000) {
-		_sw(intr, text_addr+0x00002B28); // sceMesgLed_driver_CA17E61A
-		_sw(intr, text_addr+0x00002DC0); // sceMesgLed_driver_E9BF25D2
+	if(psp_model < NELEMS(g_offs->sceMesgLedDecryptGame1) && 
+			g_offs->sceMesgLedDecryptGame1[psp_model] != 0xDEADBEEF &&
+		   	g_offs->sceMesgLedDecryptGame2[psp_model] != 0xDEADBEEF) {
+		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame1[psp_model]);
+		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame2[psp_model]);
+	} else {
+		printk("%s: unknown model 0%dg\n", __func__, psp_model+1);
 	}
-
-	sync_cache();
 }

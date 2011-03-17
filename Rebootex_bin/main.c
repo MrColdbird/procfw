@@ -2,6 +2,7 @@
 #include "rebootex_conf.h"
 #include "utils.h"
 #include "config.h"
+#include "rebootex_bin_patch_offset.h"
 
 #define REBOOT_START 0x88600000
 #define REBOOTEX_CONFIG_START 0x88FB0000
@@ -56,7 +57,12 @@ int (* sceKernelCheckExecFile)(char * prx, unsigned int size, unsigned int * new
 int (* memlmd_3F2AC9C6)(unsigned char * addr, void * arg2) = NULL;
 
 //cache sync
-int (* iCacheFlushAll)(void) = (void *)REBOOT_START + 0x00000938;
+static inline int iCacheFlushAll(void)
+{
+	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
+	
+	return (*_iCacheFlushAll)();
+}
 
 //helper functions
 int _strlen(char * string);
@@ -99,79 +105,58 @@ void main(int arg1, int arg2, int arg3, int arg4)
 {
 	//grab psp version
 	int version = *(int *)REBOOTEX_CONFIG_START;
+	struct RebootexPatch *patch;
 
 	//patch offsets
 	unsigned int patches[18];
 
+	setup_patch_offset_table(0x06030510);
+
 	load_configure();
 
-	//32mb psp
-	if(version == 0)
-	{
-		patches[0] = 0x00008624; //0x000082AC in 6.20 - sceBootLfatOpen
-		patches[1] = 0x00008798; //0x00008420 in 6.20 - sceBootLfatRead
-		patches[2] = 0x0000873C; //0x000083C4 in 6.20 - sceBootLfatClose
-		patches[3] = 0x0000588C; //0x0000565C in 6.20 - UnpackBootConfig
-		patches[4] = 0x00002764; //0x000026DC in 6.20 - Call to sceBootLfatOpen
-		patches[5] = 0x000027D4; //0x0000274C in 6.20 - Call to sceBootLfatRead
-		patches[6] = 0x00002800; //0x00002778 in 6.20 - Call to sceBootLfatClose
-		patches[7] = 0x00007348; //0x000070F0 in 6.20 - Call to UnpackBootConfig
-		patches[8] = 0x0000389C; //0x00003798 in 6.20 - Killing Function Part #1 - jr $ra
-		patches[9] = 0x000038A0; //0x0000379C in 6.20 - Killing Function Part #2 - li $v0, 1
-		patches[10] = 0x0000275C; //0x000026D4 in 6.20 - Killing Branch Check bltz ...
-		patches[11] = 0x000027B0; //0x00002728 in 6.20 - Killing Branch Check bltz ...
-		patches[12] = 0x000027C8; //0x00002740 in 6.20 - Killing Branch Check beqz ...
-		patches[13] = 0x00005760; //0x00005550 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
-		patches[14] = 0x00005764; //0x00005554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
-		patches[15] = 0x00005768; //0x00005558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
-		patches[16] = 0x00007648; //0x00007388 in 6.20 - Killing Branch Check bltz ...
-		patches[17] = 0x00007308; //UnpackBootConfig buffer address
+	if(version == 0) {
+		patch = &g_offs->rebootex_patch_01g;
+	} else {
+		patch = &g_offs->rebootex_patch_other;
 	}
 
-	//64mb psps
-	else
-	{
-		patches[0] = 0x000086F0; //0x00008374 in 6.20 - sceBootLfatOpen
-		patches[1] = 0x00008864; //0x000084E8 in 6.20 - sceBootLfatRead
-		patches[2] = 0x00008808; //0x0000848C in 6.20 - sceBootLfatClose
-		patches[3] = 0x0000595C; //0x00005724 in 6.20 - UnpackBootConfig
-		patches[4] = 0x00002834; //0x000027A4 in 6.20 - Call to sceBootLfatOpen
-		patches[5] = 0x000028A4; //0x00002814 in 6.20 - Call to sceBootLfatRead
-		patches[6] = 0x000028D0; //0x00002840 in 6.20 - Call to sceBootLfatClose
-		patches[7] = 0x00007438; //0x000071B8 in 6.20 - Call to UnpackBootConfig
-		patches[8] = 0x0000396C; //0x00003860 in 6.20 - Killing Function Part #1 - jr $ra
-		patches[9] = 0x00003970; //0x00003864 in 6.20 - Killing Function Part #2 - li $v0, 1
-		patches[10] = 0x0000282C; //0x0000279C in 6.20 - Killing Branch Check bltz ...
-		patches[11] = 0x00002880; //0x000027F0 in 6.20 - Killing Branch Check bltz ...
-		patches[12] = 0x00002898; //0x00002808 in 6.20 - Killing Branch Check beqz ...
-		patches[13] = 0x00005830; //0x00005618 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
-		patches[14] = 0x00005834; //0x0000561C in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
-		patches[15] = 0x00005838; //0x00005620 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
-		patches[16] = 0x00007714; //0x00007450 in 6.20 - Killing Branch Check bltz ...
-		patches[17] = 0x000073F8; //UnpackBootConfig buffer address
-	}
+	//0x000082AC in 6.20 - sceBootLfatOpen
+	sceBootLfatOpen = (void *)REBOOT_START + patch->sceBootLfatOpen;
+	//0x00008420 in 6.20 - sceBootLfatRead
+	sceBootLfatRead = (void *)REBOOT_START + patch->sceBootLfatRead;
+	//0x000083C4 in 6.20 - sceBootLfatClose
+	sceBootLfatClose = (void *)REBOOT_START + patch->sceBootLfatClose;
+	//0x0000565C in 6.20 - UnpackBootConfig
+	UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
 
-	//global offsets
-	sceBootLfatOpen = (void *)REBOOT_START + patches[0];
-	sceBootLfatRead = (void *)REBOOT_START + patches[1];
-	sceBootLfatClose = (void *)REBOOT_START + patches[2];
-	UnpackBootConfig = (void *)REBOOT_START + patches[3];
-
-	//reboot patches
-	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patches[4]);
-	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patches[5]);
-	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patches[6]);
-	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patches[7]);
-	_sw(0x03E00008, REBOOT_START + patches[8]); // jr $ra
-	_sw(0x24020001, REBOOT_START + patches[9]); // li $v0, 1
-	_sw(0, REBOOT_START + patches[10]);
-	_sw(0, REBOOT_START + patches[11]);
-	_sw(0, REBOOT_START + patches[12]);
-	_sw(0x00113821, REBOOT_START + patches[13]); // move $a3, $s1
-	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patches[14]);
-	_sw(0x02A0E821, REBOOT_START + patches[15]); // move $sp, $s5
-	_sw(0, REBOOT_START + patches[16]);
-	_sw(0x27A40004, REBOOT_START + patches[17]); // addiu $a0, $sp, 4
+	//0x000026DC in 6.20 - Call to sceBootLfatOpen
+	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patch->sceBootLfatOpenCall);
+	//0x0000274C in 6.20 - Call to sceBootLfatRead
+	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patch->sceBootLfatReadCall);
+	//0x00002778 in 6.20 - Call to sceBootLfatClose
+	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
+	//0x000070F0 in 6.20 - Call to UnpackBootConfig
+	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
+	//0x00003798 in 6.20 - Killing Function Part #1 - jr $ra
+	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
+	//0x0000379C in 6.20 - Killing Function Part #2 - li $v0, 1
+	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
+	//0x000026D4 in 6.20 - Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
+	//0x00002728 in 6.20 - Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck3);
+	//0x00002740 in 6.20 - Killing Branch Check beqz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck4);
+	//0x00007388 in 6.20 - Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck5);
+	//0x00005550 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
+	_sw(0x00113821, REBOOT_START + patch->LoadCoreModuleStartCall - 4);
+	//0x00005554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
+	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patch->LoadCoreModuleStartCall);
+	//0x00005558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
+	_sw(0x02A0E821, REBOOT_START + patch->LoadCoreModuleStartCall + 4);
+	//UnpackBootConfig buffer address
+	_sw(0x27A40004, REBOOT_START + patch->UnpackBootConfigBufferAddress); // addiu $a0, $sp, 4
 
 	load_configure();
 
@@ -417,16 +402,14 @@ int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
 
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *))
 {
-	//replace all occurrences
-	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x000035E8);
-	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x000050E8);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x0000510C);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x0000513C);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x000051D4);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall1);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall2);
+	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call1);
+	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call2);
+	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call3);
 
-	//save loadcore function pointer (module_bootstart = 0xBBC)
-	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + 0x00006F4C);
-	memlmd_3F2AC9C6 = (void *)((unsigned int)(module_bootstart) + 0x00006F2C);
+	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFile);
+	memlmd_3F2AC9C6 = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6);
 
 	//flush instruction cache
 	iCacheFlushAll();

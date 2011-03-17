@@ -2,7 +2,7 @@ all:
 	../../contrib/pspgz.py galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController 0x1006
 
 TARGET = galaxy
-OBJS = main.o
+OBJS = main.o galaxy_patch_offset.o
 OBJS += ../../Imports/SysMemForKernel.o \
 		SystemCtrlForKernel.o
 

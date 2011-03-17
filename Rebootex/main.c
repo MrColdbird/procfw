@@ -7,6 +7,7 @@
 #include "systemctrl.h"
 #include "utils.h"
 #include "../Rebootex_bin/rebootex.h"
+#include "rebootex_patch_offset.h"
 
 u32 psp_model;
 
@@ -37,6 +38,7 @@ void patch_sceLoadExec(int mode)
 	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
 	unsigned int offsets[6];
 	u32 text_addr;
+	struct LoadExecPatch *patch;
 
 	if (loadexec == NULL) {
 		return;
@@ -45,11 +47,9 @@ void patch_sceLoadExec(int mode)
 	text_addr = loadexec->text_addr;
 
 	if(psp_model == PSP_GO) { // PSP-N1000
-		offsets[0] = 0x00002F90;
-		offsets[1] = 0x00002FDC;
+		patch = &g_offs->loadexec_patch_05g;
 	} else {
-		offsets[0] = 0x00002D44;    // call to LoadReboot
-		offsets[1] = 0x00002D90;    // lui $at, 0x8860
+		patch = &g_offs->loadexec_patch_other;
 	}
 	
 	//save LoadReboot function
@@ -57,16 +57,16 @@ void patch_sceLoadExec(int mode)
 
 	if(mode == 0) {
 		//restore LoadReboot
-		_sw(MAKE_CALL(LoadReboot), loadexec->text_addr + offsets[0]);
+		_sw(MAKE_CALL(LoadReboot), loadexec->text_addr + patch->LoadRebootCall);
 
 		//restore jmp to 0x88600000
-		_sw(0x3C018860, loadexec->text_addr + offsets[1]);
+		_sw(0x3C018860, loadexec->text_addr + patch->RebootJump);
 	} else if(mode == 1) {
 		//replace LoadReboot function
-		_sw(MAKE_CALL(load_reboot), loadexec->text_addr + offsets[0]);
+		_sw(MAKE_CALL(load_reboot), loadexec->text_addr + patch->LoadRebootCall);
 
 		//patch Rebootex position to 0x88FC0000
-		_sw(0x3C0188FC, loadexec->text_addr + offsets[1]); // lui $at, 0x88FC
+		_sw(0x3C0188FC, loadexec->text_addr + patch->RebootJump); // lui $at, 0x88FC
 	}
 
 	sync_cache();
@@ -90,9 +90,11 @@ int module_start(SceSize args, void* argp)
 {
 	int thid;
 	//SysMemForKernel_458A70B5
-	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0x0000A13C;
+	int (* _sceKernelGetModel)(void);
 
+	setup_patch_offset_table(0x06030510);
 	//save psp model
+	_sceKernelGetModel = (void *)(g_offs->sceKernelGetModel);
 	psp_model = _sceKernelGetModel();
 
 	thid = sceKernelCreateThread("fastRecovery", main_thread, 0x1A, 0x1000, 0, NULL);

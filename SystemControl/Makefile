@@ -16,6 +16,7 @@ OBJS = main.o \
 	   march33_patch.o \
 	   nid_resolver.o \
 	   nid_data.o \
+	   nid_620_data.o \
 	   elf.o \
 	   conf.o \
 	   high_memory.o \

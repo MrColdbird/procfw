@@ -36,9 +36,17 @@ resolver_config* get_nid_resolver(const char *libname)
 {
 	int i;
 
-	for(i=0; i<nid_fix_size; ++i) {
-		if (!strcmp(libname, nid_fix[i].name)) {
-			return &nid_fix[i];
+	if (psp_fw_version == 0x06020010) {
+		for(i=0; i<nid_620_fix_size; ++i) {
+			if (!strcmp(libname, nid_620_fix[i].name)) {
+				return &nid_620_fix[i];
+			}
+		}
+	} else {
+		for(i=0; i<nid_fix_size; ++i) {
+			if (!strcmp(libname, nid_fix[i].name)) {
+				return &nid_fix[i];
+			}
 		}
 	}
 
@@ -261,7 +269,6 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	while(offset < size) {
 		stub = buf + offset;
 		stubcount = stub->stubcount;
-
 		resolver = get_nid_resolver(stub->libname);
 
 		if(resolver != NULL) {

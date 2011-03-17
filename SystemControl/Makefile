@@ -29,10 +29,10 @@ OBJS = main.o \
 	   isoload.o \
 	   cpuclock.o \
 	   fake_region.o \
+	   systemctrl_patch_offset.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
-	   ../Common/strsafe.o \
-	   ../Common/systemctrl_patch_offset.o
+	   ../Common/strsafe.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \

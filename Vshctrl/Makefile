@@ -2,7 +2,7 @@ all:
 	../contrib/pspgz.py vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl 0x1007
 
 TARGET = vshctrl
-OBJS = main.o vshpatch.o custom_update.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o dirent_track.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
+OBJS = main.o vshpatch.o custom_update.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o dirent_track.o vshctrl_patch_offset.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
 IMPORTS = ../Imports/LoadExecForKernel.o
 
 INCDIR = ../Common/ ../include/

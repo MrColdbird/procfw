@@ -37,7 +37,6 @@ OBJS = main.o \
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \
-		  ../Imports/LoadExecForKernel.o \
 		  ../Imports/SysMemForKernel.o \
 		  ../Imports/ModuleMgrForKernel.o \
 		  ../Imports/InterruptManagerForKernel.o \

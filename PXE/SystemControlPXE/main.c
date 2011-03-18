@@ -36,7 +36,7 @@ int module_start(SceSize args, void* argp)
 	//save psp model for patching
 	psp_model = *(u32*)(0x88FB0000);
 
-	psp_fw_version = sceKernelDevkitVersion();
+	psp_fw_version = sctrlKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 
 	//link to log file

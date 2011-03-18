@@ -32,21 +32,16 @@ typedef struct _MissingNIDResolver {
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
 static int (*sceKernelLinkLibraryEntriesForUser)(u32 unk0, void *buf, int size) = NULL;
 
+resolver_config *nid_fix;
+u32 nid_fix_size;
+
 resolver_config* get_nid_resolver(const char *libname)
 {
 	int i;
 
-	if (psp_fw_version == 0x06020010) {
-		for(i=0; i<nid_620_fix_size; ++i) {
-			if (!strcmp(libname, nid_620_fix[i].name)) {
-				return &nid_620_fix[i];
-			}
-		}
-	} else {
-		for(i=0; i<nid_fix_size; ++i) {
-			if (!strcmp(libname, nid_fix[i].name)) {
-				return &nid_fix[i];
-			}
+	for(i=0; i<nid_fix_size; ++i) {
+		if (!strcmp(libname, nid_fix[i].name)) {
+			return &nid_fix[i];
 		}
 	}
 
@@ -308,14 +303,25 @@ void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
 
-	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
-	loadcore = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
+	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
+	loadcore = (SceModule2*)sctrlKernelFindModuleByName("sceLoaderCore");
 
 	missing_LoadCoreForKernel_entries[0].fp = (loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelIcacheClearAll);
 	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntries);
 	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUser);
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesCall);
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUserCall);
+
+	switch(psp_fw_version) {
+		case 0x06030510:
+			nid_fix = nid_635_fix;
+			nid_fix_size = nid_635_fix_size;
+			break;
+		case 0x06020010:
+			nid_fix = nid_620_fix;
+			nid_fix_size = nid_620_fix_size;
+			break;
+	}
 }
 
 void resolve_syscon_driver(SceModule *mod)

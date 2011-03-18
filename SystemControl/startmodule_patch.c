@@ -96,7 +96,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	mod = (SceModule2*) sceKernelFindModuleByUID(modid);
 
 	if(!plugin_loaded) {
-		mediasync = (SceModule2*)sceKernelFindModuleByName("sceMediaSync");
+		mediasync = (SceModule2*)sctrlKernelFindModuleByName("sceMediaSync");
 
 		if(mediasync == NULL) {
 			goto out;
@@ -126,7 +126,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 		u32 key = sceKernelInitKeyConfig();
 
 		if (key == PSP_INIT_KEYCONFIG_GAME) {
-			kernellibrary = (SceModule2*)sceKernelFindModuleByName("sceKernelLibrary");
+			kernellibrary = (SceModule2*)sctrlKernelFindModuleByName("sceKernelLibrary");
 
 			if(kernellibrary != NULL) {
 				const char *path;

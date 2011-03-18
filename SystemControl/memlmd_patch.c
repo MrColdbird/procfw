@@ -107,7 +107,7 @@ static int _memlmd_decrypt(u8 *prx, u32 size, u32 *newsize, u32 use_polling)
 void patch_sceMemlmd(void)
 {
 	//find module
-	SceModule2 * memlmd = (SceModule2*) sceKernelFindModuleByName("sceMemlmd");
+	SceModule2 * memlmd = (SceModule2*) sctrlKernelFindModuleByName("sceMemlmd");
 	struct MemlmdPatch *patch;
 
 	//32mb psp

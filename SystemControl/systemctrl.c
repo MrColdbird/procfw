@@ -23,6 +23,8 @@ extern int LoadExecForKernel_BAEB4B89(const char *file, struct SceKernelLoadExec
 extern int LoadExecForKernel_8EF38192(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_D35D6403(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int *InitForKernel_040C934B(void);
+extern u32 sceKernelDevkitVersion_620(void);
+extern SceModule* sceKernelFindModuleByName_620(char *modname);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -144,7 +146,7 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	int (*_sctrlKernelLoadExecVSHWithApitype)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, u32 unk);
 
 	k1 = pspSdkSetK1(0);
-	mod = (SceModule2*) sceKernelFindModuleByName("sceLoadExec");
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceLoadExec");
 	text_addr = mod->text_addr;
 
 	if (psp_model == PSP_GO) {
@@ -169,7 +171,7 @@ int sctrlKernelSetUserLevel(int level)
 
 	k1 = pspSdkSetK1(0);
 	ret = sceKernelGetUserLevel();
-	mod = (SceModule2*) sceKernelFindModuleByName("sceThreadManager");
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceThreadManager");
 	text_addr = mod->text_addr;
 	_sw((level^8)<<28, *(u32*)(text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetUserLevel)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
 
@@ -223,7 +225,7 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 	int* (*find_driver)(char *drvname);
 
 	k1 = pspSdkSetK1(0);
-	mod = (SceModule2*) sceKernelFindModuleByName("sceIOFileManager");
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceIOFileManager");
 	find_driver = (void*)(mod->text_addr + g_offs->systemctrl_export_patch.sctrlHENFindDriver); // 0x00002A38 in 6.20/6.31
 	p = find_driver(drvname);
 
@@ -254,7 +256,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 		nid = resolve_nid(resolver, nid);
 	}
 
-	pMod = sceKernelFindModuleByName(szMod);
+	pMod = sctrlKernelFindModuleByName(szMod);
 
 	if(!pMod) {
 		pMod = sceKernelFindModuleByAddress((u32)szMod);
@@ -367,7 +369,7 @@ int sctrlKernelSetInitApitype(int apitype)
 
 int sctrlKernelSetUMDEmuFile(const char *iso)
 {
-	SceModule2 *modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+	SceModule2 *modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
 
 	if (modmgr == NULL) {
 		return -1;
@@ -383,7 +385,7 @@ int sctrlKernelSetInitFileName(char *filename)
 {
 	SceModule2 *modmgr;
 
-	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
+	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
 
 	if(modmgr == NULL) {
 		return -1;
@@ -393,4 +395,30 @@ int sctrlKernelSetInitFileName(char *filename)
 	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetInitFileName) = g_initfilename;
 
 	return 0;
+}
+
+u32 sctrlKernelDevkitVersion(void)
+{
+	u32 fw_version;
+   
+	fw_version = sceKernelDevkitVersion_620();
+
+	if(fw_version == 0x8002013A) {
+		fw_version = sceKernelDevkitVersion();
+	}
+
+	return fw_version;
+}
+
+SceModule* sctrlKernelFindModuleByName(char *modname)
+{
+	SceModule *mod;
+
+	mod = sceKernelFindModuleByName_620(modname);
+
+	if((u32)mod == 0x8002013A) {
+		mod = sceKernelFindModuleByName(modname);
+	}
+
+	return mod;
 }

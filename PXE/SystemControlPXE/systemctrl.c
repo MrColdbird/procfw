@@ -12,6 +12,8 @@
 #include "printk.h"
 #include "syspatch.h"
 
+extern u32 sceKernelDevkitVersion_620(void);
+extern SceModule* sceKernelFindModuleByName_620(char *modname);
 extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
 
 extern int (*g_on_module_start)(SceModule2*);
@@ -35,7 +37,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	void *entTab;
 	int entLen;
 
-	pMod = sceKernelFindModuleByName(szMod);
+	pMod = sctrlKernelFindModuleByName(szMod);
 
 	if (!pMod)
 	{
@@ -87,3 +89,28 @@ STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 	return on_module_start;
 }
 
+u32 sctrlKernelDevkitVersion(void)
+{
+	u32 fw_version;
+   
+	fw_version = sceKernelDevkitVersion_620();
+
+	if(fw_version == 0x8002013A) {
+		fw_version = sceKernelDevkitVersion();
+	}
+
+	return fw_version;
+}
+
+SceModule* sctrlKernelFindModuleByName(char *modname)
+{
+	SceModule *mod;
+
+	mod = sceKernelFindModuleByName_620(modname);
+
+	if((u32)mod == 0x8002013A) {
+		mod = sceKernelFindModuleByName(modname);
+	}
+
+	return mod;
+}

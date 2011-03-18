@@ -14,8 +14,6 @@
 #include "libs.h"
 #include "elf.h"
 
-extern SceModule2 *LoadCoreForKernel_312CA47E(void *entry);
-
 SceUID g_mod_start_thid = -1;
 SceModule2 *g_mod_start = NULL;
 int (*g_on_module_start)(SceModule2*) = NULL;
@@ -23,7 +21,7 @@ int (*g_on_module_start)(SceModule2*) = NULL;
 int PatchExec1(unsigned char * buffer, int * check);
 int PatchExec2(unsigned char * buffer, int * check);
 int PatchExec3(unsigned char * buffer, int * check, int isplain, int checkresult);
-int LoadCoreForKernel_01DB1EB3(unsigned char * buffer, int * check);
+int sceKernelCheckExecFile(unsigned char * buffer, int * check);
 
 //original functions
 int (* ProbeExec1)(unsigned char * buffer, int * check) = NULL;
@@ -62,7 +60,7 @@ int myKernelCreateThread(const char *name, void *entry, int pri, int stack, u32 
 
 	if (ret >= 0 && !strcmp(name, "SceModmgrStart")) {
 //		printk("%s: g_mod_start 0x%08x g_mod_start_thid 0x%08x entry 0x%08x\r\n", __func__, g_mod_start, g_mod_start_thid, entry);
-		g_mod_start = LoadCoreForKernel_312CA47E(entry);
+		g_mod_start = (SceModule2*)sceKernelFindModuleByAddress(entry);
 		g_mod_start_thid = ret;
 	}
 
@@ -172,9 +170,7 @@ int _sceKernelCheckExecFile(unsigned char * buffer, int * check)
 
 	//PatchExec1 isn't enough... :(
 	if(result != 0) {
-		//sceKernelCheckExecFile (LoadCoreForKernel_B0466E46)
-		//LoadCoreForKernel_01DB1EB3 in 6.30
-		int checkresult = LoadCoreForKernel_01DB1EB3(buffer, check);
+		int checkresult = sceKernelCheckExecFile(buffer, check);
 
 		//grab executable magic
 		unsigned int magic = *(unsigned int *)(buffer);

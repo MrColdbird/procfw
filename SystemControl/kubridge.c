@@ -12,7 +12,6 @@
 #include "printk.h"
 
 SceUID ModuleMgrForKernel_32292450(int apitype, const char *path, int flags, SceKernelLMOption *option);
-int SysMemForKernel_00E9A04A(void *addr, int size, int prot);
 
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
 {
@@ -85,7 +84,7 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 	u32 k1;
 
 	k1 = pspSdkSetK1(0);
-	ret = SysMemForKernel_00E9A04A(addr, size, prot);
+	ret = sceKernelSetDdrMemoryProtection(addr, size, prot);
 	pspSdkSetK1(k1);
 
 	return ret;

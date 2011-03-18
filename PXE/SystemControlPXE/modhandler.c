@@ -60,7 +60,7 @@ int myKernelCreateThread(const char *name, void *entry, int pri, int stack, u32 
 
 	if (ret >= 0 && !strcmp(name, "SceModmgrStart")) {
 //		printk("%s: g_mod_start 0x%08x g_mod_start_thid 0x%08x entry 0x%08x\r\n", __func__, g_mod_start, g_mod_start_thid, entry);
-		g_mod_start = (SceModule2*)sceKernelFindModuleByAddress(entry);
+		g_mod_start = (SceModule2*)sceKernelFindModuleByAddress((u32)entry);
 		g_mod_start_thid = ret;
 	}
 

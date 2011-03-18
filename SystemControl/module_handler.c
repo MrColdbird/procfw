@@ -3,6 +3,7 @@
 #include <pspiofilemgr.h>
 #include <stdio.h>
 #include <string.h>
+#include <psploadcore.h>
 
 #include "main.h"
 #include "systemctrl.h"
@@ -13,9 +14,6 @@
 #include "systemctrl_patch_offset.h"
 
 int (*g_on_module_start)(SceModule2*) = NULL;
-
-// sceKernelFindModuleByAddress most likely?
-extern SceModule2 *LoadCoreForKernel_312CA47E(void *addr);
 
 static int (*_prologue_module)(void *unk0, SceModule2 *mod) = NULL;
 

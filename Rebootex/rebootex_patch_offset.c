@@ -11,7 +11,6 @@ PatchOffset g_635_offsets = {
 		.LoadRebootCall = 0x00002D44,
 		.RebootJump = 0x00002D90,
 	},
-	.sceKernelGetModel = 0x88000000 + 0x0000A13C,
 };
 
 PatchOffset *g_offs = NULL;

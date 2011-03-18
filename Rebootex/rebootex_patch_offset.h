@@ -10,7 +10,6 @@ typedef struct _PatchOffset {
 	u32 fw_version;
 	struct LoadExecPatch loadexec_patch_05g;
 	struct LoadExecPatch loadexec_patch_other;
-	u32 sceKernelGetModel;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

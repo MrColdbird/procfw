@@ -78,6 +78,9 @@ void patch_module_for_version_spoof(SceModule *mod);
 void patch_sceChkreg(void);
 
 // Have to use this function to support both 6.2/6.3 kernel
+u32 sctrlKernelGetModel(void);
+
+// Have to use this function to support both 6.2/6.3 kernel
 u32 sctrlKernelDevkitVersion(void);
 
 // Have to use this function to support both 6.2/6.3 kernel

@@ -141,7 +141,7 @@ PatchOffset g_635_offsets = {
 		.LoaderCoreUndo2Call1 = 0x000041A4,
 		.LoaderCoreUndo2Call2 = 0x00005CA4,
 	},
-	.loadexec_patch = {
+	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002D44,
 		.RebootAddress = 0x00002D90,

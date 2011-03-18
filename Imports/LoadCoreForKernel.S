@@ -6,8 +6,8 @@
 	IMPORT_FUNC	"LoadCoreForKernel",0xEF8A0BEA,sceKernelFindModuleByName
 	IMPORT_FUNC	"LoadCoreForKernel",0xBEF0A05E,sceKernelFindModuleByName_620
 	IMPORT_FUNC	"LoadCoreForKernel",0xED53894F,sceKernelFindModuleByUID
+	IMPORT_FUNC	"LoadCoreForKernel",0x77E8F516,sceKernelFindModuleByUID_620
 	IMPORT_FUNC	"LoadCoreForKernel",0x312CA47E,sceKernelFindModuleByAddress
-	IMPORT_FUNC	"LoadCoreForKernel",0x312CA47E,LoadCoreForKernel_312CA47E
-	IMPORT_FUNC	"LoadCoreForKernel",0x01DB1EB3,LoadCoreForKernel_01DB1EB3
-	IMPORT_FUNC	"LoadCoreForKernel",0x07738DC3,LoadCoreForKernel_07738DC3
-	IMPORT_FUNC	"LoadCoreForKernel",0x6565B132,LoadCoreForKernel_6565B132
+	IMPORT_FUNC	"LoadCoreForKernel",0x452C5524,sceKernelFindModuleByAddress_620
+	IMPORT_FUNC	"LoadCoreForKernel",0x01DB1EB3,sceKernelCheckExecFile
+	IMPORT_FUNC	"LoadCoreForKernel",0xB0466E46,sceKernelCheckExecFile_620

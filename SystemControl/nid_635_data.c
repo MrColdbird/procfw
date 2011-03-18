@@ -72,7 +72,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xF6C10E27, 0x6174D377, }, // sceKernelGetSysMemoryInfo
 	{ 0xCDA3A2F7, 0xF2FEAFD5, }, // SysMemForKernel_CDA3A2F7
 	{ 0x960B888C, 0x78A1500D, }, // SysMemForKernel_960B888C
-	{ 0x452E3696, 0xD9A4D69E, }, // SysMemForKernel_452E3696
+	{ 0x452E3696, 0xD9A4D69E, }, // sceKernelGetSystemStatus
 	{ 0x95F5E8DA, 0x604C20C4, }, // SysMemForKernel_95F5E8DA
 	{ 0x0D547E7F, 0x3C4C5630, }, // sceKernelGetUMDData
 	{ 0x419DB8F4, 0x25A760F0, }, // sceKernelRegisterGetIdFunc
@@ -148,7 +148,7 @@ static nid_entry KDebugForKernel_nid[] = {
 static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0xCF8A41B1, 0xEF8A0BEA, }, // sceKernelFindModuleByName
 	{ 0xCCE4A157, 0xED53894F, }, // sceKernelFindModuleByUID
-	{ 0xDD303D79, 0x312CA47E, }, // LoadCoreForKernel_DD303D79 ( TODO: actually in 5.XX)
+	{ 0xDD303D79, 0x312CA47E, }, // sceKernelFindModuleByAddress (5.XX NID)
 	{ 0xFB8AE27D, 0x312CA47E, }, // sceKernelFindModuleByAddress (3.xx NID)
 	{ 0xACE23476, 0x563CB22E, }, // sceKernelCheckPspConfig
 	{ 0x7BE1421C, 0x01DB1EB3, }, // sceKernelCheckExecFile

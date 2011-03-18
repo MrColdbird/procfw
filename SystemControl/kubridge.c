@@ -4,6 +4,7 @@
 #include <pspthreadman_kernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
+#include <pspsysmem_kernel.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"

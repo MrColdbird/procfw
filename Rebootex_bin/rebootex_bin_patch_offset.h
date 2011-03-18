@@ -57,7 +57,7 @@ PatchOffset g_635_offsets = {
 		.RebootexCheck2 = 0x0000275C,
 		.RebootexCheck3 = 0x000027B0,
 		.RebootexCheck4 = 0x000027C8,
-		.RebootexCheck5 = 0x00007308,
+		.RebootexCheck5 = 0x00007648,
 		.LoadCoreModuleStartCall = 0x00005764,
 		.UnpackBootConfigBufferAddress = 0x00007308,
 	},

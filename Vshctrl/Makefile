@@ -3,7 +3,7 @@ all:
 
 TARGET = vshctrl
 OBJS = main.o vshpatch.o custom_update.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o dirent_track.o vshctrl_patch_offset.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
-IMPORTS = ../Imports/LoadExecForKernel.o
+IMPORTS =
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic

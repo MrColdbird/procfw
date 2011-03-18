@@ -33,6 +33,7 @@ struct SystemCtrlExportPatch {
 	u32 sctrlHENFindDriver;
 	u32 sctrlKernelSetUMDEmuFile;
 	u32 sctrlKernelSetInitFileName;
+	u32 sceKernelLoadExecVSHEf2NID;
 };
 
 struct ValidateStubPatch {

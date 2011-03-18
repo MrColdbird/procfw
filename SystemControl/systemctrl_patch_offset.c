@@ -54,6 +54,7 @@ PatchOffset g_635_offsets = {
 		.sctrlHENFindDriver = 0x00002A44,
 		.sctrlKernelSetUMDEmuFile = 0x000099B8,
 		.sctrlKernelSetInitFileName = 0x000099B4,
+		.sceKernelLoadExecVSHEf2NID = 0xD35D6403,
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00007004,

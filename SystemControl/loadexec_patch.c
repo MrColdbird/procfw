@@ -69,7 +69,7 @@ void patch_sceLoadExec(void)
 	if(psp_model == PSP_GO) {
 		patch = &g_offs->loadexec_patch_05g;
 	} else {
-		patch = &g_offs->loadexec_patch;
+		patch = &g_offs->loadexec_patch_other;
 	}
 
 	//replace LoadReboot function

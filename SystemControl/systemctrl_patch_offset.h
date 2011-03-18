@@ -154,7 +154,7 @@ typedef struct _PatchOffset {
 	struct SysMemForUserPatch sysmemforuser_patch[9];
 	struct ModuleHandlerPatch module_handler_patch;
 	struct sceLoaderCorePatch loadercore_patch;
-	struct sceLoadExecPatch loadexec_patch;
+	struct sceLoadExecPatch loadexec_patch_other;
 	struct sceLoadExecPatch loadexec_patch_05g;
 } PatchOffset;
 

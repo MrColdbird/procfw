@@ -16,7 +16,7 @@ void patch_sceSystemMemoryManager(void)
 	SceModule2 *mod;
 	int i;
 
-	mod = (SceModule2*)sceKernelFindModuleByName("sceSystemMemoryManager");
+	mod = (SceModule2*)sctrlKernelFindModuleByName("sceSystemMemoryManager");
 
 	if(mod == NULL)
 		return;

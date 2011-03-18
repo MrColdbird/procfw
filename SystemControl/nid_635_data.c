@@ -1143,7 +1143,7 @@ static nid_entry scePaf_nid[] = {
 	{ 0xE3D530AE, 0x1B952318, },
 };
 
-resolver_config nid_fix[] = {
+resolver_config nid_635_fix[] = {
 #define NID_ENTRY(libname) \
 	{ #libname, NELEMS(libname##_nid), libname##_nid, }
 	NID_ENTRY(SysMemForKernel),
@@ -1184,4 +1184,4 @@ resolver_config nid_fix[] = {
 #undef NID_ENTRY
 };
 
-u32 nid_fix_size = NELEMS(nid_fix);
+u32 nid_635_fix_size = NELEMS(nid_635_fix);

@@ -382,7 +382,7 @@ int patch_sceModuleManager(void)
 	SceModule2 *mod;
 	int intc;
 
-	mod = (SceModule2*) sceKernelFindModuleByName("sceModuleManager");
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceModuleManager");
 
 	if (mod == NULL)
 		return -1;
@@ -426,7 +426,7 @@ int patch_sceModuleManager(void)
 void patch_sceLoadCore(void)
 {
 	//find module
-	SceModule2 * loadcore = (SceModule2 *)sceKernelFindModuleByName("sceLoaderCore");
+	SceModule2 * loadcore = (SceModule2 *)sctrlKernelFindModuleByName("sceLoaderCore");
 
 	//patch sceKernelCheckExecFile (sub_00C10)
 	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + 0x00007DC0);

@@ -322,7 +322,7 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check)
 void patch_sceLoaderCore(void)
 {
 	//find module
-	SceModule2 * loadcore = (SceModule2 *)sceKernelFindModuleByName("sceLoaderCore");
+	SceModule2 * loadcore = (SceModule2 *)sctrlKernelFindModuleByName("sceLoaderCore");
 
 	//patch sceKernelCheckExecFile (sub_0C10)
 	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFile);

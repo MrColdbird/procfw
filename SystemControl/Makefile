@@ -15,7 +15,7 @@ OBJS = main.o \
 	   version_spoof.o \
 	   march33_patch.o \
 	   nid_resolver.o \
-	   nid_data.o \
+	   nid_635_data.o \
 	   nid_620_data.o \
 	   elf.o \
 	   conf.o \

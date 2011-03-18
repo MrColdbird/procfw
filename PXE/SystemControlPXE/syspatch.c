@@ -89,7 +89,7 @@ int on_module_start(SceModule2 *mod)
 void patch_sceLoadExec(void)
 {
 	//find loadexec module
-	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
+	SceModule2 * loadexec = (SceModule2*)sctrlKernelFindModuleByName("sceLoadExec");
 
 	//allow all user levels to call sceKernelExitVSHVSH (needed for installer reboot)
 	_sw(0x10000008, loadexec->text_addr + 0x168C);

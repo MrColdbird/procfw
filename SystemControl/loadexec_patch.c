@@ -56,7 +56,7 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 
 void patch_sceLoadExec(void)
 {
-	SceModule2 * loadexec = (SceModule2*)sceKernelFindModuleByName("sceLoadExec");
+	SceModule2 * loadexec = (SceModule2*)sctrlKernelFindModuleByName("sceLoadExec");
 	u32 text_addr;
 	struct sceLoadExecPatch *patch;
 

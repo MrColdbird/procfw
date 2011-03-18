@@ -35,7 +35,7 @@ void setup_module_handler(void)
 {
 	SceModule2 *mod;
 
-	mod = (SceModule2*) sceKernelFindModuleByName("sceModuleManager");
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceModuleManager");
 
 	if (mod == NULL)
 		return;

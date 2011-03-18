@@ -165,8 +165,7 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
-	// for now fw_version cannot be used because sceKernelDevkitVersion's NID goes randomly
-
-	// assumed it's 635
-	g_offs = &g_635_offsets;
+	if(fw_version == g_635_offsets.fw_version) {
+		g_offs = &g_635_offsets;
+	}
 }

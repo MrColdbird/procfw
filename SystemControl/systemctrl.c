@@ -23,6 +23,7 @@ extern int LoadExecForKernel_BAEB4B89(const char *file, struct SceKernelLoadExec
 extern int LoadExecForKernel_8EF38192(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int LoadExecForKernel_D35D6403(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int *InitForKernel_040C934B(void);
+extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern SceModule* sceKernelFindModuleByName_620(char *modname);
 
@@ -395,6 +396,19 @@ int sctrlKernelSetInitFileName(char *filename)
 	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetInitFileName) = g_initfilename;
 
 	return 0;
+}
+
+u32 sctrlKernelGetModel(void)
+{
+	u32 model;
+   
+	model = sceKernelGetModel_620();
+
+	if(model == 0x8002013A) {
+		model = sceKernelGetModel();
+	}
+
+	return model;
 }
 
 u32 sctrlKernelDevkitVersion(void)

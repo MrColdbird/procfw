@@ -14,7 +14,7 @@ static void patch_devicename(SceUID modid)
 	SceModule2 *mod;
 	int i;
 
-	mod = (SceModule2*)sceKernelFindModuleByUID(modid);
+	mod = (SceModule2*)sctrlKernelFindModuleByUID(modid);
 
 	if(mod == NULL) {
 		return;

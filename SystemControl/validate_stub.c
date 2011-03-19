@@ -54,7 +54,7 @@ void validate_stub_by_uid(int modid)
 	SceModule *pMod;
 
 	k1 = pspSdkSetK1(0);
-	pMod = sceKernelFindModuleByUID(modid);
+	pMod = sctrlKernelFindModuleByUID(modid);
 	
 	if (pMod != NULL) {
 		validate_stub(pMod);

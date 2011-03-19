@@ -149,7 +149,7 @@ int _sceKernelCheckExecFile(unsigned char * buffer, int * check)
 
 	//PatchExec1 isn't enough... :(
 	if(result != 0) {
-		int checkresult = sceKernelCheckExecFile(buffer, check);
+		int checkresult = sctrlKernelCheckExecFile(buffer, check);
 
 		//grab executable magic
 		unsigned int magic = *(unsigned int *)(buffer);

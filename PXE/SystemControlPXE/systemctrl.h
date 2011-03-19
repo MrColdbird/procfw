@@ -317,5 +317,6 @@ int sctrlHENSetMemory(u32 p2, u32 p8);
 u32 sctrlKernelGetModel(void);
 u32 sctrlKernelDevkitVersion(void);
 SceModule* sctrlKernelFindModuleByName(char *modname);
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check);
 
 #endif

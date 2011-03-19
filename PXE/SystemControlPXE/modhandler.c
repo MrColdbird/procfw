@@ -13,6 +13,7 @@
 #include "modhandler.h"
 #include "libs.h"
 #include "elf.h"
+#include "systemctrl_patch_offset.h"
 
 SceUID g_mod_start_thid = -1;
 SceModule2 *g_mod_start = NULL;
@@ -32,38 +33,16 @@ int (* PartitionCheck)(unsigned int * st0, unsigned int * check);
 #define J_TARGET(f) (((f & ~(0x08000000)) << 2) | 0x80000000)
 #define JAL_TARGET(f) (((f & ~(0x0C000000)) << 2) | 0x80000000)
 
-int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
+static int (*_prologue_module)(void *unk0, SceModule2 *mod) = NULL;
+
+static int prologue_module(void *unk0, SceModule2 *mod)
 {
-	int ret;
-
-	if (g_mod_start_thid != -1 && thid == g_mod_start_thid) {
-//		printk("%s: g_mod_start 0x%08x g_mod_start_thid 0x%08x g_on_module_start 0x%08x\r\n", __func__, g_mod_start, g_mod_start_thid, g_on_module_start);
-
-		if (g_on_module_start != NULL && g_mod_start != NULL) {
-			(*g_on_module_start)(g_mod_start);
-		}
-
-		g_mod_start_thid = -1;
-		g_mod_start = NULL;
+	int ret = (*_prologue_module)(unk0, mod);
+	
+	if (ret >= 0) {
+		(*g_on_module_start)(mod);
 	}
-
-	ret = sceKernelStartThread(thid, arglen, argp);
-
-	return ret;
-}
-
-int myKernelCreateThread(const char *name, void *entry, int pri, int stack, u32 attr, void *opt)
-{
-	int ret;
-
-	ret = sceKernelCreateThread(name, entry, pri, stack, attr, opt);
-
-	if (ret >= 0 && !strcmp(name, "SceModmgrStart")) {
-//		printk("%s: g_mod_start 0x%08x g_mod_start_thid 0x%08x entry 0x%08x\r\n", __func__, g_mod_start, g_mod_start_thid, entry);
-		g_mod_start = (SceModule2*)sceKernelFindModuleByAddress((u32)entry);
-		g_mod_start_thid = ret;
-	}
-
+	
 	return ret;
 }
 
@@ -376,45 +355,36 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check)
 int patch_sceModuleManager(void)
 {
 	SceModule2 *mod;
-	int intc;
 
 	mod = (SceModule2*) sctrlKernelFindModuleByName("sceModuleManager");
 
 	if (mod == NULL)
 		return -1;
 	
-	intc = pspSdkDisableInterrupts();
-
 	//backup function pointer (dword_622C)
-	ProbeExec3 = (void*)mod->text_addr + 0x00008864;
+	ProbeExec3 = (void*)mod->text_addr + g_offs->module_handler_patch.ProbeExec3;
 
 	//override function (sub_0045C)
-	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + 0x00007C6C);
+	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + g_offs->module_handler_patch.ProbeExec3Call);
 
-	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr+0x000087E4);
+	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr + g_offs->module_handler_patch.sceKernelCheckExecFileImport);
 
-	PartitionCheck = (void*)mod->text_addr + 0x00007FE0;
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + 0x0000652C);
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + 0x000068A8);
-
-	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0x446D8DE6, &myKernelCreateThread, 0);
-	hook_import_bynid((SceModule*)mod, "ThreadManForKernel", 0xF475845D, &myKernelStartThread, 0);
+	PartitionCheck = (void*)mod->text_addr + g_offs->module_handler_patch.PartitionCheck;
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall1);
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall2);
 
 	//no device check patches
-	_sw(0, mod->text_addr + 0x00000760);
-	_sw(0x24020000, mod->text_addr + 0x000007C0);
-	_sw(0, mod->text_addr + 0x000030B0);
-	_sw(0, mod->text_addr + 0x0000310C);
-	_sw(0x10000009, mod->text_addr + 0x00003138);
-	_sw(0, mod->text_addr + 0x00003444);
-	_sw(0, mod->text_addr + 0x0000349C);
-	_sw(0x10000010, mod->text_addr + 0x000034C8);
-	_sw(0, mod->text_addr + 0x00004360);
-	_sw(0, mod->text_addr + 0x000043A8);
-	_sw(0, mod->text_addr + 0x000043C0);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck1);
+	_sw(0x24020000, mod->text_addr + g_offs->module_handler_patch.DeviceCheck2);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck3);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck4);
+	_sw(0x10000009, mod->text_addr + g_offs->module_handler_patch.DeviceCheck5);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck6);
+	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck7);
+	_sw(0x10000010, mod->text_addr + g_offs->module_handler_patch.DeviceCheck8);
 
-	sync_cache();
-	pspSdkEnableInterrupts(intc);
+	_prologue_module = (void*)(mod->text_addr + g_offs->module_handler_patch.PrologueModule);
+	_sw(MAKE_CALL(prologue_module), mod->text_addr + g_offs->module_handler_patch.PrologueModuleCall);
 
 	return 0;
 }
@@ -425,37 +395,37 @@ void patch_sceLoadCore(void)
 	SceModule2 * loadcore = (SceModule2 *)sctrlKernelFindModuleByName("sceLoaderCore");
 
 	//patch sceKernelCheckExecFile (sub_00C10)
-	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + 0x00007DC0);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x00001570);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x000015C0);
-	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + 0x00004BE8);
+	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFile);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall1);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall2);
+	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall3);
 
 	//patch ProbeExec1 (sub_001AC)
-	ProbeExec1 = (void*)loadcore->text_addr + 0x0000679C; //dword_6248
-	_sw(MAKE_CALL(_ProbeExec1), loadcore->text_addr + 0x000047E4);
+	ProbeExec1 = (void*)loadcore->text_addr + g_offs->loadercore_patch.ProbeExec1; //dword_6248
+	_sw(MAKE_CALL(_ProbeExec1), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec1Call);
 
 	//patch ProbeExec2 (sub_004E8)
-	ProbeExec2 = (void*)loadcore->text_addr + 0x000066F4; //dword_6364
-	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + 0x000049E4);
-	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + 0x00006A14);
+	ProbeExec2 = (void*)loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2; //dword_6364
+	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2Call1);
+	_sw(MAKE_CALL(_ProbeExec2), loadcore->text_addr + g_offs->loadercore_patch.ProbeExec2Call2);
 
 	//undo check #1
-	_sw(0, loadcore->text_addr + 0x000076E4); //bnez
+	_sw(NOP, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck1); //bnez
 
 	//undo check #2
-	_sw(0, loadcore->text_addr + 0x00005C34); //beqzl
-	_sw(0, loadcore->text_addr + 0x00005C38); //lui (likely branch instruction)
+	_sw(NOP, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck2); //beqzl
+	_sw(NOP, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck2 + 4); //lui (likely branch instruction)
 
 	//undo check #3
-	_sw(0, loadcore->text_addr + 0x00005D44); //beqzl
-	_sw(0, loadcore->text_addr + 0x00005D48); //lui (likely branch instruction)
+	_sw(NOP, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3); //beqzl
+	_sw(NOP, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3 + 4); //lui (likely branch instruction)
 
 	//undo rebootex patches
-	void * memlmd_3F2AC9C6 = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0x3F2AC9C6);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005CC8);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005CF8);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + 0x00005D90);
-	void * memlmd_E42AFE2E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0xE42AFE2E);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x000041A4);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + 0x00005CA4);
+	void * memlmd_323366CA = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", g_offs->loadercore_patch.memlmd_323366CA_NID);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call1);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call2);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call3);
+	void * memlmd_7CF1CD3E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", g_offs->loadercore_patch.memlmd_7CF1CD3E_NID);
+	_sw(MAKE_CALL(memlmd_7CF1CD3E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call1);
+	_sw(MAKE_CALL(memlmd_7CF1CD3E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call2);
 }

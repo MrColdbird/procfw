@@ -33,7 +33,6 @@ struct SystemCtrlExportPatch {
 	u32 sctrlHENFindDriver;
 	u32 sctrlKernelSetUMDEmuFile;
 	u32 sctrlKernelSetInitFileName;
-	u32 sceKernelLoadExecVSHEf2NID;
 };
 
 struct ValidateStubPatch {
@@ -124,6 +123,8 @@ struct sceLoaderCorePatch {
 	u32 LoaderCoreUndo1Call3;
 	u32 LoaderCoreUndo2Call1;
 	u32 LoaderCoreUndo2Call2;
+	u32 memlmd_323366CA_NID;
+	u32 memlmd_7CF1CD3E_NID;
 };
 
 struct sceLoadExecPatch {

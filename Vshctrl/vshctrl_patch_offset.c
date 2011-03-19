@@ -8,6 +8,7 @@ PatchOffset g_635_offsets = {
 		.sceDisplaySetHoldModeCall = 0x00001A14,
 		.HibBlockCheck = 0x000051A8,
 		.SystemVersionStr = 0x0002A1FC,
+		.SystemVersionMessage = "6.35 PRO-%c",
 		.SystemVersion = 0x00018F3C,
 		.MacAddressStr = 0x0002E4D8,
 		.HomebrewCheck = 0x000202A8,
@@ -54,11 +55,67 @@ PatchOffset g_635_offsets = {
 	},
 };
 
+PatchOffset g_620_offsets = {
+	.fw_version = FW_620,
+	.vshctrl_patch = {
+		.sceDisplaySetHoldMode = 0x00005570,
+		.sceDisplaySetHoldModeCall = 0x00001A14,
+		.HibBlockCheck = 0x000050F8,
+		.SystemVersionStr = 0x000298AC,
+		.SystemVersionMessage = "6.20 PRO-%c",
+		.SystemVersion = 0x00018920,
+		.MacAddressStr = 0x0002DB90,
+		.HomebrewCheck = 0x0001EB08,
+		.PopsCheck = 0x0001F41C,
+		.MultiDiscPopsCheck = 0x00013850,
+		.HidePicCheck1 = 0x0001C098,
+		.HidePicCheck2 = 0x0001C0A4,
+		.SkipGameBootSubroute = 0x000181BC,
+		.SkipGameBoot = 0x00017E5C,
+		.RifFileCheck = 0x0001EC0C,
+		.RifCompareCheck = 0x0001EC34,
+		.RifTypeCheck = 0x0001EC48,
+		.RifNpDRMCheck = 0x0001EC8C,
+	},
+	.msvideo_main_patch = {
+		.checks = {
+			0x0003AB2C,
+			0x0003ABB4,
+			0x0003D3AC,
+			0x0003D608,
+			0x00043B98,
+            0x00073A84,
+            0x000880A0,
+			0x0003D324,
+            0x0003D36C,
+            0x00042C40,
+		},
+	},
+	.vsh_module_patch = {
+		.checks = {
+			0x00011D84,
+			0x00011A70,
+			0x00011A78,
+		},
+	},
+	.custom_update_patch = {
+		.UpdatePluginImageVersion1 = 0x0000819C,
+		.UpdatePluginImageVersion2 = 0x000081A4,
+		.SceUpdateDL_UpdateListStr = 0x000032BC,
+		.SceUpdateDL_UpdateListCall1 = 0x00002044,
+		.SceUpdateDL_UpdateListCall2 = 0x00002054,
+		.SceUpdateDL_UpdateListCall3 = 0x00002080,
+		.SceUpdateDL_UpdateListCall4 = 0x0000209C,
+	},
+};
+
 PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;
+	} else if(fw_version == g_620_offsets.fw_version) {
+		g_offs = &g_620_offsets;
 	}
 }

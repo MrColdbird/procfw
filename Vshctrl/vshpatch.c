@@ -175,10 +175,10 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 
 	minor_version = sctrlHENGetMinorVersion();
 
-	if(minor_version == 0) {
-		sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
-	} else {
-		sprintf(str, "6.35 PRO-%c%d", 'A'+(sctrlHENGetVersion()&0xF)-1, minor_version);
+	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
+
+	if(minor_version != 0) {
+		sprintf(str+strlen(str), "%d", minor_version);
 	}
 
 	p = (void*)(text_addr + g_offs->vshctrl_patch.SystemVersionStr);

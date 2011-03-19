@@ -7,6 +7,7 @@
 #include <psploadexec.h>
 #include <psputils.h>
 #include <psputilsforkernel.h>
+#include <pspsysmem.h>
 #include <psppower.h>
 #include <string.h>
 #include "utils.h"
@@ -56,6 +57,8 @@ typedef struct SceModule2
 //psp model
 int model = 0;
 
+u32 fw_version = 0;
+
 int dump_kmem = 0;
 
 //load reboot function
@@ -82,6 +85,9 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 
 	//store rebootex length
 	_sw(size_rebootex, 0x88FB0004);
+
+	//store fw version
+	_sw(fw_version, 0x88FB0008);
 
 	//forward
 	return LoadReboot(arg1, arg2, arg3, arg4);
@@ -346,6 +352,8 @@ int main(int argc, char * argv[])
 
 	//create empty callback
 	int cbid = -1;
+
+	fw_version = sceKernelDevkitVersion();
 
 	printk_init("ms0:/fastrecovery.txt");
 	printk("Hello exploit\r\n");

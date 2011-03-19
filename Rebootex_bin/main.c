@@ -106,7 +106,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	//grab psp version
 	int version = *(int *)REBOOTEX_CONFIG_START;
 	struct RebootexPatch *patch;
-	int fw_version = *(int *)(REBOOTEX_CONFIG_START + 4);
+	int fw_version = *(int *)(REBOOTEX_CONFIG_START + 8);
 
 	setup_patch_offset_table(fw_version);
 

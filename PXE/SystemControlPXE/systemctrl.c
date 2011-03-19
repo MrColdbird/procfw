@@ -12,27 +12,37 @@
 #include "printk.h"
 #include "syspatch.h"
 
+#define FW_635 0x06030510
+#define FW_620 0x06020010
+
 extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern SceModule* sceKernelFindModuleByName_620(char *modname);
 extern int sceKernelExitVSH(struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
+extern u32 sceKernelQuerySystemCall(void *func);
+extern u32 sceKernelQuerySystemCall_620(void *func);
 
+extern u32 psp_fw_version;
 extern int (*g_on_module_start)(SceModule2*);
 
 int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 {
 	u32 k1;
-	int ret;
+	int ret = -1;
 
 	k1 = pspSdkSetK1(0);
-	ret = sceKernelExitVSH_620(param);
 
-	if(ret == 0x8002013A) {
-		ret = sceKernelExitVSH(param);
-	}
-
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelExitVSH(param);
+			break;
+		case FW_620:
+			ret = sceKernelExitVSH_620(param);
+			break;
+	};
+	
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -99,14 +109,17 @@ STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 
 u32 sctrlKernelGetModel(void)
 {
-	u32 model;
+	u32 model = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			model = sceKernelGetModel();
+			break;
+		case FW_620:
+			model = sceKernelGetModel_620();
+			break;
+	};
    
-	model = sceKernelGetModel_620();
-
-	if(model == 0x8002013A) {
-		model = sceKernelGetModel();
-	}
-
 	return model;
 }
 
@@ -125,13 +138,38 @@ u32 sctrlKernelDevkitVersion(void)
 
 SceModule* sctrlKernelFindModuleByName(char *modname)
 {
-	SceModule *mod;
+	SceModule *mod = NULL;
 
-	mod = sceKernelFindModuleByName_620(modname);
-
-	if((u32)mod == 0x8002013A) {
-		mod = sceKernelFindModuleByName(modname);
-	}
+	switch(psp_fw_version) {
+		case FW_635:
+			mod = sceKernelFindModuleByName(modname);
+			break;
+		case FW_620:
+			mod = sceKernelFindModuleByName_620(modname);
+			break;
+	};
 
 	return mod;
 }
+
+int sctrlKernelQuerySystemCall(void *func_addr)
+{
+	int ret = -1;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelQuerySystemCall(func_addr);
+			break;
+		case FW_620:
+			ret = sceKernelQuerySystemCall_620(func_addr);
+			break;
+	};
+
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+

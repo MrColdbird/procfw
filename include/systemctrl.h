@@ -289,4 +289,6 @@ int sctrlHENSetMemory(u32 p2, u32 p8);
 
 void sctrlHENPatchSyscall(void *addr, void *newaddr);
 
+int sctrlKernelQuerySystemCall(void *func_addr);
+
 #endif

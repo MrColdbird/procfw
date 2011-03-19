@@ -24,8 +24,8 @@
 #include "utils.h"
 #include "libs.h"
 #include "printk.h"
-
-unsigned int sceKernelQuerySystemCall(void * func);
+#include "main.h"
+#include "systemctrl.h"
 
 PspModuleImport *find_import_lib(SceModule *pMod, char *library)
 {
@@ -95,7 +95,7 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 					if(syscall) {
 						u32 syscall_num;
 
-						syscall_num = sceKernelQuerySystemCall(func);
+						syscall_num = sctrlKernelQuerySystemCall(func);
 
 						if(syscall_num == (u32)-1) {
 							printk("%s: cannot find syscall in %s_%08X\n", __func__, library, nid);

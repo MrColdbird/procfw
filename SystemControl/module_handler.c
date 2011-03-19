@@ -23,7 +23,10 @@ static int prologue_module(void *unk0, SceModule2 *mod)
 	
 	if (ret >= 0) {
 		unlock_high_memory(0);
-		(*g_on_module_start)(mod);
+
+		if(g_on_module_start != NULL) {
+			(*g_on_module_start)(mod);
+		}
 	}
 	
 	return ret;
@@ -38,12 +41,8 @@ void setup_module_handler(void)
 	if (mod == NULL)
 		return;
 	
-	//backup function pointer (dword_622C)
 	ProbeExec3 = (void*)mod->text_addr + g_offs->module_handler_patch.ProbeExec3;
-
-	//override function (sub_0045C)
 	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + g_offs->module_handler_patch.ProbeExec3Call);
-
 	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr + g_offs->module_handler_patch.sceKernelCheckExecFileImport);
 
 	PartitionCheck = (void*)mod->text_addr + g_offs->module_handler_patch.PartitionCheck;

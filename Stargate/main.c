@@ -30,6 +30,7 @@ PSP_MAIN_THREAD_ATTR(0);
 
 static STMOD_HANDLER previous;
 SEConfig conf;
+u32 psp_fw_version;
 
 #define MAX_MODULE_NUMBER 256
 
@@ -83,6 +84,10 @@ static int stargate_module_chain(SceModule2 *mod)
 	patch_utility((SceModule*)mod);
 	patch_load_module((SceModule*)mod);
 
+	if(psp_fw_version == FW_620) {
+		patch_for_620((SceModule*)mod);
+	}
+
 	// m33 mode: until npdrm loaded
 	if(conf.usenodrm) {
 		if(0 == strcmp(mod->modname, "scePspNpDrm_Driver")) {
@@ -127,7 +132,8 @@ int module_start(SceSize args, void *argp)
 		return 1;
 	}
 
-	setup_patch_offset_table(sceKernelDevkitVersion());
+	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/log_stargate.txt");
 	printk("stargate started\n");
 	sctrlSEGetConfig(&conf);
@@ -138,6 +144,10 @@ int module_start(SceSize args, void *argp)
 	if(conf.usenodrm) {
 		nodrm_init();
 		nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
+	}
+
+	if(psp_fw_version == FW_620) {
+		get_620_function();
 	}
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);

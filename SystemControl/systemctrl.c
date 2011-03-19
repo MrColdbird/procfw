@@ -14,6 +14,7 @@
 #include "nid_resolver.h"
 #include "strsafe.h"
 #include "systemctrl_patch_offset.h"
+#include "rebootex_conf.h"
 
 extern int *InitForKernel_040C934B(void);
 extern u32 sceKernelGetModel_620(void);
@@ -53,12 +54,6 @@ extern SceUID _sceKernelLoadModuleWithApitype2(int apitype, const char *path, in
 extern SceUID sceKernelLoadModuleWithApitype2_620(int apitype, const char *path, int flags, SceKernelLMOption *option);
 
 extern int (*g_on_module_start)(SceModule2*);
-
-// for sctrlHENLoadModuleOnReboot
-char *g_insert_module_before;
-void *g_insert_module_binary;
-int g_insert_module_size;
-int g_insert_module_flags;
 
 // for sctrlHENSetMemory
 u32 g_p2_size = 24;
@@ -412,10 +407,10 @@ STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 
 void sctrlHENLoadModuleOnReboot(char *module_before, void *buf, int size, int flags)
 {
-	g_insert_module_before = module_before;
-	g_insert_module_binary = buf;
-	g_insert_module_size = size;
-	g_insert_module_flags = flags;
+	rebootex_conf.insert_module_before = module_before;
+	rebootex_conf.insert_module_binary = buf;
+	rebootex_conf.insert_module_size = size;
+	rebootex_conf.insert_module_flags = flags;
 }
 
 // SystemCtrlForKernel_826668E9 in Tn's code

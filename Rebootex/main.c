@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "../Rebootex_bin/rebootex.h"
 #include "rebootex_patch_offset.h"
+#include "rebootex_conf.h"
 
 u32 psp_model;
 u32 psp_fw_version;
@@ -65,21 +66,26 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	return mod;
 }
 
+void build_rebootex_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+	
+	conf->magic = REBOOTEX_CONFIG_MAGIC;
+	conf->psp_fw_version = psp_fw_version;
+	conf->psp_model = psp_model;
+}
+
 //load reboot wrapper
 int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
 	//copy reboot extender
-	memcpy((void*)0x88FC0000, rebootex, size_rebootex);
+	memcpy((void*)REBOOTEX_START, rebootex, size_rebootex);
 
 	//reset reboot flags
-	memset((void*)0x88FB0000, 0, 0x100);
-	memset((void*)0x88FB0100, 0, 256);
+	memset((void*)REBOOTEX_CONFIG, 0, 0x100);
+	memset((void*)REBOOTEX_CONFIG_ISO_PATH, 0, 256);
 
-	//store psp model
-	_sw(psp_model, 0x88FB0000);
-
-	//store fw version
-	_sw(psp_fw_version, 0x88FB0020);
+	build_rebootex_configure();
 
 	//forward
 	return (*LoadReboot)(arg1, arg2, arg3, arg4);

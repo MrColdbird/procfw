@@ -4,12 +4,6 @@
 #include "config.h"
 #include "rebootex_bin_patch_offset.h"
 
-#define REBOOT_START 0x88600000
-#define REBOOTEX_CONFIG_START 0x88FB0000
-#define REBOOTEX_START 0x88FC0000
-#define BTCNF_MAGIC 0x0F803001
-#define BOOTCONFIG_TEMP_BUFFER 0x88FB0200
-
 typedef struct _btcnf_header
 {
 	unsigned int signature; // 0
@@ -35,6 +29,8 @@ typedef struct _btcnf_module
 	unsigned char hash[0x10]; //0x10
 } _btcnf_module __attribute((packed));
 
+rebootex_config *conf;
+
 //io flags
 int rebootmodule_open = 0;
 
@@ -43,6 +39,8 @@ char * loadrebootmodulebefore = NULL;
 char * rebootmodule = NULL;
 int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
+u32 psp_fw_version = 0;
+u32 psp_model = 0;
 
 PspBootConfMode iso_mode = 0;
 
@@ -110,16 +108,12 @@ int GetPrxFlag(char *buffer, const char* modname, u32 *flag);
 //reboot replacement
 void main(int arg1, int arg2, int arg3, int arg4)
 {
-	//grab psp version
-	int version = *(int *)REBOOTEX_CONFIG_START;
 	struct RebootexPatch *patch;
-	int fw_version = *(int *)(REBOOTEX_CONFIG_START + 0x20);
-
-	setup_patch_offset_table(fw_version);
 
 	load_configure();
+	setup_patch_offset_table(psp_fw_version);
 
-	if(version == 0) {
+	if(psp_model == PSP_1000) {
 		patch = &g_offs->rebootex_patch_01g;
 	} else {
 		patch = &g_offs->rebootex_patch_other;
@@ -178,15 +172,17 @@ void main(int arg1, int arg2, int arg3, int arg4)
 
 void load_configure(void)
 {
-	loadrebootmodulebefore = *(int *)(REBOOTEX_CONFIG_START + 0x10);
-	rebootmodule = (char *)(*(int *)(REBOOTEX_CONFIG_START + 0x14));
-	size_rebootmodule = *(int *)(REBOOTEX_CONFIG_START + 0x18);
-	rebootmoduleflags = *(int *)(REBOOTEX_CONFIG_START + 0x1C);
-
-	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG_START + 0x20);
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
 	
 	if(conf->magic == REBOOTEX_CONFIG_MAGIC) {
 		iso_mode = conf->iso_mode;
+		loadrebootmodulebefore = conf->insert_module_before;
+		rebootmodule = conf->insert_module_binary;
+		size_rebootmodule = conf->insert_module_size;
+		rebootmoduleflags = conf->insert_module_flags;
+		psp_fw_version = conf->psp_fw_version;
+		iso_mode = conf->iso_mode;
+		psp_model = conf->psp_model;
 	}
 }
 

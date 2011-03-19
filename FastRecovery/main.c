@@ -13,6 +13,7 @@
 #include "utils.h"
 #include "printk.h"
 #include "../Rebootex_bin/rebootex.h"
+#include "rebootex_conf.h"
 
 PSP_MODULE_INFO("635FastRecovery", PSP_MODULE_USER, 1, 0);
 PSP_HEAP_SIZE_KB(0);
@@ -54,10 +55,8 @@ typedef struct SceModule2
 	unsigned int segmentsize[4]; // 0x90
 } SceModule2;
 
-//psp model
-int model = 0;
-
-u32 fw_version = 0;
+int psp_model = 0;
+u32 psp_fw_version = 0;
 
 int dump_kmem = 0;
 
@@ -70,24 +69,27 @@ int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid);
 //unregister callback function - its slotcheck is bugged too. ;)
 int scePowerUnregisterCallbackPrivate(unsigned int slot);
 
+void build_rebootex_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+
+	conf->magic = REBOOTEX_CONFIG_MAGIC;
+	conf->psp_model = psp_model;
+	conf->rebootex_size = size_rebootex;
+	conf->psp_fw_version = psp_fw_version;
+}
+
 //load reboot wrapper
 int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
 	//copy reboot extender
-	memcpy((char *)0x88FC0000, rebootex, size_rebootex);
+	memcpy((char *)REBOOTEX_START, rebootex, size_rebootex);
 
 	//reset reboot flags
-	memset((char *)0x88FB0000, 0, 0x100);
-	memset((char *)0x88FB0100, 0, 256);
+	memset((char *)REBOOTEX_CONFIG, 0, 0x100);
+	memset((char *)REBOOTEX_CONFIG_ISO_PATH, 0, 256);
 
-	//store psp model
-	_sw(model, 0x88FB0000);
-
-	//store rebootex length
-	_sw(size_rebootex, 0x88FB0004);
-
-	//store fw version
-	_sw(fw_version, 0x88FB0020);
+	build_rebootex_configure();
 
 	//forward
 	return LoadReboot(arg1, arg2, arg3, arg4);
@@ -209,22 +211,15 @@ int kernel_permission_call(void)
 	//SysMemForKernel_458A70B5
 	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0x0000A13C;
 
-	//save psp model
-	model = _sceKernelGetModel();
+	psp_model = _sceKernelGetModel();
 
 	//loadexec patches
 	unsigned int offsets[2];
 
-	//psp N1000
-	if(model == 4)
-	{
+	if(psp_model == PSP_GO) {
 		offsets[0] = 0x00002F90;
 		offsets[1] = 0x00002FDC;
-	}
-
-	//psp 1000-4000
-	else
-	{
+	} else {
 		offsets[0] = 0x00002D44;
 		offsets[1] = 0x00002D90;
 	}
@@ -353,7 +348,7 @@ int main(int argc, char * argv[])
 	//create empty callback
 	int cbid = -1;
 
-	fw_version = sceKernelDevkitVersion();
+	psp_fw_version = sceKernelDevkitVersion();
 
 	printk_init("ms0:/fastrecovery.txt");
 	printk("Hello exploit\r\n");

@@ -8,6 +8,7 @@ struct VshctrlPatch {
 	u32 sceDisplaySetHoldModeCall;
 	u32 HibBlockCheck;
 	u32 SystemVersionStr;
+	const char *SystemVersionMessage;
 	u32 SystemVersion;
 	u32 MacAddressStr;
 	u32 HomebrewCheck;

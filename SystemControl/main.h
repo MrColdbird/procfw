@@ -81,6 +81,7 @@ void patch_sceChkreg(void);
 u32 sctrlKernelGetModel(void);
 u32 sctrlKernelDevkitVersion(void);
 SceModule* sctrlKernelFindModuleByName(char *modname);
+int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot);
 SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name);
 
 extern SEConfig conf;

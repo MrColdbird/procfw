@@ -4,6 +4,7 @@
 #include <psputilsforkernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
+#include <pspsysmem_kernel.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
@@ -29,6 +30,7 @@ extern int sceKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSH
 extern int sceKernelLoadExecVSHMs3_620(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelLoadExecVSHMs3(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelLoadExecVSHMs4_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelSetDdrMemoryProtection_620(void *addr, int size, int prot);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -479,4 +481,17 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	}
 
 	return mod;
+}
+
+int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot)
+{
+	int ret;
+
+	ret = sceKernelSetDdrMemoryProtection_620(addr, size, prot);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelSetDdrMemoryProtection(addr, size, prot);
+	}
+
+	return ret;
 }

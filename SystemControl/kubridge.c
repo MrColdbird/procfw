@@ -85,7 +85,7 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 	u32 k1;
 
 	k1 = pspSdkSetK1(0);
-	ret = sceKernelSetDdrMemoryProtection(addr, size, prot);
+	ret = sctrlKernelSetDdrMemoryProtection(addr, size, prot);
 	pspSdkSetK1(k1);
 
 	return ret;

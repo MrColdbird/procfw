@@ -15,9 +15,6 @@
 #include "strsafe.h"
 #include "systemctrl_patch_offset.h"
 
-#define FW_635 0x06030510
-#define FW_620 0x06020010
-
 extern int *InitForKernel_040C934B(void);
 extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);

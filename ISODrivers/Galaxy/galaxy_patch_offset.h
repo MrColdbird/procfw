@@ -1,6 +1,8 @@
 #ifndef GALAXY_PATCH_OFFSET_H
 #define GALAXY_PATCH_OFFSET_H
 
+#include "utils.h"
+
 typedef struct _PatchOffset {
 	u32 fw_version;
 	u32 StoreFd;

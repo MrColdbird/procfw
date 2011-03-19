@@ -2,7 +2,7 @@
 #include "vshctrl_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.vshctrl_patch = {
 		.sceDisplaySetHoldMode = 0x00005618,
 		.sceDisplaySetHoldModeCall = 0x00001A14,

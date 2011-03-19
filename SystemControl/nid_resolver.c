@@ -313,11 +313,11 @@ void setup_nid_resolver(void)
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUserCall);
 
 	switch(psp_fw_version) {
-		case 0x06030510:
+		case FW_635:
 			nid_fix = nid_635_fix;
 			nid_fix_size = nid_635_fix_size;
 			break;
-		case 0x06020010:
+		case FW_620:
 			nid_fix = nid_620_fix;
 			nid_fix_size = nid_620_fix_size;
 			break;

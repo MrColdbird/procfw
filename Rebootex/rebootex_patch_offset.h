@@ -1,6 +1,8 @@
 #ifndef REBOOTEX_PATCH_OFFSET_H
 #define REBOOTEX_PATCH_OFFSET_H
 
+#include "utils.h"
+
 struct LoadExecPatch {
 	u32 LoadRebootCall;
 	u32 RebootJump;

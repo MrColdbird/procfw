@@ -199,10 +199,10 @@ int install_cfw(void)
 		sceIoRemove(g_old_cfw_files[i]);
 	}
 
-	if(psp_fw_version == 0x06030510) {
+	if(psp_fw_version == FW_635) {
 		g_file_lists[4].buf = march33;
 		g_file_lists[4].size = &size_march33;
-	} else if (psp_fw_version == 0x06020010) {
+	} else if (psp_fw_version == FW_620) {
 		g_file_lists[4].buf = march33_620;
 		g_file_lists[4].size = &size_march33_620;
 	}
@@ -310,7 +310,7 @@ int main(int argc, char *argv[])
 	pspDebugScreenInit();
 	psp_fw_version = sceKernelDevkitVersion();
 
-	if (psp_fw_version != 0x06030510 && psp_fw_version != 0x06020010) {
+	if (psp_fw_version != FW_635 && psp_fw_version != FW_620) {
 		printf("Sorry. This program requires 6.20/6.35.\n");
 		goto exit;
 	}

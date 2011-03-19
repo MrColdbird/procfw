@@ -2,6 +2,7 @@
 #define REBOOTEX_BIN_PATCH_OFFSET_H
 
 #include <pspsdk.h>
+#include "utils.h"
 
 struct RebootexPatch {
 	u32 sceBootLfatOpen;
@@ -42,7 +43,7 @@ typedef struct _PatchOffset {
 extern PatchOffset *g_offs;
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.iCacheFlushAll = 0x00000938,
 	.rebootex_patch_01g = {
 		.sceBootLfatOpen = 0x00008624,

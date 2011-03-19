@@ -22,6 +22,7 @@ PatchOffset g_635_offsets = {
 		.RifCompareCheck = 0x000203D4,
 		.RifTypeCheck = 0x000203E8,
 		.RifNpDRMCheck = 0x0002042C,
+		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
 	},
 	.msvideo_main_patch = {
 		.checks = {
@@ -76,6 +77,7 @@ PatchOffset g_620_offsets = {
 		.RifCompareCheck = 0x0001EC34,
 		.RifTypeCheck = 0x0001EC48,
 		.RifNpDRMCheck = 0x0001EC8C,
+		.sceCtrlReadBufferPositiveNID = 0xD073ECA4,
 	},
 	.msvideo_main_patch = {
 		.checks = {

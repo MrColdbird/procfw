@@ -9,6 +9,9 @@
 #include "../Rebootex_bin/rebootex.h"
 #include "rebootex_patch_offset.h"
 
+#define FW_635 0x06030510
+#define FW_620 0x06020010
+
 u32 psp_model;
 u32 psp_fw_version;
 
@@ -20,20 +23,23 @@ extern SceModule* sceKernelFindModuleByName_620(char *modname);
 
 static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 
-static u32 sctrlKernelGetModel(void)
+u32 sctrlKernelGetModel(void)
 {
-	u32 model;
+	u32 model = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			model = sceKernelGetModel();
+			break;
+		case FW_620:
+			model = sceKernelGetModel_620();
+			break;
+	};
    
-	model = sceKernelGetModel_620();
-
-	if(model == 0x8002013A) {
-		model = sceKernelGetModel();
-	}
-
 	return model;
 }
 
-static u32 sctrlKernelDevkitVersion(void)
+u32 sctrlKernelDevkitVersion(void)
 {
 	u32 fw_version;
    
@@ -46,15 +52,18 @@ static u32 sctrlKernelDevkitVersion(void)
 	return fw_version;
 }
 
-static SceModule* sctrlKernelFindModuleByName(char *modname)
+SceModule* sctrlKernelFindModuleByName(char *modname)
 {
-	SceModule *mod;
+	SceModule *mod = NULL;
 
-	mod = sceKernelFindModuleByName_620(modname);
-
-	if((u32)mod == 0x8002013A) {
-		mod = sceKernelFindModuleByName(modname);
-	}
+	switch(psp_fw_version) {
+		case FW_635:
+			mod = sceKernelFindModuleByName(modname);
+			break;
+		case FW_620:
+			mod = sceKernelFindModuleByName_620(modname);
+			break;
+	};
 
 	return mod;
 }
@@ -136,9 +145,9 @@ int module_start(SceSize args, void* argp)
 {
 	int thid;
 
-	psp_model = sctrlKernelGetModel();
 	psp_fw_version = sctrlKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
+	psp_model = sctrlKernelGetModel();
 
 	thid = sceKernelCreateThread("fastRecovery", main_thread, 0x1A, 0x1000, 0, NULL);
 

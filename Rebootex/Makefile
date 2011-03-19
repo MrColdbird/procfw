@@ -1,6 +1,3 @@
-release: all
-	psp-fixup-imports -m $(PSP_FW_VERSION)mapfile.txt $(TARGET).prx
-
 TARGET = Rebootex
 OBJS = main.o rebootex_patch_offset.o ../Common/utils.o imports.o
 

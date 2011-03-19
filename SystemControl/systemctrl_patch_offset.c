@@ -54,7 +54,6 @@ PatchOffset g_635_offsets = {
 		.sctrlHENFindDriver = 0x00002A44,
 		.sctrlKernelSetUMDEmuFile = 0x000099B8,
 		.sctrlKernelSetInitFileName = 0x000099B4,
-		.sceKernelLoadExecVSHEf2NID = 0xD35D6403,
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00007004,
@@ -141,6 +140,8 @@ PatchOffset g_635_offsets = {
 		.LoaderCoreUndo1Call3 = 0x00005D90,
 		.LoaderCoreUndo2Call1 = 0x000041A4,
 		.LoaderCoreUndo2Call2 = 0x00005CA4,
+		.memlmd_323366CA_NID = 0x3F2AC9C6,
+		.memlmd_7CF1CD3E_NID = 0xE42AFE2E,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,

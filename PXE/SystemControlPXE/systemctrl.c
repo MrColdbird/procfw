@@ -12,9 +12,12 @@
 #include "printk.h"
 #include "syspatch.h"
 
+extern u32 sceKernelGetModel_620(void);
+extern u32 sceKernelDevkitVersion_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern SceModule* sceKernelFindModuleByName_620(char *modname);
-extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelExitVSH(struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -24,7 +27,12 @@ int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 	int ret;
 
 	k1 = pspSdkSetK1(0);
-	ret = LoadExecForKernel_5AA1A6D2(param);
+	ret = sceKernelExitVSH_620(param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelExitVSH(param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -87,6 +95,19 @@ STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 	g_on_module_start = (void*)(((u32)new_handler) | 0x80000000);
 
 	return on_module_start;
+}
+
+u32 sctrlKernelGetModel(void)
+{
+	u32 model;
+   
+	model = sceKernelGetModel_620();
+
+	if(model == 0x8002013A) {
+		model = sceKernelGetModel();
+	}
+
+	return model;
 }
 
 u32 sctrlKernelDevkitVersion(void)

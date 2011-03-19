@@ -25,6 +25,6 @@ SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option
 
 int kuKernelGetModel(void)
 {
-	return sceKernelGetModel();
+	return sctrlKernelGetModel();
 }
 

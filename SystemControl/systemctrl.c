@@ -18,6 +18,17 @@ extern int *InitForKernel_040C934B(void);
 extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern SceModule* sceKernelFindModuleByName_620(char *modname);
+extern int sceKernelExitVSH(struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHDisc_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHDiscUpdater_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHMs1_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHMs2_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHEf2_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHMs3_620(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHMs3(const char *file, struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelLoadExecVSHMs4_620(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -38,11 +49,14 @@ int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelExitVSHVSH)(struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelExitVSHVSH = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0xA3D5E142));
-	ret = (*sceKernelExitVSHVSH)(param);
+	ret = sceKernelExitVSH_620(param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelExitVSH(param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -52,11 +66,14 @@ int sctrlKernelLoadExecVSHDisc(const char *file, struct SceKernelLoadExecVSHPara
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHDisc)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHDisc = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x1B97BDB3));
-	ret = (*sceKernelLoadExecVSHDisc)(file, param);
+	ret = sceKernelLoadExecVSHDisc_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHDisc(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -66,11 +83,14 @@ int sctrlKernelLoadExecVSHDiscUpdater(const char *file, struct SceKernelLoadExec
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHDiscUpdater)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHDiscUpdater = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x821BE114));
-	ret = (*sceKernelLoadExecVSHDiscUpdater)(file, param);
+	ret = sceKernelLoadExecVSHDiscUpdater_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHDiscUpdater(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -80,11 +100,14 @@ int sctrlKernelLoadExecVSHMs1(const char *file, struct SceKernelLoadExecVSHParam
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHMs1)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHMs1 = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x31DF42BF));
-	ret = (*sceKernelLoadExecVSHMs1)(file, param);
+	ret = sceKernelLoadExecVSHMs1_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHMs1(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -94,11 +117,14 @@ int sctrlKernelLoadExecVSHMs2(const char *file, struct SceKernelLoadExecVSHParam
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHMs2)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHMs2 = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x28D0D249));
-	ret = (*sceKernelLoadExecVSHMs2)(file, param);
+	ret = sceKernelLoadExecVSHMs2_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHMs2(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -108,12 +134,15 @@ int sctrlKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSHParam
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHEf2)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
 
-	sceKernelLoadExecVSHEf2 = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", g_offs->systemctrl_export_patch.sceKernelLoadExecVSHEf2NID));
-	ret = (*sceKernelLoadExecVSHEf2)(file, param);
+	ret = sceKernelLoadExecVSHEf2_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHEf2(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -123,11 +152,14 @@ int sctrlKernelLoadExecVSHMs3(const char *file, struct SceKernelLoadExecVSHParam
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHMs3)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHMs3 = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x70901231));
-	ret = (*sceKernelLoadExecVSHMs3)(file, param);
+	ret = sceKernelLoadExecVSHMs3_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHMs3(file, param);
+	}
+
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -137,11 +169,14 @@ int sctrlKernelLoadExecVSHMs4(const char *file, struct SceKernelLoadExecVSHParam
 {
 	u32 k1;
 	int ret;
-	int (*sceKernelLoadExecVSHMs4)(const char *file, struct SceKernelLoadExecVSHParam *param);
 
 	k1 = pspSdkSetK1(0);
-	sceKernelLoadExecVSHMs4 = (void*)(sctrlHENFindFunction("sceLoadExec", "LoadExecForKernel", 0x061D9514));
-	ret = (*sceKernelLoadExecVSHMs4)(file, param);
+	ret = sceKernelLoadExecVSHMs4_620(file, param);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelLoadExecVSHMs4(file, param);
+	}
+	
 	pspSdkSetK1(k1);
 
 	return ret;

@@ -13,6 +13,8 @@
 #include "printk.h"
 #include "syspatch.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
+#include "systemctrl_pxe_patch_offset.h"
 
 char installerpath[256];
 
@@ -50,8 +52,8 @@ int installer_thread(SceSize args, void * argp)
 void patch_vsh_module(u32 text_addr)
 {
 	//force module start error + unload
-	_sw(0x03E00008, text_addr + 0xF570);
-	_sw(0x24020001, text_addr + 0xF574);
+	_sw(0x03E00008, text_addr + g_pxe_offs->vsh_module_patch.module_start);
+	_sw(0x24020001, text_addr + g_pxe_offs->vsh_module_patch.module_start + 4);
 
 	//spawn installer thread (to avoid modulemgr is busy error)
 	SceUID thid = sceKernelCreateThread("installer_thread", installer_thread, 0x1A, 0x2000, 0, NULL);
@@ -92,7 +94,7 @@ void patch_sceLoadExec(void)
 	SceModule2 * loadexec = (SceModule2*)sctrlKernelFindModuleByName("sceLoadExec");
 
 	//allow all user levels to call sceKernelExitVSHVSH (needed for installer reboot)
-	_sw(0x10000008, loadexec->text_addr + 0x168C);
-	_sw(0, loadexec->text_addr + 0x16C0);
+	_sw(0x10000008, loadexec->text_addr + g_offs->loadexec_patch_other.sceKernelExitVSHVSHCheck1);
+	_sw(NOP, loadexec->text_addr + g_offs->loadexec_patch_other.sceKernelExitVSHVSHCheck1);
 }
 

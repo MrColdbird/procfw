@@ -28,6 +28,8 @@ char installerpath[256];
 //psp model
 int model = 0;
 
+u32 fw_version = 0;
+
 int dump_kmem = 0;
 
 //load reboot function
@@ -55,6 +57,9 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 
 	//store rebootex length
 	_sw(size_rebootex, 0x88FB0004);
+
+	//store fw version
+	_sw(fw_version, 0x88FB0008);
 
 	//copy installer path
 	memcpy((char *)0x88FB0100, installerpath, sizeof(installerpath));
@@ -440,7 +445,6 @@ int main(int argc, char * argv[])
 	//result
 	int result = 0;
 	u32 power_buf_address = 0;
-	u32 fw_version;
 
 	pspDebugScreenInit();
 

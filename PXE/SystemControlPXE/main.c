@@ -38,6 +38,7 @@ int module_start(SceSize args, void* argp)
 
 	psp_fw_version = sctrlKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
+	setup_pxe_patch_offset_table(psp_fw_version);
 
 	//link to log file
 	printk_init("ms0:/pxesysctrl.txt");

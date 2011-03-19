@@ -88,7 +88,7 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	int version = *(int *)REBOOTEX_CONFIG_START;
 	struct RebootexPatch *patch;
 
-	setup_patch_offset_table(*(int*)(REBOOTEX_CONFIG_START+0x00000008));
+	setup_patch_offset_table(*(int*)(REBOOTEX_CONFIG_START+0x00000020));
 
 	//32mb psp
 	if(version == 0)

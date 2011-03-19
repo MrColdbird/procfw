@@ -107,7 +107,7 @@ static int _sceDisplaySetHoldMode(int a0)
 
 static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
 {
-	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", 0x9F3038AC, _sceCtrlReadBufferPositive, 0);
+	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", g_offs->vshctrl_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
 }
 
 static void patch_Gameboot(SceModule2 *mod)

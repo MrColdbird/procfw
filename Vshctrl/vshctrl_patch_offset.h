@@ -22,6 +22,7 @@ struct VshctrlPatch {
 	u32 RifCompareCheck;
 	u32 RifTypeCheck;
 	u32 RifNpDRMCheck;
+	u32 sceCtrlReadBufferPositiveNID;
 };
 
 struct MsVideoMainPatch {

@@ -24,6 +24,10 @@ extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
 extern u32 sceKernelQuerySystemCall(void *func);
 extern u32 sceKernelQuerySystemCall_620(void *func);
 extern SceModule* sceKernelFindModuleByUID_620(SceUID modid);
+extern int sceKernelCheckExecFile(unsigned char * buffer, int * check);
+extern int sceKernelCheckExecFile_620(unsigned char * buffer, int * check);	
+extern int sceKernelLoadModule_620(const char *path, int flags, SceKernelLMOption *option);
+extern int sceKernelStartModule_620(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 
 extern u32 psp_fw_version;
 extern int (*g_on_module_start)(SceModule2*);
@@ -187,5 +191,37 @@ int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
 			break;
 	}
 
+	return ret;
+}
+
+int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelLoadModule(path, flags, option);
+			break;
+		case FW_620:
+			ret = sceKernelLoadModule_620(path, flags, option);
+			break;
+	}
+	
+	return ret;
+}
+
+int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelStartModule(modid, argsize, argp, status, option);
+			break;
+		case FW_620:
+			ret = sceKernelStartModule_620(modid, argsize, argp, status, option);
+			break;
+	}
+	
 	return ret;
 }

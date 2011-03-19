@@ -318,5 +318,7 @@ u32 sctrlKernelGetModel(void);
 u32 sctrlKernelDevkitVersion(void);
 SceModule* sctrlKernelFindModuleByName(char *modname);
 int sctrlKernelCheckExecFile(unsigned char * buffer, int * check);
+int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option);
+int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 
 #endif

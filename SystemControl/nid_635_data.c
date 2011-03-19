@@ -255,8 +255,8 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0xB49FFB9E, 0x0208316C, }, // sceKernelRebootBeforeForKernel
 	{ 0xF0A26395, 0x8B19C181, }, // sceKernelGetModuleId
 	{ 0xD8B73127, 0xAD633D71, }, // sceKernelGetModuleIdByAddress
+	{ 0x6DE9FF11, 0x32292450, }, // sceKernelLoadModuleWithApitype2
 
-	{ 0x6DE9FF11, 0x32292450, },
 	{ 0x896C15B6, 0xD1F71B4D, },
 	{ 0x92EDEBD0, 0x057BEB8E, },
 	{ 0x6723BBFF, 0xC350D8D6, },

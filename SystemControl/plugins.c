@@ -48,7 +48,7 @@ int load_start_module(char *path)
 	SceUID modid;
 	int status;
 
-	modid = sceKernelLoadModule(path, 0, NULL);
+	modid = sctrlKernelLoadModule(path, 0, NULL);
 
 	if(modid < 0) {
 		if(0 == strnicmp(path, "ef", 2)) {
@@ -57,7 +57,7 @@ int load_start_module(char *path)
 			strncpy(path, "ef", 2);
 		}
 
-		modid = sceKernelLoadModule(path, 0, NULL);
+		modid = sctrlKernelLoadModule(path, 0, NULL);
 	}
 
 	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
@@ -65,7 +65,7 @@ int load_start_module(char *path)
 	}
 
 	status = 0;
-	ret = sceKernelStartModule(modid, strlen(path) + 1, path, &status, NULL);
+	ret = sctrlKernelStartModule(modid, strlen(path) + 1, path, &status, NULL);
 	printk("%s: %s, UID: %08X, Status: 0x%08X\n", __func__, path, modid, status);
 
 	return ret;

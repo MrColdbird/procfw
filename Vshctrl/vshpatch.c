@@ -255,11 +255,8 @@ static void patch_vsh_module(SceModule2 * mod)
 	_sw(NOP, mod->text_addr + g_offs->vsh_module_patch.checks[1]);
 	_sw(NOP, mod->text_addr + g_offs->vsh_module_patch.checks[2]);
 
-	//loadexec calls to vsh_bridge
-	u32 nids[2] = { /* ms0 */ 0x59BBA567, /* ef0 */ 0xD4BA5699 };
-
-	//hook imports
-	int i = 0; for(; i < NELEMS(nids); i++) hook_import_bynid((SceModule *)mod, "sceVshBridge", nids[i], gameloadexec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID1, gameloadexec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID2, gameloadexec, 1);
 }
 
 static void hook_iso_file_io(void)

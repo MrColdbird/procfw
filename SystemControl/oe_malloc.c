@@ -8,6 +8,21 @@
 
 static SceUID heapid = -1;
 
+extern SceUID sceKernelCreateHeap_620(SceUID partitionid, SceSize size, int unk, const char *name);
+
+SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name)
+{
+	SceUID ret;
+
+	ret = sceKernelCreateHeap_620(partitionid, size, unk, name);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelCreateHeap(partitionid, size, unk, name);
+	}
+
+	return ret;
+}
+
 int oe_mallocinit()
 {
 	int size;
@@ -27,7 +42,7 @@ int oe_mallocinit()
 		return 0;
 	}
 	
-	heapid = sceKernelCreateHeap(PSP_MEMORY_PARTITION_KERNEL, size, 1, "SystemCtrlHeap");
+	heapid = sctrlKernelCreateHeap(PSP_MEMORY_PARTITION_KERNEL, size, 1, "SystemCtrlHeap");
 
 	printk("%s: 0x%08X heap size %d\n", __func__, heapid, size);
 

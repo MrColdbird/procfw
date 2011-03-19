@@ -31,9 +31,6 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	//store psp model
 	_sw(psp_model, 0x88FB0000);
 
-	//store fw version
-	_sw(psp_fw_version, 0x88FB0008);
-
 	//store custom partition size
 	if(g_p2_size != 24 || g_p9_size != 24) {
 		//store partition 2 length
@@ -48,7 +45,10 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	_sw((u32)g_insert_module_size, 0x88FB0018);
 	_sw((u32)g_insert_module_flags, 0x88FB001C);
 	
-	memcpy((void*)0x88FB0020, &rebootex_conf, sizeof(rebootex_conf));
+	//store fw version
+	_sw(psp_fw_version, 0x88FB0020);
+	
+	memcpy((void*)0x88FB0024, &rebootex_conf, sizeof(rebootex_conf));
 
 	memset((void*)0x88FB0100, 0, 256);
 	strcpy_s((char*)0x88FB0100, 256, sctrlSEGetUmdFile());

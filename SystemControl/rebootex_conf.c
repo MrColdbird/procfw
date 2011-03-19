@@ -23,7 +23,7 @@ static void load_default_rebootex_config()
 
 void load_rebootex_config(void)
 {
-	rebootex_config *conf = (rebootex_config*)(0x88FB0020);
+	rebootex_config *conf = (rebootex_config*)(0x88FB0024);
 
 	load_default_rebootex_config();
 

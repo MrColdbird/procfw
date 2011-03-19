@@ -102,7 +102,7 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 	_sw(size_rebootex, 0x88FB0004);
 
 	//store fw version
-	_sw(psp_fw_version, 0x88FB0008);
+	_sw(psp_fw_version, 0x88FB0020);
 
 	//copy installer path
 	memcpy((char *)0x88FB0100, installerpath, sizeof(installerpath));

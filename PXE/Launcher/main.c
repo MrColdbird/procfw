@@ -4,7 +4,6 @@
 #include <pspsdk.h>
 #include <pspiofilemgr.h>
 #include <psputility.h>
-#include <psputility_htmlviewer.h>
 #include <psploadexec.h>
 #include <psputils.h>
 #include <psputilsforkernel.h>
@@ -336,11 +335,11 @@ static void patch_power_arg(int cbid, u32 power_buf_address)
 		scePowerRegisterCallbackPrivate(slot, cbid);
 
 		if (*((u32*)0x08900008) == 0) {
-			printk("%s: power_arg noped\r\n", __func__);
+			printk("%s: power_arg noped\n", __func__);
 			break;
 		}
 
-		printk("Retrying...\r\n");
+		printk("Retrying...\n");
 		sceKernelDelayThread(1000000);
 	}
 }
@@ -380,7 +379,7 @@ void input_dump_kmem(void)
 
 	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
 		dump_kmem = 1;
-		pspDebugScreenPrintf("Kernel memory will be dumped into ms0:/KMEM.BIN and ms0:/SEED.BIN\r\n");
+		pspDebugScreenPrintf("Kernel memory will be dumped into ms0:/KMEM.BIN and ms0:/SEED.BIN\n");
 	}
 }
 
@@ -509,7 +508,7 @@ int main(int argc, char * argv[])
 	int cbid = -1;
 
 	printk_init("ms0:/launcher.txt");
-	printk("Hello exploit\r\n");
+	printk("Hello exploit\n");
 
 	if(sctrlHENGetVersion() >= 0) {
 		install_in_cfw();
@@ -530,13 +529,13 @@ int main(int argc, char * argv[])
 		cbid = sceKernelCreateCallback("", NULL, NULL);
 	}
 
-	printk("Got a CBID: 0x%08X\r\n", cbid);
+	printk("Got a CBID: 0x%08X\n", cbid);
 
 	//Davee $v1 trick, $v1 would leak the power_buf_address when called on an registered slot 0
 	scePowerRegisterCallbackPrivate(0, cbid);
 	power_buf_address = get_power_address(cbid);
 	scePowerUnregisterCallbackPrivate(0);
-	printk("power_buf_address 0x%08X\r\n", power_buf_address);
+	printk("power_buf_address 0x%08X\n", power_buf_address);
 
 	if(psp_fw_version == FW_635 && !is_pspgo()) {
 		patch_power_arg(cbid, power_buf_address);
@@ -567,9 +566,10 @@ int main(int argc, char * argv[])
 	if(psp_fw_version == FW_635) {
 		result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
 	} else if (psp_fw_version == FW_620) {
-		u32 entry_addr;
+		u32 kernel_entry, entry_addr;
 
-		entry_addr = ((u32) &kernel_permission_call) - 16;
+		kernel_entry = (u32) &kernel_permission_call;
+		entry_addr = ((u32) &kernel_entry) - 16;
 		result = sceKernelPowerLock(0, ((u32) &entry_addr) - 0x4234);
 	}
 
@@ -593,7 +593,7 @@ int main(int argc, char * argv[])
 		}
 	}
 
-	printk("SysMemUserForUser_D8DE5C1E returns 0x%08X\r\n", result);
+	printk("exploit -> 0x%08X\n", result);
 
 exit:
 	//trigger reboot

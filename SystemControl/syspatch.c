@@ -19,13 +19,11 @@ static STMOD_HANDLER previous;
 static void patch_sceWlan_Driver(u32 text_addr);
 static void patch_scePower_Service(u32 text_addr);
 
-extern int sceKernelGetSystemStatus(void);
-
 static inline void set_clock(void)
 {
 	int key_config, ret;
 
-	ret = sceKernelGetSystemStatus();
+	ret = sctrlKernelGetSystemStatus();
    
 	// status becomes 0x00020000 after init_file loads
 	if (ret != 0x00020000) {

@@ -82,9 +82,9 @@ static int display_meminfo(void)
 		memset(&info, 0, sizeof(info));
 		info.size = sizeof(info);
 
-		if(sceKernelQueryMemoryPartitionInfo(i, &info) == 0) {
-			free = sceKernelPartitionMaxFreeMemSize(i);
-			total = sceKernelPartitionTotalFreeMemSize(i);
+		if(sctrlKernelQueryMemoryPartitionInfo(i, &info) == 0) {
+			free = sctrlKernelPartitionMaxFreeMemSize(i);
+			total = sctrlKernelPartitionTotalFreeMemSize(i);
 			printk("%-2d | 0x%08X | %8d | %9d | %9d | %04X |\n", 
 					i, info.startaddr, info.memsize, total, free, info.attr);
 		}

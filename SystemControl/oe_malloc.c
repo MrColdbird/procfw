@@ -5,23 +5,9 @@
 #include <malloc.h>
 #include "utils.h"
 #include "printk.h"
+#include "main.h"
 
 static SceUID heapid = -1;
-
-extern SceUID sceKernelCreateHeap_620(SceUID partitionid, SceSize size, int unk, const char *name);
-
-SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name)
-{
-	SceUID ret;
-
-	ret = sceKernelCreateHeap_620(partitionid, size, unk, name);
-
-	if(ret == 0x8002013A) {
-		ret = sceKernelCreateHeap(partitionid, size, unk, name);
-	}
-
-	return ret;
-}
 
 int oe_mallocinit()
 {
@@ -53,7 +39,7 @@ void *oe_malloc(size_t size)
 {
 	void *p;
 
-	p = sceKernelAllocHeapMemory(heapid, size);
+	p = sctrlKernelAllocHeapMemory(heapid, size);
 //	printk("%s: %d@0x%08X\n", __func__, size, (u32)p);
 
 	return p;
@@ -61,11 +47,11 @@ void *oe_malloc(size_t size)
 
 void oe_free(void *p)
 {
-	sceKernelFreeHeapMemory(heapid, p);
+	sctrlKernelFreeHeapMemory(heapid, p);
 }
 
 int oe_mallocterminate()
 {
-	return sceKernelDeleteHeap(heapid);
+	return sctrlKernelDeleteHeap(heapid);
 }
 

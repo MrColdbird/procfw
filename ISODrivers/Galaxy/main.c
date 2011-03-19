@@ -20,8 +20,7 @@ PSP_MODULE_INFO("M33GalaxyController", 0x1006, 1, 1);
 
 extern int get_total_block(void);
 extern int clear_cache(void);
-extern int SysMemForKernel_9F154FA1(void *unk0);
-extern int SysMemForKernel_B00D1EC2(void *unk0);
+extern int SysMemForKernel_C7E57B9C(void *unk0);
 
 u32 psp_fw_version;
 
@@ -237,11 +236,7 @@ int sub_00000588(void)
 	}
 
 	clear_cache();
-
-	if(psp_fw_version == FW_635)
-		SysMemForKernel_9F154FA1(g_umddata);
-	else if(psp_fw_version == FW_620)
-		SysMemForKernel_B00D1EC2(g_umddata);
+	SysMemForKernel_C7E57B9C(g_umddata);
 
 	return 0;
 }

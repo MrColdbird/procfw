@@ -23,18 +23,19 @@ struct RebootexPatch {
 };
 
 struct LoadCorePatch {
+	u32 DecryptPSP;
 	u32 sceKernelCheckExecFile;
-	u32 memlmd_3F2AC9C6;
+	u32 DecryptPSPCall1;
+	u32 DecryptPSPCall2;
 	u32 sceKernelCheckExecFileCall1;
 	u32 sceKernelCheckExecFileCall2;
-	u32 memlmd_3F2AC9C6_call1;
-	u32 memlmd_3F2AC9C6_call2;
-	u32 memlmd_3F2AC9C6_call3;
+	u32 sceKernelCheckExecFileCall3;
 };
 
 typedef struct _PatchOffset {
 	u32 fw_version;
 	u32 iCacheFlushAll;
+	u32 dCacheFlushAll;
 	struct RebootexPatch rebootex_patch_01g;
 	struct RebootexPatch rebootex_patch_other;
 	struct LoadCorePatch loadcore_patch;
@@ -44,7 +45,8 @@ extern PatchOffset *g_offs;
 
 PatchOffset g_635_offsets = {
 	.fw_version = FW_635,
-	.iCacheFlushAll = 0x00000938,
+	.iCacheFlushAll = 0x000001E4,
+	.dCacheFlushAll = 0x00000938,
 	.rebootex_patch_01g = {
 		.sceBootLfatOpen = 0x00008624,
 		.sceBootLfatRead = 0x00008798,
@@ -80,13 +82,62 @@ PatchOffset g_635_offsets = {
 		.UnpackBootConfigBufferAddress = 0x000073F8,
 	},
 	.loadcore_patch = {
-		.sceKernelCheckExecFile = 0x00007B08 - 0x00000BBC,
-		.memlmd_3F2AC9C6 = 0x00007AE8 - 0x00000BBC,
-		.sceKernelCheckExecFileCall1 = 0x000041A4 - 0x00000BBC,
-		.sceKernelCheckExecFileCall2 = 0x00005CA4 - 0x00000BBC,
-		.memlmd_3F2AC9C6_call1 = 0x00005CC8 - 0x00000BBC,
-		.memlmd_3F2AC9C6_call2 = 0x00005CF8 - 0x00000BBC,
-		.memlmd_3F2AC9C6_call3 = 0x00005D90 - 0x00000BBC,
+		.DecryptPSP = 0x00007B08 - 0x00000BBC,
+		.sceKernelCheckExecFile = 0x00007AE8 - 0x00000BBC,
+		.DecryptPSPCall1 = 0x000041A4 - 0x00000BBC,
+		.DecryptPSPCall2 = 0x00005CA4 - 0x00000BBC,
+		.sceKernelCheckExecFileCall1 = 0x00005CC8 - 0x00000BBC,
+		.sceKernelCheckExecFileCall2 = 0x00005CF8 - 0x00000BBC,
+		.sceKernelCheckExecFileCall3 = 0x00005D90 - 0x00000BBC,
+	},
+};
+
+PatchOffset g_620_offsets = {
+	.fw_version = FW_620,
+	.iCacheFlushAll = 0x000001E4,
+	.dCacheFlushAll = 0x00000938,
+	.rebootex_patch_01g = {
+		.sceBootLfatOpen = 0x000082AC,
+		.sceBootLfatRead = 0x00008420,
+		.sceBootLfatClose = 0x000083C4,
+		.UnpackBootConfig = 0x0000565C,
+		.sceBootLfatOpenCall = 0x000026DC,
+		.sceBootLfatReadCall = 0x0000274C,
+		.sceBootLfatCloseCall = 0x00002778,
+		.UnpackBootConfigCall = 0x000070F0,
+		.RebootexCheck1 = 0x00003798,
+		.RebootexCheck2 = 0x000026D4,
+		.RebootexCheck3 = 0x00002728,
+		.RebootexCheck4 = 0x00002740,
+		.RebootexCheck5 = 0x00007388,
+		.LoadCoreModuleStartCall = 0x00005554,
+		.UnpackBootConfigBufferAddress = 0x000070CC,
+	},
+	.rebootex_patch_other = {
+		.sceBootLfatOpen = 0x00008374,
+		.sceBootLfatRead = 0x000084E8,
+		.sceBootLfatClose = 0x0000848C,
+		.UnpackBootConfig = 0x00005724,
+		.sceBootLfatOpenCall = 0x000027A4,
+		.sceBootLfatReadCall = 0x00002814,
+		.sceBootLfatCloseCall = 0x00002840,
+		.UnpackBootConfigCall = 0x000071B8,
+		.RebootexCheck1 = 0x00003860,
+		.RebootexCheck2 = 0x0000279C,
+		.RebootexCheck3 = 0x000027F0,
+		.RebootexCheck4 = 0x00002808,
+		.RebootexCheck5 = 0x00007450,
+		.LoadCoreModuleStartCall = 0x0000561C,
+		.UnpackBootConfigBufferAddress = 0x00007194,
+	},
+	.loadcore_patch = {
+		.DecryptPSP = 0x00008374 - 0x00000BC4,
+		.sceKernelCheckExecFile = 0x0000835C - 0x00000BC4,
+		.DecryptPSPCall1 = 0x000041A4 - 0x00000BC4,
+		.DecryptPSPCall2 = 0x000068F0 - 0x00000BC4,
+		.sceKernelCheckExecFileCall1 = 0x00006914 - 0x00000BC4,
+		.sceKernelCheckExecFileCall2 = 0x00006944 - 0x00000BC4,
+		.sceKernelCheckExecFileCall3 = 0x000069DC - 0x00000BC4,
 	},
 };
 
@@ -96,6 +147,8 @@ static inline void setup_patch_offset_table(u32 fw_version)
 {
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;
+	} else if(fw_version == g_620_offsets.fw_version) {
+		g_offs = &g_620_offsets;
 	}
 }
 

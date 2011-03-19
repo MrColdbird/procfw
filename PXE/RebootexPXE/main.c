@@ -44,8 +44,8 @@ int (* sceBootLfatClose)(void) = NULL;
 int (* UnpackBootConfig)(char * buffer, int length) = NULL;
 
 //loadcore functions
-int (* sceKernelCheckExecFile)(char * prx, unsigned int size, unsigned int * newsize) = 0;
-int (* memlmd_3F2AC9C6)(unsigned char * addr, void * arg2) = NULL;
+int (* DecryptPSP)(char * prx, unsigned int size, unsigned int * newsize) = 0;
+int (* sceKernelCheckExecFile)(unsigned char * addr, void * arg2) = NULL;
 
 //cache sync
 static inline int iCacheFlushAll(void)
@@ -70,8 +70,8 @@ int _sceBootLfatClose (void);
 int _UnpackBootConfig(char * buffer, int length);
 
 //loadcore replacements
-int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize);
-int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2);
+int _DecryptPSP(char * prx, unsigned int size, unsigned int * newsize);
+int _sceKernelCheckExecFile(unsigned char * addr, void * arg2);
 
 //patch functions
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *));
@@ -315,8 +315,7 @@ int _sceBootLfatClose(void)
 	return sceBootLfatClose();
 }
 
-// memlmd_E42AFE2E
-int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize)
+int _DecryptPSP(char * prx, unsigned int size, unsigned int * newsize)
 {
 	//check for gzip packed prx
 	if(*(unsigned int *)(prx + 0x130) == 0xC01DB15D)
@@ -335,10 +334,10 @@ int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsiz
 	}
 
 	//forward to original function
-	return sceKernelCheckExecFile(prx, size, newsize);
+	return DecryptPSP(prx, size, newsize);
 }
 
-int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
+int _sceKernelCheckExecFile(unsigned char * addr, void * arg2)
 {
 	//scan structure
 	//6.31 kernel modules use type 3 PRX... 0xd4~0x10C is zero padded
@@ -348,7 +347,7 @@ int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
 		if(addr[pos + 212])
 		{
 			//forward to unsign function?
-			return memlmd_3F2AC9C6(addr, arg2);
+			return sceKernelCheckExecFile(addr, arg2);
 		}
 	}
 
@@ -358,14 +357,14 @@ int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
 
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *))
 {
+	_sw((((int)(_DecryptPSP) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSPCall1);
+	_sw((((int)(_DecryptPSP) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSPCall2);
 	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall1);
 	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall2);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call1);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call2);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6_call3);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall3);
 
+	DecryptPSP = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSP);
 	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFile);
-	memlmd_3F2AC9C6 = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.memlmd_3F2AC9C6);
 
 	//flush instruction cache
 	iCacheFlushAll();

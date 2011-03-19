@@ -93,6 +93,6 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 
 int kuKernelGetModel(void)
 {
-	return sceKernelGetModel();
+	return sctrlKernelGetModel();
 }
 

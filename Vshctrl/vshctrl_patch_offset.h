@@ -31,6 +31,8 @@ struct MsVideoMainPatch {
 
 struct VshModulePatch {
 	u32 checks[3];
+	u32 loadexecNID1;
+	u32 loadexecNID2;
 };
 
 struct CustomUpdatePatch {

@@ -44,6 +44,8 @@ PatchOffset g_635_offsets = {
 			0x00011FD8,
 			0x00011FE0,
 		},
+		.loadexecNID1 = 0x59BBA567,
+		.loadexecNID2 = 0xD4BA5699,
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
@@ -99,6 +101,8 @@ PatchOffset g_620_offsets = {
 			0x00011A70,
 			0x00011A78,
 		},
+		.loadexecNID1 = 0x4ECCCDBC,
+		.loadexecNID2 = 0x2D5C9178,
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x0000819C,

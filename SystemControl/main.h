@@ -64,12 +64,6 @@ extern u32 g_p2_size;
 extern u32 g_p9_size;
 extern int g_high_memory_enabled;
 
-//for sctrlHENLoadModuleOnReboot
-extern char *g_insert_module_before;
-extern void *g_insert_module_binary;
-extern int g_insert_module_size;
-extern int g_insert_module_flags;
-
 int GetConfig(SEConfig *config);
 int SetConfig(SEConfig *config);
 void load_config(void);

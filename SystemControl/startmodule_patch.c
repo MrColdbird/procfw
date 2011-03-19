@@ -123,7 +123,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	}
 
 	if(!opnssmp_loaded) {
-		u32 key = sceKernelInitKeyConfig();
+		u32 key = sceKernelApplicationType();
 
 		if (key == PSP_INIT_KEYCONFIG_GAME) {
 			kernellibrary = (SceModule2*)sctrlKernelFindModuleByName("sceKernelLibrary");

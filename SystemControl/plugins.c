@@ -162,7 +162,7 @@ static void load_plugin(char * path)
 
 int load_plugins(void)
 {
-	unsigned int key = sceKernelInitKeyConfig();
+	unsigned int key = sceKernelApplicationType();
 
 	char * bootconf = NULL;
 

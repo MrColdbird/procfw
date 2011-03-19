@@ -98,6 +98,7 @@ int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option
 int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 int sctrlKernelUnloadModule(SceUID modid);
 SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
+int sceKernelApplicationType(void);
 
 extern SEConfig conf;
 

@@ -1,5 +1,5 @@
 TARGET = 635kernel
-OBJS = main.o imports.o syscall.o ../../Common/utils.o
+OBJS = main.o imports.o syscall.o launcher_patch_offset.o ../../Common/utils.o
 EXTRA_CLEAN = Rebootex_prx.h Installer.h
 
 all: $(OBJS)

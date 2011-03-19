@@ -135,7 +135,7 @@ void SetSpeed(int cpuspd, int busspd)
 	_scePowerSetClockFrequency = (void*)fp;
 	_scePowerSetClockFrequency(cpuspd, cpuspd, busspd);
 
-	if (sceKernelInitKeyConfig() == PSP_INIT_KEYCONFIG_VSH)
+	if (sceKernelApplicationType() == PSP_INIT_KEYCONFIG_VSH)
 		return;
 
 	for(i=0; i<NELEMS(g_power_func_redir); ++i) {

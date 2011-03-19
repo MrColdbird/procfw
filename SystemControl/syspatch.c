@@ -30,7 +30,7 @@ static inline void set_clock(void)
 		return;
 	}
 	
-	key_config = sceKernelInitKeyConfig();
+	key_config = sceKernelApplicationType();
 
 	if (key_config == PSP_INIT_KEYCONFIG_GAME ||
 			key_config == PSP_INIT_KEYCONFIG_POPS
@@ -56,7 +56,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
 		u32 key_config;
 
-		key_config = sceKernelInitKeyConfig();
+		key_config = sceKernelApplicationType();
 		
 		if (key_config == PSP_INIT_KEYCONFIG_GAME) {
 			if(PSP_1000 != psp_model) {

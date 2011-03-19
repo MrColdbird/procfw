@@ -61,8 +61,7 @@ int kuKernelInitFileName(char *initfilename)
 
 int kuKernelInitKeyConfig()
 {
-	// sceKernelApplicationType
-	return InitForKernel_7233B5BC();
+	return sceKernelApplicationType();
 }
 
 int kuKernelGetUserLevel(void)

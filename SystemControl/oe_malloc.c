@@ -14,7 +14,7 @@ int oe_mallocinit()
 	int size;
 	int key_config;
    
-	key_config = sceKernelInitKeyConfig();
+	key_config = sceKernelApplicationType();
 
 	if (key_config == PSP_INIT_KEYCONFIG_POPS) {
 		return 0;

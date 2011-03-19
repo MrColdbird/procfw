@@ -36,7 +36,7 @@ void patch_umdcache(u32 text_addr)
 {
 	int ret;
 
-	ret = sceKernelInitKeyConfig();
+	ret = sceKernelApplicationType();
 
 	if (ret != PSP_INIT_KEYCONFIG_GAME)
 		return;

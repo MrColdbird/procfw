@@ -34,7 +34,7 @@ typedef struct _rebootex_config {
 	u32 p9_size;
 	char *insert_module_before;
 	void *insert_module_binary;
-	void *insert_module_size;
+	u32 insert_module_size;
 	u32 insert_module_flags;
 	u32 psp_fw_version;
 	int iso_mode;

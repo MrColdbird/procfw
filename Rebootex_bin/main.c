@@ -55,19 +55,8 @@ int (* DecryptPSP)(char * prx, unsigned int size, unsigned int * newsize) = 0;
 int (* sceKernelCheckExecFile)(unsigned char * addr, void * arg2) = NULL;
 
 //cache sync
-static inline int iCacheFlushAll(void)
-{
-	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
-	
-	return (*_iCacheFlushAll)();
-}
-
-static inline int dCacheFlushAll(void)
-{
-	int (*_dCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->dCacheFlushAll);
-	
-	return (*_dCacheFlushAll)();
-}
+static inline int iCacheFlushAll(void);
+static inline int dCacheFlushAll(void);
 
 //helper functions
 int _strlen(char * string);
@@ -105,7 +94,7 @@ void ModifyPrxFlag(char *buffer, const char* modname, u32 flags);
 int MovePrx(char * buffer, char * insertbefore, const char * prxname, u32 flags);
 int GetPrxFlag(char *buffer, const char* modname, u32 *flag);
 
-//reboot replacement
+// NOTICE: main must be the FIRST soubroutine of Rebootex
 void main(int arg1, int arg2, int arg3, int arg4)
 {
 	struct RebootexPatch *patch;
@@ -168,6 +157,21 @@ void main(int arg1, int arg2, int arg3, int arg4)
 
 	//reboot psp
 	reboot(arg1, arg2, arg3, arg4);
+}
+
+//cache sync
+static inline int iCacheFlushAll(void)
+{
+	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
+	
+	return (*_iCacheFlushAll)();
+}
+
+static inline int dCacheFlushAll(void)
+{
+	int (*_dCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->dCacheFlushAll);
+	
+	return (*_dCacheFlushAll)();
 }
 
 void load_configure(void)

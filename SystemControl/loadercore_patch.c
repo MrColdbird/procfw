@@ -15,9 +15,6 @@
 #include "libs.h"
 #include "systemctrl_patch_offset.h"
 
-extern int sceKernelCheckExecFile(unsigned char * buffer, int * check);
-extern int sceKernelCheckExecFile_620(unsigned char * buffer, int * check);
-
 //original functions
 int (* ProbeExec1)(unsigned char * buffer, int * check) = NULL;
 int (* ProbeExec2)(unsigned char * buffer, int * check) = NULL;
@@ -117,9 +114,7 @@ int _sceKernelCheckExecFile(unsigned char * buffer, int * check)
 
 	//PatchExec1 isn't enough... :(
 	if(result != 0) {
-		//sceKernelCheckExecFile (LoadCoreForKernel_B0466E46)
-		//LoadCoreForKernel_01DB1EB3 in 6.30
-		int checkresult = sceKernelCheckExecFile(buffer, check);
+		int checkresult = sctrlKernelCheckExecFile(buffer, check);
 
 		//grab executable magic
 		unsigned int magic = *(unsigned int *)(buffer);

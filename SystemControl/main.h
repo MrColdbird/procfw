@@ -91,6 +91,9 @@ int sctrlKernelGetSystemStatus(void);
 int sctrlKernelQueryMemoryPartitionInfo(int pid, PspSysmemPartitionInfo *info);
 int sctrlKernelPartitionMaxFreeMemSize(int pid);
 int sctrlKernelPartitionTotalFreeMemSize(int pid);
+SceModule* sctrlKernelFindModuleByUID(SceUID modid);
+SceModule* sctrlKernelFindModuleByAddress(u32 address);
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check);
 
 extern SEConfig conf;
 

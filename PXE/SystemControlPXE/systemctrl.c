@@ -23,6 +23,7 @@ extern int sceKernelExitVSH(struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
 extern u32 sceKernelQuerySystemCall(void *func);
 extern u32 sceKernelQuerySystemCall_620(void *func);
+extern SceModule* sceKernelFindModuleByUID_620(SceUID modid);
 
 extern u32 psp_fw_version;
 extern int (*g_on_module_start)(SceModule2*);
@@ -173,3 +174,18 @@ int sctrlKernelQuerySystemCall(void *func_addr)
 	return ret;
 }
 
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelCheckExecFile(buffer, check);
+			break;
+		case FW_620:
+			ret = sceKernelCheckExecFile_620(buffer, check);
+			break;
+	}
+
+	return ret;
+}

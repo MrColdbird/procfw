@@ -93,7 +93,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	int ret;
 	SceModule2 *mod, *mediasync, *kernellibrary;
 
-	mod = (SceModule2*) sceKernelFindModuleByUID(modid);
+	mod = (SceModule2*) sctrlKernelFindModuleByUID(modid);
 
 	if(!plugin_loaded) {
 		mediasync = (SceModule2*)sctrlKernelFindModuleByName("sceMediaSync");

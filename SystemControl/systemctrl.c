@@ -45,6 +45,10 @@ extern int sceKernelPartitionMaxFreeMemSize_620(int pid);
 extern int sceKernelPartitionTotalFreeMemSize_620(int pid);
 extern u32 sceKernelQuerySystemCall(void *func);
 extern u32 sceKernelQuerySystemCall_620(void *func);
+extern SceModule* sceKernelFindModuleByUID_620(SceUID modid);
+extern SceModule* sceKernelFindModuleByAddress_620(u32 address);
+extern int sceKernelCheckExecFile(unsigned char * buffer, int * check);
+extern int sceKernelCheckExecFile_620(unsigned char * buffer, int * check);	
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -351,7 +355,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	pMod = sctrlKernelFindModuleByName(szMod);
 
 	if(!pMod) {
-		pMod = sceKernelFindModuleByAddress((u32)szMod);
+		pMod = sctrlKernelFindModuleByAddress((u32)szMod);
 
 		if (!pMod) {
 			printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, nid);
@@ -695,6 +699,54 @@ int sctrlKernelQuerySystemCall(void *func_addr)
 	};
 
 	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+SceModule* sctrlKernelFindModuleByUID(SceUID modid)
+{
+	SceModule *mod = NULL;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			mod = sceKernelFindModuleByUID(modid);
+			break;
+		case FW_620:
+			mod = sceKernelFindModuleByUID_620(modid);
+			break;
+	};
+
+	return mod;
+}
+
+SceModule* sctrlKernelFindModuleByAddress(u32 address)
+{
+	SceModule *mod = NULL;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			mod = sceKernelFindModuleByAddress(address);
+			break;
+		case FW_620:
+			mod = sceKernelFindModuleByAddress_620(address);
+			break;
+	};
+
+	return mod;
+}
+
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelCheckExecFile(buffer, check);
+			break;
+		case FW_620:
+			ret = sceKernelCheckExecFile_620(buffer, check);
+			break;
+	}
 
 	return ret;
 }

@@ -364,13 +364,13 @@ void patch_sceLoaderCore(void)
 	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3 + 4); //lui (likely branch instruction)
 	
 	//undo rebootex patches
-	void * memlmd_3F2AC9C6 = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0x3F2AC9C6);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call1);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call2);
-	_sw(MAKE_CALL(memlmd_3F2AC9C6), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call3);
-	void * memlmd_E42AFE2E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", 0xE42AFE2E);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call1);
-	_sw(MAKE_CALL(memlmd_E42AFE2E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call2);
+	void * memlmd_323366CA = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", g_offs->loadercore_patch.memlmd_323366CA_NID);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call1);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call2);
+	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call3);
+	void * memlmd_7CF1CD3E = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", g_offs->loadercore_patch.memlmd_7CF1CD3E_NID);
+	_sw(MAKE_CALL(memlmd_7CF1CD3E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call1);
+	_sw(MAKE_CALL(memlmd_7CF1CD3E), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo2Call2);
 
 	setup_nid_resolver();
 

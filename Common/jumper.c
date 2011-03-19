@@ -18,7 +18,7 @@ u32 * jumper_table_user = NULL;
 u32 syscallnum = 0;
 
 //sony syscall api
-unsigned int sceKernelQuerySystemCall(void * func);
+unsigned int sctrlKernelQuerySystemCall(void * func);
 
 //init user memory
 int initUserTraceMemory(void)
@@ -35,7 +35,7 @@ int initUserTraceMemory(void)
 		jumper_table_user = gethead(result);
 
 		//get syscall number
-		syscallnum = sceKernelQuerySystemCall(dumpJAL);
+		syscallnum = sctrlKernelQuerySystemCall(dumpJAL);
 
 		//log syscall number
 		printk("Jumper Syscall Number: %08X\n", syscallnum);

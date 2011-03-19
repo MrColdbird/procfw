@@ -22,11 +22,11 @@ int module_start(SceSize args, void* argp)
 #ifdef DEBUG
 	fill_vram(0x000000ff);
 #endif
-	sctrlHENSetMemory(*(u32*)(0x88FB0008), *(u32*)(0x88FB000C));
-	printk("High memory: p2/p9 %d/%d\n", g_p2_size, g_p9_size);
-	psp_model = sctrlKernelGetModel();
 	psp_fw_version = sctrlKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
+	psp_model = sctrlKernelGetModel();
+	sctrlHENSetMemory(*(u32*)(0x88FB0008), *(u32*)(0x88FB000C));
+	printk("High memory: p2/p9 %d/%d\n", g_p2_size, g_p9_size);
 	
 	printk_init(NULL);
 	printk("SystemControl: model 0%dg FW 0x%08X\n", psp_model+1, psp_fw_version);

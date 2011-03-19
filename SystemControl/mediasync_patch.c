@@ -118,8 +118,8 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 		_sw(0x24020001, scemediasync_text_addr+g_offs->mediasync_patch.MsCheckMediaCheck+4);
 
 		// patch DiscCheckMedia
-		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck);
-		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck+4);
+		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck1);
+		_sw(0x1000001D, scemediasync_text_addr+g_offs->mediasync_patch.DiscCheckMediaCheck2);
 	}
 
 	// patch MsSystemFile

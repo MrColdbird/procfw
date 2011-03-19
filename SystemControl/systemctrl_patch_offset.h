@@ -10,7 +10,8 @@ struct InterruptManPatch {
 struct MediaSyncPatch {
 	u32 sceSystemFileGetIndex;
 	u32 MsCheckMediaCheck;
-	u32 DiscCheckMediaCheck;
+	u32 DiscCheckMediaCheck1;
+	u32 DiscCheckMediaCheck2;
 	u32 MsSystemFileCheck;
 	u32 DiscIDCheck;
 	u32 sceSystemFileGetIndexCall;

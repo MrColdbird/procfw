@@ -19,6 +19,7 @@
 #include "installer.h"
 #include "Rebootex_prx.h"
 #include "launcher_patch_offset.h"
+#include "rebootex_conf.h"
 
 #define INTR(intr) \
 	_sw((intr), address); address +=4;
@@ -34,7 +35,7 @@ PSP_HEAP_SIZE_KB(128);
 char installerpath[256];
 
 //psp model
-int model = 0;
+int psp_model = 0;
 
 u32 psp_fw_version = 0;
 
@@ -86,26 +87,28 @@ extern int sceKernelPowerLock(unsigned int, unsigned int);
 
 u8 decompress_buf[1024*1024L];
 
+void build_rebootex_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+
+	conf->magic = REBOOTEX_CONFIG_MAGIC;
+	conf->psp_model = psp_model;
+	conf->rebootex_size = size_rebootex;
+	conf->psp_fw_version = psp_fw_version;
+}
+
 //load reboot wrapper
 int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 {
 	//copy reboot extender
-	memcpy((char *)0x88FC0000, rebootex, size_rebootex);
+	memcpy((char *)REBOOTEX_START, rebootex, size_rebootex);
 
 	//reset reboot flags
-	memset((char *)0x88FB0000, 0, 0x100);
-
-	//store psp model
-	_sw(model, 0x88FB0000);
-
-	//store rebootex length
-	_sw(size_rebootex, 0x88FB0004);
-
-	//store fw version
-	_sw(psp_fw_version, 0x88FB0020);
-
+	memset((char *)REBOOTEX_CONFIG, 0, 0x100);
 	//copy installer path
-	memcpy((char *)0x88FB0100, installerpath, sizeof(installerpath));
+	memcpy((char *)REBOOTEX_CONFIG_ISO_PATH, installerpath, sizeof(installerpath));
+
+	build_rebootex_configure();
 
 	//forward
 	return LoadReboot(arg1, arg2, arg3, arg4);
@@ -232,10 +235,9 @@ int kernel_permission_call(void)
 	//SysMemForKernel_458A70B5
 	int (* _sceKernelGetModel)(void) = (void *)g_offs->sceKernelGetModel;
 
-	//save psp model
-	model = _sceKernelGetModel();
+	psp_model = _sceKernelGetModel();
 
-	if(model == PSP_GO) {
+	if(psp_model == PSP_GO) {
 		patch = &g_offs->loadexec_patch_05g;
 	} else {
 		patch = &g_offs->loadexec_patch_other;
@@ -247,10 +249,6 @@ int kernel_permission_call(void)
 	//patch Rebootex position to 0x88FC0000
 	_sw(0x3C0188FC, loadexec->text_addr + patch->RebootAddress); // lui $at, 0x88FC
 
-	//sync cache
-	_sceKernelIcacheInvalidateAll();
-	_sceKernelDcacheWritebackInvalidateAll();
-
 	//save LoadReboot function
 	LoadReboot = (void*)loadexec->text_addr + patch->LoadReboot;
 
@@ -258,6 +256,9 @@ int kernel_permission_call(void)
 		memcpy((void*)0x08A00000, (void*)0x88000000, 0x400000);
 		memcpy((void*)(0x08A00000+0x400000), (void*)0xBFC00200, 0x100);
 	}
+
+	_sceKernelIcacheInvalidateAll();
+	_sceKernelDcacheWritebackInvalidateAll();
 
 	//return success
 	return 0xC01DB15D;

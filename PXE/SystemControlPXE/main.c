@@ -14,6 +14,7 @@
 #include "libs.h"
 #include "systemctrl_patch_offset.h"
 #include "systemctrl_pxe_patch_offset.h"
+#include "rebootex_conf.h"
 
 PSP_MODULE_INFO("SystemControl", 0x3007, 2, 5);
 
@@ -31,21 +32,27 @@ u32 psp_fw_version = 0;
 //installer path buffer
 extern char installerpath[256];
 
+void load_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+	
+	if(conf->magic == REBOOTEX_CONFIG_MAGIC) {
+		psp_model = conf->psp_model;
+		psp_fw_version = conf->psp_fw_version;
+	}
+
+	memcpy(installerpath, (char*)REBOOTEX_CONFIG_ISO_PATH, sizeof(installerpath));
+}
+
 //entry point of pxe sysctrl
 int module_start(SceSize args, void* argp)
 {
-	//save psp model for patching
-	psp_model = *(u32*)(0x88FB0000);
-
-	psp_fw_version = sctrlKernelDevkitVersion();
+	load_configure();
 	setup_patch_offset_table(psp_fw_version);
 	setup_pxe_patch_offset_table(psp_fw_version);
 
 	//link to log file
 	printk_init("ms0:/pxesysctrl.txt");
-
-	//grab installer executable path
-	memcpy(installerpath, (char*)0x88FB0100, sizeof(installerpath));
 
 	//disable executable checks
 	patch_sceLoadCore();

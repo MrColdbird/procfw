@@ -1,13 +1,8 @@
 #include <pspsdk.h>
 #include "utils.h"
 #include "systemctrl.h"
+#include "rebootex_conf.h"
 #include "../../Rebootex_bin/rebootex_bin_patch_offset.h"
-
-#define REBOOT_START 0x88600000
-#define REBOOTEX_CONFIG_START 0x88FB0000
-#define REBOOTEX_START 0x88FC0000
-
-#define BTCNF_MAGIC 0x0F803001
 
 typedef struct _btcnf_header
 {
@@ -47,13 +42,8 @@ int (* UnpackBootConfig)(char * buffer, int length) = NULL;
 int (* DecryptPSP)(char * prx, unsigned int size, unsigned int * newsize) = 0;
 int (* sceKernelCheckExecFile)(unsigned char * addr, void * arg2) = NULL;
 
-//cache sync
-static inline int iCacheFlushAll(void)
-{
-	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
-	
-	return (*_iCacheFlushAll)();
-}
+static inline int iCacheFlushAll(void);
+static inline int dCacheFlushAll(void);
 
 //helper functions
 int _strlen(char * string);
@@ -77,28 +67,26 @@ int _sceKernelCheckExecFile(unsigned char * addr, void * arg2);
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *));
 int AddPRX(char * buffer, char * insertafter, char * prxname, u32 flags);
 void RenameModule(void *buffer, char *mod_name, char *new_mod_name);
+void load_configure(void);
 
 //reboot function
 void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
 
-//reboot replacement
+int psp_model = 0;
+u32 psp_fw_version = 0;
+
+// NOTICE: main must be the FIRST subroutine of Rebootex!
 void main(int arg1, int arg2, int arg3, int arg4)
 {
-	//grab psp version
-	int version = *(int *)REBOOTEX_CONFIG_START;
 	struct RebootexPatch *patch;
 
-	setup_patch_offset_table(*(int*)(REBOOTEX_CONFIG_START+0x00000020));
+	load_configure();
+	setup_patch_offset_table(psp_fw_version);
 
 	//32mb psp
-	if(version == 0)
-	{
+	if(psp_model == PSP_1000) {
 		patch = &g_offs->rebootex_patch_01g;
-	}
-
-	//64mb psps
-	else
-	{
+	} else {
 		patch = &g_offs->rebootex_patch_other;
 	}
 
@@ -108,41 +96,54 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	sceBootLfatClose = (void *)REBOOT_START + patch->sceBootLfatClose;
 	UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
 
-	//0x000026DC in 6.20 - Call to sceBootLfatOpen
 	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patch->sceBootLfatOpenCall);
-	//0x0000274C in 6.20 - Call to sceBootLfatRead
 	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patch->sceBootLfatReadCall);
-	//0x00002778 in 6.20 - Call to sceBootLfatClose
 	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
-	//0x000070F0 in 6.20 - Call to UnpackBootConfig
 	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
-	//0x00003798 in 6.20 - Killing Function Part #1 - jr $ra
 	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
-	//0x0000379C in 6.20 - Killing Function Part #2 - li $v0, 1
 	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
-	//0x000026D4 in 6.20 - Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
-	//0x00002728 in 6.20 - Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck3);
-	//0x00002740 in 6.20 - Killing Branch Check beqz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck4);
-	//0x00007388 in 6.20 - Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck5);
-	//0x00005550 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
 	_sw(0x00113821, REBOOT_START + patch->LoadCoreModuleStartCall - 4);
-	//0x00005554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
 	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patch->LoadCoreModuleStartCall);
-	//0x00005558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
 	_sw(0x02A0E821, REBOOT_START + patch->LoadCoreModuleStartCall + 4);
 	
 	//initializing global variables
 	systemcontrol_open = 0;
 
 	//flush instruction cache
+	dCacheFlushAll();
 	iCacheFlushAll();
 
 	//reboot psp
 	reboot(arg1, arg2, arg3, arg4);
+}
+
+//cache sync
+static inline int iCacheFlushAll(void)
+{
+	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
+	
+	return (*_iCacheFlushAll)();
+}
+
+static inline int dCacheFlushAll(void)
+{
+	int (*_dCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->dCacheFlushAll);
+	
+	return (*_dCacheFlushAll)();
+}
+
+void load_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+	
+	if(conf->magic == REBOOTEX_CONFIG_MAGIC) {
+		psp_model = conf->psp_model;
+		psp_fw_version = conf->psp_fw_version;
+	}
 }
 
 int _strlen(char * string)
@@ -367,6 +368,7 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFile);
 
 	//flush instruction cache
+	dCacheFlushAll();
 	iCacheFlushAll();
 
 	//call module_start

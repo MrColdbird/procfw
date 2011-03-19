@@ -12,15 +12,13 @@
 #include "systemctrl.h"
 #include "printk.h"
 
-SceUID ModuleMgrForKernel_32292450(int apitype, const char *path, int flags, SceKernelLMOption *option);
-
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
 {
 	u32 k1;
 	int ret;
 
 	k1 = pspSdkSetK1(0);
-	ret = sceKernelLoadModule(path, flags, option);
+	ret = sctrlKernelLoadModule(path, flags, option);
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -32,7 +30,7 @@ SceUID kuKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, 
 	int ret;
 
 	k1 = pspSdkSetK1(0);
-	ret = ModuleMgrForKernel_32292450(apitype, path, flags, option);
+	ret = sctrlKernelLoadModuleWithApitype2(apitype, path, flags, option);
 	pspSdkSetK1(k1);
 
 	return ret;

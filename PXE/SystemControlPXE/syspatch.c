@@ -27,7 +27,7 @@ int installer_thread(SceSize args, void * argp)
 	printk("Starting %s\n", installerpath);
 
 	//load installer module
-	SceUID mod = sceKernelLoadModule(installerpath, 0, NULL);
+	SceUID mod = sctrlKernelLoadModule(installerpath, 0, NULL);
 
 	//log installer uid
 	printk("Module UID: %08X\n", mod);
@@ -36,7 +36,7 @@ int installer_thread(SceSize args, void * argp)
 	if (mod >= 0) {
 		//start installer
 		int status = 0;
-		result = sceKernelStartModule(mod, strlen(installerpath) + 1, installerpath, &status, NULL);
+		result = sctrlKernelStartModule(mod, strlen(installerpath) + 1, installerpath, &status, NULL);
 
 		//log start result
 		printk("Start Result: %08X - Status %08X\n", result, status);

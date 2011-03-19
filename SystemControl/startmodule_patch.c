@@ -68,7 +68,7 @@ static int load_opnssmp(const char *path, u32 tag)
 	}
 
 	STRCAT_S(opnssmp_path, "OPNSSMP.BIN");
-	modid = sceKernelLoadModule(opnssmp_path, 0, NULL);
+	modid = sctrlKernelLoadModule(opnssmp_path, 0, NULL);
 
 	if(modid < 0) {
 		printk("%s: load %s -> 0x%08X\n", __func__, opnssmp_path, modid);
@@ -76,11 +76,11 @@ static int load_opnssmp(const char *path, u32 tag)
 		return modid;
 	}
 
-	ret = sceKernelStartModule(modid, 4, &opnssmp_type, 0, NULL);
+	ret = sctrlKernelStartModule(modid, 4, &opnssmp_type, 0, NULL);
 
 	if(ret < 0) {
 		printk("%s: start module -> 0x%08X\n", __func__, modid);
-		sceKernelUnloadModule(modid);
+		sctrlKernelUnloadModule(modid);
 
 		return ret;
 	}
@@ -116,7 +116,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 		vshmain_args[160] = 1;
 		vshmain_args[161] = 0x50007;
 
-		ret = sceKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
+		ret = sctrlKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
 		oe_free(vshmain_args);
 
 		return ret;
@@ -153,7 +153,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	}
 
 out:
-	ret = sceKernelStartModule(modid, argsize, argp, modstatus, opt);
+	ret = sctrlKernelStartModule(modid, argsize, argp, modstatus, opt);
 
 	return ret;
 }

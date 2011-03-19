@@ -49,6 +49,11 @@ extern SceModule* sceKernelFindModuleByUID_620(SceUID modid);
 extern SceModule* sceKernelFindModuleByAddress_620(u32 address);
 extern int sceKernelCheckExecFile(unsigned char * buffer, int * check);
 extern int sceKernelCheckExecFile_620(unsigned char * buffer, int * check);	
+extern int sceKernelLoadModule_620(const char *path, int flags, SceKernelLMOption *option);
+extern int sceKernelStartModule_620(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
+int sceKernelUnloadModule_620(SceUID modid);
+extern SceUID _sceKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
+extern SceUID sceKernelLoadModuleWithApitype2_620(int apitype, const char *path, int flags, SceKernelLMOption *option);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -747,6 +752,70 @@ int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
 			ret = sceKernelCheckExecFile_620(buffer, check);
 			break;
 	}
+
+	return ret;
+}
+
+int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelLoadModule(path, flags, option);
+			break;
+		case FW_620:
+			ret = sceKernelLoadModule_620(path, flags, option);
+			break;
+	}
+	
+	return ret;
+}
+
+int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelStartModule(modid, argsize, argp, status, option);
+			break;
+		case FW_620:
+			ret = sceKernelStartModule_620(modid, argsize, argp, status, option);
+			break;
+	}
+	
+	return ret;
+}
+
+int sctrlKernelUnloadModule(SceUID modid)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = sceKernelUnloadModule(modid);
+			break;
+		case FW_620:
+			ret = sceKernelUnloadModule_620(modid);
+			break;
+	}
+	
+	return ret;
+}
+
+SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option)
+{
+	SceUID ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = _sceKernelLoadModuleWithApitype2(apitype, path, flags, option);
+			break;
+		case FW_620:
+			ret = sceKernelLoadModuleWithApitype2_620(apitype, path, flags, option);
+			break;
+	};
 
 	return ret;
 }

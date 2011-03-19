@@ -17,7 +17,7 @@ extern int SysMemForKernel_458A70B5(void);
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
 {
 	u32 k1 = pspSdkSetK1(0);
-	int result = sceKernelLoadModule(path, flags, option);
+	int result = sctrlKernelLoadModule(path, flags, option);
 	pspSdkSetK1(k1);
 
 	return result;

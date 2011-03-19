@@ -10,6 +10,7 @@
 
 #include "galaxy.h"
 #include "march33.h"
+#include "march33_620.h"
 #include "popcorn.h"
 #include "satelite.h"
 #include "stargate.h"
@@ -29,6 +30,7 @@ PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;
+u32 psp_fw_version;
 int disable_smart = 0;
 static u8 g_buf[64*1024] __attribute__((aligned(64)));
 
@@ -170,7 +172,7 @@ struct InstallList g_file_lists[] = {
 	{ vshctrl, &size_vshctrl, PATH_VSHCTRL, },
 	{ galaxy, &size_galaxy, PATH_GALAXY, },
 	{ stargate, &size_stargate, PATH_STARGATE, },
-	{ march33, &size_march33, PATH_MARCH33, },
+	{ NULL, NULL, PATH_MARCH33, },
 	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
 	{ popcorn, &size_popcorn, PATH_POPCORN, },
 	{ satelite, &size_satelite, PATH_SATELITE, },
@@ -195,6 +197,14 @@ int install_cfw(void)
 
 	for(i=0; i<NELEMS(g_old_cfw_files); ++i) {
 		sceIoRemove(g_old_cfw_files[i]);
+	}
+
+	if(psp_fw_version == 0x06030510) {
+		g_file_lists[4].buf = march33;
+		g_file_lists[4].size = &size_march33;
+	} else if (psp_fw_version == 0x06020010) {
+		g_file_lists[4].buf = march33_620;
+		g_file_lists[4].size = &size_march33_620;
 	}
 
 	for(i=0; i<NELEMS(g_file_lists); ++i) {
@@ -291,17 +301,17 @@ void start_reboot(int mode)
 
 int main(int argc, char *argv[])
 {
-	int ret = 0, fw_version;
+	int ret = 0;
 	struct SceIoStat stat;
 	SceCtrlData ctl;
 	u32 key;
 
 	memset(&stat, 0, sizeof(stat));
 	pspDebugScreenInit();
-	fw_version = sceKernelDevkitVersion();
+	psp_fw_version = sceKernelDevkitVersion();
 
-	if (fw_version != 0x06030510) {
-		printf("Sorry. This program requires 6.35.\n");
+	if (psp_fw_version != 0x06030510 && psp_fw_version != 0x06020010) {
+		printf("Sorry. This program requires 6.20/6.35.\n");
 		goto exit;
 	}
 

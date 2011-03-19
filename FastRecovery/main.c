@@ -87,7 +87,7 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 	_sw(size_rebootex, 0x88FB0004);
 
 	//store fw version
-	_sw(fw_version, 0x88FB0008);
+	_sw(fw_version, 0x88FB0020);
 
 	//forward
 	return LoadReboot(arg1, arg2, arg3, arg4);

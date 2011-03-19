@@ -79,7 +79,7 @@ int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 	_sw(psp_model, 0x88FB0000);
 
 	//store fw version
-	_sw(psp_fw_version, 0x88FB0008);
+	_sw(psp_fw_version, 0x88FB0020);
 
 	//forward
 	return (*LoadReboot)(arg1, arg2, arg3, arg4);

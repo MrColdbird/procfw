@@ -31,6 +31,15 @@ extern int sceKernelLoadExecVSHMs3_620(const char *file, struct SceKernelLoadExe
 extern int sceKernelLoadExecVSHMs3(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelLoadExecVSHMs4_620(const char *file, struct SceKernelLoadExecVSHParam *param);
 extern int sceKernelSetDdrMemoryProtection_620(void *addr, int size, int prot);
+extern SceUID sceKernelCreateHeap_620(SceUID partitionid, SceSize size, int unk, const char *name);
+extern int sceKernelDeleteHeap_620(SceUID heapid);
+extern int sceKernelFreeHeapMemory_620(SceUID heapid, void *block);
+extern void* sceKernelAllocHeapMemory_620(SceUID heapid, SceSize size);
+extern int sceKernelGetSystemStatus(void);
+extern int sceKernelGetSystemStatus_620(void);
+extern int sceKernelQueryMemoryPartitionInfo_620(int pid, PspSysmemPartitionInfo *info);
+extern int sceKernelPartitionMaxFreeMemSize_620(int pid);
+extern int sceKernelPartitionTotalFreeMemSize_620(int pid);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -494,4 +503,108 @@ int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 	}
 
 	return ret;
+}
+
+SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name)
+{
+	SceUID ret;
+
+	ret = sceKernelCreateHeap_620(partitionid, size, unk, name);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelCreateHeap(partitionid, size, unk, name);
+	}
+
+	return ret;
+}
+
+int sctrlKernelDeleteHeap(SceUID heapid)
+{
+	int ret;
+
+	ret = sceKernelDeleteHeap_620(heapid);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelDeleteHeap(heapid);
+	}
+
+	return ret;
+}
+
+int sctrlKernelFreeHeapMemory(SceUID heapid, void *block)
+{
+	int ret;
+
+	ret = sceKernelFreeHeapMemory_620(heapid, block);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelFreeHeapMemory(heapid, block);
+	}
+
+	return ret;
+}
+
+void* sctrlKernelAllocHeapMemory(SceUID heapid, SceSize size)
+{
+	void *p;
+
+	p = sceKernelAllocHeapMemory_620(heapid, size);
+
+	if((u32)p == 0x8002013A) {
+		p = sceKernelAllocHeapMemory(heapid, size);
+	}
+
+	return p;
+}
+
+int sctrlKernelGetSystemStatus(void)
+{
+	int ret;
+
+	ret = sceKernelGetSystemStatus_620();
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelGetSystemStatus();
+	}
+
+	return ret;
+}
+
+int sctrlKernelQueryMemoryPartitionInfo(int pid, PspSysmemPartitionInfo *info)
+{
+	int ret;
+
+	ret = sceKernelQueryMemoryPartitionInfo_620(pid, info);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelQueryMemoryPartitionInfo(pid, info);
+	}
+
+	return ret;
+}
+
+int sctrlKernelPartitionMaxFreeMemSize(int pid)
+{
+	int ret;
+
+	ret = sceKernelPartitionMaxFreeMemSize_620(pid);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelPartitionMaxFreeMemSize(pid);
+	}
+
+	return pid;
+}
+
+int sctrlKernelPartitionTotalFreeMemSize(int pid)
+{
+	int ret;
+
+	ret = sceKernelPartitionTotalFreeMemSize_620(pid);
+
+	if(ret == 0x8002013A) {
+		ret = sceKernelPartitionTotalFreeMemSize(pid);
+	}
+
+	return pid;
 }

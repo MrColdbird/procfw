@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <pspsysmem_kernel.h>
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "systemctrl_private.h"
@@ -83,6 +84,13 @@ u32 sctrlKernelDevkitVersion(void);
 SceModule* sctrlKernelFindModuleByName(char *modname);
 int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot);
 SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name);
+int sctrlKernelDeleteHeap(SceUID heapid);
+int sctrlKernelFreeHeapMemory(SceUID heapid, void *block);
+void* sctrlKernelAllocHeapMemory(SceUID heapid, SceSize size);
+int sctrlKernelGetSystemStatus(void);
+int sctrlKernelQueryMemoryPartitionInfo(int pid, PspSysmemPartitionInfo *info);
+int sctrlKernelPartitionMaxFreeMemSize(int pid);
+int sctrlKernelPartitionTotalFreeMemSize(int pid);
 
 extern SEConfig conf;
 

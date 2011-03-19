@@ -9,9 +9,6 @@
 #include "../Rebootex_bin/rebootex.h"
 #include "rebootex_patch_offset.h"
 
-#define FW_635 0x06030510
-#define FW_620 0x06020010
-
 u32 psp_model;
 u32 psp_fw_version;
 

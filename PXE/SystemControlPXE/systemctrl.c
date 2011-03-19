@@ -12,9 +12,6 @@
 #include "printk.h"
 #include "syspatch.h"
 
-#define FW_635 0x06030510
-#define FW_620 0x06020010
-
 extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern u32 sceKernelDevkitVersion_620(void);

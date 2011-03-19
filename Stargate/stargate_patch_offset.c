@@ -2,7 +2,7 @@
 #include "stargate_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.sceMesgLedDecryptGame1 = {
 		0x00002B28, // 01g
 		0x00002F08, // 02g

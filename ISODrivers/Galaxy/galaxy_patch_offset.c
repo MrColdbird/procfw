@@ -2,7 +2,7 @@
 #include "galaxy_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.StoreFd = 0x00008A04,
 	.StoreFd2 = 0x00005BA4,
 	.Data1 = 0x00005BB4 - 0x00005BA4 + 0x00008A04,

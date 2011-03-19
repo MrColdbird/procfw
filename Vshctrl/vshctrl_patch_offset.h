@@ -1,6 +1,8 @@
 #ifndef VSHCTRL_PATCH_OFFSET_H
 #define VSHCTRL_PATCH_OFFSET_H
 
+#include "utils.h"
+
 struct VshctrlPatch {
 	u32 sceDisplaySetHoldMode;
 	u32 sceDisplaySetHoldModeCall;

@@ -20,9 +20,6 @@
 #include "Rebootex_prx.h"
 #include "launcher_patch_offset.h"
 
-#define FW_635 0x06030510
-#define FW_620 0x06020010
-
 #define INTR(intr) \
 	_sw((intr), address); address +=4;
 #define INTR_HIGH(intr) \

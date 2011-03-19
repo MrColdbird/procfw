@@ -2,7 +2,7 @@
 #include "rebootex_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.loadexec_patch_05g = {
 		.LoadRebootCall = 0x00002F90,
 		.RebootJump = 0x00002FDC,

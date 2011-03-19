@@ -238,9 +238,9 @@ int sub_00000588(void)
 
 	clear_cache();
 
-	if(g_fw_version == 0x06030510)
+	if(g_fw_version == FW_635)
 		SysMemForKernel_9F154FA1(g_umddata);
-	else if(g_fw_version == 0x06020010)
+	else if(g_fw_version == FW_620)
 		SysMemForKernel_B00D1EC2(g_umddata);
 
 	return 0;

@@ -2,7 +2,7 @@
 #include "systemctrl_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.interruptman_patch = {
 		.InvalidSyscallCheck1 = 0x00000DE8,
 		.InvalidSyscallCheck2 = 0x00000E94,

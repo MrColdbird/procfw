@@ -1,6 +1,8 @@
 #ifndef LAUNCHER_PATCH_OFFSET_H
 #define LAUNCHER_PATCH_OFFSET_H
 
+#include "utils.h"
+
 struct sceLoadExecPatch {
 	u32 LoadReboot;
 	u32 LoadRebootCall;

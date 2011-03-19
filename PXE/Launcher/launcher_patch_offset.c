@@ -2,7 +2,7 @@
 #include "launcher_patch_offset.h"
 
 PatchOffset g_635_offsets = {
-	.fw_version = 0x06030510,
+	.fw_version = FW_635,
 	.sceKernelIcacheInvalidateAll = 0x88000E98,
 	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
 	.sceKernelFindModuleByName = 0x88017000 + 0x000072D8,
@@ -22,7 +22,7 @@ PatchOffset g_635_offsets = {
 };
 
 PatchOffset g_620_offsets = {
-	.fw_version = 0x06020010,
+	.fw_version = FW_620,
 	.sceKernelIcacheInvalidateAll = 0x88000E98,
 	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
 	.sceKernelFindModuleByName = 0x8801EB78,

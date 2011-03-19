@@ -13,6 +13,7 @@
 #include "syspatch.h"
 #include "libs.h"
 #include "systemctrl_patch_offset.h"
+#include "systemctrl_pxe_patch_offset.h"
 
 PSP_MODULE_INFO("SystemControl", 0x3007, 2, 5);
 

@@ -24,7 +24,6 @@
 #include "utils.h"
 #include "libs.h"
 #include "printk.h"
-#include "main.h"
 #include "systemctrl.h"
 
 PspModuleImport *find_import_lib(SceModule *pMod, char *library)

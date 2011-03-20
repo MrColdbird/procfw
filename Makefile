@@ -57,7 +57,7 @@ all:
 # Creating Debugging Suite for Live-System
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
-	@cd $(PERMANENT); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(PERMANENT); make $(DEBUG_OPTION)
 	@mv $(PERMANENT)/EBOOT.PBP $(DISTRIBUTE)/620PRO_Permanent
 	@mv $(PERMANENT)/hen.prx $(DISTRIBUTE)/620PRO_Permanent
 	@mv $(PERMANENT)/kmod.prx $(DISTRIBUTE)/620PRO_Permanent

@@ -39,8 +39,8 @@ PatchOffset g_620_offsets = {
 	.Func5 = 0x00004EAC,
 	.Func6 = 0x00004F1C,
 	.sceIoClose = 0x00007C28,
-	.sceKernelCreateThread = 0x00017DEC,
-	.sceKernelStartThread = 0x00017F88,
+	.sceKernelCreateThread = 0x000191B4,
+	.sceKernelStartThread = 0x00019358,
 };
 
 PatchOffset *g_offs = NULL;

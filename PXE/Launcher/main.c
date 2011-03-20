@@ -344,7 +344,7 @@ static void patch_power_arg(int cbid, u32 power_buf_address)
 	}
 }
 
-#if 1
+#if 0
 void freezeme(unsigned int color)
 {
 	while(1)

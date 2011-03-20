@@ -17,7 +17,13 @@ int get_max_len(char **str_list,int nums)
 	int i;
 	for(i=0;i<nums;i++)
 	{
-		int len = scePaf_967A56EF_strlen(str_list[i]);
+		int len;
+
+		if(psp_fw_version == FW_635)
+			len = scePaf_strlen(str_list[i]);
+		else if(psp_fw_version == FW_620)
+			len = scePaf_strlen_620(str_list[i]);
+	
 		if(max_len < len) max_len = len;
 	}
 	return max_len;

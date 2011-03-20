@@ -42,6 +42,7 @@ int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
 u32 psp_fw_version = 0;
 u32 psp_model = 0;
+int disable_vshorig = 0;
 
 PspBootConfMode iso_mode = 0;
 
@@ -189,6 +190,7 @@ void load_configure(void)
 		psp_fw_version = conf->psp_fw_version;
 		iso_mode = conf->iso_mode;
 		psp_model = conf->psp_model;
+		disable_vshorig = conf->disable_vshorig;
 	}
 }
 
@@ -533,16 +535,18 @@ int is_permanent_mode(void)
 {
 	int ret;
 
+	if(disable_vshorig) {
+		return 0;
+	}
+
 	ret = sceBootLfatOpen(VSHORIG + sizeof("flash0:") - 1);
 
 	if(ret >= 0) {
 		sceBootLfatClose();
-		ret = 1;
-	} else {
-		ret = 0;
+		return 1;
 	}
 
-	return ret;
+	return 0;
 }
 
 int _UnpackBootConfig(char **p_buffer, int length)

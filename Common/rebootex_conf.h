@@ -38,6 +38,7 @@ typedef struct _rebootex_config {
 	u32 insert_module_flags;
 	u32 psp_fw_version;
 	int iso_mode;
+	int disable_vshorig;
 } rebootex_config;
 
 extern rebootex_config rebootex_conf;

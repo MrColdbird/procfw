@@ -11,12 +11,13 @@
 #include "utils.h"
 #include "../ppatch_config.h"
 #include "systemctrl.h"
+#include "kubridge.h"
 #include "config.h"
 
 PSP_MODULE_INFO("HEN", 0x800, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
-extern int start_exploit(void);
+extern int start_exploit(int disable_vshorig);
 
 static u8 buf[1024] __attribute__((aligned(64)));
 
@@ -94,25 +95,32 @@ static SceUID load_start_module(char *path)
 {
 	SceUID modid;
 
-	modid = sceKernelLoadModule(path, 0, NULL);
+	pspDebugScreenInit();
+
+	modid = kuKernelLoadModule(path, 0, NULL);
+	pspDebugScreenPrintf("load module -> 0x%08X\n", modid);
 	modid = sceKernelStartModule(modid, strlen(path) + 1, path, NULL, NULL);
+	pspDebugScreenPrintf("start module -> 0x%08X\n", modid);
 
 	return modid;
 }
 
-static void launch_recovery(void)
+// first exploit and disable vshorig replace,
+// and then launch recovery
+static int launch_recovery(void)
 {
 	if(sctrlHENGetVersion() == 0x8002013A) {
-		return;
+		return -1;
 	}
 
-	load_start_module(PATH_RECOVERY);
+	return load_start_module(PATH_RECOVERY);
 }
 
 int main(void)
 {
 	SceCtrlData ctl;
 	u32 key;
+	int disable_vshorig = 0;
 	
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
@@ -120,12 +128,14 @@ int main(void)
 	if(key & (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) {
 		uninstall_fake_vsh();
 	} else if(key & PSP_CTRL_RTRIGGER) {
-		launch_recovery();
+		disable_vshorig = 1;
 
-		return 0;
+		if (launch_recovery() >= 0) {
+			return 0;
+		}
 	}
 
-	start_exploit();
+	start_exploit(disable_vshorig);
 	
 	return 0;
 }

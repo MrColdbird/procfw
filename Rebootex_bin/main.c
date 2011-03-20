@@ -3,6 +3,7 @@
 #include "utils.h"
 #include "config.h"
 #include "rebootex_bin_patch_offset.h"
+#include "../Permanent/ppatch_config.h"
 
 typedef struct _btcnf_header
 {
@@ -80,13 +81,14 @@ int _sceKernelCheckExecFile(unsigned char * addr, void * arg2);
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *));
 
 //screen debugger
-//void freezeme(unsigned int color);
+void freezeme(unsigned int color);
 
 //reboot function
 void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
 
 void load_configure(void);
 
+int RenameModule(void *buffer, char *mod_name, char *new_mod_name);
 int AddPRX(char * buffer, char * insertbefore, char * prxname, u32 flags);
 int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32 flags);
 void RemovePrx(char *buffer, const char *prxname, u32 flags);
@@ -527,6 +529,22 @@ int patch_bootconf_march33(char *buffer, int length)
 	return result;
 }
 
+int is_permanent_mode(void)
+{
+	int ret;
+
+	ret = sceBootLfatOpen(VSHORIG + sizeof("flash0:") - 1);
+
+	if(ret >= 0) {
+		sceBootLfatClose();
+		ret = 1;
+	} else {
+		ret = 0;
+	}
+
+	return ret;
+}
+
 int _UnpackBootConfig(char **p_buffer, int length)
 {
 	int result;
@@ -578,6 +596,10 @@ int _UnpackBootConfig(char **p_buffer, int length)
 		newsize = AddPRX(buffer, loadrebootmodulebefore, "/rtm.prx", rebootmoduleflags);
 
 		if(newsize > 0) result = newsize;
+	}
+
+	if(is_permanent_mode()) {
+		RenameModule(buffer, VSHMAIN + sizeof("flash0:") - 1, VSHORIG + sizeof("flash0:") - 1);
 	}
 
 	return result;
@@ -754,6 +776,27 @@ int GetPrxFlag(char *buffer, const char* modname, u32 *flags)
 	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
 
 	*flags = module[modnum].flags;
+
+	return 0;
+}
+
+// Note: new_mod_name cannot have longer filename than mod_name 
+int RenameModule(void *buffer, char *mod_name, char *new_mod_name)
+{
+	int modnum;
+
+	modnum = SearchPrx(buffer, mod_name);
+
+	if (modnum < 0) {
+		return modnum;
+	}
+
+	_btcnf_header * header = (_btcnf_header *)buffer;
+	
+	//cast module list
+	_btcnf_module * module = (_btcnf_module *)(buffer + header->modulestart);
+
+	_strcpy((char*)(buffer + header->modnamestart + module[modnum].module_path), new_mod_name);
 
 	return 0;
 }

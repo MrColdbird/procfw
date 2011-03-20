@@ -20,6 +20,8 @@
 #include "recovery.h"
 #include "config.h"
 
+#include "../Permanent/ppatch_config.h"
+
 // VSH module can write F0/F1
 PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
 
@@ -33,6 +35,7 @@ int psp_model = 0;
 u32 psp_fw_version;
 int disable_smart = 0;
 static u8 g_buf[64*1024] __attribute__((aligned(64)));
+static u8 g_buf2[64*1024] __attribute__((aligned(64)));
 
 void cleanup_exit(void)
 {
@@ -236,6 +239,189 @@ exit:
 	return -1;
 }
 
+int compare_file(const char *src, const char *dst)
+{
+	SceUID fd = -1, fdd = -1;
+	int ret, ret2;
+	SceIoStat srcstat, dststat;
+
+	ret = sceIoGetstat(src, &srcstat);
+
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	ret = sceIoGetstat(dst, &dststat);
+
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	if (dststat.st_size != srcstat.st_size) {
+		goto not_equal;
+	}
+
+	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fd = ret;
+
+	ret = sceIoOpen(dst, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fdd = ret;
+	ret = sizeof(g_buf);
+	ret = sceIoRead(fd, g_buf, ret);
+
+	while (ret > 0) {
+		ret2 = sceIoRead(fdd, g_buf2, ret);
+
+		if (ret2 != ret) {
+			goto not_equal;
+		}
+
+		if (memcmp(g_buf, g_buf2, ret)) {
+			goto not_equal;
+		}
+
+		ret = sceIoRead(fd, g_buf, ret);
+	}
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	sceIoClose(fd);
+	sceIoClose(fdd);
+
+	return 0;
+
+not_equal:
+	if (fd >= 0)
+		sceIoClose(fd);
+
+	if (fdd >= 0)
+		sceIoClose(fdd);
+
+	return 1;
+}
+
+int copy_file(const char *src, const char *dst)
+{
+	SceUID fd = -1, fdw = -1;
+	int ret;
+
+	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	fd = ret;
+
+	ret = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	fdw = ret;
+	ret = sizeof(g_buf);
+	ret = sceIoRead(fd, g_buf, ret);
+
+	while (ret > 0) {
+		ret = sceIoWrite(fdw, g_buf, ret);
+
+		if (ret < 0) {
+			goto error;
+		}
+
+		ret = sceIoRead(fd, g_buf, ret);
+	}
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	sceIoClose(fd);
+	sceIoClose(fdw);
+
+	return 0;
+
+error:
+	sceIoClose(fd);
+	sceIoClose(fdw);
+
+	return ret;
+}
+
+int is_file_exist(const char *path)
+{
+	SceIoStat stat;
+	int ret;
+
+	ret = sceIoGetstat(path, &stat);
+
+	return ret == 0 ? 1 : 0;
+}
+
+int is_permanent_patch_installed(void)
+{
+	if(psp_fw_version != FW_620) {
+		return 0;
+	}
+
+	if(!is_file_exist(VSHORIG)) {
+		return 0;
+	}
+
+	if(0 == compare_file(VSHMAIN, VSHORIG)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+void uninstall_permanent_patch(void)
+{
+	int ret;
+
+	do {
+		ret = sceIoRemove(VSHMAIN);
+
+		if(ret != 0) {
+			printf("Delete %s failed\n", VSHMAIN);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	do {
+		ret = copy_file(VSHORIG, VSHMAIN);
+
+		if(ret != 0) {
+			printf("Copy %s to %s failed 0x%08X\n", VSHORIG, VSHMAIN, ret);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	do {
+		ret = sceIoRemove(VSHORIG);
+
+		if(ret != 0) {
+			printf("Delete %s failed\n", VSHTEMP);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	sceIoRemove(VSHTEMP);
+}
+
 int uninstall_cfw(void)
 {
 	int ret;
@@ -265,6 +451,12 @@ int uninstall_cfw(void)
 			break;
 		case PSP_1000:
 			break;
+	}
+
+	if(is_permanent_patch_installed()) {
+		printf("Uninstalling permanent patch...");
+		uninstall_permanent_patch();
+		printf("OK\n");
 	}
 
 	return 0;

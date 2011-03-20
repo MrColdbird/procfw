@@ -14,6 +14,7 @@ FASTRECOVERY = FastRecovery
 SATELITE = Satelite
 POPCORN = Popcorn
 RECOVERY = Recovery
+PERMANENT = Permanent
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -28,7 +29,7 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/635PROUPDATE || true
 	@mkdir $(DISTRIBUTE)/635FastRecovery || true
-	@mkdir $(DISTRIBUTE)/dbg_installer || true
+	@mkdir $(DISTRIBUTE)/620PRO_Permanent || true
 	@rm -f ./Common/*.o
 
 # Creating Live-System Reboot Buffer
@@ -56,7 +57,10 @@ all:
 # Creating Debugging Suite for Live-System
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/635FastRecovery
-	@cp $(INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/dbg_installer
+	@cd $(PERMANENT); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@mv $(PERMANENT)/EBOOT.PBP $(DISTRIBUTE)/620PRO_Permanent
+	@mv $(PERMANENT)/hen.prx $(DISTRIBUTE)/620PRO_Permanent
+	@mv $(PERMANENT)/kmod.prx $(DISTRIBUTE)/620PRO_Permanent
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)
@@ -67,6 +71,8 @@ clean:
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
+	@cd $(PERMANENT); make clean $(DEBUG_OPTION)
+	@cd $(PERMANENT); make clean $(DEBUG_OPTION)
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)
 	@cd $(REBOOTEXPXE); make clean $(DEBUG_OPTION)

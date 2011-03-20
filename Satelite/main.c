@@ -33,10 +33,13 @@ int thread_id=0;
 SEConfig cnf;
 static SEConfig cnf_old;
 
+u32 psp_fw_version;
+
 int module_start(int argc, char *argv[])
 {
 	int	thid;
 
+	psp_fw_version = sceKernelDevkitVersion();
 	thid = sceKernelCreateThread("VshMenu_Thread", TSRThread, 16 , 0x1000 ,0 ,0);
 
 	thread_id=thid;
@@ -69,7 +72,10 @@ int EatKey(SceCtrlData *pad_data, int count)
 	int i;
 
 	// copy true value
-	scePaf_6BD7452C_memcpy(&ctrl_pad , pad_data , sizeof(SceCtrlData));
+	if(psp_fw_version == FW_635)
+		scePaf_memcpy(&ctrl_pad, pad_data, sizeof(SceCtrlData));
+	else if (psp_fw_version == FW_620)
+		scePaf_memcpy_620(&ctrl_pad, pad_data, sizeof(SceCtrlData));
 
 	// buttons check
 	buttons     = ctrl_pad.Buttons;
@@ -140,7 +146,10 @@ int TSRThread(SceSize args, void *argp)
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
-	scePaf_memcpy(&cnf_old , &cnf , sizeof(SEConfig));
+	if(psp_fw_version == FW_635)
+		scePaf_memcpy(&cnf_old, &cnf, sizeof(SEConfig));
+	else if (psp_fw_version == FW_620)
+		scePaf_memcpy_620(&cnf_old, &cnf, sizeof(SEConfig));
 
 	while(stop_flag == 0) {
 		if( sceDisplayWaitVblankStart() < 0)

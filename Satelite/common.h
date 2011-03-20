@@ -43,4 +43,14 @@ int scePaf_15AFC8D3_snprintf(char *buffer,int c , const char *format, ...);
 int scePaf_6BD7452C_memcpy(void *path , void *name , int size);
 int scePaf_98DE3BA6_strcpy(char *path , const char *name);
 
+int scePaf_strlen_620(const char *path);
+int scePaf_memset_620(void *buff ,int c ,int size);
+int scePaf_memcmp_620(const void *path , const void *name , int c);
+int scePaf_sprintf_620(char *buffer , const char *format , ...);
+int scePaf_snprintf_620(char *buffer,int c , const char *format, ...);
+int scePaf_memcpy_620(void *path , void *name , int size);
+int scePaf_strcpy_620(char *path , const char *name);
+
+extern u32 psp_fw_version;
+
 #endif

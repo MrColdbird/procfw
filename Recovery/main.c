@@ -41,6 +41,8 @@ static u32 g_last_btn = 0;
 static u32 g_last_tick = 0;
 static u32 g_deadzone_tick = 0;
 
+static u32 no_vsh = 0;
+
 int g_display_flip;
 
 SEConfig g_config;
@@ -121,8 +123,10 @@ void suspend_thread(const char *thread_name)
 
 	ret = get_thread_id(thread_name);
 
-	if(ret < 0)
+	if(ret < 0) {
+		no_vsh = 1;
 		return;
+	}
 
 	sceKernelSuspendThread(ret);
 }
@@ -181,6 +185,11 @@ void recovery_exit(void)
 	vctrlVSHUpdateConfig(&g_config);
 	resume_vsh_thread();
 	vpl_finish();
+
+	if(no_vsh) {
+		sctrlKernelExitVSH(NULL);
+	}
+
 	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 }
 

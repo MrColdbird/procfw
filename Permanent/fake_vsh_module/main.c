@@ -17,7 +17,7 @@
 PSP_MODULE_INFO("HEN", 0x800, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
-extern int start_exploit(int disable_vshorig);
+extern int start_exploit(int disable_vshorig, int ofw_mode);
 
 static u8 buf[1024] __attribute__((aligned(64)));
 
@@ -120,12 +120,12 @@ int main(void)
 {
 	SceCtrlData ctl;
 	u32 key;
-	int disable_vshorig = 0;
+	int disable_vshorig = 0, ofw_mode = 0;
 	
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
 
-	if(key & (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) {
+	if((key & (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) == (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) {
 		uninstall_fake_vsh();
 	} else if(key & PSP_CTRL_RTRIGGER) {
 		disable_vshorig = 1;
@@ -133,9 +133,11 @@ int main(void)
 		if (launch_recovery() >= 0) {
 			return 0;
 		}
+	} else if(key & PSP_CTRL_SELECT) {
+		ofw_mode = 1;
 	}
 
-	start_exploit(disable_vshorig);
+	start_exploit(disable_vshorig, ofw_mode);
 	
 	return 0;
 }

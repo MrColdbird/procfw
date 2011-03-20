@@ -28,7 +28,6 @@ typedef enum {
 
 typedef struct _rebootex_config {
 	u32 magic;
-	u32 psp_model;
 	u32 rebootex_size;
 	u32 p2_size;
 	u32 p9_size;
@@ -37,8 +36,10 @@ typedef struct _rebootex_config {
 	u32 insert_module_size;
 	u32 insert_module_flags;
 	u32 psp_fw_version;
-	int iso_mode;
-	int disable_vshorig;
+	u8 psp_model;
+	u8 iso_mode;
+	u8 disable_vshorig;
+	u8 ofw_mode;
 } rebootex_config;
 
 extern rebootex_config rebootex_conf;

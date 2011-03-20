@@ -41,8 +41,9 @@ char * rebootmodule = NULL;
 int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
 u32 psp_fw_version = 0;
-u32 psp_model = 0;
-int disable_vshorig = 0;
+u8 psp_model = 0;
+u8 disable_vshorig = 0;
+u8 ofw_mode = 0;
 
 PspBootConfMode iso_mode = 0;
 
@@ -111,6 +112,19 @@ void main(int arg1, int arg2, int arg3, int arg4)
 		patch = &g_offs->rebootex_patch_other;
 	}
 
+	if(ofw_mode) {
+		//0x0000565C in 6.20 - UnpackBootConfig
+		UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
+
+		//0x000070F0 in 6.20 - Call to UnpackBootConfig
+		_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
+
+		//UnpackBootConfig buffer address
+		_sw(0x27A40004, REBOOT_START + patch->UnpackBootConfigBufferAddress); // addiu $a0, $sp, 4
+
+		goto exit;
+	}
+
 	//0x000082AC in 6.20 - sceBootLfatOpen
 	sceBootLfatOpen = (void *)REBOOT_START + patch->sceBootLfatOpen;
 	//0x00008420 in 6.20 - sceBootLfatRead
@@ -149,16 +163,15 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	//UnpackBootConfig buffer address
 	_sw(0x27A40004, REBOOT_START + patch->UnpackBootConfigBufferAddress); // addiu $a0, $sp, 4
 
-	load_configure();
-
 	//initializing global variables
 	rebootmodule_open = 0;
 
+exit:
+	//reboot psp
 	//flush instruction cache
 	dCacheFlushAll();
 	iCacheFlushAll();
 
-	//reboot psp
 	reboot(arg1, arg2, arg3, arg4);
 }
 
@@ -191,6 +204,7 @@ void load_configure(void)
 		iso_mode = conf->iso_mode;
 		psp_model = conf->psp_model;
 		disable_vshorig = conf->disable_vshorig;
+		ofw_mode = conf->ofw_mode;
 	}
 }
 
@@ -559,6 +573,11 @@ int _UnpackBootConfig(char **p_buffer, int length)
 	buffer = (void*)BOOTCONFIG_TEMP_BUFFER;
 	_memcpy(buffer, *p_buffer, length);
 	*p_buffer = buffer;
+
+	if(ofw_mode) {
+		goto exit;
+	}
+
 	newsize = AddPRX(buffer, "/kd/init.prx", PATH_SYSTEMCTRL+sizeof(PATH_FLASH0)-2, 0x000000EF);
 
 	if (newsize > 0) result = newsize;
@@ -602,6 +621,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 		if(newsize > 0) result = newsize;
 	}
 
+exit:
 	if(is_permanent_mode()) {
 		RenameModule(buffer, VSHMAIN + sizeof("flash0:") - 1, VSHORIG + sizeof("flash0:") - 1);
 	}

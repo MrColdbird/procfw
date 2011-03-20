@@ -54,6 +54,53 @@ PatchOffset g_635_offsets = {
 
 PatchOffset g_620_offsets = {
 	.fw_version = FW_620,
+	.popsman_patch = {
+		.sceIoOpenImport = 0x00003CD4,
+		.sceIoLseekImport = 0x00003CDC,
+		.sceIoIoctlImport = 0x00003CE4,
+		.sceIoReadImport = 0x00003CEC,
+		.sceIoReadAsyncImport = 0x00003D04,
+		.sceIoGetstatImport = 0x00003D0C,
+		.sceIoCloseImport = 0x00003CFC,
+		.get_rif_path = 0x00000190,
+		.get_rif_path_call1 = 0x00002824,
+		.get_rif_path_call2 = 0x00002CE4,
+		.sceNpDrmGetVersionKeyCall = 0x00002A50,
+		.scePspNpDrm_driver_9A34AC9F_Call = 0x00002E34,
+		.scePopsManLoadModuleCheck = 0x00001EA8,
+		.sceDrmBBCipherInitImport = 0x00003DEC,
+		.sceDrmBBCipherUpdateImport = 0x00003DE4,
+		.sceDrmBBCipherFinalImport = 0x00003E04,
+		.sceDrmBBMacInitImport = 0x00003DF4,
+		.sceDrmBBMacUpdateImport = 0x00003DFC,
+		.sceDrmBBMacFinalImport = 0x00003E0C,
+		.sceDrmBBMacFinal2Import = 0x00003E14,
+	},
+	.pops_patch = {
+		.decomp = {
+			{ 0x000DA600, 0x0000DE18 }, // 01G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // 02G TODO
+			{ 0xDEADBEEF, 0xDEADBEEF }, // 03G TODO
+			{ 0x000DA630, 0x0000DE1C }, // 04G
+			{ 0x000DC5CC, 0x0000E534 }, // 05G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+		},
+		.ICON0SizeOffset = {
+			0x0003BCD0, // 01G
+			0xDEADBEEF, // 02G TODO
+			0xDEADBEEF, // 03G TODO
+			0x0003BCFC, // 04G
+			0x0003DAE4, // 05G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+		},
+		.sceMeAudio_67CD7972_NID = 0xF43E573A,
+	},
 };
 
 PatchOffset *g_offs = NULL;

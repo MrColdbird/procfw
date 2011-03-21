@@ -13,7 +13,8 @@ struct MediaSyncPatch {
 	u32 DiscCheckMediaCheck1;
 	u32 DiscCheckMediaCheck2;
 	u32 MsSystemFileCheck;
-	u32 DiscIDCheck;
+	u32 DiscIDCheck1;
+	u32 DiscIDCheck2;
 	u32 sceSystemFileGetIndexCall;
 };
 

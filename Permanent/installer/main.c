@@ -865,8 +865,10 @@ int main()
 
 	if(confirm_testrun()) {
 		ret = load_start_module(VSHTEMP);
-		sceKernelSleepThread();
-		goto exit;
+
+		while ( 1 ) {
+			sceKernelSleepThread();
+		}
 	}
 
 	ret = final_check();

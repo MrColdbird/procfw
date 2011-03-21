@@ -794,8 +794,8 @@ int main()
 		goto exit;
 	}
 
-	printf("Initializing flash rw...\n");
 	init_flash();
+	printf("BY RUNNING THIS APPLICATION YOU ACCEPT ALL THE RISK INVOLVED.\n\n");
 	
 	if(is_already_installed() != 0) {
 		if(confirm_uninstall()) {

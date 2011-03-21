@@ -79,8 +79,8 @@ PatchOffset g_620_offsets = {
 	.pops_patch = {
 		.decomp = {
 			{ 0x000DA600, 0x0000DE18 }, // 01G
-			{ 0xDEADBEEF, 0xDEADBEEF }, // 02G TODO
-			{ 0xDEADBEEF, 0xDEADBEEF }, // 03G TODO
+			{ 0x000DA600, 0x0000DE18 }, // 02G
+			{ 0x000DA600, 0x0000DE18 }, // 03G
 			{ 0x000DA630, 0x0000DE1C }, // 04G
 			{ 0x000DC5CC, 0x0000E534 }, // 05G
 			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
@@ -90,8 +90,8 @@ PatchOffset g_620_offsets = {
 		},
 		.ICON0SizeOffset = {
 			0x0003BCD0, // 01G
-			0xDEADBEEF, // 02G TODO
-			0xDEADBEEF, // 03G TODO
+			0x0003BCD0, // 02G
+			0x0003BCD0, // 03G
 			0x0003BCFC, // 04G
 			0x0003DAE4, // 05G
 			0xDEADBEEF, // unused

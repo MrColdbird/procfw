@@ -59,7 +59,15 @@ char *vpl_strdup(const char *str)
 
 void vpl_free(void *p)
 {
-	sceKernelFreeVpl(g_vpl_uid, p);
+	int ret;
+
+	ret = sceKernelFreeVpl(g_vpl_uid, p);
+
+#ifdef DEBUG
+	if(ret != 0) {
+		asm("break 0x8492");
+	}
+#endif
 }
 
 void *vpl_realloc(void *ptr, size_t size)

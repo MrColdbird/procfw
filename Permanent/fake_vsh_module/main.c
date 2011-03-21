@@ -18,6 +18,7 @@ PSP_MODULE_INFO("HEN", 0x800, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
 extern int start_exploit(int disable_vshorig, int ofw_mode);
+extern int scePowerRequestColdReset(int unk);
 
 static u8 buf[1024] __attribute__((aligned(64)));
 
@@ -127,6 +128,10 @@ int main(void)
 
 	if((key & (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) == (PSP_CTRL_CIRCLE | PSP_CTRL_CROSS | PSP_CTRL_SELECT | PSP_CTRL_START)) {
 		uninstall_fake_vsh();
+		sceKernelDelayThread(100000);
+		scePowerRequestColdReset(0);
+
+		return 0;
 	} else if(key & PSP_CTRL_RTRIGGER) {
 		disable_vshorig = 1;
 

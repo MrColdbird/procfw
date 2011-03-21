@@ -2,6 +2,8 @@
 #define STARGATE_H
 
 extern SEConfig conf;
+extern u32 psp_model;
+extern u32 psp_fw_version;
 
 int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key);
 int myPauth_init(void);

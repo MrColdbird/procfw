@@ -722,7 +722,7 @@ static int popcorn_patch_chain(SceModule2 *mod)
 		}
 
 		sceMeAudio_67CD7972 = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", g_offs->pops_patch.sceMeAudio_67CD7972_NID);
-		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0x67CD7972, _sceMeAudio_67CD7972, 1);
+		hook_import_bynid((SceModule*)mod, "sceMeAudio", g_offs->pops_patch.sceMeAudio_67CD7972_NID, _sceMeAudio_67CD7972, 1);
 
 		sync_cache();
 	}

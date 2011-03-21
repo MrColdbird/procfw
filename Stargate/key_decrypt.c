@@ -18,10 +18,13 @@
 #include "pspmodulemgr_kernel.h"
 #include "psputilsforkernel.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "kubridge.h"
 #include "utils.h"
 #include "printk.h"
 #include "stargate_patch_offset.h"
+#include "pspcipher.h"
+#include "stargate.h"
 
 static u8 g_key_d91609f0[16] = {
 	0xD0, 0x36, 0x12, 0x75, 0x80, 0x56, 0x20, 0x43,
@@ -207,7 +210,11 @@ static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 
 	cipher = get_game_cipher(keytag);
 
 	if (cipher != NULL) {
-		ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		if(psp_fw_version == FW_620) {
+			ret = uprx_decrypt(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		} else {
+			ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		}
 		
 		if (ret == 0) {
 			printk("%s: tag=0x%08X type=%d decrypt OK\n", __func__, cipher->tag, cipher->type);

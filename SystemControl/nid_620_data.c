@@ -551,6 +551,40 @@ static nid_entry sceDisplay_driver_nid[] = {
 	{ 0xE8466BC2, 0x82DE8125 }, 
 };
 
+static nid_entry sceAudio_driver_nid[] = {
+	{ 0xB282F4B2, 0x77EBE4A2, },  //sceAudioGetChannelRestLength
+	{ 0x669D93E4, 0xA502088E, },  //sceAudioSRCChReserve
+	{ 0x138A70F1, 0xF462A7B9, },  //sceAudioSRCChRelease
+	{ 0x43645E69, 0xE26E49E7, },  //sceAudioSRCOutputBlocking
+	{ 0x80F1F7E0, 0x0C4213E3, }, // sceAudioInit
+	{ 0x210567F7, 0x3C20F1F3, }, // sceAudioEnd
+	{ 0xA2BEAA6C, 0x45543440, }, // sceAudioSetFrequency 
+	{ 0xB61595C0, 0x6354634C, }, // sceAudioLoopbackTest 
+	{ 0x927AC32B, 0xBF1E8C42, }, // sceAudioSetVolumeOffset 
+	{ 0x8C1009B2, 0xA5C0603B, }, // sceAudioOutput 
+	{ 0x136CAF51, 0x2FD643D0, }, // sceAudioOutputBlocking 
+	{ 0xE2D56B2D, 0x548EEFD1, }, // sceAudioOutputPanned 
+	{ 0x13F592BC, 0x23F19798, }, // sceAudioOutputPannedBlocking 
+	{ 0x5EC81C55, 0x64B9E089, }, // sceAudioChReserve 
+	{ 0x41EFADE7, 0x45457EE5, }, // sceAudioOneshotOutput 
+	{ 0x6FC46853, 0xA05BAA21, }, // sceAudioChRelease 
+	{ 0xB011922F, 0x77EBE4A2, }, // sceAudioGetChannelRestLength 
+	{ 0xCB2E439E, 0x6F968893, }, // sceAudioSetChannelDataLen 
+	{ 0x95FD0C2D, 0xCD62C216, }, // sceAudioChangeChannelConfig 
+	{ 0xB7E1D8E7, 0x57AB835D, }, // sceAudioChangeChannelVolume 
+	{ 0x38553111, 0xA502088E, }, // sceAudioSRCChReserve 
+	{ 0x5C37C0AE, 0xF462A7B9, }, // sceAudioSRCChRelease 
+	{ 0xE0727056, 0xE26E49E7, }, // sceAudioSRCOutputBlocking 
+	{ 0x086E5895, 0x7F93FE1C, }, // sceAudioInputBlocking 
+	{ 0x6D4BEC68, 0xEC8B87CD, }, // sceAudioInput 
+	{ 0xA708C6A6, 0xFA700131, }, // sceAudioGetInputLength 
+	{ 0x87B2E651, 0x6B9C59FE, }, // sceAudioWaitInputEnd 
+	{ 0x7DE61688, 0xB82D416A, }, // sceAudioInputInit 
+	{ 0xE926D3FB, 0xB82D416A, }, // sceAudioInputInitEx 
+	{ 0xA633048E, 0x3076A373, }, // sceAudioPollInputEnd 
+	{ 0xE9D97901, 0x79AF2DA3, }, // sceAudioGetChannelRestLen 
+};
+
 static nid_entry sceDve_driver_nid[] = {
 	{ 0x0836B2B5, 0x9E03BCF9 }, 
 	{ 0x17BC42E4, 0x5BC934E9 }, 
@@ -939,7 +973,7 @@ resolver_config nid_620_fix[] = {
 	NID_ENTRY(sceReg_driver),
 	NID_ENTRY(sceCtrl_driver),
 	NID_ENTRY(sceDisplay_driver),
-//	NID_ENTRY(sceAudio_driver),
+	NID_ENTRY(sceAudio_driver),
 //	NID_ENTRY(UtilsForKernel),
 //	NID_ENTRY(SysclibForKernel),
 //	NID_ENTRY(ThreadManForKernel),

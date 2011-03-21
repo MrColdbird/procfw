@@ -536,13 +536,13 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0x5EC81C55, 0xF84226FB, }, // sceAudioChReserve 
 	{ 0x41EFADE7, 0x686AC4F4, }, // sceAudioOneshotOutput 
 	{ 0x6FC46853, 0xA6FD1A21, }, // sceAudioChRelease 
-	{ 0xB011922F, 0xA388ABDB, }, // sceAudio_driver_B011922F 
+	{ 0xB011922F, 0xA388ABDB, }, // sceAudioGetChannelRestLength 
 	{ 0xCB2E439E, 0x3F4D81C1, }, // sceAudioSetChannelDataLen 
 	{ 0x95FD0C2D, 0x5A0397C5, }, // sceAudioChangeChannelConfig 
 	{ 0xB7E1D8E7, 0xA25A3346, }, // sceAudioChangeChannelVolume 
-	{ 0x38553111, 0xE9BCD519, }, // sceAudio_driver_38553111 
-	{ 0x5C37C0AE, 0x0399579B, }, // sceAudio_driver_5C37C0AE 
-	{ 0xE0727056, 0x475F41FE, }, // sceAudio_driver_E0727056 
+	{ 0x38553111, 0xE9BCD519, }, // sceAudioSRCChReserve 
+	{ 0x5C37C0AE, 0x0399579B, }, // sceAudioSRCChRelease 
+	{ 0xE0727056, 0x475F41FE, }, // sceAudioSRCOutputBlocking 
 	{ 0x086E5895, 0x459D3B55, }, // sceAudioInputBlocking 
 	{ 0x6D4BEC68, 0x84FA80C4, }, // sceAudioInput 
 	{ 0xA708C6A6, 0xE071AB41, }, // sceAudioGetInputLength 

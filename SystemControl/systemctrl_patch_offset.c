@@ -13,7 +13,8 @@ PatchOffset g_635_offsets = {
 		.DiscCheckMediaCheck1 = 0x000003C4,
 		.DiscCheckMediaCheck2 = 0x00000DC8,
 		.MsSystemFileCheck = 0x000010B4,
-		.DiscIDCheck = 0x00000FC0,
+		.DiscIDCheck1 = 0x00000FC0,
+		.DiscIDCheck2 = 0x00000FDC,
 		.sceSystemFileGetIndexCall = 0x0000097C,
 	},
 	.memlmd_patch_01g = {
@@ -176,7 +177,8 @@ PatchOffset g_620_offsets = {
 		.DiscCheckMediaCheck1 = 0x0000039C,
 		.DiscCheckMediaCheck2 = 0x00000DA0,
 		.MsSystemFileCheck = 0x00001074,
-		.DiscIDCheck = 0x00000F80,
+		.DiscIDCheck1 = 0x00000F80,
+		.DiscIDCheck2 = 0x00000F9C,
 		.sceSystemFileGetIndexCall = 0x00000954,
 	},
 	.memlmd_patch_01g = {

@@ -126,8 +126,8 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 	_sw(0x1000FFDB, scemediasync_text_addr+g_offs->mediasync_patch.MsSystemFileCheck);
 
 	// Patch check on homebrews without DISC_ID
-	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck);
-	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck+4);
+	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck1);
+	_sw(NOP, scemediasync_text_addr+g_offs->mediasync_patch.DiscIDCheck2);
 
 	if(g_p2_size != 24 || g_p9_size != 24) {
 		printk("%s: p2/p9 %d/%d\n", __func__, g_p2_size, g_p9_size);

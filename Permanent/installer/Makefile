@@ -14,7 +14,8 @@ PSP_FW_VERSION = 620
 
 BUILD_PRX = 1
 EXTRA_TARGETS=EBOOT.PBP
-PSP_EBOOT_TITLE=6.20-PRO Permanent Patch
+PSP_EBOOT_TITLE=620 PRO-B Permanent Patch
+PSP_EBOOT_ICON = ICON0.PNG
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

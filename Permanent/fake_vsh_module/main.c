@@ -17,7 +17,7 @@
 PSP_MODULE_INFO("HEN", 0x800, 1, 0);
 PSP_HEAP_SIZE_KB(0);
 
-extern int start_exploit(int disable_vshorig, int ofw_mode);
+extern int start_exploit(int recovery_mode, int ofw_mode);
 extern int scePowerRequestColdReset(int unk);
 
 static u8 buf[1024] __attribute__((aligned(64)));
@@ -121,7 +121,7 @@ int main(void)
 {
 	SceCtrlData ctl;
 	u32 key;
-	int disable_vshorig = 0, ofw_mode = 0;
+	int recovery_mode = 0, ofw_mode = 0;
 	
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
@@ -133,7 +133,7 @@ int main(void)
 
 		return 0;
 	} else if(key & PSP_CTRL_RTRIGGER) {
-		disable_vshorig = 1;
+		recovery_mode = 1;
 
 		if (launch_recovery() >= 0) {
 			return 0;
@@ -142,7 +142,7 @@ int main(void)
 		ofw_mode = 1;
 	}
 
-	start_exploit(disable_vshorig, ofw_mode);
+	start_exploit(recovery_mode, ofw_mode);
 	
 	return 0;
 }

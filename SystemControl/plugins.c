@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "printk.h"
 #include "strsafe.h"
+#include "rebootex_conf.h"
 
 #define PLUGIN_PATH "ms0:/seplugins/"
 
@@ -165,6 +166,10 @@ int load_plugins(void)
 	unsigned int key = sceKernelApplicationType();
 
 	char * bootconf = NULL;
+
+	if(rebootex_conf.recovery_mode) {
+		return 0;
+	}
 
 	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {

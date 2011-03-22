@@ -34,6 +34,7 @@ struct PopsDecompressFunctionPatch {
 struct PopsPatch {
 	struct PopsDecompressFunctionPatch decomp[9];
 	u32 ICON0SizeOffset[9];
+	u32 manualNameCheck[9];
 	u32 sceMeAudio_67CD7972_NID;
 };
 

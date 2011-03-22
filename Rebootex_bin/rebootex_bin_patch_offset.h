@@ -4,6 +4,10 @@
 #include <pspsdk.h>
 #include "utils.h"
 
+#if !defined(CONFIG_635) && !defined(CONFIG_620)
+#error You have to define CONFIG_620 or CONFIG_635
+#endif
+
 struct RebootexPatch {
 	u32 sceBootLfatOpen;
 	u32 sceBootLfatRead;
@@ -43,6 +47,7 @@ typedef struct _PatchOffset {
 
 extern PatchOffset *g_offs;
 
+#ifdef CONFIG_635
 PatchOffset g_635_offsets = {
 	.fw_version = FW_635,
 	.iCacheFlushAll = 0x000001E4,
@@ -91,7 +96,9 @@ PatchOffset g_635_offsets = {
 		.sceKernelCheckExecFileCall3 = 0x00005D90 - 0x00000BBC,
 	},
 };
+#endif
 
+#ifdef CONFIG_620
 PatchOffset g_620_offsets = {
 	.fw_version = FW_620,
 	.iCacheFlushAll = 0x000001E4,
@@ -140,16 +147,23 @@ PatchOffset g_620_offsets = {
 		.sceKernelCheckExecFileCall3 = 0x000069DC - 0x00000BC4,
 	},
 };
+#endif
 
 PatchOffset *g_offs = NULL;
 
 static inline void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_635
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;
-	} else if(fw_version == g_620_offsets.fw_version) {
+	}
+#endif
+
+#ifdef CONFIG_620
+	if(fw_version == g_620_offsets.fw_version) {
 		g_offs = &g_620_offsets;
 	}
+#endif
 }
 
 #endif

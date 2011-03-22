@@ -72,10 +72,16 @@ int EatKey(SceCtrlData *pad_data, int count)
 	int i;
 
 	// copy true value
+
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635)
 		scePaf_memcpy(&ctrl_pad, pad_data, sizeof(SceCtrlData));
-	else if (psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620)
 		scePaf_memcpy_620(&ctrl_pad, pad_data, sizeof(SceCtrlData));
+#endif
 
 	// buttons check
 	buttons     = ctrl_pad.Buttons;
@@ -146,10 +152,15 @@ int TSRThread(SceSize args, void *argp)
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635)
 		scePaf_memcpy(&cnf_old, &cnf, sizeof(SEConfig));
-	else if (psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620)
 		scePaf_memcpy_620(&cnf_old, &cnf, sizeof(SEConfig));
+#endif
 
 	while(stop_flag == 0) {
 		if( sceDisplayWaitVblankStart() < 0)

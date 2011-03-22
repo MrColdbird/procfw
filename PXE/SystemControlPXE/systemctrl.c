@@ -37,12 +37,16 @@ int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelExitVSH(param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelExitVSH_620(param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -114,12 +118,16 @@ u32 sctrlKernelGetModel(void)
 	u32 model = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			model = sceKernelGetModel();
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			model = sceKernelGetModel_620();
 			break;
+#endif
 	};
    
 	return model;
@@ -143,12 +151,16 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByName(modname);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			mod = sceKernelFindModuleByName_620(modname);
 			break;
+#endif
 	};
 
 	return mod;
@@ -162,12 +174,16 @@ int sctrlKernelQuerySystemCall(void *func_addr)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelQuerySystemCall(func_addr);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelQuerySystemCall_620(func_addr);
 			break;
+#endif
 	};
 
 	pspSdkSetK1(k1);
@@ -180,12 +196,16 @@ int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelCheckExecFile(buffer, check);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelCheckExecFile_620(buffer, check);
 			break;
+#endif
 	}
 
 	return ret;
@@ -196,12 +216,16 @@ int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadModule(path, flags, option);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadModule_620(path, flags, option);
 			break;
+#endif
 	}
 	
 	return ret;
@@ -212,12 +236,16 @@ int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *statu
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelStartModule(modid, argsize, argp, status, option);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelStartModule_620(modid, argsize, argp, status, option);
 			break;
+#endif
 	}
 	
 	return ret;

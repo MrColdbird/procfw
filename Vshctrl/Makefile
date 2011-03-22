@@ -13,12 +13,20 @@ CFLAGS += -DDEBUG=1
 OBJS += ../Common/printk.o
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
+
 OBJS += $(IMPORTS)
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
-
-PSP_FW_VERSION = 635
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

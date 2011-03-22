@@ -15,8 +15,6 @@ OBJS = main.o \
 	   version_spoof.o \
 	   march33_patch.o \
 	   nid_resolver.o \
-	   nid_635_data.o \
-	   nid_620_data.o \
 	   elf.o \
 	   conf.o \
 	   high_memory.o \
@@ -54,10 +52,20 @@ CFLAGS += -DDEBUG=1
 OBJS += validate_stub.o ../Common/printk.o
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+OBJS += nid_620_data.o
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+OBJS += nid_635_data.o
+PSP_FW_VERSION = 635
+endif
+
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
-
-PSP_FW_VERSION = 635
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

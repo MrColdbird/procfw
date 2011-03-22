@@ -2,7 +2,16 @@ TARGET = Rebootex
 OBJS = main.o rebootex_patch_offset.o ../Common/utils.o imports.o
 
 CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
-PSP_FW_VERSION=635
+
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
 
 LDFLAGS = -mno-crt0 -nostartfiles -L ../libs
 LIBS += -lpspsystemctrl_kernel -lpspkubridge

@@ -70,12 +70,16 @@ int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelExitVSH(param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelExitVSH_620(param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -91,12 +95,16 @@ int sctrlKernelLoadExecVSHDisc(const char *file, struct SceKernelLoadExecVSHPara
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHDisc(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHDisc_620(file, param);
 			break;
+#endif
 	};
 
 	pspSdkSetK1(k1);
@@ -112,12 +120,16 @@ int sctrlKernelLoadExecVSHDiscUpdater(const char *file, struct SceKernelLoadExec
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHDiscUpdater(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHDiscUpdater_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -133,12 +145,16 @@ int sctrlKernelLoadExecVSHMs1(const char *file, struct SceKernelLoadExecVSHParam
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHMs1(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHMs1_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -154,12 +170,16 @@ int sctrlKernelLoadExecVSHMs2(const char *file, struct SceKernelLoadExecVSHParam
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHMs2(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHMs2_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -175,12 +195,16 @@ int sctrlKernelLoadExecVSHEf2(const char *file, struct SceKernelLoadExecVSHParam
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHEf2(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHEf2_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -196,12 +220,16 @@ int sctrlKernelLoadExecVSHMs3(const char *file, struct SceKernelLoadExecVSHParam
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHMs3(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHMs3_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -217,12 +245,16 @@ int sctrlKernelLoadExecVSHMs4(const char *file, struct SceKernelLoadExecVSHParam
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadExecVSHMs4(file, param);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHMs4_620(file, param);
 			break;
+#endif
 	};
 	
 	pspSdkSetK1(k1);
@@ -495,12 +527,16 @@ u32 sctrlKernelGetModel(void)
 	u32 model = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			model = sceKernelGetModel();
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			model = sceKernelGetModel_620();
 			break;
+#endif
 	};
    
 	return model;
@@ -524,12 +560,16 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByName(modname);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			mod = sceKernelFindModuleByName_620(modname);
 			break;
+#endif
 	};
 
 	return mod;
@@ -540,12 +580,16 @@ int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelSetDdrMemoryProtection(addr, size, prot);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelSetDdrMemoryProtection_620(addr, size, prot);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -556,12 +600,16 @@ SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const ch
 	SceUID ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelCreateHeap(partitionid, size, unk, name);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelCreateHeap_620(partitionid, size, unk, name);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -572,12 +620,16 @@ int sctrlKernelDeleteHeap(SceUID heapid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelDeleteHeap(heapid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelDeleteHeap_620(heapid);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -588,12 +640,16 @@ int sctrlKernelFreeHeapMemory(SceUID heapid, void *block)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelFreeHeapMemory(heapid, block);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelFreeHeapMemory_620(heapid, block);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -604,12 +660,16 @@ void* sctrlKernelAllocHeapMemory(SceUID heapid, SceSize size)
 	void *p = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			p = sceKernelAllocHeapMemory(heapid, size);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			p = sceKernelAllocHeapMemory_620(heapid, size);
 			break;
+#endif
 	};
 
 	return p;
@@ -620,12 +680,16 @@ int sctrlKernelGetSystemStatus(void)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelGetSystemStatus();
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelGetSystemStatus_620();
 			break;
+#endif
 	};
 	
 	return ret;
@@ -636,12 +700,16 @@ int sctrlKernelQueryMemoryPartitionInfo(int pid, PspSysmemPartitionInfo *info)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelQueryMemoryPartitionInfo(pid, info);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelQueryMemoryPartitionInfo_620(pid, info);
 			break;
+#endif
 	};
 
 	return ret;
@@ -652,12 +720,16 @@ int sctrlKernelPartitionMaxFreeMemSize(int pid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelPartitionMaxFreeMemSize(pid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelPartitionMaxFreeMemSize_620(pid);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -668,12 +740,16 @@ int sctrlKernelPartitionTotalFreeMemSize(int pid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelPartitionTotalFreeMemSize(pid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelPartitionTotalFreeMemSize_620(pid);
 			break;
+#endif
 	};
 	
 	return ret;
@@ -687,12 +763,16 @@ int sctrlKernelQuerySystemCall(void *func_addr)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelQuerySystemCall(func_addr);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelQuerySystemCall_620(func_addr);
 			break;
+#endif
 	};
 
 	pspSdkSetK1(k1);
@@ -705,12 +785,16 @@ SceModule* sctrlKernelFindModuleByUID(SceUID modid)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByUID(modid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			mod = sceKernelFindModuleByUID_620(modid);
 			break;
+#endif
 	};
 
 	return mod;
@@ -721,12 +805,16 @@ SceModule* sctrlKernelFindModuleByAddress(u32 address)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByAddress(address);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			mod = sceKernelFindModuleByAddress_620(address);
 			break;
+#endif
 	};
 
 	return mod;
@@ -737,12 +825,16 @@ int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelCheckExecFile(buffer, check);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelCheckExecFile_620(buffer, check);
 			break;
+#endif
 	}
 
 	return ret;
@@ -753,12 +845,16 @@ int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadModule(path, flags, option);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadModule_620(path, flags, option);
 			break;
+#endif
 	}
 	
 	return ret;
@@ -769,12 +865,16 @@ int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *statu
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelStartModule(modid, argsize, argp, status, option);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelStartModule_620(modid, argsize, argp, status, option);
 			break;
+#endif
 	}
 	
 	return ret;
@@ -785,12 +885,16 @@ int sctrlKernelUnloadModule(SceUID modid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelUnloadModule(modid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelUnloadModule_620(modid);
 			break;
+#endif
 	}
 	
 	return ret;
@@ -801,12 +905,16 @@ SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flag
 	SceUID ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = _sceKernelLoadModuleWithApitype2(apitype, path, flags, option);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadModuleWithApitype2_620(apitype, path, flags, option);
 			break;
+#endif
 	};
 
 	return ret;

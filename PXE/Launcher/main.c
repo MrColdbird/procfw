@@ -54,12 +54,16 @@ int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = scePowerRegisterCallbackPrivate_635(slot, cbid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = scePowerRegisterCallbackPrivate_620(slot, cbid);
 			break;
+#endif
 	}
 
 	return ret;
@@ -71,12 +75,16 @@ int scePowerUnregisterCallbackPrivate(unsigned int slot)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = scePowerUnregisterCallbackPrivate_635(slot);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = scePowerUnregisterCallbackPrivate_620(slot);
 			break;
+#endif
 	}
 
 	return ret;
@@ -216,10 +224,15 @@ int kernel_permission_call(void)
 	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)g_offs->sceKernelIcacheInvalidateAll;
 	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)g_offs->sceKernelDcacheWritebackInvalidateAll;
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635)
 		restore_sysmem_635();
-	else if(psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620)
 		restore_sysmem_620();
+#endif
 
 	//sync cache
 	_sceKernelIcacheInvalidateAll();
@@ -487,12 +500,23 @@ int main(int argc, char * argv[])
 
 	psp_fw_version = sceKernelDevkitVersion();
 
-	if (psp_fw_version != FW_635 && psp_fw_version != FW_620) {
-		pspDebugScreenPrintf("Sorry. This program requires 6.20/6.35.\n");
-		sceKernelDelayThread(5*1000000);
-		goto exit;
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		goto version_OK;
 	}
+#endif
 
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		goto version_OK;
+	}
+#endif
+
+	pspDebugScreenPrintf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
+	sceKernelDelayThread(5*1000000);
+	goto exit;
+
+version_OK:
 	setup_patch_offset_table(psp_fw_version);
 	
 	//puzzle installer path
@@ -518,6 +542,7 @@ int main(int argc, char * argv[])
 
 	input_dump_kmem();
 
+#ifdef COFNIG_635
 	if(psp_fw_version == FW_635) {
 		//create a fitting one
 		while(!is_intr_OK((u32)cbid))
@@ -525,9 +550,14 @@ int main(int argc, char * argv[])
 			//sceKernelDeleteCallback(cbid);
 			cbid = sceKernelCreateCallback("", NULL, NULL);
 		}
-	} else if (psp_fw_version == FW_620) {
+	}
+#endif
+
+#ifdef CONFIG_620
+   	if (psp_fw_version == FW_620) {
 		cbid = sceKernelCreateCallback("", NULL, NULL);
 	}
+#endif
 
 	printk("Got a CBID: 0x%08X\n", cbid);
 
@@ -563,15 +593,21 @@ int main(int argc, char * argv[])
 	//restoring instructions and patching loadexec
 	unsigned int interrupts = pspSdkDisableInterrupts();
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
-	} else if (psp_fw_version == FW_620) {
+	} 
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620) {
 		u32 kernel_entry, entry_addr;
 
 		kernel_entry = (u32) &kernel_permission_call;
 		entry_addr = ((u32) &kernel_entry) - 16;
 		result = sceKernelPowerLock(0, ((u32) &entry_addr) - 0x4234);
 	}
+#endif
 
 	pspSdkEnableInterrupts(interrupts);
 

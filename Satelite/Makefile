@@ -2,12 +2,21 @@ TARGET = satelite
 OBJS = main.o blit.o ui.o menu.o clock.o stubkk.o
 
 BUILD_PRX=1
-PSP_FW_VERSION=635
 
 INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
+
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
 
 PRX_EXPORTS = exports.exp
 

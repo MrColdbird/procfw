@@ -1,6 +1,11 @@
 #include <pspsdk.h>
 #include "stargate_patch_offset.h"
 
+#if !defined(CONFIG_635) && !defined(CONFIG_620)
+#error You have to define CONFIG_620 or CONFIG_635
+#endif
+
+#ifdef CONFIG_635
 PatchOffset g_635_offsets = {
 	.fw_version = FW_635,
 	.sceMesgLedDecryptGame1 = {
@@ -26,7 +31,9 @@ PatchOffset g_635_offsets = {
 		0x00003540, // 09g
 	},
 };
+#endif
 
+#ifdef CONFIG_620
 PatchOffset g_620_offsets = {
 	.fw_version = FW_620,
 	.sceMesgLedDecryptGame1 = {
@@ -52,14 +59,21 @@ PatchOffset g_620_offsets = {
 		0xDEADBEEF, // 09g
 	},
 };
+#endif
 
 PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_635
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;
-	} else if(fw_version == g_620_offsets.fw_version) {
+	}
+#endif
+
+#ifdef CONFIG_620
+	if(fw_version == g_620_offsets.fw_version) {
 		g_offs = &g_620_offsets;
 	}
+#endif
 }

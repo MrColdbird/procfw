@@ -25,12 +25,23 @@ OBJS += ../../Common/printk.o
 else
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+PSP_EBOOT_TITLE = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+PSP_EBOOT_TITLE = 635
+endif
+
 BUILD_PRX = 1
+PSP_EBOOT_TITLE += PRO-B Updater
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = 635 PRO-B Updater
 PSP_EBOOT_ICON = ICON0.PNG
-PSP_FW_VERSION = 635
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

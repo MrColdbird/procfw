@@ -15,10 +15,19 @@ OBJS += ../../Common/printk.o \
 		../../Common/utils.o
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
+
 BUILD_PRX=1
 USE_KERNEL_LIBS=1
 USE_KERNEL_LIBC=1
-PSP_FW_VERSION=635
 
 PRX_EXPORTS = export.exp
 

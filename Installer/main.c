@@ -9,8 +9,15 @@
 #include "utils.h"
 
 #include "galaxy.h"
+
+#ifdef CONFIG_635
 #include "march33.h"
+#endif
+
+#ifdef CONFIG_620
 #include "march33_620.h"
+#endif
+
 #include "popcorn.h"
 #include "satelite.h"
 #include "stargate.h"
@@ -23,12 +30,12 @@
 #include "../Permanent/ppatch_config.h"
 
 // VSH module can write F0/F1
-PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
+PSP_MODULE_INFO("PROUpdater", 0x0800, 1, 0);
 
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
-#define VERSION_STR "635PRO-B"
+#define VERSION_STR "PRO-B"
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;
@@ -202,13 +209,19 @@ int install_cfw(void)
 		sceIoRemove(g_old_cfw_files[i]);
 	}
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		g_file_lists[4].buf = march33;
 		g_file_lists[4].size = &size_march33;
-	} else if (psp_fw_version == FW_620) {
+	}
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620) {
 		g_file_lists[4].buf = march33_620;
 		g_file_lists[4].size = &size_march33_620;
 	}
+#endif
 
 	for(i=0; i<NELEMS(g_file_lists); ++i) {
 		ret = smart_write_file(g_file_lists[i].dst, g_file_lists[i].buf, *g_file_lists[i].size);
@@ -502,11 +515,22 @@ int main(int argc, char *argv[])
 	pspDebugScreenInit();
 	psp_fw_version = sceKernelDevkitVersion();
 
-	if (psp_fw_version != FW_635 && psp_fw_version != FW_620) {
-		printf("Sorry. This program requires 6.20/6.35.\n");
-		goto exit;
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		goto version_OK;
 	}
+#endif
 
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		goto version_OK;
+	}
+#endif
+
+	printf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
+	goto exit;
+	
+version_OK:
 	psp_model = kuKernelGetModel();
 	scePowerSetClockFrequency(333, 333, 166);
 	init_flash();

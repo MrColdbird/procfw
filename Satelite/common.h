@@ -14,6 +14,10 @@
 #include "blit.h"
 #include "utils.h"
 
+#if !defined(CONFIG_635) && !defined(CONFIG_620)
+#error You have to define CONFIG_620 or CONFIG_635
+#endif
+
 int menu_draw(void);
 int menu_setup(void);
 int menu_ctrl(u32 button_on);

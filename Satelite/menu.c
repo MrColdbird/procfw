@@ -169,10 +169,15 @@ int menu_setup(void)
 
 	//xmb clock
 	if( cpu2no(cnf.vshcpuspeed) && ( bus2no(cnf.vshbusspeed)))	{		
+#ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
-		else if (psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+		if (psp_fw_version == FW_620)
 			scePaf_sprintf_620(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
+#endif
 		
 		bridge = freq_buf;
 	} else {
@@ -183,10 +188,15 @@ int menu_setup(void)
 
 	//game clock
 	if(cpu2no(cnf.umdisocpuspeed) && (bus2no(cnf.umdisobusspeed))) {		
+#ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
-		else if (psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+		if (psp_fw_version == FW_620)
 			scePaf_sprintf_620(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
+#endif
 		
 		bridge = freq2_buf;
 	} else {
@@ -197,10 +207,15 @@ int menu_setup(void)
 
 	//usb device
 	if((cnf.usbdevice>0) && (cnf.usbdevice<5)) {
+#ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(device_buf, "Flash %d", cnf.usbdevice-1);	
-		else if (psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+		if (psp_fw_version == FW_620)
 			scePaf_sprintf_620(device_buf, "Flash %d", cnf.usbdevice-1);	
+#endif
 
 		bridge = device_buf;
 	} else {

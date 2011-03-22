@@ -48,10 +48,21 @@ PatchOffset g_635_offsets = {
 			0x00037D34, // 03G
 			0x00037D74, // 04G
 			0x00039B5C, // 05G
-			0x00000000, // unused
+			0xDEADBEEF, // unused
 			0x00037D74, // 07G
-			0x00000000, // unused
+			0xDEADBEEF, // unused
 			0x00037D74, // 09G
+		},
+		.manualNameCheck = {
+			0x000251C0, // 01G
+			0x000256CC, // 02G
+			0x000256CC, // 03G
+			0x0002570C, // 04G
+			0x00025FA0, // 05G
+			0xDEADBEEF, // unused
+			0x0002570C, // 07G
+			0xDEADBEEF, // unused
+			0x0002570C, // 09G
 		},
 		.sceMeAudio_67CD7972_NID = 0x67CD7972,
 	},
@@ -101,6 +112,17 @@ PatchOffset g_620_offsets = {
 			0x0003BCD0, // 03G
 			0x0003BCFC, // 04G
 			0x0003DAE4, // 05G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+		},
+		.manualNameCheck = {
+			0x00029710, // 01G
+			0x00029710, // 02G
+			0x00029710, // 03G
+			0x0002973C, // 04G
+			0x00029FD0, // 05G
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused

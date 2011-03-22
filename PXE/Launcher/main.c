@@ -542,7 +542,7 @@ version_OK:
 
 	input_dump_kmem();
 
-#ifdef COFNIG_635
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		//create a fitting one
 		while(!is_intr_OK((u32)cbid))

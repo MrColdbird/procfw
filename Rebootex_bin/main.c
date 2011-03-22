@@ -42,7 +42,7 @@ int size_rebootmodule = 0;
 int rebootmoduleflags = 0;
 u32 psp_fw_version = 0;
 u8 psp_model = 0;
-u8 disable_vshorig = 0;
+u8 recovery_mode = 0;
 u8 ofw_mode = 0;
 
 PspBootConfMode iso_mode = 0;
@@ -203,7 +203,7 @@ void load_configure(void)
 		psp_fw_version = conf->psp_fw_version;
 		iso_mode = conf->iso_mode;
 		psp_model = conf->psp_model;
-		disable_vshorig = conf->disable_vshorig;
+		recovery_mode = conf->recovery_mode;
 		ofw_mode = conf->ofw_mode;
 	}
 }
@@ -549,7 +549,7 @@ int is_permanent_mode(void)
 {
 	int ret;
 
-	if(disable_vshorig) {
+	if(recovery_mode) {
 		return 0;
 	}
 

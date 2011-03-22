@@ -38,7 +38,7 @@ typedef struct _rebootex_config {
 	u32 psp_fw_version;
 	u8 psp_model;
 	u8 iso_mode;
-	u8 disable_vshorig;
+	u8 recovery_mode;
 	u8 ofw_mode;
 } rebootex_config;
 

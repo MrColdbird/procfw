@@ -10,6 +10,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "utils.h"
+#include "rebootex_conf.h"
 
 int sceResmgr_driver_9DC14891(u8 *buf, u32 size, u32* newsize);
 
@@ -19,7 +20,7 @@ int versionspoofer(u8 *buf, u32 size, u32* newsize)
 	int result = sceResmgr_driver_9DC14891(buf, size, newsize);
 
 	//version.txt spotted!
-	if(conf.useversion && strstr((const char*)buf, "release:")) {
+	if(!rebootex_conf.recovery_mode && conf.useversion && strstr((const char*)buf, "release:")) {
 		//increase permission level
 		u32 k1 = pspSdkSetK1(0);
 

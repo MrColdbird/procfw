@@ -100,14 +100,24 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patch->sceBootLfatReadCall);
 	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
 	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
+
+	//Killing Function Part #1 - jr $ra
 	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
+	//Killing Function Part #2 - li $v0, 1
 	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck3);
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck4);
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck5);
+	//Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
 	_sw(0x00113821, REBOOT_START + patch->LoadCoreModuleStartCall - 4);
+	//Prepare LoadCore Patch Part #2 - jal PatchLoadCore
 	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patch->LoadCoreModuleStartCall);
+	//Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
 	_sw(0x02A0E821, REBOOT_START + patch->LoadCoreModuleStartCall + 4);
 	
 	//initializing global variables

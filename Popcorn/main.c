@@ -7,11 +7,16 @@
 
 #include "pspmodulemgr_kernel.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "printk.h"
 #include "utils.h"
 #include "strsafe.h"
 #include "libs.h"
 #include "popcorn_patch_offset.h"
+
+extern void patch_analog_imports(SceModule *mod);
+
+SEConfig conf;
 
 enum {
 	ICON0_OK = 0,
@@ -728,6 +733,10 @@ static int popcorn_patch_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if( conf.noanalog ) {
+		patch_analog_imports((SceModule*)mod);
+	}
+
 	if(g_previous)
 		return g_previous(mod);
 	
@@ -806,6 +815,8 @@ int module_start(SceSize args, void* argp)
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 	psp_model = sceKernelGetModel();
+	memset(&conf, 0, sizeof(conf));
+	sctrlSEGetConfig(&conf);
 	printk_init("ms0:/popcorn.txt");
 	printk("Popcorn: init_file = %s psp_fw_version = 0x%08X psp_model = %d\n", sceKernelInitFileName(), psp_fw_version, psp_model);
 

@@ -112,53 +112,40 @@ void main(int arg1, int arg2, int arg3, int arg4)
 		patch = &g_offs->rebootex_patch_other;
 	}
 
+	sceBootLfatOpen = (void *)REBOOT_START + patch->sceBootLfatOpen;
+	sceBootLfatRead = (void *)REBOOT_START + patch->sceBootLfatRead;
+	sceBootLfatClose = (void *)REBOOT_START + patch->sceBootLfatClose;
+	UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
+
 	if(ofw_mode) {
-		//0x0000565C in 6.20 - UnpackBootConfig
-		UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
-
-		//0x000070F0 in 6.20 - Call to UnpackBootConfig
 		_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
-
-		//UnpackBootConfig buffer address
 		_sw(0x27A40004, REBOOT_START + patch->UnpackBootConfigBufferAddress); // addiu $a0, $sp, 4
-
+		
 		goto exit;
 	}
 
-	//0x000082AC in 6.20 - sceBootLfatOpen
-	sceBootLfatOpen = (void *)REBOOT_START + patch->sceBootLfatOpen;
-	//0x00008420 in 6.20 - sceBootLfatRead
-	sceBootLfatRead = (void *)REBOOT_START + patch->sceBootLfatRead;
-	//0x000083C4 in 6.20 - sceBootLfatClose
-	sceBootLfatClose = (void *)REBOOT_START + patch->sceBootLfatClose;
-	//0x0000565C in 6.20 - UnpackBootConfig
-	UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
-
-	//0x000026DC in 6.20 - Call to sceBootLfatOpen
 	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patch->sceBootLfatOpenCall);
-	//0x0000274C in 6.20 - Call to sceBootLfatRead
 	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patch->sceBootLfatReadCall);
-	//0x00002778 in 6.20 - Call to sceBootLfatClose
 	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
-	//0x000070F0 in 6.20 - Call to UnpackBootConfig
 	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
-	//0x00003798 in 6.20 - Killing Function Part #1 - jr $ra
+
+	//Killing Function Part #1 - jr $ra
 	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
-	//0x0000379C in 6.20 - Killing Function Part #2 - li $v0, 1
+	//Killing Function Part #2 - li $v0, 1
 	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
-	//0x000026D4 in 6.20 - Killing Branch Check bltz ...
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
-	//0x00002728 in 6.20 - Killing Branch Check bltz ...
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck3);
-	//0x00002740 in 6.20 - Killing Branch Check beqz ...
+	//Killing Branch Check beqz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck4);
-	//0x00007388 in 6.20 - Killing Branch Check bltz ...
+	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck5);
-	//0x00005550 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
+	//Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
 	_sw(0x00113821, REBOOT_START + patch->LoadCoreModuleStartCall - 4);
-	//0x00005554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
+	//Prepare LoadCore Patch Part #2 - jal PatchLoadCore
 	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patch->LoadCoreModuleStartCall);
-	//0x00005558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
+	//Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
 	_sw(0x02A0E821, REBOOT_START + patch->LoadCoreModuleStartCall + 4);
 	//UnpackBootConfig buffer address
 	_sw(0x27A40004, REBOOT_START + patch->UnpackBootConfigBufferAddress); // addiu $a0, $sp, 4
@@ -549,14 +536,10 @@ int is_permanent_mode(void)
 {
 	int ret;
 
-	if(recovery_mode) {
-		return 0;
-	}
-
-	ret = sceBootLfatOpen(VSHORIG + sizeof("flash0:") - 1);
+	ret = (*sceBootLfatOpen)(VSHORIG + sizeof("flash0:") - 1);
 
 	if(ret >= 0) {
-		sceBootLfatClose();
+		(*sceBootLfatClose)();
 		return 1;
 	}
 
@@ -622,7 +605,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 	}
 
 exit:
-	if(is_permanent_mode()) {
+	if((!recovery_mode || ofw_mode) && is_permanent_mode()) {
 		RenameModule(buffer, VSHMAIN + sizeof("flash0:") - 1, VSHORIG + sizeof("flash0:") - 1);
 	}
 

@@ -75,6 +75,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x452E3696, 0xD9A4D69E, }, // sceKernelGetSystemStatus
 	{ 0x95F5E8DA, 0x604C20C4, }, // SysMemForKernel_95F5E8DA
 	{ 0x0D547E7F, 0x3C4C5630, }, // sceKernelGetUMDData
+	{ 0xAB5E85E5, 0x3C4C5630, }, // sceKernelGetUMDData (620 to 635)
 	{ 0x419DB8F4, 0x25A760F0, }, // sceKernelRegisterGetIdFunc
 	{ 0x002BA296, 0x54DEFDA7, }, // sceKernelQueryHeapInfo
 	{ 0x03808C51, 0xD94A5183, }, // SysMemForKernel_03808C51

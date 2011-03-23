@@ -6,6 +6,8 @@
 static nid_entry SysMemForKernel_nid[] = {
 	{ 0x1C1FBFE7, 0xC6A782DA }, 
 	{ 0x002BA296, 0x6FDEF86F }, 
+	{ 0x0D547E7F, 0xAB5E85E5 }, // sceKernelGetUMDData
+	{ 0x3C4C5630, 0xAB5E85E5 }, // sceKernelGetUMDData (635 to 620)
 	{ 0x03808C51, 0x3988900F }, 
 	{ 0xC9805775, 0x9BAA857E }, 
 	{ 0xEB7A74DB, 0x191C6F98 }, 

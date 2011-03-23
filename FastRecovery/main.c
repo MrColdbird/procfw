@@ -82,12 +82,16 @@ int scePowerRegisterCallbackPrivate(unsigned int slot, int cbid)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = scePowerRegisterCallbackPrivate_635(slot, cbid);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = scePowerRegisterCallbackPrivate_620(slot, cbid);
 			break;
+#endif
 	}
 
 	return ret;
@@ -99,12 +103,16 @@ int scePowerUnregisterCallbackPrivate(unsigned int slot)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_635
 		case FW_635:
 			ret = scePowerUnregisterCallbackPrivate_635(slot);
 			break;
+#endif
+#ifdef CONFIG_620
 		case FW_620:
 			ret = scePowerUnregisterCallbackPrivate_620(slot);
 			break;
+#endif
 	}
 
 	return ret;
@@ -142,6 +150,7 @@ int _LoadReboot(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4)
 int kernelSyscall(void);
 u32 get_power_address(int cbid);
 
+#ifdef CONFIG_635
 void restore_sysmem_635(void)
 {
 	u32 address, data_address;
@@ -219,7 +228,9 @@ void restore_sysmem_635(void)
 	INTR(0x03E00008);
 	INTR(0x27BD0010);
 }
+#endif
 
+#ifdef CONFIG_620
 void restore_sysmem_620(void)
 {
 	u32 address;
@@ -231,8 +242,8 @@ void restore_sysmem_620(void)
 	INTR(0x00001021); /* addu $v0, $zr, $zr */
 	INTR(0x3C058801); /* lui $a1, 0x8801 */
 }
+#endif
 
-//our 6.35 kernel permission call
 int kernel_permission_call(void)
 {
 	struct sceLoadExecPatch *patch;
@@ -241,10 +252,15 @@ int kernel_permission_call(void)
 	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)g_offs->sceKernelIcacheInvalidateAll;
 	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)g_offs->sceKernelDcacheWritebackInvalidateAll;
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635)
 		restore_sysmem_635();
-	else if(psp_fw_version == FW_620)
+#endif
+
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620)
 		restore_sysmem_620();
+#endif
 
 	//sync cache
 	_sceKernelIcacheInvalidateAll();
@@ -328,6 +344,7 @@ int is_intr_OK(u32 intr)
 	return 0; 
 }
 
+#ifdef CONFIG_635
 static int is_pspgo(void)
 {
 	// This call will always fail, but with a different error code depending on the model
@@ -336,6 +353,7 @@ static int is_pspgo(void)
 	// Check for "No such device" error
 	return ((result == (int)0x80020321) ? 0 : 1);
 }
+#endif
 
 static inline u32 get_power_slot_by_address(u32 address, u32 power_buf_address)
 {
@@ -345,6 +363,7 @@ static inline u32 get_power_slot_by_address(u32 address, u32 power_buf_address)
 	return (address - power_buf_address) >> 4;
 }
 
+#ifdef CONFIG_635
 // psp-go don't need this for it's always zero.
 static void patch_power_arg(int cbid, u32 power_buf_address)
 {
@@ -369,6 +388,7 @@ static void patch_power_arg(int cbid, u32 power_buf_address)
 		sceKernelDelayThread(1000000);
 	}
 }
+#endif
 
 void input_dump_kmem(void)
 {
@@ -400,15 +420,21 @@ int main(int argc, char * argv[])
 
 	input_dump_kmem();
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		//create a fitting one
 		while(!is_intr_OK((u32)cbid)) {
 			//sceKernelDeleteCallback(cbid);
 			cbid = sceKernelCreateCallback("", NULL, NULL);
 		}
-	} else if (psp_fw_version == FW_620) {
+	} 
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620) {
 		cbid = sceKernelCreateCallback("", NULL, NULL);
 	}
+#endif
 
 	printk("Got a CBID: 0x%08X\r\n", cbid);
 
@@ -418,9 +444,11 @@ int main(int argc, char * argv[])
 	scePowerUnregisterCallbackPrivate(0);
 	printk("power_buf_address 0x%08X\r\n", power_buf_address);
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635 && !is_pspgo()) {
 		patch_power_arg(cbid, power_buf_address);
 	}
+#endif
 
 	//override sysmem function
 	unsigned int smpos = g_offs->patchRangeStart; for(; smpos < g_offs->patchRangeEnd; smpos += 16)
@@ -444,15 +472,21 @@ int main(int argc, char * argv[])
 	//restoring instructions and patching loadexec
 	unsigned int interrupts = pspSdkDisableInterrupts();
 
+#ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		result = SysMemUserForUser_D8DE5C1E(0xC01DB15D, 0xC00DCAFE, kernelSyscall, 0x12345678, -1);
-	} else if (psp_fw_version == FW_620) {
+	}
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620) {
 		u32 kernel_entry, entry_addr;
 
 		kernel_entry = (u32) &kernel_permission_call;
 		entry_addr = ((u32) &kernel_entry) - 16;
 		result = sceKernelPowerLock(0, ((u32) &entry_addr) - 0x4234);
 	}
+#endif
 
 	pspSdkEnableInterrupts(interrupts);
 

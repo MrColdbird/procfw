@@ -8,4 +8,5 @@ Dark_Alex for the initial M33 CFW who guided us mentally through several CFW gen
 Davee for his v1 register leak address discovery used in Power-Argument-Patching.
 victor.rds for the cool animated Fast Recovery Icon. (http://wololo.net/talk/viewtopic.php?f=17&t=3716#p42091)
 Takka and Plum for their idea of preventing hibernation deletetion.
+bbtgp for his PrxEncrypter source code to produce the signed fake vshmain module for permanent patch
 And last but not least - Sony for making a wonderful, however very locked down, portable gaming handheld.

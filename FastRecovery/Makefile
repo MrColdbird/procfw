@@ -1,5 +1,5 @@
 TARGET = 635kernel
-OBJS = main.o imports.o syscall.o ../Common/utils.o
+OBJS = main.o imports.o syscall.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o
 LIBS =
 CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
 CXXFLAGS = $(CFLAGS)
@@ -13,10 +13,22 @@ OBJS += ../Common/printk.o
 else
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+PSP_EBOOT_TITLE = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+PSP_EBOOT_TITLE = 635
+endif
+
 BUILD_PRX = 1
+PSP_EBOOT_TITLE += PRO-B Fast Recovery
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = 635PRO-B Fast Recovery
 PSP_EBOOT_ICON = ICON0.PNG
 PSP_EBOOT_ICON1 = ICON1.PMF
 PSP_EBOOT_PIC1 = PIC1.PNG

@@ -12,26 +12,25 @@
 #include "printk.h"
 #include "libs.h"
 #include "nid_resolver.h"
+#include "systemctrl_patch_offset.h"
 
 static STMOD_HANDLER previous;
 
 static void patch_sceWlan_Driver(u32 text_addr);
 static void patch_scePower_Service(u32 text_addr);
 
-extern int sceKernelGetSystemStatus(void);
-
 static inline void set_clock(void)
 {
 	int key_config, ret;
 
-	ret = sceKernelGetSystemStatus();
+	ret = sctrlKernelGetSystemStatus();
    
 	// status becomes 0x00020000 after init_file loads
 	if (ret != 0x00020000) {
 		return;
 	}
 	
-	key_config = sceKernelInitKeyConfig();
+	key_config = sceKernelApplicationType();
 
 	if (key_config == PSP_INIT_KEYCONFIG_GAME ||
 			key_config == PSP_INIT_KEYCONFIG_POPS
@@ -57,7 +56,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
 		u32 key_config;
 
-		key_config = sceKernelInitKeyConfig();
+		key_config = sceKernelApplicationType();
 		
 		if (key_config == PSP_INIT_KEYCONFIG_GAME) {
 			if(PSP_1000 != psp_model) {
@@ -150,13 +149,13 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 static void patch_sceWlan_Driver(u32 text_addr)
 {
-	_sw(0, text_addr + 0x000026C0);
+	_sw(NOP, text_addr + g_offs->wlan_driver_patch.FreqCheck);
 }
 
 static void patch_scePower_Service(u32 text_addr)
 {
 	// scePowerGetBacklightMaximum always returns 4
-	_sw(0, text_addr + 0x00000E10);
+	_sw(NOP, text_addr + g_offs->power_service_patch.scePowerGetBacklightMaximumCheck);
 }
 
 void syspatch_init()

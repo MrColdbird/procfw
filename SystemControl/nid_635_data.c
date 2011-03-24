@@ -72,9 +72,10 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xF6C10E27, 0x6174D377, }, // sceKernelGetSysMemoryInfo
 	{ 0xCDA3A2F7, 0xF2FEAFD5, }, // SysMemForKernel_CDA3A2F7
 	{ 0x960B888C, 0x78A1500D, }, // SysMemForKernel_960B888C
-	{ 0x452E3696, 0xD9A4D69E, }, // SysMemForKernel_452E3696
+	{ 0x452E3696, 0xD9A4D69E, }, // sceKernelGetSystemStatus
 	{ 0x95F5E8DA, 0x604C20C4, }, // SysMemForKernel_95F5E8DA
 	{ 0x0D547E7F, 0x3C4C5630, }, // sceKernelGetUMDData
+	{ 0xAB5E85E5, 0x3C4C5630, }, // sceKernelGetUMDData (620 to 635)
 	{ 0x419DB8F4, 0x25A760F0, }, // sceKernelRegisterGetIdFunc
 	{ 0x002BA296, 0x54DEFDA7, }, // sceKernelQueryHeapInfo
 	{ 0x03808C51, 0xD94A5183, }, // SysMemForKernel_03808C51
@@ -148,7 +149,7 @@ static nid_entry KDebugForKernel_nid[] = {
 static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0xCF8A41B1, 0xEF8A0BEA, }, // sceKernelFindModuleByName
 	{ 0xCCE4A157, 0xED53894F, }, // sceKernelFindModuleByUID
-	{ 0xDD303D79, 0x312CA47E, }, // LoadCoreForKernel_DD303D79 ( TODO: actually in 5.XX)
+	{ 0xDD303D79, 0x312CA47E, }, // sceKernelFindModuleByAddress (5.XX NID)
 	{ 0xFB8AE27D, 0x312CA47E, }, // sceKernelFindModuleByAddress (3.xx NID)
 	{ 0xACE23476, 0x563CB22E, }, // sceKernelCheckPspConfig
 	{ 0x7BE1421C, 0x01DB1EB3, }, // sceKernelCheckExecFile
@@ -255,8 +256,8 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0xB49FFB9E, 0x0208316C, }, // sceKernelRebootBeforeForKernel
 	{ 0xF0A26395, 0x8B19C181, }, // sceKernelGetModuleId
 	{ 0xD8B73127, 0xAD633D71, }, // sceKernelGetModuleIdByAddress
+	{ 0x6DE9FF11, 0x32292450, }, // sceKernelLoadModuleWithApitype2
 
-	{ 0x6DE9FF11, 0x32292450, },
 	{ 0x896C15B6, 0xD1F71B4D, },
 	{ 0x92EDEBD0, 0x057BEB8E, },
 	{ 0x6723BBFF, 0xC350D8D6, },
@@ -536,13 +537,13 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0x5EC81C55, 0xF84226FB, }, // sceAudioChReserve 
 	{ 0x41EFADE7, 0x686AC4F4, }, // sceAudioOneshotOutput 
 	{ 0x6FC46853, 0xA6FD1A21, }, // sceAudioChRelease 
-	{ 0xB011922F, 0xA388ABDB, }, // sceAudio_driver_B011922F 
+	{ 0xB011922F, 0xA388ABDB, }, // sceAudioGetChannelRestLength 
 	{ 0xCB2E439E, 0x3F4D81C1, }, // sceAudioSetChannelDataLen 
 	{ 0x95FD0C2D, 0x5A0397C5, }, // sceAudioChangeChannelConfig 
 	{ 0xB7E1D8E7, 0xA25A3346, }, // sceAudioChangeChannelVolume 
-	{ 0x38553111, 0xE9BCD519, }, // sceAudio_driver_38553111 
-	{ 0x5C37C0AE, 0x0399579B, }, // sceAudio_driver_5C37C0AE 
-	{ 0xE0727056, 0x475F41FE, }, // sceAudio_driver_E0727056 
+	{ 0x38553111, 0xE9BCD519, }, // sceAudioSRCChReserve 
+	{ 0x5C37C0AE, 0x0399579B, }, // sceAudioSRCChRelease 
+	{ 0xE0727056, 0x475F41FE, }, // sceAudioSRCOutputBlocking 
 	{ 0x086E5895, 0x459D3B55, }, // sceAudioInputBlocking 
 	{ 0x6D4BEC68, 0x84FA80C4, }, // sceAudioInput 
 	{ 0xA708C6A6, 0xE071AB41, }, // sceAudioGetInputLength 
@@ -1143,7 +1144,7 @@ static nid_entry scePaf_nid[] = {
 	{ 0xE3D530AE, 0x1B952318, },
 };
 
-resolver_config nid_fix[] = {
+resolver_config nid_635_fix[] = {
 #define NID_ENTRY(libname) \
 	{ #libname, NELEMS(libname##_nid), libname##_nid, }
 	NID_ENTRY(SysMemForKernel),
@@ -1184,4 +1185,4 @@ resolver_config nid_fix[] = {
 #undef NID_ENTRY
 };
 
-u32 nid_fix_size = NELEMS(nid_fix);
+u32 nid_635_fix_size = NELEMS(nid_635_fix);

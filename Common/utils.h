@@ -1,6 +1,9 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define FW_635 0x06030510
+#define FW_620 0x06020010
+
 enum {
 	PSP_1000 = 0,
 	PSP_2000 = 1,

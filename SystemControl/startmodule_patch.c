@@ -7,6 +7,7 @@
 #include "printk.h"
 #include "strsafe.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 static int plugin_loaded = 0;
 static int opnssmp_loaded = 0;
@@ -16,6 +17,8 @@ static int get_game_tag(const char *path, u32 *tag)
 	SceUID fd;
 	char buf[0x150];
 	int ret;
+
+	*tag = (u32)-1;
 
 	if(path == NULL) {
 		return -1;
@@ -65,7 +68,7 @@ static int load_opnssmp(const char *path, u32 tag)
 	}
 
 	STRCAT_S(opnssmp_path, "OPNSSMP.BIN");
-	modid = sceKernelLoadModule(opnssmp_path, 0, NULL);
+	modid = sctrlKernelLoadModule(opnssmp_path, 0, NULL);
 
 	if(modid < 0) {
 		printk("%s: load %s -> 0x%08X\n", __func__, opnssmp_path, modid);
@@ -73,11 +76,11 @@ static int load_opnssmp(const char *path, u32 tag)
 		return modid;
 	}
 
-	ret = sceKernelStartModule(modid, 4, &opnssmp_type, 0, NULL);
+	ret = sctrlKernelStartModule(modid, 4, &opnssmp_type, 0, NULL);
 
 	if(ret < 0) {
 		printk("%s: start module -> 0x%08X\n", __func__, modid);
-		sceKernelUnloadModule(modid);
+		sctrlKernelUnloadModule(modid);
 
 		return ret;
 	}
@@ -90,10 +93,10 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	int ret;
 	SceModule2 *mod, *mediasync, *kernellibrary;
 
-	mod = (SceModule2*) sceKernelFindModuleByUID(modid);
+	mod = (SceModule2*) sctrlKernelFindModuleByUID(modid);
 
 	if(!plugin_loaded) {
-		mediasync = (SceModule2*)sceKernelFindModuleByName("sceMediaSync");
+		mediasync = (SceModule2*)sctrlKernelFindModuleByName("sceMediaSync");
 
 		if(mediasync == NULL) {
 			goto out;
@@ -105,25 +108,31 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 	if(conf.skiplogo && mod != NULL && 0 == strcmp(mod->modname, "vsh_module")) {
 		u32* vshmain_args = oe_malloc(1024);
+		u32 error_code = 0;
+
+		if(argp != NULL && argsize >= 16) {
+			error_code = ((u32*)argp)[3];
+		}
 
 		memset(vshmain_args, 0, 1024);
 		vshmain_args[0] = 1024;
 		vshmain_args[1] = 0x20;
+		vshmain_args[3] = error_code;
 		vshmain_args[16] = 1;
 		vshmain_args[160] = 1;
 		vshmain_args[161] = 0x50007;
 
-		ret = sceKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
+		ret = sctrlKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
 		oe_free(vshmain_args);
 
 		return ret;
 	}
 
 	if(!opnssmp_loaded) {
-		u32 key = sceKernelInitKeyConfig();
+		u32 key = sceKernelApplicationType();
 
 		if (key == PSP_INIT_KEYCONFIG_GAME) {
-			kernellibrary = (SceModule2*)sceKernelFindModuleByName("sceKernelLibrary");
+			kernellibrary = (SceModule2*)sctrlKernelFindModuleByName("sceKernelLibrary");
 
 			if(kernellibrary != NULL) {
 				const char *path;
@@ -137,7 +146,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 				ret = get_game_tag(path, &tag);
 
-				if (ret == 0) {
+				if (ret == 0 && tag != (u32)-1) {
 					printk("%s: tag 0x%08X\n", __func__, tag);
 					load_opnssmp(path, tag);
 				} else {
@@ -150,7 +159,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 	}
 
 out:
-	ret = sceKernelStartModule(modid, argsize, argp, modstatus, opt);
+	ret = sctrlKernelStartModule(modid, argsize, argp, modstatus, opt);
 
 	return ret;
 }
@@ -160,7 +169,7 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 	u32 import;
 
 	// patch init's sceKernelStartModule import from its bootstart offset
-	import = ((u32)bootstart)+0x270;
+	import = ((u32)bootstart)+g_offs->start_module_patch.sceKernelStartModuleBootStartOffset;
 	REDIRECT_FUNCTION(_sceKernelStartModule, import);
 	sync_cache();
 
@@ -169,6 +178,6 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 
 void patch_sceKernelStartModule(u32 loadcore_text_addr)
 {
-	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr+0x00001DA8);
-	_sw(0x02E02021, loadcore_text_addr+0x00001DAC); // move $a0, $s7
+	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall);
+	_sw(0x02E02021, loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall+4); // move $a0, $s7
 }

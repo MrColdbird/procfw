@@ -6,14 +6,26 @@
 
 	IMPORT_START	"SysMemForKernel",0x00010011
 	IMPORT_FUNC	"SysMemForKernel",0x458A70B5,sceKernelGetModel
+	IMPORT_FUNC	"SysMemForKernel",0x864EBFD7,sceKernelGetModel_620
 	IMPORT_FUNC	"SysMemForKernel",0x5E8DCA05,sceKernelDevkitVersion
-	IMPORT_FUNC	"SysMemForKernel",0x00E9A04A,SysMemForKernel_00E9A04A
+	IMPORT_FUNC	"SysMemForKernel",0xFE9BC18B,sceKernelDevkitVersion_620
+	IMPORT_FUNC	"SysMemForKernel",0x00E9A04A,sceKernelSetDdrMemoryProtection
+	IMPORT_FUNC	"SysMemForKernel",0x31DFE03F,sceKernelSetDdrMemoryProtection_620
 	IMPORT_FUNC	"SysMemForKernel",0xAF85EB1B,sceKernelCreateHeap
+	IMPORT_FUNC	"SysMemForKernel",0xC6A782DA,sceKernelCreateHeap_620
 	IMPORT_FUNC	"SysMemForKernel",0xF9475C1A,sceKernelDeleteHeap
+	IMPORT_FUNC	"SysMemForKernel",0x9BAA857E,sceKernelDeleteHeap_620
 	IMPORT_FUNC	"SysMemForKernel",0x6D161EE2,sceKernelAllocHeapMemory
+	IMPORT_FUNC	"SysMemForKernel",0x96BFE779,sceKernelAllocHeapMemory_620
 	IMPORT_FUNC	"SysMemForKernel",0xDB836ADB,sceKernelFreeHeapMemory
+	IMPORT_FUNC	"SysMemForKernel",0xC2A8C491,sceKernelFreeHeapMemory_620
 	IMPORT_FUNC	"SysMemForKernel",0x9F154FA1,SysMemForKernel_9F154FA1
+	IMPORT_FUNC	"SysMemForKernel",0xB00D1EC2,SysMemForKernel_B00D1EC2
 	IMPORT_FUNC	"SysMemForKernel",0xD9A4D69E,sceKernelGetSystemStatus
+	IMPORT_FUNC	"SysMemForKernel",0x957A966D,sceKernelGetSystemStatus_620
 	IMPORT_FUNC	"SysMemForKernel",0xF5E82409,sceKernelQueryMemoryPartitionInfo
+	IMPORT_FUNC	"SysMemForKernel",0xE057A674,sceKernelQueryMemoryPartitionInfo_620
 	IMPORT_FUNC	"SysMemForKernel",0xE10F21CF,sceKernelPartitionMaxFreeMemSize
+	IMPORT_FUNC	"SysMemForKernel",0xA25BF7A1,sceKernelPartitionMaxFreeMemSize_620
 	IMPORT_FUNC	"SysMemForKernel",0x7BE9653E,sceKernelPartitionTotalFreeMemSize
+	IMPORT_FUNC	"SysMemForKernel",0x35588461,sceKernelPartitionTotalFreeMemSize_620

@@ -1,12 +1,8 @@
 #include <pspsdk.h>
 #include "utils.h"
 #include "systemctrl.h"
-
-#define REBOOT_START 0x88600000
-#define REBOOTEX_CONFIG_START 0x88FB0000
-#define REBOOTEX_START 0x88FC0000
-
-#define BTCNF_MAGIC 0x0F803001
+#include "rebootex_conf.h"
+#include "../../Rebootex_bin/rebootex_bin_patch_offset.h"
 
 typedef struct _btcnf_header
 {
@@ -43,11 +39,11 @@ int (* sceBootLfatClose)(void) = NULL;
 int (* UnpackBootConfig)(char * buffer, int length) = NULL;
 
 //loadcore functions
-int (* sceKernelCheckExecFile)(char * prx, unsigned int size, unsigned int * newsize) = 0;
-int (* memlmd_3F2AC9C6)(unsigned char * addr, void * arg2) = NULL;
+int (* DecryptPSP)(char * prx, unsigned int size, unsigned int * newsize) = 0;
+int (* sceKernelCheckExecFile)(unsigned char * addr, void * arg2) = NULL;
 
-//cache sync
-int (* iCacheFlushAll)(void) = (void *)REBOOT_START + 0x0938;
+static inline int iCacheFlushAll(void);
+static inline int dCacheFlushAll(void);
 
 //helper functions
 int _strlen(char * string);
@@ -64,98 +60,100 @@ int _sceBootLfatClose (void);
 int _UnpackBootConfig(char * buffer, int length);
 
 //loadcore replacements
-int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize);
-int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2);
+int _DecryptPSP(char * prx, unsigned int size, unsigned int * newsize);
+int _sceKernelCheckExecFile(unsigned char * addr, void * arg2);
 
 //patch functions
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *));
 int AddPRX(char * buffer, char * insertafter, char * prxname, u32 flags);
+void RenameModule(void *buffer, char *mod_name, char *new_mod_name);
+void load_configure(void);
 
 //reboot function
 void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
 
-//reboot replacement
+int psp_model = 0;
+u32 psp_fw_version = 0;
+
+// NOTICE: main must be the FIRST subroutine of Rebootex!
 void main(int arg1, int arg2, int arg3, int arg4)
 {
-	//grab psp version
-	int version = *(int *)REBOOTEX_CONFIG_START;
+	struct RebootexPatch *patch;
 
-	//patch offsets
-	unsigned int patches[17];
+	load_configure();
+	setup_patch_offset_table(psp_fw_version);
 
 	//32mb psp
-	if(version == 0)
-	{
-		patches[0] = 0x8624; //0x82AC in 6.20 - sceBootLfatOpen
-		patches[1] = 0x8798; //0x8420 in 6.20 - sceBootLfatRead
-		patches[2] = 0x873C; //0x83C4 in 6.20 - sceBootLfatClose
-		patches[3] = 0x588C; //0x565C in 6.20 - UnpackBootConfig
-		patches[4] = 0x2764; //0x26DC in 6.20 - Call to sceBootLfatOpen
-		patches[5] = 0x27D4; //0x274C in 6.20 - Call to sceBootLfatRead
-		patches[6] = 0x2800; //0x2778 in 6.20 - Call to sceBootLfatClose
-		patches[7] = 0x7348; //0x70F0 in 6.20 - Call to UnpackBootConfig
-		patches[8] = 0x389C; //0x3798 in 6.20 - Killing Function Part #1 - jr $ra
-		patches[9] = 0x38A0; //0x379C in 6.20 - Killing Function Part #2 - li $v0, 1
-		patches[10] = 0x275C; //0x26D4 in 6.20 - Killing Branch Check bltz ...
-		patches[11] = 0x27B0; //0x2728 in 6.20 - Killing Branch Check bltz ...
-		patches[12] = 0x27C8; //0x2740 in 6.20 - Killing Branch Check beqz ...
-		patches[13] = 0x5760; //0x5550 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
-		patches[14] = 0x5764; //0x5554 in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
-		patches[15] = 0x5768; //0x5558 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
-		patches[16] = 0x7648; //0x7388 in 6.20 - Killing Branch Check bltz ...
-	}
-
-	//64mb psps
-	else
-	{
-		patches[0] = 0x86F0; //0x8374 in 6.20 - sceBootLfatOpen
-		patches[1] = 0x8864; //0x84E8 in 6.20 - sceBootLfatRead
-		patches[2] = 0x8808; //0x848C in 6.20 - sceBootLfatClose
-		patches[3] = 0x595C; //0x5724 in 6.20 - UnpackBootConfig
-		patches[4] = 0x2834; //0x27A4 in 6.20 - Call to sceBootLfatOpen
-		patches[5] = 0x28A4; //0x2814 in 6.20 - Call to sceBootLfatRead
-		patches[6] = 0x28D0; //0x2840 in 6.20 - Call to sceBootLfatClose
-		patches[7] = 0x7438; //0x71B8 in 6.20 - Call to UnpackBootConfig
-		patches[8] = 0x396C; //0x3860 in 6.20 - Killing Function Part #1 - jr $ra
-		patches[9] = 0x3970; //0x3864 in 6.20 - Killing Function Part #2 - li $v0, 1
-		patches[10] = 0x282C; //0x279C in 6.20 - Killing Branch Check bltz ...
-		patches[11] = 0x2880; //0x27F0 in 6.20 - Killing Branch Check bltz ...
-		patches[12] = 0x2898; //0x2808 in 6.20 - Killing Branch Check beqz ...
-		patches[13] = 0x5830; //0x5618 in 6.20 - Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
-		patches[14] = 0x5834; //0x561C in 6.20 - Prepare LoadCore Patch Part #2 - jal PatchLoadCore
-		patches[15] = 0x5838; //0x5620 in 6.20 - Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
-		patches[16] = 0x7714; //0x7450 in 6.20 - Killing Branch Check bltz ...
+	if(psp_model == PSP_1000) {
+		patch = &g_offs->rebootex_patch_01g;
+	} else {
+		patch = &g_offs->rebootex_patch_other;
 	}
 
 	//global offsets
-	sceBootLfatOpen = (void *)REBOOT_START + patches[0];
-	sceBootLfatRead = (void *)REBOOT_START + patches[1];
-	sceBootLfatClose = (void *)REBOOT_START + patches[2];
-	UnpackBootConfig = (void *)REBOOT_START + patches[3];
+	sceBootLfatOpen = (void *)REBOOT_START + patch->sceBootLfatOpen;
+	sceBootLfatRead = (void *)REBOOT_START + patch->sceBootLfatRead;
+	sceBootLfatClose = (void *)REBOOT_START + patch->sceBootLfatClose;
+	UnpackBootConfig = (void *)REBOOT_START + patch->UnpackBootConfig;
 
-	//reboot patches
-	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patches[4]);
-	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patches[5]);
-	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patches[6]);
-	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patches[7]);
-	_sw(0x03E00008, REBOOT_START + patches[8]); // jr $ra
-	_sw(0x24020001, REBOOT_START + patches[9]); // li $v0, 1
-	_sw(0, REBOOT_START + patches[10]);
-	_sw(0, REBOOT_START + patches[11]);
-	_sw(0, REBOOT_START + patches[12]);
-	_sw(0x00113821, REBOOT_START + patches[13]); // move $a3, $s1
-	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patches[14]);
-	_sw(0x02A0E821, REBOOT_START + patches[15]); // move $sp, $s5
-	_sw(0, REBOOT_START + patches[16]);
+	_sw(MAKE_CALL(_sceBootLfatOpen), REBOOT_START + patch->sceBootLfatOpenCall);
+	_sw(MAKE_CALL(_sceBootLfatRead), REBOOT_START + patch->sceBootLfatReadCall);
+	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
+	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
 
+	//Killing Function Part #1 - jr $ra
+	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
+	//Killing Function Part #2 - li $v0, 1
+	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
+	//Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
+	//Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck3);
+	//Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck4);
+	//Killing Branch Check bltz ...
+	_sw(NOP, REBOOT_START + patch->RebootexCheck5);
+	//Prepare LoadCore Patch Part #1 - addu $a3, $zr, $s1 - Stores module_start ($s1) as fourth argument.
+	_sw(0x00113821, REBOOT_START + patch->LoadCoreModuleStartCall - 4);
+	//Prepare LoadCore Patch Part #2 - jal PatchLoadCore
+	_sw(MAKE_JUMP(PatchLoadCore), REBOOT_START + patch->LoadCoreModuleStartCall);
+	//Prepare LoadCore Patch Part #3 - move $sp, $s5 - Backed up instruction.
+	_sw(0x02A0E821, REBOOT_START + patch->LoadCoreModuleStartCall + 4);
+	
 	//initializing global variables
 	systemcontrol_open = 0;
 
 	//flush instruction cache
+	dCacheFlushAll();
 	iCacheFlushAll();
 
 	//reboot psp
 	reboot(arg1, arg2, arg3, arg4);
+}
+
+//cache sync
+static inline int iCacheFlushAll(void)
+{
+	int (*_iCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->iCacheFlushAll);
+	
+	return (*_iCacheFlushAll)();
+}
+
+static inline int dCacheFlushAll(void)
+{
+	int (*_dCacheFlushAll)(void) = (void *)(REBOOT_START + g_offs->dCacheFlushAll);
+	
+	return (*_dCacheFlushAll)();
+}
+
+void load_configure(void)
+{
+	rebootex_config *conf = (rebootex_config *)(REBOOTEX_CONFIG);
+	
+	if(conf->magic == REBOOTEX_CONFIG_MAGIC) {
+		psp_model = conf->psp_model;
+		psp_fw_version = conf->psp_fw_version;
+	}
 }
 
 int _strlen(char * string)
@@ -328,8 +326,7 @@ int _sceBootLfatClose(void)
 	return sceBootLfatClose();
 }
 
-// memlmd_E42AFE2E
-int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsize)
+int _DecryptPSP(char * prx, unsigned int size, unsigned int * newsize)
 {
 	//check for gzip packed prx
 	if(*(unsigned int *)(prx + 0x130) == 0xC01DB15D)
@@ -348,10 +345,10 @@ int _sceKernelCheckExecFile(char * prx, unsigned int size, unsigned int * newsiz
 	}
 
 	//forward to original function
-	return sceKernelCheckExecFile(prx, size, newsize);
+	return DecryptPSP(prx, size, newsize);
 }
 
-int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
+int _sceKernelCheckExecFile(unsigned char * addr, void * arg2)
 {
 	//scan structure
 	//6.31 kernel modules use type 3 PRX... 0xd4~0x10C is zero padded
@@ -361,7 +358,7 @@ int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
 		if(addr[pos + 212])
 		{
 			//forward to unsign function?
-			return memlmd_3F2AC9C6(addr, arg2);
+			return sceKernelCheckExecFile(addr, arg2);
 		}
 	}
 
@@ -371,18 +368,17 @@ int _memlmd_3F2AC9C6(unsigned char * addr, void * arg2)
 
 int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart)(void *, void *, void *))
 {
-	//replace all occurrences
-	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x35E8);
-	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x50E8);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x510C);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x513C);
-	_sw((((int)(_memlmd_3F2AC9C6) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + 0x51D4);
+	_sw((((int)(_DecryptPSP) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSPCall1);
+	_sw((((int)(_DecryptPSP) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSPCall2);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall1);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall2);
+	_sw((((int)(_sceKernelCheckExecFile) >> 2) & 0x03FFFFFF) | 0x0C000000, (unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFileCall3);
 
-	//save loadcore function pointer (module_bootstart = 0xBBC)
-	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + 0x6F4C);
-	memlmd_3F2AC9C6 = (void *)((unsigned int)(module_bootstart) + 0x6F2C);
+	DecryptPSP = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.DecryptPSP);
+	sceKernelCheckExecFile = (void *)((unsigned int)(module_bootstart) + g_offs->loadcore_patch.sceKernelCheckExecFile);
 
 	//flush instruction cache
+	dCacheFlushAll();
 	iCacheFlushAll();
 
 	//call module_start
@@ -474,3 +470,29 @@ int AddPRX(char * buffer, char * insertafter, char * prxname, u32 flags)
 	return -1;
 }
 
+// Note: new_mod_name cannot have longer filename than mod_name 
+void RenameModule(void *buffer, char *mod_name, char *new_mod_name)
+{
+	_btcnf_module *pmod;
+	int i;
+	char *modules_start, *names_start;
+	_btcnf_header *hdr = buffer;
+
+	modules_start = (char *) (buffer + hdr->modulestart);
+	names_start = (char *) (buffer + hdr->modnamestart);
+	pmod = (_btcnf_header *) modules_start;
+
+	if (hdr->nmodules < 0)
+		return;
+
+	for (i = 0; i < hdr->nmodules; i++) {
+		if (0 == _strcmp(names_start + pmod->module_path, mod_name))
+			break;
+		pmod++;
+	}
+
+	if (i == hdr->nmodules)
+		return;
+
+	_strcpy(names_start + pmod->module_path, new_mod_name);
+}

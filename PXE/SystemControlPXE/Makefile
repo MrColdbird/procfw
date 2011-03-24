@@ -2,9 +2,9 @@ all:
 	../../contrib/pspgz.py ../RebootexPXE/systemctrl.prx ../../contrib/SystemControl.hdr systemctrl.prx
 
 TARGET = systemctrl
-OBJS = main.o syspatch.o systemctrl.o kubridge.o modhandler.o elf.o ../../SystemControl/memlmd_patch.o ../../Common/libs.o ../../Common/utils.o ../../Imports/sceResmgr_driver.o ../../Imports/InterruptManagerForKernel.o ../../Imports/LoadCoreForKernel.o ../../Imports/ModuleMgrForKernel.o ../../Imports/SysMemForKernel.o ../../Imports/LoadExecForKernel.o
+OBJS = main.o syspatch.o systemctrl.o kubridge.o modhandler.o elf.o systemctrl_pxe_patch_offset.o ../../SystemControl/systemctrl_patch_offset.o ../../SystemControl/memlmd_patch.o ../../Common/libs.o ../../Common/utils.o ../../Imports/sceResmgr_driver.o ../../Imports/InterruptManagerForKernel.o ../../Imports/LoadCoreForKernel.o ../../Imports/ModuleMgrForKernel.o ../../Imports/SysMemForKernel.o ../../Imports/LoadExecForKernel.o
 
-INCDIR = ../../Common/ ../../include/
+INCDIR = ../../Common/ ../../include/ ../../SystemControl/
 CFLAGS = -Os -G0 -Wall
 
 ifeq ($(DEBUG), 1)
@@ -15,7 +15,15 @@ endif
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
 PSP_FW_VERSION = 635
+endif
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

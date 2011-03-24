@@ -6,6 +6,7 @@
 #include "utils.h"
 #include "printk.h"
 #include "strsafe.h"
+#include "rebootex_conf.h"
 
 #define PLUGIN_PATH "ms0:/seplugins/"
 
@@ -14,7 +15,7 @@ static void patch_devicename(SceUID modid)
 	SceModule2 *mod;
 	int i;
 
-	mod = (SceModule2*)sceKernelFindModuleByUID(modid);
+	mod = (SceModule2*)sctrlKernelFindModuleByUID(modid);
 
 	if(mod == NULL) {
 		return;
@@ -48,7 +49,7 @@ int load_start_module(char *path)
 	SceUID modid;
 	int status;
 
-	modid = sceKernelLoadModule(path, 0, NULL);
+	modid = sctrlKernelLoadModule(path, 0, NULL);
 
 	if(modid < 0) {
 		if(0 == strnicmp(path, "ef", 2)) {
@@ -57,7 +58,7 @@ int load_start_module(char *path)
 			strncpy(path, "ef", 2);
 		}
 
-		modid = sceKernelLoadModule(path, 0, NULL);
+		modid = sctrlKernelLoadModule(path, 0, NULL);
 	}
 
 	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
@@ -65,7 +66,7 @@ int load_start_module(char *path)
 	}
 
 	status = 0;
-	ret = sceKernelStartModule(modid, strlen(path) + 1, path, &status, NULL);
+	ret = sctrlKernelStartModule(modid, strlen(path) + 1, path, &status, NULL);
 	printk("%s: %s, UID: %08X, Status: 0x%08X\n", __func__, path, modid, status);
 
 	return ret;
@@ -162,9 +163,13 @@ static void load_plugin(char * path)
 
 int load_plugins(void)
 {
-	unsigned int key = sceKernelInitKeyConfig();
+	unsigned int key = sceKernelApplicationType();
 
 	char * bootconf = NULL;
+
+	if(rebootex_conf.recovery_mode) {
+		return 0;
+	}
 
 	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {

@@ -6,6 +6,7 @@ def main():
 	lists = [
 			"ISODrivers/Galaxy/galaxy.prx",
 			"ISODrivers/March33/march33.prx",
+			"ISODrivers/March33/march33_620.prx",
 			"Popcorn/popcorn.prx",
 			"Satelite/satelite.prx",
 			"Stargate/stargate.prx",

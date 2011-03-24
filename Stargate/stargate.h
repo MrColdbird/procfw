@@ -2,6 +2,8 @@
 #define STARGATE_H
 
 extern SEConfig conf;
+extern u32 psp_model;
+extern u32 psp_fw_version;
 
 int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key);
 int myPauth_init(void);
@@ -18,5 +20,8 @@ int load_module_get_function(void);
 void patch_load_module(SceModule *mod);
 
 extern int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2);
+
+void patch_for_620(SceModule *mod);
+void get_620_function(void);
 
 #endif

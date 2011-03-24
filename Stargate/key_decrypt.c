@@ -18,9 +18,13 @@
 #include "pspmodulemgr_kernel.h"
 #include "psputilsforkernel.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "kubridge.h"
 #include "utils.h"
 #include "printk.h"
+#include "stargate_patch_offset.h"
+#include "pspcipher.h"
+#include "stargate.h"
 
 static u8 g_key_d91609f0[16] = {
 	0xD0, 0x36, 0x12, 0x75, 0x80, 0x56, 0x20, 0x43,
@@ -206,7 +210,15 @@ static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 
 	cipher = get_game_cipher(keytag);
 
 	if (cipher != NULL) {
+#ifdef CONFIG_620
+		if(psp_fw_version == FW_620) {
+			ret = uprx_decrypt(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		} else {
+			ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+		}
+#else
 		ret = (*mesgled_decrypt)(&cipher->tag, cipher->key, cipher->code, prx, size, newsize, use_polling, blacklist, blacklistsize, cipher->type, NULL, NULL);
+#endif
 		
 		if (ret == 0) {
 			printk("%s: tag=0x%08X type=%d decrypt OK\n", __func__, cipher->tag, cipher->type);
@@ -236,19 +248,12 @@ void patch_sceMesgLed()
 	text_addr = mod->text_addr;
 	mesgled_decrypt = (void*)(text_addr+0xE0);
 
-	if (psp_model == PSP_GO) {
-		_sw(intr, text_addr+0x3614);
-		_sw(intr, text_addr+0x38AC);
-	} else if (psp_model == PSP_3000 || psp_model == PSP_4000 || psp_model == PSP_7000 || psp_model == PSP_9000) {
-		_sw(intr, text_addr+0x32A8);
-		_sw(intr, text_addr+0x3540);
-	} else if (psp_model == PSP_2000) {
-		_sw(intr, text_addr+0x2F08);
-		_sw(intr, text_addr+0x31A0);
-	} else if (psp_model == PSP_1000) {
-		_sw(intr, text_addr+0x2B28); // sceMesgLed_driver_CA17E61A
-		_sw(intr, text_addr+0x2DC0); // sceMesgLed_driver_E9BF25D2
+	if(psp_model < NELEMS(g_offs->sceMesgLedDecryptGame1) && 
+			g_offs->sceMesgLedDecryptGame1[psp_model] != 0xDEADBEEF &&
+		   	g_offs->sceMesgLedDecryptGame2[psp_model] != 0xDEADBEEF) {
+		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame1[psp_model]);
+		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame2[psp_model]);
+	} else {
+		printk("%s: unknown model 0%dg\n", __func__, psp_model+1);
 	}
-
-	sync_cache();
 }

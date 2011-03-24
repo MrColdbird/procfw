@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include "systemctrl_se.h"
+#include "config.h"
 
 extern u32 psp_model;
 extern u32 psp_fw_version;

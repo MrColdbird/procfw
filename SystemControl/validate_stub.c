@@ -4,6 +4,7 @@
 #include "libs.h"
 #include "printk.h"
 #include "systemctrl.h"
+#include "systemctrl_patch_offset.h"
 
 extern int _sceKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 
@@ -53,7 +54,7 @@ void validate_stub_by_uid(int modid)
 	SceModule *pMod;
 
 	k1 = pspSdkSetK1(0);
-	pMod = sceKernelFindModuleByUID(modid);
+	pMod = sctrlKernelFindModuleByUID(modid);
 	
 	if (pMod != NULL) {
 		validate_stub(pMod);
@@ -79,6 +80,6 @@ void setup_validate_stub(SceModule *mod)
 {
 	SceModule2 *modulemgr = (SceModule2*)mod;
 
-	start_module = (void*)(modulemgr->text_addr + 0x7004);
-	_sw(MAKE_CALL(_start_module), modulemgr->text_addr+0x290);
+	start_module = (void*)(modulemgr->text_addr + g_offs->validate_stub_patch.StartModule);
+	_sw(MAKE_CALL(_start_module), modulemgr->text_addr+g_offs->validate_stub_patch.StartModuleCall);
 }

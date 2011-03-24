@@ -1,4 +1,4 @@
-TARGET = 635kernel
+TARGET = pxe_launcher
 OBJS = main.o imports.o syscall.o launcher_patch_offset.o ../../Common/utils.o
 EXTRA_CLEAN = Rebootex_prx.h Installer.h
 

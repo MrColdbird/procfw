@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "nid_resolver.h"
+#include "systemctrl_patch_offset.h"
 
 typedef struct _CustomResolver {
 	void *import_addr;
@@ -30,6 +31,9 @@ typedef struct _MissingNIDResolver {
 
 static int (*sceKernelLinkLibraryEntries)(void *buf, int size) = NULL;
 static int (*sceKernelLinkLibraryEntriesForUser)(u32 unk0, void *buf, int size) = NULL;
+
+resolver_config *nid_fix;
+u32 nid_fix_size;
 
 resolver_config* get_nid_resolver(const char *libname)
 {
@@ -260,7 +264,6 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	while(offset < size) {
 		stub = buf + offset;
 		stubcount = stub->stubcount;
-
 		resolver = get_nid_resolver(stub->libname);
 
 		if(resolver != NULL) {
@@ -300,18 +303,29 @@ void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
 
-	modmgr = (SceModule2*)sceKernelFindModuleByName("sceModuleManager");
-	loadcore = (SceModule2*)sceKernelFindModuleByName("sceLoaderCore");
+	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
+	loadcore = (SceModule2*)sctrlKernelFindModuleByName("sceLoaderCore");
 
-	// Sony removed sceKernelIcacheClearAll's export
-	// It's at 0x77CC+@LoadCore@ in 6.35
-	missing_LoadCoreForKernel_entries[0].fp = (0x77CC + loadcore->text_addr);
+	missing_LoadCoreForKernel_entries[0].fp = (loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelIcacheClearAll);
+	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntries);
+	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUser);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesCall);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUserCall);
 
-	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr+0x000011D4);
-	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr+0x00002924);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr+0x0000844C);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr+0x00008198);
-	sync_cache();
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			nid_fix = nid_635_fix;
+			nid_fix_size = nid_635_fix_size;
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			nid_fix = nid_620_fix;
+			nid_fix_size = nid_620_fix_size;
+			break;
+#endif
+	}
 }
 
 void resolve_syscon_driver(SceModule *mod)
@@ -323,5 +337,5 @@ void resolve_syscon_driver(SceModule *mod)
 	if(syscon == NULL)
 		return;
 
-	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + 0x00002C6C); // _sceSysconPowerStandby
+	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + g_offs->nid_resolver_patch.sceSysconPowerStandby);
 }

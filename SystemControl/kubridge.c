@@ -4,6 +4,7 @@
 #include <pspthreadman_kernel.h>
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
+#include <pspsysmem_kernel.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
@@ -11,16 +12,13 @@
 #include "systemctrl.h"
 #include "printk.h"
 
-SceUID ModuleMgrForKernel_32292450(int apitype, const char *path, int flags, SceKernelLMOption *option);
-int SysMemForKernel_00E9A04A(void *addr, int size, int prot);
-
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
 {
 	u32 k1;
 	int ret;
 
 	k1 = pspSdkSetK1(0);
-	ret = sceKernelLoadModule(path, flags, option);
+	ret = sctrlKernelLoadModule(path, flags, option);
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -32,7 +30,7 @@ SceUID kuKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, 
 	int ret;
 
 	k1 = pspSdkSetK1(0);
-	ret = ModuleMgrForKernel_32292450(apitype, path, flags, option);
+	ret = sctrlKernelLoadModuleWithApitype2(apitype, path, flags, option);
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -63,8 +61,7 @@ int kuKernelInitFileName(char *initfilename)
 
 int kuKernelInitKeyConfig()
 {
-	// sceKernelApplicationType
-	return InitForKernel_7233B5BC();
+	return sceKernelApplicationType();
 }
 
 int kuKernelGetUserLevel(void)
@@ -85,7 +82,7 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 	u32 k1;
 
 	k1 = pspSdkSetK1(0);
-	ret = SysMemForKernel_00E9A04A(addr, size, prot);
+	ret = sctrlKernelSetDdrMemoryProtection(addr, size, prot);
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -93,6 +90,6 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot)
 
 int kuKernelGetModel(void)
 {
-	return sceKernelGetModel();
+	return sctrlKernelGetModel();
 }
 

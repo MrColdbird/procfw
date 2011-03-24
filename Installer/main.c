@@ -9,7 +9,15 @@
 #include "utils.h"
 
 #include "galaxy.h"
+
+#ifdef CONFIG_635
 #include "march33.h"
+#endif
+
+#ifdef CONFIG_620
+#include "march33_620.h"
+#endif
+
 #include "popcorn.h"
 #include "satelite.h"
 #include "stargate.h"
@@ -17,19 +25,24 @@
 #include "usbdevice.h"
 #include "vshctrl.h"
 #include "recovery.h"
+#include "config.h"
+
+#include "../Permanent/ppatch_config.h"
 
 // VSH module can write F0/F1
-PSP_MODULE_INFO("635PROUpdater", 0x0800, 1, 0);
+PSP_MODULE_INFO("PROUpdater", 0x0800, 1, 0);
 
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
-#define VERSION_STR "635PRO-B"
+#define VERSION_STR "PRO-B"
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;
+u32 psp_fw_version;
 int disable_smart = 0;
 static u8 g_buf[64*1024] __attribute__((aligned(64)));
+static u8 g_buf2[64*1024] __attribute__((aligned(64)));
 
 void cleanup_exit(void)
 {
@@ -165,15 +178,15 @@ struct InstallList {
 };
 
 struct InstallList g_file_lists[] = {
-	{ systemctrl, &size_systemctrl, "flash0:/kd/_systemctrl.prx", },
-	{ vshctrl, &size_vshctrl, "flash0:/kd/_vshctrl.prx", },
-	{ galaxy, &size_galaxy, "flash0:/kd/_galaxy.prx", },
-	{ stargate, &size_stargate, "flash0:/kd/_stargate.prx", },
-	{ march33, &size_march33, "flash0:/kd/_march33.prx", },
-	{ usbdevice, &size_usbdevice, "flash0:/kd/_usbdevice.prx", },
-	{ popcorn, &size_popcorn, "flash0:/kd/_popcorn.prx", },
-	{ satelite, &size_satelite, "flash0:/vsh/module/_satelite.prx", },
-	{ recovery, &size_recovery, "flash0:/vsh/module/_recovery.prx", },
+	{ systemctrl, &size_systemctrl, PATH_SYSTEMCTRL, },
+	{ vshctrl, &size_vshctrl, PATH_VSHCTRL, },
+	{ galaxy, &size_galaxy, PATH_GALAXY, },
+	{ stargate, &size_stargate, PATH_STARGATE, },
+	{ NULL, NULL, PATH_MARCH33, },
+	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
+	{ popcorn, &size_popcorn, PATH_POPCORN, },
+	{ satelite, &size_satelite, PATH_SATELITE, },
+	{ recovery, &size_recovery, PATH_RECOVERY, },
 };
 
 static const char *g_old_cfw_files[] = {
@@ -195,6 +208,20 @@ int install_cfw(void)
 	for(i=0; i<NELEMS(g_old_cfw_files); ++i) {
 		sceIoRemove(g_old_cfw_files[i]);
 	}
+
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		g_file_lists[4].buf = march33;
+		g_file_lists[4].size = &size_march33;
+	}
+#endif
+
+#ifdef CONFIG_620
+	if (psp_fw_version == FW_620) {
+		g_file_lists[4].buf = march33_620;
+		g_file_lists[4].size = &size_march33_620;
+	}
+#endif
 
 	for(i=0; i<NELEMS(g_file_lists); ++i) {
 		ret = smart_write_file(g_file_lists[i].dst, g_file_lists[i].buf, *g_file_lists[i].size);
@@ -223,6 +250,189 @@ exit:
 	printf("\nWrite file error (0x%08x)! Install aborted.\n", ret);
 
 	return -1;
+}
+
+int compare_file(const char *src, const char *dst)
+{
+	SceUID fd = -1, fdd = -1;
+	int ret, ret2;
+	SceIoStat srcstat, dststat;
+
+	ret = sceIoGetstat(src, &srcstat);
+
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	ret = sceIoGetstat(dst, &dststat);
+
+	if (ret != 0) {
+		goto not_equal;
+	}
+
+	if (dststat.st_size != srcstat.st_size) {
+		goto not_equal;
+	}
+
+	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fd = ret;
+
+	ret = sceIoOpen(dst, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	fdd = ret;
+	ret = sizeof(g_buf);
+	ret = sceIoRead(fd, g_buf, ret);
+
+	while (ret > 0) {
+		ret2 = sceIoRead(fdd, g_buf2, ret);
+
+		if (ret2 != ret) {
+			goto not_equal;
+		}
+
+		if (memcmp(g_buf, g_buf2, ret)) {
+			goto not_equal;
+		}
+
+		ret = sceIoRead(fd, g_buf, ret);
+	}
+
+	if (ret < 0) {
+		goto not_equal;
+	}
+
+	sceIoClose(fd);
+	sceIoClose(fdd);
+
+	return 0;
+
+not_equal:
+	if (fd >= 0)
+		sceIoClose(fd);
+
+	if (fdd >= 0)
+		sceIoClose(fdd);
+
+	return 1;
+}
+
+int copy_file(const char *src, const char *dst)
+{
+	SceUID fd = -1, fdw = -1;
+	int ret;
+
+	ret = sceIoOpen(src, PSP_O_RDONLY, 0777);
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	fd = ret;
+
+	ret = sceIoOpen(dst, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	fdw = ret;
+	ret = sizeof(g_buf);
+	ret = sceIoRead(fd, g_buf, ret);
+
+	while (ret > 0) {
+		ret = sceIoWrite(fdw, g_buf, ret);
+
+		if (ret < 0) {
+			goto error;
+		}
+
+		ret = sceIoRead(fd, g_buf, ret);
+	}
+
+	if (ret < 0) {
+		goto error;
+	}
+
+	sceIoClose(fd);
+	sceIoClose(fdw);
+
+	return 0;
+
+error:
+	sceIoClose(fd);
+	sceIoClose(fdw);
+
+	return ret;
+}
+
+int is_file_exist(const char *path)
+{
+	SceIoStat stat;
+	int ret;
+
+	ret = sceIoGetstat(path, &stat);
+
+	return ret == 0 ? 1 : 0;
+}
+
+int is_permanent_patch_installed(void)
+{
+	if(psp_fw_version != FW_620) {
+		return 0;
+	}
+
+	if(!is_file_exist(VSHORIG)) {
+		return 0;
+	}
+
+	if(0 == compare_file(VSHMAIN, VSHORIG)) {
+		return 0;
+	}
+
+	return 1;
+}
+
+void uninstall_permanent_patch(void)
+{
+	int ret;
+
+	do {
+		ret = sceIoRemove(VSHMAIN);
+
+		if(ret != 0) {
+			printf("Delete %s failed\n", VSHMAIN);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	do {
+		ret = copy_file(VSHORIG, VSHMAIN);
+
+		if(ret != 0) {
+			printf("Copy %s to %s failed 0x%08X\n", VSHORIG, VSHMAIN, ret);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	do {
+		ret = sceIoRemove(VSHORIG);
+
+		if(ret != 0) {
+			printf("Delete %s failed\n", VSHTEMP);
+			sceKernelDelayThread(1000000L);
+		}
+	} while(ret != 0);
+
+	sceIoRemove(VSHTEMP);
 }
 
 int uninstall_cfw(void)
@@ -254,6 +464,12 @@ int uninstall_cfw(void)
 			break;
 		case PSP_1000:
 			break;
+	}
+
+	if(is_permanent_patch_installed()) {
+		printf("Uninstalling permanent patch...");
+		uninstall_permanent_patch();
+		printf("OK\n");
 	}
 
 	return 0;
@@ -290,20 +506,31 @@ void start_reboot(int mode)
 
 int main(int argc, char *argv[])
 {
-	int ret = 0, fw_version;
+	int ret = 0;
 	struct SceIoStat stat;
 	SceCtrlData ctl;
 	u32 key;
 
 	memset(&stat, 0, sizeof(stat));
 	pspDebugScreenInit();
-	fw_version = sceKernelDevkitVersion();
+	psp_fw_version = sceKernelDevkitVersion();
 
-	if (fw_version != 0x06030510) {
-		printf("Sorry. This program requires 6.35.\n");
-		goto exit;
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		goto version_OK;
 	}
+#endif
 
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		goto version_OK;
+	}
+#endif
+
+	printf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
+	goto exit;
+	
+version_OK:
 	psp_model = kuKernelGetModel();
 	scePowerSetClockFrequency(333, 333, 166);
 	init_flash();

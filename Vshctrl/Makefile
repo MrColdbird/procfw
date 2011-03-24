@@ -2,8 +2,8 @@ all:
 	../contrib/pspgz.py vshctrl.prx ../contrib/SystemControl.hdr vshctrl.prx VshCtrl 0x1007
 
 TARGET = vshctrl
-OBJS = main.o vshpatch.o custom_update.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o dirent_track.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
-IMPORTS = ../Imports/LoadExecForKernel.o
+OBJS = main.o vshpatch.o custom_update.o xmbiso.o isoreader.o virtual_pbp.o vshmenu.o usbdevice.o dirent_track.o vshctrl_patch_offset.o ../Common/utils.o ../Common/libs.o ../Common/strsafe.o
+IMPORTS =
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
@@ -13,12 +13,20 @@ CFLAGS += -DDEBUG=1
 OBJS += ../Common/printk.o
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
+
 OBJS += $(IMPORTS)
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
-
-PSP_FW_VERSION = 635
 
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp

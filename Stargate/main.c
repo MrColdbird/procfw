@@ -23,12 +23,14 @@
 #include "strsafe.h"
 #include "libs.h"
 #include "stargate.h"
+#include "stargate_patch_offset.h"
 
 PSP_MODULE_INFO("stargate", 0x1007, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 static STMOD_HANDLER previous;
 SEConfig conf;
+u32 psp_fw_version;
 
 #define MAX_MODULE_NUMBER 256
 
@@ -82,6 +84,12 @@ static int stargate_module_chain(SceModule2 *mod)
 	patch_utility((SceModule*)mod);
 	patch_load_module((SceModule*)mod);
 
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		patch_for_620((SceModule*)mod);
+	}
+#endif
+
 	// m33 mode: until npdrm loaded
 	if(conf.usenodrm) {
 		if(0 == strcmp(mod->modname, "scePspNpDrm_Driver")) {
@@ -126,6 +134,8 @@ int module_start(SceSize args, void *argp)
 		return 1;
 	}
 
+	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/log_stargate.txt");
 	printk("stargate started\n");
 	sctrlSEGetConfig(&conf);
@@ -137,8 +147,15 @@ int module_start(SceSize args, void *argp)
 		nodrm_init();
 		nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
 	}
+
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		get_620_function();
+	}
+#endif
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
-
+	sync_cache();
+	
 	return 0;
 }

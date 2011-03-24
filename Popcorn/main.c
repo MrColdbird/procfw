@@ -7,15 +7,16 @@
 
 #include "pspmodulemgr_kernel.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "printk.h"
 #include "utils.h"
 #include "strsafe.h"
 #include "libs.h"
+#include "popcorn_patch_offset.h"
 
-struct PopsPatchOffset {
-	u32 stub_offset;
-	u32 patch_offset;
-};
+extern void patch_analog_imports(SceModule *mod);
+
+SEConfig conf;
 
 enum {
 	ICON0_OK = 0,
@@ -40,6 +41,9 @@ static u32 g_is_custom_ps1;
 static STMOD_HANDLER g_previous = NULL;
 
 static u8 g_keys[16];
+
+u32 psp_fw_version = 0;
+u32 psp_model = 0;
 
 static int myIoRead(int fd, u8 *buf, int size)
 {
@@ -489,36 +493,36 @@ static void patch_scePops_Manager(void)
 	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
 	text_addr = mod->text_addr;
 
-	REDIRECT_FUNCTION(myIoOpen, text_addr+0x00003B98);
-	REDIRECT_FUNCTION(myIoLseek, text_addr+0x00003BA0);
-	REDIRECT_FUNCTION(myIoIoctl, text_addr+0x00003BA8);
-	REDIRECT_FUNCTION(myIoRead, text_addr+0x00003BB0);
-	REDIRECT_FUNCTION(myIoReadAsync, text_addr+0x00003BC8);
-	REDIRECT_FUNCTION(myIoGetstat, text_addr+0x00003BD0);
-	REDIRECT_FUNCTION(myIoClose, text_addr+0x00003BC0);
+	REDIRECT_FUNCTION(myIoOpen, text_addr + g_offs->popsman_patch.sceIoOpenImport);
+	REDIRECT_FUNCTION(myIoLseek, text_addr + g_offs->popsman_patch.sceIoLseekImport);
+	REDIRECT_FUNCTION(myIoIoctl, text_addr + g_offs->popsman_patch.sceIoIoctlImport);
+	REDIRECT_FUNCTION(myIoRead, text_addr + g_offs->popsman_patch.sceIoReadImport);
+	REDIRECT_FUNCTION(myIoReadAsync, text_addr + g_offs->popsman_patch.sceIoReadAsyncImport);
+	REDIRECT_FUNCTION(myIoGetstat, text_addr + g_offs->popsman_patch.sceIoGetstatImport);
+	REDIRECT_FUNCTION(myIoClose, text_addr + g_offs->popsman_patch.sceIoCloseImport);
 
-	_get_rif_path = (void*)(text_addr+0x00000190);
-	_sw(MAKE_CALL(&get_rif_path), text_addr+0x00002798);
-	_sw(MAKE_CALL(&get_rif_path), text_addr+0x00002C58);
+	_get_rif_path = (void*)(text_addr + g_offs->popsman_patch.get_rif_path);
+	_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call1);
+	_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call2);
 
 	sceNpDrmGetVersionKey = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_driver", 0x0F9547E6);
 	scePspNpDrm_driver_9A34AC9F = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_driver", 0x9A34AC9F);
 
-	_sw(MAKE_CALL(_sceNpDrmGetVersionKey), text_addr+0x000029C4);
-	_sw(MAKE_CALL(_scePspNpDrm_driver_9A34AC9F), text_addr+0x00002DA8);
+	_sw(MAKE_CALL(_sceNpDrmGetVersionKey), text_addr + g_offs->popsman_patch.sceNpDrmGetVersionKeyCall);
+	_sw(MAKE_CALL(_scePspNpDrm_driver_9A34AC9F), text_addr + g_offs->popsman_patch.scePspNpDrm_driver_9A34AC9F_Call);
 
 	// remove the check in scePopsManLoadModule that only allows loading module below the FW 3.XX
-	_sw(NOP, text_addr + 0x00001E80);
+	_sw(NOP, text_addr + g_offs->popsman_patch.scePopsManLoadModuleCheck);
 
 	if (g_is_custom_ps1) {
-		REDIRECT_FUNCTION(_sceDrmBBCipherInit, text_addr+0x00003CB0);
-		REDIRECT_FUNCTION(_sceDrmBBCipherUpdate, text_addr+0x00003CA8);
-		REDIRECT_FUNCTION(_sceDrmBBCipherFinal, text_addr+0x00003CC8);
+		REDIRECT_FUNCTION(_sceDrmBBCipherInit, text_addr + g_offs->popsman_patch.sceDrmBBCipherInitImport);
+		REDIRECT_FUNCTION(_sceDrmBBCipherUpdate, text_addr + g_offs->popsman_patch.sceDrmBBCipherUpdateImport);
+		REDIRECT_FUNCTION(_sceDrmBBCipherFinal, text_addr + g_offs->popsman_patch.sceDrmBBCipherFinalImport);
 
-		REDIRECT_FUNCTION(_sceDrmBBMacInit, text_addr+0x00003CB8);
-		REDIRECT_FUNCTION(_sceDrmBBMacUpdate, text_addr+0x00003CC0);
-		REDIRECT_FUNCTION(_sceDrmBBMacFinal, text_addr+0x00003CD0);
-		REDIRECT_FUNCTION(_sceDrmBBMacFinal2, text_addr+0x00003CD8);
+		REDIRECT_FUNCTION(_sceDrmBBMacInit, text_addr + g_offs->popsman_patch.sceDrmBBMacInitImport);
+		REDIRECT_FUNCTION(_sceDrmBBMacUpdate, text_addr + g_offs->popsman_patch.sceDrmBBMacUpdateImport);
+		REDIRECT_FUNCTION(_sceDrmBBMacFinal, text_addr + g_offs->popsman_patch.sceDrmBBMacFinalImport);
+		REDIRECT_FUNCTION(_sceDrmBBMacFinal2, text_addr + g_offs->popsman_patch.sceDrmBBMacFinal2Import);
 	}
 }
 
@@ -661,27 +665,13 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	return ret;
 }
 
-static struct PopsPatchOffset g_pops_dec_func_offset[] = {
-	{ 0x000D5404, 0x0000DAC0 }, // 01G
-	{ 0x000D64BC, 0x0000DAC0 }, // 02G
-	{ 0x000D64BC, 0x0000DAC0 }, // 03G
-	{ 0x000D64FC, 0x0000DB00 }, // 04G
-	{ 0x000D8488, 0x0000E218 }, // 05G
-	{ 0x00000000, 0x00000000 }, // unused
-	{ 0x000D64FC, 0x0000DB00 }, // 07G
-	{ 0x00000000, 0x00000000 }, // unused
-	{ 0x000D64FC, 0x0000DB00 }, // 09G
-};
-
 static int patch_decompress_data(u32 text_addr)
 {
 	int ret;
-	u32 psp_model;
 	void *stub_addr, *patch_addr;
 
-	psp_model = sceKernelGetModel();
-	stub_addr = (void*)(text_addr+g_pops_dec_func_offset[psp_model].stub_offset);
-	patch_addr = (void*)(text_addr+g_pops_dec_func_offset[psp_model].patch_offset);
+	stub_addr = (void*)(text_addr + g_offs->pops_patch.decomp[psp_model].stub_offset);
+	patch_addr = (void*)(text_addr + g_offs->pops_patch.decomp[psp_model].patch_offset);
 	ret = place_syscall_stub(decompress_data, stub_addr);
 
 	if (ret != 0) {
@@ -695,25 +685,11 @@ static int patch_decompress_data(u32 text_addr)
 	return 0;
 }
 
-static u32 g_pops_icon0_size_offset[] = {
-	0x00036CF8, // 01G
-	0x00037D34, // 02G
-	0x00037D34, // 03G
-	0x00037D74, // 04G
-	0x00039B5C, // 05G
-	0x00000000, // unused
-	0x00037D74, // 07G
-	0x00000000, // unused
-	0x00037D74, // 09G
-};
-
 static void patch_icon0_size(u32 text_addr)
 {
-	u32 psp_model;
 	u32 patch_addr;
 	
-	psp_model = sceKernelGetModel();
-	patch_addr = text_addr + g_pops_icon0_size_offset[psp_model];
+	patch_addr = text_addr + g_offs->pops_patch.ICON0SizeOffset[psp_model];
 	_sw(0x24050000 | (sizeof(g_icon_png) & 0xFFFF), patch_addr);
 }
 
@@ -750,10 +726,15 @@ static int popcorn_patch_chain(SceModule2 *mod)
 			patch_icon0_size(text_addr);
 		}
 
-		sceMeAudio_67CD7972 = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", 0x67CD7972);
-		hook_import_bynid((SceModule*)mod, "sceMeAudio", 0x67CD7972, _sceMeAudio_67CD7972, 1);
+		sceMeAudio_67CD7972 = (void*)sctrlHENFindFunction("scePops_Manager", "sceMeAudio", g_offs->pops_patch.sceMeAudio_67CD7972_NID);
+		hook_import_bynid((SceModule*)mod, "sceMeAudio", g_offs->pops_patch.sceMeAudio_67CD7972_NID, _sceMeAudio_67CD7972, 1);
+		_sw(0x24020001, text_addr + g_offs->pops_patch.manualNameCheck[psp_model]);
 
 		sync_cache();
+	}
+
+	if( conf.noanalog ) {
+		patch_analog_imports((SceModule*)mod);
 	}
 
 	if(g_previous)
@@ -831,8 +812,13 @@ int module_start(SceSize args, void* argp)
 	int ret;
 	SceIoStat stat;
 
+	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
+	psp_model = sceKernelGetModel();
+	memset(&conf, 0, sizeof(conf));
+	sctrlSEGetConfig(&conf);
 	printk_init("ms0:/popcorn.txt");
-	printk("Popcorn: init_file = %s\n", sceKernelInitFileName());
+	printk("Popcorn: init_file = %s psp_fw_version = 0x%08X psp_model = %d\n", sceKernelInitFileName(), psp_fw_version, psp_model);
 
 	get_keypath(keypath, sizeof(keypath));
 	ret = sceIoGetstat(keypath, &stat);
@@ -851,7 +837,7 @@ int module_start(SceSize args, void* argp)
 	g_icon0_status = get_icon0_status();
 
 	if(g_is_custom_ps1) {
-		setup_psx_fw_version(sceKernelDevkitVersion());
+		setup_psx_fw_version(psp_fw_version);
 	}
 
 	g_previous = sctrlHENSetStartModuleHandler(&popcorn_patch_chain);

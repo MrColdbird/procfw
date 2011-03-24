@@ -2,9 +2,8 @@ all:
 	../../contrib/pspgz.py galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController 0x1006
 
 TARGET = galaxy
-OBJS = main.o
-OBJS += ../../Imports/SysMemForKernel.o \
-		SystemCtrlForKernel.o
+OBJS = main.o galaxy_patch_offset.o imports.o
+OBJS += SystemCtrlForKernel.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../../include -I../../Common
 
@@ -16,10 +15,19 @@ OBJS += ../../Common/printk.o \
 		../../Common/utils.o
 endif
 
+ifeq ($(CONFIG_620), 1)
+CFLAGS += -DCONFIG_620=1
+PSP_FW_VERSION = 620
+endif
+
+ifeq ($(CONFIG_635), 1)
+CFLAGS += -DCONFIG_635=1
+PSP_FW_VERSION = 635
+endif
+
 BUILD_PRX=1
 USE_KERNEL_LIBS=1
 USE_KERNEL_LIBC=1
-PSP_FW_VERSION=635
 
 PRX_EXPORTS = export.exp
 

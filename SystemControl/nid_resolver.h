@@ -12,8 +12,13 @@ typedef struct _resolver_config {
 	nid_entry *nidtable;
 } resolver_config;
 
-extern resolver_config nid_fix[];
+extern resolver_config *nid_fix;
 extern u32 nid_fix_size;
+extern resolver_config nid_635_fix[];
+extern u32 nid_635_fix_size;
+extern resolver_config nid_620_fix[];
+extern u32 nid_620_fix_size;
+
 resolver_config* get_nid_resolver(const char *libname);
 u32 resolve_nid(resolver_config *resolver, u32 nid);
 void setup_nid_resolver(void);

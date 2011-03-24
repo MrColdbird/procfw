@@ -12,17 +12,43 @@
 #include "printk.h"
 #include "syspatch.h"
 
-extern int LoadExecForKernel_5AA1A6D2(struct SceKernelLoadExecVSHParam *param);
+extern u32 sceKernelGetModel_620(void);
+extern u32 sceKernelDevkitVersion_620(void);
+extern u32 sceKernelDevkitVersion_620(void);
+extern SceModule* sceKernelFindModuleByName_620(char *modname);
+extern int sceKernelExitVSH(struct SceKernelLoadExecVSHParam *param);
+extern int sceKernelExitVSH_620(struct SceKernelLoadExecVSHParam *param);
+extern u32 sceKernelQuerySystemCall(void *func);
+extern u32 sceKernelQuerySystemCall_620(void *func);
+extern SceModule* sceKernelFindModuleByUID_620(SceUID modid);
+extern int sceKernelCheckExecFile(unsigned char * buffer, int * check);
+extern int sceKernelCheckExecFile_620(unsigned char * buffer, int * check);	
+extern int sceKernelLoadModule_620(const char *path, int flags, SceKernelLMOption *option);
+extern int sceKernelStartModule_620(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
 
+extern u32 psp_fw_version;
 extern int (*g_on_module_start)(SceModule2*);
 
 int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 {
 	u32 k1;
-	int ret;
+	int ret = -1;
 
 	k1 = pspSdkSetK1(0);
-	ret = LoadExecForKernel_5AA1A6D2(param);
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelExitVSH(param);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelExitVSH_620(param);
+			break;
+#endif
+	};
+	
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -35,7 +61,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 	void *entTab;
 	int entLen;
 
-	pMod = sceKernelFindModuleByName(szMod);
+	pMod = sctrlKernelFindModuleByName(szMod);
 
 	if (!pMod)
 	{
@@ -87,3 +113,140 @@ STMOD_HANDLER sctrlHENSetStartModuleHandler(STMOD_HANDLER new_handler)
 	return on_module_start;
 }
 
+u32 sctrlKernelGetModel(void)
+{
+	u32 model = -1;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			model = sceKernelGetModel();
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			model = sceKernelGetModel_620();
+			break;
+#endif
+	};
+   
+	return model;
+}
+
+u32 sctrlKernelDevkitVersion(void)
+{
+	u32 fw_version;
+   
+	fw_version = sceKernelDevkitVersion_620();
+
+	if(fw_version == 0x8002013A) {
+		fw_version = sceKernelDevkitVersion();
+	}
+
+	return fw_version;
+}
+
+SceModule* sctrlKernelFindModuleByName(char *modname)
+{
+	SceModule *mod = NULL;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			mod = sceKernelFindModuleByName(modname);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			mod = sceKernelFindModuleByName_620(modname);
+			break;
+#endif
+	};
+
+	return mod;
+}
+
+int sctrlKernelQuerySystemCall(void *func_addr)
+{
+	int ret = -1;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelQuerySystemCall(func_addr);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelQuerySystemCall_620(func_addr);
+			break;
+#endif
+	};
+
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelCheckExecFile(buffer, check);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelCheckExecFile_620(buffer, check);
+			break;
+#endif
+	}
+
+	return ret;
+}
+
+int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelLoadModule(path, flags, option);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelLoadModule_620(path, flags, option);
+			break;
+#endif
+	}
+	
+	return ret;
+}
+
+int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelStartModule(modid, argsize, argp, status, option);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelStartModule_620(modid, argsize, argp, status, option);
+			break;
+#endif
+	}
+	
+	return ret;
+}

@@ -10,6 +10,7 @@
 #include "systemctrl_private.h"
 #include "utils.h"
 #include "printk.h"
+#include "galaxy_patch_offset.h"
 
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000
@@ -19,9 +20,9 @@ PSP_MODULE_INFO("M33GalaxyController", 0x1006, 1, 1);
 
 extern int get_total_block(void);
 extern int clear_cache(void);
-extern int SysMemForKernel_9F154FA1(void *unk0);
+extern int SysMemForKernel_C7E57B9C(void *unk0);
 
-u32 g_fw_version;
+u32 psp_fw_version;
 
 // 0x00000F24
 SceUID g_SceNpUmdMount_thid = -1;
@@ -109,7 +110,7 @@ SceUID myKernelCreateThread (const char * name,
 
 	if (!strncmp(name, "SceNpUmdMount", 13)) {
 		g_SceNpUmdMount_thid = thid;
-		printk("g_SceNpUmdMount_thid at 0x%08x\r\n", thid);
+		printk("g_SceNpUmdMount_thid at 0x%08x\n", thid);
 	}
 
 	return thid;
@@ -135,7 +136,7 @@ int cso_open(SceUID fd)
 	if (*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
-		printk("%s: total block %d\r\n", __func__, ciso_total_block);
+		printk("%s: total block %d\n", __func__, ciso_total_block);
 
 		if (g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
@@ -190,14 +191,14 @@ int open_iso(void)
 	// 6.30: 0x00004D50
 	// 6.20: 0x00004C70 in sub_00004BB4
 	// see 0x00004618 in sub_000045CC
-	// see 0x00003428 in sub_000033F4, memset(0x5BA4, 0, 60)
-	_sw(g_iso_fd, g_sceNp9660_driver_text_addr + 0x8A04);
+	// see 0x00003428 in sub_000033F4, memset(0x00005BA4, 0, 60)
+	_sw(g_iso_fd, g_sceNp9660_driver_text_addr + g_offs->StoreFd);
 	g_is_ciso = 0;
 	ret = cso_open(g_iso_fd);
 
 	if (ret >= 0) {
 		g_is_ciso = 1;
-		printk("%s: g_is_ciso = 1\r\n", __func__);
+		printk("%s: g_is_ciso = 1\n", __func__);
 	}
 
 	ret = get_total_block();
@@ -217,16 +218,16 @@ int sub_00000588(void)
 	intr = sceKernelCpuSuspendIntr();
 
 	// see 0x00004640 in sub_000045CC
-	_sw(0xE0000800, g_sceNp9660_driver_text_addr + 0x5BB4-0x5BA4+0x8A04);
+	_sw(0xE0000800, g_sceNp9660_driver_text_addr + g_offs->Data1);
 	// see 0x00004648 in sub_000045CC
-	_sw(0x00000009, g_sceNp9660_driver_text_addr + 0x5BBC-0x5BA4+0x8A04);
+	_sw(0x00000009, g_sceNp9660_driver_text_addr + g_offs->Data2);
 	// see 0x00004438 in sub_000043E4
-	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + 0x5BD0-0x5BA4+0x8A04);
+	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + g_offs->Data3);
 	// see 0x000037B4 in sub_00003760
-	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + 0x5BD8-0x5BA4+0x8A04);
-	// 6.20: move to 0x88D4
+	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + g_offs->Data4);
+	// 6.20: move to 0x000088D4
 	// see 0x000025FC in sub_00002514
-	_sw(0x00000000, g_sceNp9660_driver_text_addr + 0x8994);
+	_sw(0x00000000, g_sceNp9660_driver_text_addr + g_offs->Data5);
 	sceKernelCpuResumeIntr(intr);
 
 	if (g_data_1204 == 0) {
@@ -235,7 +236,7 @@ int sub_00000588(void)
 	}
 
 	clear_cache();
-	SysMemForKernel_9F154FA1(g_umddata);
+	SysMemForKernel_C7E57B9C(g_umddata);
 
 	return 0;
 }
@@ -254,7 +255,7 @@ int get_total_block(void)
 		ret = ((u32)(offset >> 32) << 21) | (((u32)offset) >> 11);
 	}
 
-	printk("%s: returns %d blocks\r\n", __func__, ret);
+	printk("%s: returns %d blocks\n", __func__, ret);
 
 	return ret;
 }
@@ -500,7 +501,7 @@ int sub_00000514 (int fd)
 
 	if (fd == g_iso_fd) {
 		g_iso_fd = -1;
-		_sw(-1, g_sceNp9660_driver_text_addr + 0x5BA4);
+		_sw(-1, g_sceNp9660_driver_text_addr + g_offs->StoreFd2);
 		clear_cache();
 
 		return ret;
@@ -520,32 +521,32 @@ int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
 
 		// 6.30: 0x00003C34
 		// 6.20: move to 0x00003BD8: jal InitForKernel_29DAA63F
-		_sw(0x3C028000, g_sceNp9660_driver_text_addr + 0x3C34); // jal InitForKernel_23458221 to lui $v0, 0x8000
+		_sw(0x3C028000, g_sceNp9660_driver_text_addr + g_offs->InitForKernelCall); // jal InitForKernel_23458221 to lui $v0, 0x00008000
 		// 6.30: 0x00003C4C
 		// 6.20: move to 0x00003BF0: jal sub_00000000
-		_sw(MAKE_CALL(sub_00000588), g_sceNp9660_driver_text_addr + 0x3C4C);
+		_sw(MAKE_CALL(sub_00000588), g_sceNp9660_driver_text_addr + g_offs->Func1);
 		// 6.30: 0x000043B4
 		// 6.20: move to 0x00004358: jal sub_00004388
-		_sw(MAKE_CALL(sub_00000054), g_sceNp9660_driver_text_addr + 0x43B4); // jal sub_3948 to jal sub_00000054
+		_sw(MAKE_CALL(sub_00000054), g_sceNp9660_driver_text_addr + g_offs->Func2); // jal sub_3948 to jal sub_00000054
 		// 6.30: 0x0000590C
 		// 6.20: move to 0x0000582C: jal sub_00004388
-		_sw(MAKE_CALL(sub_00000054), g_sceNp9660_driver_text_addr + 0x590C); // jal sub_3948 to jal sub_00000054
+		_sw(MAKE_CALL(sub_00000054), g_sceNp9660_driver_text_addr + g_offs->Func3); // jal sub_3948 to jal sub_00000054
 		// 6.30: 0x00007D08
 		// 6.20: move to 0x00007C28
-		_sw(MAKE_JUMP(sub_00000514), g_sceNp9660_driver_text_addr + 0x7D08); // hook sceIoClose import
+		_sw(MAKE_JUMP(sub_00000514), g_sceNp9660_driver_text_addr + g_offs->sceIoClose); // hook sceIoClose import
 
 		// 6.30: 0x00003680
 		// 6.20: move to 0x00003624
-		g_func_1200 = pMod->text_addr + 0x00003680;
-		printk("g_func_1200 0x%08x\r\n", g_func_1200); // sub_2f30
+		g_func_1200 = pMod->text_addr + g_offs->Func4;
+		printk("g_func_1200 0x%08x\n", g_func_1200); // sub_2f30
 		// 6.30: 0x00004F8C
 		// 6.20: move to 0x00004EAC
-		g_func_1208 = pMod->text_addr + 0x4F8C;
-		printk("g_func_1208 0x%08x\r\n", g_func_1208); // sub_4494
+		g_func_1208 = pMod->text_addr + g_offs->Func5;
+		printk("g_func_1208 0x%08x\n", g_func_1208); // sub_4494
 		// 6.30: 0x00004FFC
 		// 6.20: move to 0x00004F1C
-		g_func_121C = pMod->text_addr + 0x4FFC;
-		printk("g_func_121C 0x%08x\r\n", g_func_121C); // sub_44ec
+		g_func_121C = pMod->text_addr + g_offs->Func6;
+		printk("g_func_121C 0x%08x\n", g_func_121C); // sub_44ec
 
 		clear_cache();
 	}
@@ -559,22 +560,23 @@ int module_start(SceSize args, void* argp)
 	SceModule2 *pMod;
 	int fd;
    
-	g_fw_version = sceKernelDevkitVersion();
+	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
 
 	printk_init("ms0:/LOG_GALAXY.TXT");
-	printk("M33GalaxyController started\r\n");
+	printk("M33GalaxyController started: 0x%08X\n", psp_fw_version);
 
 	g_iso_fn = sctrlSEGetUmdFile();
 	pMod = (SceModule2*)sceKernelFindModuleByName("sceThreadManager");
 
 	if (pMod != NULL) {
 		// sceKernelCreateThread export
-		_sw((u32)&myKernelCreateThread, pMod->text_addr+0x191B4); 
+		_sw((u32)&myKernelCreateThread, pMod->text_addr + g_offs->sceKernelCreateThread); 
 
 		// sceKernelStartThread export
-		_sw((u32)&myKernelStartThread, pMod->text_addr+0x19358); 
+		_sw((u32)&myKernelStartThread, pMod->text_addr + g_offs->sceKernelStartThread); 
 	} else {
-		printk("sceThreadManager cannot be found?!\r\n");
+		printk("sceThreadManager cannot be found?!\n");
 	}
 
 	clear_cache();
@@ -590,7 +592,7 @@ int module_start(SceSize args, void* argp)
 	}
 
 	sceIoClose(fd);
-	printk("%s: finished\r\n", __func__);
+	printk("%s: finished\n", __func__);
 
 	return 0;
 }

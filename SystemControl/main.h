@@ -1,6 +1,7 @@
 #ifndef MAIN_H
 #define MAIN_H
 
+#include <pspsysmem_kernel.h>
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "systemctrl_private.h"
@@ -63,12 +64,6 @@ extern u32 g_p2_size;
 extern u32 g_p9_size;
 extern int g_high_memory_enabled;
 
-//for sctrlHENLoadModuleOnReboot
-extern char *g_insert_module_before;
-extern void *g_insert_module_binary;
-extern int g_insert_module_size;
-extern int g_insert_module_flags;
-
 int GetConfig(SEConfig *config);
 int SetConfig(SEConfig *config);
 void load_config(void);
@@ -76,6 +71,28 @@ void load_config(void);
 void patch_module_for_version_spoof(SceModule *mod);
 
 void patch_sceChkreg(void);
+
+// Have to use these functions to support both 6.2/6.3 kernel
+u32 sctrlKernelGetModel(void);
+u32 sctrlKernelDevkitVersion(void);
+SceModule* sctrlKernelFindModuleByName(char *modname);
+int sctrlKernelSetDdrMemoryProtection(void *addr, int size, int prot);
+SceUID sctrlKernelCreateHeap(SceUID partitionid, SceSize size, int unk, const char *name);
+int sctrlKernelDeleteHeap(SceUID heapid);
+int sctrlKernelFreeHeapMemory(SceUID heapid, void *block);
+void* sctrlKernelAllocHeapMemory(SceUID heapid, SceSize size);
+int sctrlKernelGetSystemStatus(void);
+int sctrlKernelQueryMemoryPartitionInfo(int pid, PspSysmemPartitionInfo *info);
+int sctrlKernelPartitionMaxFreeMemSize(int pid);
+int sctrlKernelPartitionTotalFreeMemSize(int pid);
+SceModule* sctrlKernelFindModuleByUID(SceUID modid);
+SceModule* sctrlKernelFindModuleByAddress(u32 address);
+int sctrlKernelCheckExecFile(unsigned char * buffer, int * check);
+int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option);
+int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
+int sctrlKernelUnloadModule(SceUID modid);
+SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
+int sceKernelApplicationType(void);
 
 extern SEConfig conf;
 

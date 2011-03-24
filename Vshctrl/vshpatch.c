@@ -16,6 +16,7 @@
 #include "main.h"
 #include "virtual_pbp.h"
 #include "strsafe.h"
+#include "vshctrl_patch_offset.h"
 
 extern int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count);
 extern void patch_sceUSB_Driver(void);
@@ -106,19 +107,19 @@ static int _sceDisplaySetHoldMode(int a0)
 
 static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
 {
-	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", 0x9F3038AC, _sceCtrlReadBufferPositive, 0);
+	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", g_offs->vshctrl_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
 }
 
 static void patch_Gameboot(SceModule2 *mod)
 {
-	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + 0x1A14);
-	sceDisplaySetHoldMode = (void*)(mod->text_addr+0x5618);
+	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + g_offs->vshctrl_patch.sceDisplaySetHoldModeCall);
+	sceDisplaySetHoldMode = (void*)(mod->text_addr + g_offs->vshctrl_patch.sceDisplaySetHoldMode);
 }
 
 static void patch_hibblock(SceModule2 *mod)
 {
-	_sw(0x03E00008, mod->text_addr + 0x000051A8);
-	_sw(0x00001021, mod->text_addr + 0x000051AC);
+	_sw(0x03E00008, mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck);
+	_sw(0x00001021, mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck + 4);
 }
 
 static inline void ascii2utf16(char *dest, const char *src)
@@ -174,20 +175,20 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 
 	minor_version = sctrlHENGetMinorVersion();
 
-	if(minor_version == 0) {
-		sprintf(str, "6.35 PRO-%c", 'A'+(sctrlHENGetVersion()&0xF)-1);
-	} else {
-		sprintf(str, "6.35 PRO-%c%d", 'A'+(sctrlHENGetVersion()&0xF)-1, minor_version);
+	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
+
+	if(minor_version != 0) {
+		sprintf(str+strlen(str), "%d", minor_version);
 	}
 
-	p = (void*)(text_addr + 0x2A1FC);
+	p = (void*)(text_addr + g_offs->vshctrl_patch.SystemVersionStr);
 	ascii2utf16(p, str);
 
-	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr+0x18F3C); // lui $v0, 
-	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr+0x18F40); // or $v0, $v0, 
+	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr + g_offs->vshctrl_patch.SystemVersion); // lui $v0, 
+	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr + g_offs->vshctrl_patch.SystemVersion + 4); // or $v0, $v0, 
 
 	if (conf.machidden) {
-		p = (void*)(text_addr + 0x2E4D8);
+		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
 		sprintf(str, "[ Hidden: 0%dg ]", psp_model+1);
 		ascii2utf16(p, str);
 	}
@@ -200,65 +201,62 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 static void patch_game_plugin_module(u32 text_addr)
 {
 	//disable executable check for normal homebrew
-	_sw(0x03E00008, text_addr + 0x000202A8); // jr $ra
-	_sw(0x00001021, text_addr + 0x000202AC); // move $v0, $zr
+	_sw(0x03E00008, text_addr + g_offs->vshctrl_patch.HomebrewCheck); // jr $ra
+	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.HomebrewCheck + 4); // move $v0, $zr
 
 	//kill ps1 eboot check
-	_sw(0x03E00008, text_addr + 0x00020BC8); //jr $ra
-	_sw(0x00001021, text_addr + 0x00020BCC); // move $v0, $zr
+	_sw(0x03E00008, text_addr + g_offs->vshctrl_patch.PopsCheck); //jr $ra
+	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.PopsCheck + 4); // move $v0, $zr
 
 	//kill multi-disc ps1 check
-	_sw(0x00000000, text_addr + 0x00014634);
+	_sw(NOP, text_addr + g_offs->vshctrl_patch.MultiDiscPopsCheck);
 
 	if (conf.hidepic) {
-		_sw(0x00601021, text_addr + 0x0001D5DC);
-		_sw(0x00601021, text_addr + 0x0001D5E8);
+		_sw(0x00601021, text_addr + g_offs->vshctrl_patch.HidePicCheck1);
+		_sw(0x00601021, text_addr + g_offs->vshctrl_patch.HidePicCheck2);
 	}
 	
 	if (conf.skipgameboot) {
-		_sw(MAKE_CALL(text_addr+0x00019294), text_addr + 0x00018F14);
-		_sw(0x24040002, text_addr + 0x00018F18);
+		_sw(MAKE_CALL(text_addr + g_offs->vshctrl_patch.SkipGameBootSubroute), text_addr + g_offs->vshctrl_patch.SkipGameBoot);
+		_sw(0x24040002, text_addr + g_offs->vshctrl_patch.SkipGameBoot + 4);
 	}
 
 	// disable check for custom psx eboot restore 
 	// rif file check
-	_sw(0x00001021, text_addr+0x000203AC);
+	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.RifFileCheck);
 	// rif content memcmp check
-	_sw(NOP, text_addr+0x000203D4);
+	_sw(NOP, text_addr + g_offs->vshctrl_patch.RifCompareCheck);
 	// some type check, branch it
-	_sw(0x10000010, text_addr+0x000203E8);
+	_sw(0x10000010, text_addr + g_offs->vshctrl_patch.RifTypeCheck);
 	// fake npdrm call
-	_sw(0x00001021, text_addr+0x0002042C);
+	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.RifNpDRMCheck);
 }
 
 static void patch_msvideo_main_plugin_module(u32 text_addr)
 {
-	_sh(0xFE00, text_addr + 0x0003AED4);
-	_sh(0xFE00, text_addr + 0x0003AF5C);
-	_sh(0xFE00, text_addr + 0x0003D79C);
-	_sh(0xFE00, text_addr + 0x0003D9F8);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[0]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[1]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[2]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[3]);
 
-	_sh(0xFE00, text_addr + 0x00044150);
-	_sh(0xFE00, text_addr + 0x00074550);
-	_sh(0xFE00, text_addr + 0x00088BA0);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[4]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[5]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[6]);
 
-	_sh(0x4003, text_addr + 0x0003D714);
-	_sh(0x4003, text_addr + 0x0003D75C);
-	_sh(0x4003, text_addr + 0x000431F8);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[7]);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[8]);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[9]);
 }
 
 static void patch_vsh_module(SceModule2 * mod)
 {
 	//enable homebrew boot
-	_sw(0, mod->text_addr+0x12230);
-	_sw(0, mod->text_addr+0x11FD8);
-	_sw(0, mod->text_addr+0x11FE0);
+	_sw(NOP, mod->text_addr + g_offs->vsh_module_patch.checks[0]);
+	_sw(NOP, mod->text_addr + g_offs->vsh_module_patch.checks[1]);
+	_sw(NOP, mod->text_addr + g_offs->vsh_module_patch.checks[2]);
 
-	//loadexec calls to vsh_bridge
-	u32 nids[2] = { /* ms0 */ 0x59BBA567, /* ef0 */ 0xD4BA5699 };
-
-	//hook imports
-	int i = 0; for(; i < NELEMS(nids); i++) hook_import_bynid((SceModule *)mod, "sceVshBridge", nids[i], gameloadexec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID1, gameloadexec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID2, gameloadexec, 1);
 }
 
 static void hook_iso_file_io(void)

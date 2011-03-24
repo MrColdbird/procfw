@@ -1,0 +1,29 @@
+TARGET = hen
+OBJS = main.o exploit.o ../../PXE/Launcher/launcher_patch_offset.o syscall.o imports.o
+
+all:
+
+main.c: rebootex_bin.inc
+
+rebootex_bin.inc:
+	bin2c ../../Rebootex_bin/rebootex.bin $@ rebootex_bin
+
+INCDIR = ../../Common ../../include
+CFLAGS = -O2 -G0 -Wall -mno-gpopt
+
+CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
+ASFLAGS = $(CFLAGS)
+
+LDFLAGS =
+LIBS = -lpsppower -lpsputility
+
+PSP_FW_VERSION = 620
+
+EXTRA_TARGETS = EBOOT.PBP
+EXTRA_CLEAN = rebootex_bin.inc
+PSP_EBOOT_TITLE = HEN
+
+BUILD_PRX = 1
+
+PSPSDK=$(shell psp-config --pspsdk-path)
+include $(PSPSDK)/lib/build.mak

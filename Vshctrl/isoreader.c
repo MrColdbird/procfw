@@ -175,11 +175,7 @@ static int readSectorCompressed(int sector, void *addr)
 
 	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, PTR_ALIGN_64(g_ciso_dec_buf) + offset - g_ciso_dec_buf_offset, 0);
 
-	if (ret >= 0) {
-		return SECTOR_SIZE;
-	}
-
-	return ret;
+	return ret < 0 ? ret : SECTOR_SIZE;
 }
 
 static int readSector(u32 sector, void *buf)

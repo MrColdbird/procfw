@@ -382,7 +382,7 @@ int read_cso_sector(u8 *addr, int sector)
 	// loc_8B8
 	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
 
-	return ret;
+	return ret < 0 ? ret : SECTOR_SIZE;
 }
 
 // 998

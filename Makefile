@@ -94,6 +94,10 @@ endif
 	@cd $(RECOVERY); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 
+deps:
+	make clean_lib
+	make build_lib
+
 build_lib:
 	@cd $(SYSTEMCONTROL)/libs; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	

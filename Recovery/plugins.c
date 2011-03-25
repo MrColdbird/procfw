@@ -16,6 +16,7 @@
 #include "utils.h"
 #include "vpl.h"
 #include "main.h"
+#include "strsafe.h"
 
 struct Plugin {
 	struct Plugin *next;
@@ -255,7 +256,7 @@ static int display_callback(struct MenuEntry* entry, char *buf, int size)
 		name = plugin->name;
 	}
 
-	sprintf(buf, "%s [%s]", name, get_plugin_name(plugin->type));
+	sprintf(buf, "%.64s [%s]", name, get_plugin_name(plugin->type));
 	sprintf(buf, "%-48s %-11s", buf, get_bool_name(plugin->enabled));
 
 	return 0;

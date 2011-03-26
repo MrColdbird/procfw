@@ -8,6 +8,7 @@ REBOOTEXPXE = PXE/RebootexPXE
 LAUNCHER = PXE/Launcher
 GALAXYDRIVER = ISODrivers/Galaxy
 M33DRIVER = ISODrivers/March33
+INFERNO = ISODrivers/Inferno
 STARGATE = Stargate
 ISOLAUNCHER = testsuite/ISOLauncher
 FASTRECOVERY = FastRecovery
@@ -52,6 +53,7 @@ endif
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(INFERNO); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -81,6 +83,7 @@ clean:
 	@cd $(VSHCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
+	@cd $(INFERNO); make clean $(DEBUG_OPTION)
 	@cd $(STARGATE); make clean $(DEBUG_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 ifeq ($(CONFIG_620), 1)

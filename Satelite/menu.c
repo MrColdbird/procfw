@@ -24,7 +24,8 @@ const char * enable_disable[] ={
 const char *iso[]={
 	"Normal",
 	"M33 driver",
-	"Sony NP9660"
+	"Sony NP9660",
+	"Inferno",
 };
 
 #define TMENU_MAX 10

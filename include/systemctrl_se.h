@@ -30,6 +30,7 @@ enum SEUmdModes
 	MODE_UMD = 0,
 	MODE_MARCH33 = 1,
 	MODE_NP9660 = 2,
+	MODE_INFERNO = 3,
 };
 
 typedef struct
@@ -186,7 +187,7 @@ void sctrlSESetUmdFile(char *file);
 /** 
  * Sets the boot config file for next reboot (kernel only)
  *
- * @param index - The index identifying the file (0 -> normal bootconf, 1 -> march33 driver bootconf, 2 -> np9660 bootcnf)
+ * @param index - The index identifying the file (0 -> normal bootconf, 1 -> march33 driver bootconf, 2 -> np9660 bootcnf, 3 -> inferno bootconf)
 */
 void sctrlSESetBootConfFileIndex(int index);
 

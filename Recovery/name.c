@@ -74,6 +74,8 @@ const char *get_iso_name(int iso_mode)
 			return "M33 driver";
 		case MODE_NP9660:
 			return "Sony NP9660";
+		case MODE_INFERNO:
+			return "Inferno";
 	}
 
 	return "FIXME";

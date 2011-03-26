@@ -367,7 +367,8 @@ int read_cso_sector(u8 *addr, int sector)
 		// loc_93C
 		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
 
-		if (ret != CISO_DEC_BUFFER_SIZE) {
+		/* May not reach CISO_DEC_BUFFER_SIZE */	
+		if (ret < 0) {
 			// loc_95C
 			g_ciso_dec_buf_offset = 0xFFF00000;
 			ret = -6;

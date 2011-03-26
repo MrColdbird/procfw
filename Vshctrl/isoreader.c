@@ -164,7 +164,8 @@ static int readSectorCompressed(int sector, void *addr)
 	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		ret = readRawData(PTR_ALIGN_64(g_ciso_dec_buf), CISO_DEC_BUFFER_SIZE, offset);
 
-		if (ret != CISO_DEC_BUFFER_SIZE) {
+		/* May not reach CISO_DEC_BUFFER_SIZE */	
+		if (ret < 0) {
 			g_ciso_dec_buf_offset = 0xFFF00000;
 
 			return -24;

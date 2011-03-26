@@ -6,7 +6,7 @@
 static nid_entry SysMemForKernel_nid[] = {
 	{ 0xC7E57B9C, 0x9F154FA1, },
 	{ 0xCF4DE78C, 0x208F4820, }, // sceKernelGetUIDcontrolBlock
-	{ 0xFC114573, 0xF0E0AB7A, },
+	{ 0xFC114573, 0xF0E0AB7A, }, // sceKernelGetCompiledSdkVersion
 	{ 0x3FC9AE6A, 0x5E8DCA05, }, // sceKernelDevkitVersion
 	{ 0x536AD5E1, 0xF3C729A6, }, // SysMemForKernel_536AD5E1
 	{ 0x636C953B, 0x6D161EE2, }, // sceKernelAllocHeapMemory

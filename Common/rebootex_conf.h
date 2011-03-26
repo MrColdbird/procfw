@@ -24,6 +24,7 @@ typedef enum {
 	NORMAL_MODE = 0,
 	MARCH33_MODE = 1,
 	NP9660_MODE = 2,
+	INFERNO_MODE = 3,
 } PspBootConfMode;
 
 typedef struct _rebootex_config {

@@ -532,6 +532,40 @@ int patch_bootconf_march33(char *buffer, int length)
 	return result;
 }
 
+static struct add_module inferno_add_mods[] = {
+	{ "/kd/mgr.prx", "/kd/amctrl.prx", GAME_RUNLEVEL },
+	{ PATH_INFERNO+sizeof(PATH_FLASH0)-2, "/kd/utility.prx", GAME_RUNLEVEL },
+	{ PATH_INFERNO+sizeof(PATH_FLASH0)-2, "/kd/isofs.prx", UMDEMU_RUNLEVEL },
+	{ "/kd/isofs.prx", "/kd/utility.prx", GAME_RUNLEVEL },
+};
+
+static struct del_module inferno_del_mods[] = {
+	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
+	{ "/kd/ata.prx", GAME_RUNLEVEL },
+	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
+	{ "/kd/np9660.prx", UMDEMU_RUNLEVEL },
+};
+
+int patch_bootconf_inferno(char *buffer, int length)
+{
+	int newsize, result, ret;
+
+	result = length;
+
+	int i; for(i=0; i<NELEMS(inferno_del_mods); ++i) {
+		RemovePrx(buffer, inferno_del_mods[i].prxname, inferno_del_mods[i].flags);
+	}
+
+	for(i=0; i<NELEMS(inferno_add_mods); ++i) {
+		newsize = MovePrx(buffer, inferno_add_mods[i].insertbefore, inferno_add_mods[i].prxname, inferno_add_mods[i].flags);
+
+		if (newsize > 0) result = newsize;
+	}
+
+	return result;
+}
+
 int is_permanent_mode(void)
 {
 	int ret;
@@ -587,6 +621,11 @@ int _UnpackBootConfig(char **p_buffer, int length)
 			break;
 		case MARCH33_MODE:
 			newsize = patch_bootconf_march33(buffer, length);
+
+			if (newsize > 0) result = newsize;
+			break;
+		case INFERNO_MODE:
+			newsize = patch_bootconf_inferno(buffer, length);
 
 			if (newsize > 0) result = newsize;
 			break;

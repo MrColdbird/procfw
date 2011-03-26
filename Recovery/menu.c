@@ -113,7 +113,7 @@ static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 
 static struct ValueOption g_iso_mode_option = {
 	&g_config.umdmode,
-	MODE_NP9660+1,
+	MODE_INFERNO+1,
 };
 
 static struct ValueOption g_xmb_usbdevice_option = {

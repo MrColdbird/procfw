@@ -9,6 +9,7 @@
 #include "utils.h"
 
 #include "galaxy.h"
+#include "inferno.h"
 
 #ifdef CONFIG_635
 #include "march33.h"
@@ -183,6 +184,7 @@ struct InstallList g_file_lists[] = {
 	{ galaxy, &size_galaxy, PATH_GALAXY, },
 	{ stargate, &size_stargate, PATH_STARGATE, },
 	{ NULL, NULL, PATH_MARCH33, },
+	{ inferno, &size_inferno, PATH_INFERNO, },
 	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
 	{ popcorn, &size_popcorn, PATH_POPCORN, },
 	{ satelite, &size_satelite, PATH_SATELITE, },

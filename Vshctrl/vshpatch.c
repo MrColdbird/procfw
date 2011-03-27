@@ -164,6 +164,68 @@ int myIoMkdir(const char *dir, SceMode mode)
 	return ret;
 }
 
+static const char *g_ver_checklist[] = {
+	"release:",
+	"build:",
+	"system:",
+	"vsh:",
+	"target:",
+};
+
+static int load_version_txt(void *buf, int size)
+{
+	SceUID fd;
+
+   	fd = sceIoOpen("ms0:/seplugins/version.txt", PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		fd = sceIoOpen("ef0:/seplugins/version.txt", PSP_O_RDONLY, 0777);
+	}
+
+	if(fd < 0) {
+		return fd;
+	}
+
+	size = sceIoRead(fd, buf, size);
+	sceIoClose(fd);
+
+	return size;
+}
+
+static int check_valid_version_txt(const void *buf, int size)
+{
+	const char *p;
+	int i;
+
+	p = buf;
+
+	if(size < 159) {
+		return -1;
+	}
+
+	for(i=0; i<NELEMS(g_ver_checklist); ++i) {
+		if(p - (const char*)buf >= size) {
+			return -2;
+		}
+
+		if(0 != strncmp(p, g_ver_checklist[i], strlen(g_ver_checklist[i]))) {
+			return -3;
+		}
+
+		while(*p != '\n' && p - (const char*)buf < size) {
+			p++;
+		}
+
+		if(p - (const char*)buf >= size) {
+			return -4;
+		}
+
+		p++;
+	}
+
+	return 0;
+}
+
 static void patch_sysconf_plugin_module(SceModule2 *mod)
 {
 	void *p;
@@ -188,8 +250,18 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr + g_offs->vshctrl_patch.SystemVersion + 4); // or $v0, $v0, 
 
 	if (conf.machidden) {
+		char tmpbuf[159];
+		int tmpsize;
+		
 		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
-		sprintf(str, "[ Hidden: 0%dg ]", psp_model+1);
+		tmpsize = load_version_txt(tmpbuf, sizeof(tmpbuf));
+
+		if(tmpsize > 0 && check_valid_version_txt(tmpbuf, tmpsize) == 0) {
+			sprintf(str, "[ Model: 0%dg Fake: %.4s ]", psp_model+1, tmpbuf + sizeof("release:") - 1);
+		} else {
+			sprintf(str, "[ Model: 0%dg ]", psp_model+1);
+		}
+		
 		ascii2utf16(p, str);
 	}
 

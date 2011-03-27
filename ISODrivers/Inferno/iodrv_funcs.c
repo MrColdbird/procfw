@@ -17,6 +17,30 @@
 #include "systemctrl_private.h"
 #include "inferno.h"
 
+/*
+	UMD access RAW routine
+
+	lba_param[0] = 0 , unknown
+	lba_param[1] = cmd,3 = ctrl-area , 0 = data-read
+	lba_param[2] = top of LBA
+	lba_param[3] = total LBA size
+	lba_param[4] = total byte size
+	lba_param[5] = byte size of center LBA
+	lba_param[6] = byte size of start  LBA
+	lba_param[7] = byte size of last   LBA
+ */
+
+struct LbaParams {
+	int unknown1; // 0
+	int cmd; // 4
+	int lba_top; // 8
+	int lba_size; // 12
+	int byte_size_total;  // 16
+	int byte_size_centre; // 20
+	int byte_size_start; // 24
+	int byte_size_last;  // 28
+};
+
 struct IsoOpenSlot {
 	int enabled;
 	u32 offset;
@@ -303,10 +327,8 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 
 	if(cmd == 0x01F010DB) {
 		return 0;
-	}
-
-	/* Read fd current offset */
-	if(cmd == 0x01D20001) {
+	} else if(cmd == 0x01D20001) {
+		/* Read fd current offset */
 		ret = sceKernelWaitSema(g_umd9660_sema_id, 1, NULL);
 
 		if(ret < 0) {
@@ -326,10 +348,8 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 		}
 
 		return 0;
-	}
-
-	/* UMD file seek whence */
-	if(cmd == 0x01F100A6) {
+	} else if(cmd == 0x01F100A6) {
+		/* UMD file seek whence */
 		struct IoIoctlSeekCmd *seek_cmd;
 
 		if (indata == NULL || inlen < sizeof(struct IoIoctlSeekCmd)) {
@@ -339,9 +359,7 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 		seek_cmd = (struct IoIoctlSeekCmd *)indata;
 
 		return IoLseek(arg, seek_cmd->offset, seek_cmd->whence);
-	}
-
-	if(cmd == 0x01F30003) {
+	} else if(cmd == 0x01F30003) {
 		u32 len;
 
 		if(indata == NULL || inlen < 4) {
@@ -365,37 +383,39 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 // 0x00000488
 static int sub_00000488(void *outdata, int outlen, void *indata)
 {
-	u32 indata_8, indata_16, indata_24;
+	u32 lba_top, byte_size_total, byte_size_start;
 	u32 offset;
+	struct LbaParams *param;
 
-	indata_16 = *(u32*)(indata+16);
+	param = (struct LbaParams*) indata;
+	byte_size_total = param->byte_size_total;
 
-	if(outlen < indata_16) {
+	if(outlen < byte_size_total) {
 		return 0x80010069;
 	}
 
-	indata_8 = *(u32*)(indata+8);
-	indata_24 = *(u32*)(indata+24);
+	lba_top = param->lba_top;
+	byte_size_start = param->byte_size_start;
 
-	if(!indata_24) {
-		offset = indata_8 * ISO_SECTOR_SIZE;
+	if(!byte_size_start) {
+		offset = lba_top * ISO_SECTOR_SIZE;
 		goto exit;
 	}
 
-	if(*(u32*)(indata+20)) {
-		offset = indata_8 * ISO_SECTOR_SIZE - indata_24 + ISO_SECTOR_SIZE;
+	if(param->byte_size_centre) {
+		offset = lba_top * ISO_SECTOR_SIZE - byte_size_start + ISO_SECTOR_SIZE;
 		goto exit;
 	}
 
-	if(!*(u32*)(indata+28)) {
-		offset = indata_8 * ISO_SECTOR_SIZE + indata_24;
+	if(!param->byte_size_last) {
+		offset = lba_top * ISO_SECTOR_SIZE + byte_size_start;
 		goto exit;
 	}
 
-	offset = indata_8 * ISO_SECTOR_SIZE - indata_24 + ISO_SECTOR_SIZE;
+	offset = lba_top * ISO_SECTOR_SIZE - byte_size_start + ISO_SECTOR_SIZE;
 
 exit:
-	return iso_read_with_stack(offset, outdata, indata_16);
+	return iso_read_with_stack(offset, outdata, byte_size_total);
 }
 
 // 0x000004F4

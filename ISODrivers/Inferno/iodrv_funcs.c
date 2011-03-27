@@ -28,14 +28,6 @@ struct IoIoctlSeekCmd {
 	u32 whence;
 };
 
-#define SAFE_FREE(p) \
-do { \
-	if(p != NULL) { \
-		oe_free(p); \
-		p = NULL; \
-	} \
-} while ( 0 )
-
 // 0x00002484
 void *g_sector_buf = NULL;
 
@@ -826,14 +818,10 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 {
 	if(cmd == 0x01F00003) {
 		return 0;
-	}
-
-	if(cmd == 0x01F010DB) {
+	} else if(cmd == 0x01F010DB) {
 		return 0;
-	}
-
-	/* get UMD disc type*/
-	if(cmd == 0x01F20001) {
+	} else if(cmd == 0x01F20001) {
+		// get UMD disc type 
 		// 0 = No disc.
 		// 0x10 = Game disc.
 		// 0x20 = Video disc.
@@ -843,19 +831,15 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(0x10, (u32)(outdata+4));
 
 		return 0;
-	}
-
-	/* missing 0x01F100A4, seek UMD disc (raw). */
-	if(cmd == 0x01F100A4) {
+	} else if(cmd == 0x01F100A4) {
+		/* missing 0x01F100A4, seek UMD disc (raw). */
 		if(indata == NULL || inlen < 4) {
 			return 0x80010016;
 		}
 
 		return 0;
-	}
-
-	/* missing 0x01F300A5, prepare UMD data into cache */
-	if(cmd == 0x01F300A5) {
+	} else if(cmd == 0x01F300A5) {
+		/* missing 0x01F300A5, prepare UMD data into cache */
 		if(indata == NULL || inlen < 4) {
 			return 0x80010016;
 		}
@@ -867,27 +851,17 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(1, (u32)outdata);
 
 		return 0;
-	}
-
-	if(cmd == 0x01F20002 || cmd == 0x01F20003) {
+	} else if(cmd == 0x01F20002 || cmd == 0x01F20003) {
 		_sw(g_total_sectors, (u32)(outdata));
 
 		return 0;
-	}
-
-	if(cmd == 0x01E18030) {
+	} else if(cmd == 0x01E18030) {
 		return 1;
-	}
-
-	if(cmd == 0x01E180D3) {
+	} else if(cmd == 0x01E180D3) {
 		return 0x80010086;
-	}
-
-	if(cmd == 0x01E080A8) {
+	} else if(cmd == 0x01E080A8) {
 		return 0x80010086;
-	}
-
-	if(cmd == 0x01E28035) {
+	} else if(cmd == 0x01E28035) {
 		/* Added check for outdata */
 		if(outdata == NULL || outlen < 4) {
 			return 0x80010016;
@@ -896,9 +870,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw((u32)g_sector_buf, (u32)(outdata));
 
 		return 0;
-	}
-
-	if(cmd == 0x01E280A9) {
+	} else if(cmd == 0x01E280A9) {
 		/* Added check for outdata */
 		if(outdata == NULL || outlen < 4) {
 			return 0x80010016;
@@ -907,9 +879,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(ISO_SECTOR_SIZE, (u32)(outdata));
 
 		return 0;
-	}
-
-	if(cmd == 0x01E38034) {
+	} else if(cmd == 0x01E38034) {
 		if(indata == NULL || outdata == NULL) {
 			return 0x80010016;
 		}
@@ -917,22 +887,18 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(0, (u32)(outdata));
 
 		return 0;
-	}
-
-	/**
-	 * 0x01E380C0: read sectors general
-	 * 0x01F200A1: read sectors
-	 * 0x01F200A2: read sectors dircache
-	 */
-	if(cmd == 0x01E380C0 || cmd == 0X01F200A1 || cmd == 0x01F200A2) {
+	} else if(cmd == 0x01E380C0 || cmd == 0X01F200A1 || cmd == 0x01F200A2) {
+		/**
+		 * 0x01E380C0: read sectors general
+		 * 0x01F200A1: read sectors
+		 * 0x01F200A2: read sectors dircache
+		 */
 		if(indata == NULL || outdata == NULL) {
 			return 0x80010016;
 		}
 
 		return sub_00000488(outdata, outlen, indata);
-	}
-
-	if(cmd == 0x01E38012) {
+	} else if(cmd == 0x01E38012) {
 		int outlen2 = outlen;
 
 		// loc_6E0

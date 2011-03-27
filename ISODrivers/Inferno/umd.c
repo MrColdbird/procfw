@@ -196,7 +196,7 @@ int sceUmdMan_driver_6A1FB0DD(void)
 
 int sceUmdMan_driver_7DF4C4DA(u32 a0)
 {
-	if (g_0000279C != a0) {
+	if(g_0000279C != a0) {
 		return 0x80010002;
 	}
 

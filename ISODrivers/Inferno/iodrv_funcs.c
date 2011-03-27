@@ -328,6 +328,11 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 	if(cmd == 0x01F010DB) {
 		return 0;
 	} else if(cmd == 0x01D20001) {
+		/* added more data len checks */
+		if(outdata == NULL || outlen < 4) {
+			return 0x80010016;
+		}
+		
 		/* Read fd current offset */
 		ret = sceKernelWaitSema(g_umd9660_sema_id, 1, NULL);
 
@@ -335,12 +340,7 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 			return -1;
 		}
 
-		/* added more data len checks */
-		if(outdata == NULL || outlen < 4) {
-			return 0x80010016;
-		}
-
-		*(u32*)outdata = g_open_slot[idx].offset;
+		_sw(g_open_slot[idx].offset, (u32)outdata);
 		ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 		if(ret < 0) {

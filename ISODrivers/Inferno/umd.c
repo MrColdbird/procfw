@@ -237,6 +237,7 @@ int sceUmdMan_driver_4FFAB8DA(u32 a0, u32 a1, u32 a2)
 {
 	SceModule2 *mod;
 	u32 text_addr, intr;
+	int i;
 
 	if(0 != g_0000279C) {
 		return 0x8001000C;
@@ -252,10 +253,9 @@ int sceUmdMan_driver_4FFAB8DA(u32 a0, u32 a1, u32 a2)
 
 	intr = 0x00001021; // move $v0, $zr
 
-	_sw(intr, 0x00004020 + text_addr);
-	_sw(intr, 0x00004058 + text_addr);
-	_sw(intr, 0x0000410C + text_addr);
-	_sw(intr, 0x000042E8 + text_addr);
+	for(i=0; i<NELEMS(g_offs->patches); ++i) {
+		_sw(intr, g_offs->patches[i] + text_addr);
+	}
 
 	sync_cache();
 

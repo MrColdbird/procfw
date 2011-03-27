@@ -2,7 +2,7 @@ all:
 	../../contrib/pspgz.py inferno.prx ../../contrib/SystemControl.hdr inferno.prx PRO_Inferno_Driver 0x1000
 
 TARGET = inferno
-OBJS = main.o iodrv_funcs.o umd.o isoread.o imports.o ../../Common/utils.o
+OBJS = main.o iodrv_funcs.o umd.o isoread.o inferno_patch_offset.o imports.o ../../Common/utils.o
 
 CFLAGS = -Os -G0 -Wall -I. -I.. -I ../../Common -I ../../include
 

@@ -69,12 +69,13 @@ static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4];
 // 0x00000368
 static void wait_until_ms0_ready(void)
 {
-	int ret, status = 0;
+	int ret, status = 0, apitype;
 	const char *drvname;
 
 	drvname = "mscmhc0:";
+	apitype = sceKernelInitApitype();
 
-	if(psp_model == PSP_GO) {
+	if(psp_model == PSP_GO && apitype == 0x125) {
 		drvname = "mscmhcemu0:";
 	}
 

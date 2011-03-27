@@ -381,13 +381,11 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 }
 
 // 0x00000488
-static int sub_00000488(void *outdata, int outlen, void *indata)
+static int umd_raw_read(void *outdata, int outlen, struct LbaParams *param)
 {
 	u32 lba_top, byte_size_total, byte_size_start;
 	u32 offset;
-	struct LbaParams *param;
 
-	param = (struct LbaParams*) indata;
 	byte_size_total = param->byte_size_total;
 
 	if(outlen < byte_size_total) {
@@ -502,7 +500,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 			return 0x80010016;
 		}
 
-		return sub_00000488(outdata, outlen, indata);
+		return umd_raw_read(outdata, outlen, indata);
 	} else if(cmd == 0x01E38012) {
 		int outlen2 = outlen;
 

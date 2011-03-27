@@ -21,4 +21,12 @@ extern SceUID g_mediaman_semaid;
 
 #define MAX_FILES_NR 8
 
+#define SAFE_FREE(p) \
+do { \
+	if(p != NULL) { \
+		oe_free(p); \
+		p = NULL; \
+	} \
+} while ( 0 )
+
 #endif

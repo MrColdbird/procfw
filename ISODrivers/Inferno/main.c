@@ -20,7 +20,7 @@ PSP_MODULE_INFO("PRO_Inferno_Driver", 0x1000, 1, 1);
 u32 psp_model;
 u32 psp_fw_version;
 
-extern int SysMemForKernel_C7E57B9C(void *unk0);
+extern int sceKernelSetQTGP3(void *unk0);
 extern char *GetUmdFile();
 
 // 00002790
@@ -47,7 +47,7 @@ int setup_umd_device(void)
 		return ret;
 	}
 
-	SysMemForKernel_C7E57B9C(g_umddata);
+	sceKernelSetQTGP3(g_umddata);
 	ret = 0;
 
 	return ret;

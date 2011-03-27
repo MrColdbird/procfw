@@ -20,7 +20,7 @@ PSP_MODULE_INFO("M33GalaxyController", 0x1006, 1, 1);
 
 extern int get_total_block(void);
 extern int clear_cache(void);
-extern int SysMemForKernel_C7E57B9C(void *unk0);
+extern int sceKernelSetQTGP3(void *unk0);
 
 u32 psp_fw_version;
 
@@ -217,17 +217,13 @@ int sub_00000588(void)
 	open_iso();
 	intr = sceKernelCpuSuspendIntr();
 
-	// see 0x00004640 in sub_000045CC
+	/* sceUmdManGetUmdDiscInfo patch */
 	_sw(0xE0000800, g_sceNp9660_driver_text_addr + g_offs->Data1);
-	// see 0x00004648 in sub_000045CC
 	_sw(0x00000009, g_sceNp9660_driver_text_addr + g_offs->Data2);
-	// see 0x00004438 in sub_000043E4
 	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + g_offs->Data3);
-	// see 0x000037B4 in sub_00003760
 	_sw(g_total_blocks, g_sceNp9660_driver_text_addr + g_offs->Data4);
-	// 6.20: move to 0x000088D4
-	// see 0x000025FC in sub_00002514
 	_sw(0x00000000, g_sceNp9660_driver_text_addr + g_offs->Data5);
+
 	sceKernelCpuResumeIntr(intr);
 
 	if (g_data_1204 == 0) {
@@ -236,7 +232,7 @@ int sub_00000588(void)
 	}
 
 	clear_cache();
-	SysMemForKernel_C7E57B9C(g_umddata);
+	sceKernelSetQTGP3(g_umddata);
 
 	return 0;
 }

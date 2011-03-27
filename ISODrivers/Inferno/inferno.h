@@ -28,11 +28,11 @@ extern u32 psp_fw_version;
 extern PspIoDrv g_iodrv;
 
 extern SceUID g_umd_cbid;
-extern u32 g_umd_error_status;
-extern u32 g_drive_status;
+extern int g_umd_error_status;
+extern int g_drive_status;
 
 extern const char *g_iso_fn;
-extern int g_00002480;
+extern int g_game_fix_type;
 extern SceUID g_mediaman_semaid;
 extern void *g_sector_buf;
 extern SceUID g_umd9660_sema_id;

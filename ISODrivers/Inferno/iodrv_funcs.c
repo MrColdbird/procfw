@@ -59,6 +59,7 @@ SceUID g_umd9660_sema_id = -1;
 static struct IsoOpenSlot g_open_slot[MAX_FILES_NR];
 
 // 0x000023D8
+// it's the serial of Coded arms
 static const char *g_umd_ids[] = {
 	"ULES-00124",
 	"ULUS-10019",
@@ -66,7 +67,8 @@ static const char *g_umd_ids[] = {
 	"ULAS-42009",
 };
 
-int g_00002480 = 0;
+// 0x00002480
+int g_game_fix_type = 0;
 
 // 0x00000CB0
 static int IoInit(PspIoDrvArg* arg)
@@ -102,18 +104,19 @@ static int IoInit(PspIoDrvArg* arg)
 
 	for(i=0; i<NELEMS(g_umd_ids); ++i) {
 		if(0 == memcmp(g_read_arg.address + 0x00000373, g_umd_ids[i], 10)) {
-			g_00002480 = 1;
+			g_game_fix_type = 1;
 
 			return 0;
 		}
 	}
 
-	if(g_00002480) {
+	if(g_game_fix_type) {
 		return 0;
 	}
 
+	// NPUG-80086: FLOW -Life Could be Simple-
 	if(0 == memcmp(g_read_arg.address + 0x00000373, "NPUG-80086", 10)) {
-		g_00002480 = 2;
+		g_game_fix_type = 2;
 	}
 
 	return 0;

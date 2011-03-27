@@ -26,9 +26,6 @@ extern char *GetUmdFile();
 // 00002790
 const char *g_iso_fn = NULL;
 
-// 0x000027A8
-SceUID g_mediaman_semaid = -1;
-
 // 0x00002248
 u8 g_umddata[16] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,

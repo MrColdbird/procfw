@@ -148,7 +148,7 @@ int cso_open(SceUID fd)
 			}
 
 			if ((u32)g_ciso_dec_buf & 63)
-				g_ciso_dec_buf = (void*)(((u32)g_ciso_dec_buf & 0xFFFFFFC0) + 64);
+				g_ciso_dec_buf = (void*)(((u32)g_ciso_dec_buf & (~63)) + 64);
 		}
 
 		if (g_ciso_block_buf == NULL) {

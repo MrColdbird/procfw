@@ -9,3 +9,8 @@
 	STUB_FUNC  0x3FC9AE6A,sceKernelDevkitVersion
 	STUB_FUNC  0x6373995D,sceKernelGetModel
 	STUB_END
+
+	STUB_START "InitForKernel",0x00090011,0x00020005
+	STUB_FUNC  0xEE67E450,sceKernelBootFromGo635
+	STUB_FUNC  0x977A0F90,sceKernelBootFromGo620
+	STUB_END

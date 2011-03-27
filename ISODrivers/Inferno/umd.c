@@ -29,7 +29,7 @@ u32 g_0000279C = 0;
 u32 g_000027A0 = 0;
 
 // 0x000027A4
-u32 g_umd_cbid = 0;
+SceUID g_umd_cbid = 0;
 
 extern int sceKernelCancelSema(SceUID semaid, int unk1, int unk2);
 

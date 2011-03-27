@@ -69,9 +69,10 @@ int module_start(SceSize args, void* argp)
 {
 	int ret;
 
-	printk_init("ms0:/march33_reverse.txt");
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
+	setup_patch_offset_table(psp_fw_version);
+	printk_init("ms0:/march33_reverse.txt");
 	printk("March33 reversed started FW=0x%08X %02dg\n", psp_fw_version, psp_model+1);
 
 	ret = setup_umd_device();

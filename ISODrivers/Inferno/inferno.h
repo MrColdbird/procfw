@@ -1,6 +1,8 @@
 #ifndef INFERNO_H
 #define INFERNO_H
 
+#include "inferno_patch_offset.h"
+
 #define ISO_SECTOR_SIZE 2048
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000

@@ -26,8 +26,6 @@ extern char *GetUmdFile();
 // 00002790
 const char *g_iso_fn = NULL;
 
-int g_000027A4 = 0;
-
 // 0x000027A8
 SceUID g_mediaman_semaid = -1;
 
@@ -59,7 +57,7 @@ int setup_umd_device(void)
 int init_march33(void)
 {
 	g_drive_status = 50;
-	g_000027A4 = -1;
+	g_umd_cbid = -1;
 	g_umd_error_status = 0;
 	g_mediaman_semaid = sceKernelCreateSema("MediaManSema", 0, 0, 1, 0);
 

@@ -5,6 +5,7 @@ extern u32 psp_model;
 extern u32 psp_fw_version;
 extern PspIoDrv g_iodrv;
 
+extern SceUID g_umd_cbid;
 extern u32 g_umd_error_status;
 extern u32 g_drive_status;
 

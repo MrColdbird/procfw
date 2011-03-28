@@ -33,7 +33,7 @@ extern int g_drive_status;
 
 extern const char *g_iso_fn;
 extern int g_game_fix_type;
-extern SceUID g_mediaman_semaid;
+extern SceUID g_drive_status_evf;
 extern void *g_sector_buf;
 extern SceUID g_umd9660_sema_id;
 extern int g_iso_opened;

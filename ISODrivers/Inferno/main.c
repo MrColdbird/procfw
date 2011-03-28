@@ -56,9 +56,9 @@ int init_march33(void)
 	g_drive_status = 50;
 	g_umd_cbid = -1;
 	g_umd_error_status = 0;
-	g_mediaman_semaid = sceKernelCreateSema("MediaManSema", 0, 0, 1, 0);
+	g_drive_status_evf = sceKernelCreateEventFlag("SceMediaManUser", 0x201, 0, NULL);
 
-	return MIN(g_mediaman_semaid, 0);
+	return MIN(g_drive_status_evf, 0);
 }
 
 // 0x00000000
@@ -87,6 +87,7 @@ int module_start(SceSize args, void* argp)
 int module_stop(SceSize args, void *argp)
 {
 	sceIoDelDrv("umd");
+	sceKernelDeleteEventFlag(g_drive_status_evf);
 
 	return 0;
 }

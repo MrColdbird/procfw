@@ -250,14 +250,19 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr + g_offs->vshctrl_patch.SystemVersion + 4); // or $v0, $v0, 
 
 	if (conf.machidden) {
-		char tmpbuf[159];
-		int tmpsize;
-		
 		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
-		tmpsize = load_version_txt(tmpbuf, sizeof(tmpbuf));
+		
+		if(conf.useversion) {
+			char tmpbuf[159];
+			int tmpsize;
 
-		if(tmpsize > 0 && check_valid_version_txt(tmpbuf, tmpsize) == 0) {
-			sprintf(str, "[ Model: 0%dg Fake: %.4s ]", psp_model+1, tmpbuf + sizeof("release:") - 1);
+			tmpsize = load_version_txt(tmpbuf, sizeof(tmpbuf));
+
+			if(tmpsize > 0 && check_valid_version_txt(tmpbuf, tmpsize) == 0) {
+				sprintf(str, "[ Model: 0%dg Fake: %.4s ]", psp_model+1, tmpbuf + sizeof("release:") - 1);
+			} else {
+				sprintf(str, "[ Model: 0%dg ]", psp_model+1);
+			}
 		} else {
 			sprintf(str, "[ Model: 0%dg ]", psp_model+1);
 		}

@@ -315,7 +315,7 @@ int read_cso_sector(u8 *addr, int sector)
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret != sizeof(g_CISO_idx_cache)) {
+		if (ret < 0) {
 			ret = -4;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -341,7 +341,7 @@ int read_cso_sector(u8 *addr, int sector)
 	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret != sizeof(g_CISO_idx_cache)) {
+		if (ret < 0) {
 			ret = -5;
 			printk("%s: -> %d\n", __func__, ret);
 

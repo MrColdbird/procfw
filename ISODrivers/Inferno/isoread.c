@@ -67,7 +67,7 @@ struct CISO_header {
 static struct CISO_header g_CISO_hdr;
 
 // 0x00002500
-static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4];
+static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
 
 static int sceKernelBootFromGo(void)
 {
@@ -96,7 +96,7 @@ static void wait_until_ms0_ready(void)
 		}
 	}
 
-	while ( 1 ) {
+	while( 1 ) {
 		ret = sceIoDevctl(drvname, 0x02025801, 0, 0, &status, sizeof(status));
 
 		if(ret < 0) {
@@ -152,34 +152,34 @@ static int is_ciso(SceUID fd)
 	sceIoLseek(fd, 0, PSP_SEEK_SET);
 	ret = sceIoRead(fd, &g_CISO_hdr, sizeof(g_CISO_hdr));
 
-	if (ret != sizeof(g_CISO_hdr)) {
+	if(ret != sizeof(g_CISO_hdr)) {
 		ret = -1;
 		printk("%s: -> %d\n", __func__, ret);
 		goto exit;
 	}
 
-	if (*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
+	if(*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		g_ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
 		printk("%s: total block %d\n", __func__, g_ciso_total_block);
 
-		if (g_ciso_dec_buf == NULL) {
+		if(g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
 
-			if (g_ciso_dec_buf == NULL) {
+			if(g_ciso_dec_buf == NULL) {
 				ret = -2;
 				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
 			}
 
-			if ((u32)g_ciso_dec_buf & 63)
+			if((u32)g_ciso_dec_buf & 63)
 				g_ciso_dec_buf = (void*)(((u32)g_ciso_dec_buf & (~63)) + 64);
 		}
 
-		if (g_ciso_block_buf == NULL) {
+		if(g_ciso_block_buf == NULL) {
 			g_ciso_block_buf = oe_malloc(ISO_SECTOR_SIZE);
 
-			if (g_ciso_block_buf == NULL) {
+			if(g_ciso_block_buf == NULL) {
 				ret = -3;
 				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
@@ -235,7 +235,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 		i++;
 		ret = sceIoLseek32(g_iso_fd, offset, PSP_SEEK_SET);
 
-		if (ret >= 0) {
+		if(ret >= 0) {
 			i = 0;
 			break;
 		} else {
@@ -243,7 +243,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 		}
 	} while(i < 16);
 
-	if (i == 16) {
+	if(i == 16) {
 		ret = 0x80010013;
 		goto exit;
 	}
@@ -251,7 +251,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 	for(i=0; i<16; ++i) {
 		ret = sceIoRead(g_iso_fd, addr, size);
 
-		if (ret >= 0) {
+		if(ret >= 0) {
 			i = 0;
 			break;
 		} else {
@@ -259,7 +259,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 		}
 	}
 
-	if (i == 16) {
+	if(i == 16) {
 		ret = 0x80010013;
 		goto exit;
 	}
@@ -279,10 +279,10 @@ static int read_cso_sector(u8 *addr, int sector)
 	n_sector = sector - g_CISO_cur_idx;
 
 	// not within sector idx cache?
-	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
+	if(g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if(ret < 0) {
 			ret = -4;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -296,17 +296,17 @@ static int read_cso_sector(u8 *addr, int sector)
 	offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 
 	// is plain?
-	if (g_CISO_idx_cache[n_sector] & 0x80000000) {
+	if(g_CISO_idx_cache[n_sector] & 0x80000000) {
 		return read_raw_data(addr, ISO_SECTOR_SIZE, offset);
 	}
 
 	sector++;
 	n_sector = sector - g_CISO_cur_idx;
 
-	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
+	if(g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if(ret < 0) {
 			ret = -5;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -320,14 +320,14 @@ static int read_cso_sector(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
-	if (size <= ISO_SECTOR_SIZE)
+	if(size <= ISO_SECTOR_SIZE)
 		size = ISO_SECTOR_SIZE;
 
-	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
+	if(offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
 
 		/* May not reach CISO_DEC_BUFFER_SIZE */	
-		if (ret < 0) {
+		if(ret < 0) {
 			g_ciso_dec_buf_offset = 0xFFF00000;
 			ret = -6;
 			printk("%s: -> %d\n", __func__, ret);
@@ -351,10 +351,10 @@ static int read_cso_data(u8* addr, u32 size, int offset)
 	int read_bytes;
 	int pos = offset & 0x7FF;
 
-	if (pos) {
+	if(pos) {
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret != ISO_SECTOR_SIZE) {
+		if(ret != ISO_SECTOR_SIZE) {
 			ret = -7;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -371,14 +371,14 @@ static int read_cso_data(u8* addr, u32 size, int offset)
 	}
 
 	// more than 1 block left
-	if (size / ISO_SECTOR_SIZE > 0) {
+	if(size / ISO_SECTOR_SIZE > 0) {
 		int i;
 		int block_cnt = size / ISO_SECTOR_SIZE;
 
 		for(i=0; i<block_cnt; ++i) {
 			ret = read_cso_sector(addr, cur_block);
 
-			if (ret != ISO_SECTOR_SIZE) {
+			if(ret != ISO_SECTOR_SIZE) {
 				ret = -8;
 				printk("%s: -> %d\n", __func__, ret);
 
@@ -392,10 +392,10 @@ static int read_cso_data(u8* addr, u32 size, int offset)
 		}
 	}
 
-	if (size != 0) {
+	if(size != 0) {
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret != ISO_SECTOR_SIZE) {
+		if(ret != ISO_SECTOR_SIZE) {
 			ret = -9;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -412,7 +412,7 @@ static int read_cso_data(u8* addr, u32 size, int offset)
 // 0x00000C7C
 int iso_read(struct IoReadArg *args)
 {
-	if (g_is_ciso != 0) {
+	if(g_is_ciso != 0) {
 		return read_cso_data(args->address, args->size, args->offset);
 	}
 

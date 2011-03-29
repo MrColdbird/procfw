@@ -46,7 +46,7 @@ void *g_ciso_block_buf = NULL;
 void *g_ciso_dec_buf = NULL;
 
 // 0x00000FC0
-u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4];
+u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
 
 // 0x000011C0
 int g_ciso_dec_buf_offset = -1;
@@ -95,7 +95,7 @@ u8 g_umddata[16] = {
 };
 
 // 0x00000000
-SceUID myKernelCreateThread (const char * name,
+SceUID myKernelCreateThread(const char * name,
 		SceKernelThreadEntry entry,
 		int	initPriority,
 		int	stackSize,
@@ -108,7 +108,7 @@ SceUID myKernelCreateThread (const char * name,
 	thid = sceKernelCreateThread(name, entry, initPriority, 
 			stackSize, attr, option);
 
-	if (!strncmp(name, "SceNpUmdMount", 13)) {
+	if(!strncmp(name, "SceNpUmdMount", 13)) {
 		g_SceNpUmdMount_thid = thid;
 		printk("g_SceNpUmdMount_thid at 0x%08x\n", thid);
 	}
@@ -127,34 +127,34 @@ int cso_open(SceUID fd)
 	sceIoLseek(fd, 0, PSP_SEEK_SET);
 	ret = sceIoRead(fd, &g_CISO_hdr, sizeof(g_CISO_hdr));
 
-	if (ret != sizeof(g_CISO_hdr)) {
+	if(ret != sizeof(g_CISO_hdr)) {
 		ret = -1;
 		printk("%s: -> %d\n", __func__, ret);
 		goto exit;
 	}
 
-	if (*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
+	if(*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
 		printk("%s: total block %d\n", __func__, ciso_total_block);
 
-		if (g_ciso_dec_buf == NULL) {
+		if(g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
 
-			if (g_ciso_dec_buf == NULL) {
+			if(g_ciso_dec_buf == NULL) {
 				ret = -2;
 				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
 			}
 
-			if ((u32)g_ciso_dec_buf & 63)
+			if((u32)g_ciso_dec_buf & 63)
 				g_ciso_dec_buf = (void*)(((u32)g_ciso_dec_buf & (~63)) + 64);
 		}
 
-		if (g_ciso_block_buf == NULL) {
+		if(g_ciso_block_buf == NULL) {
 			g_ciso_block_buf = oe_malloc(SECTOR_SIZE);
 
-			if (g_ciso_block_buf == NULL) {
+			if(g_ciso_block_buf == NULL) {
 				ret = -3;
 				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
@@ -178,10 +178,10 @@ int open_iso(void)
 	g_iso_opened = 0;
 	sceIoClose(g_iso_fd);
 
-	while ( 1 ) {
+	while( 1 ) {
 		g_iso_fd = sceIoOpen(g_iso_fn, 0x000F0000 | PSP_O_RDONLY, 0);
 
-		if (g_iso_fd >= 0) {
+		if(g_iso_fd >= 0) {
 			break;
 		}
 
@@ -196,7 +196,7 @@ int open_iso(void)
 	g_is_ciso = 0;
 	ret = cso_open(g_iso_fd);
 
-	if (ret >= 0) {
+	if(ret >= 0) {
 		g_is_ciso = 1;
 		printk("%s: g_is_ciso = 1\n", __func__);
 	}
@@ -226,7 +226,7 @@ int sub_00000588(void)
 
 	sceKernelCpuResumeIntr(intr);
 
-	if (g_data_1204 == 0) {
+	if(g_data_1204 == 0) {
 		g_data_1204 = 1;
 		sceKernelDelayThread(800000);
 	}
@@ -243,7 +243,7 @@ int get_total_block(void)
 	SceOff offset;
 	int ret;
 
-	if (g_is_ciso) {
+	if(g_is_ciso) {
 		ret = ciso_total_block;
 	} else {
 		offset = sceIoLseek(g_iso_fd, 0, PSP_SEEK_END);
@@ -268,7 +268,7 @@ int read_raw_data(u8* addr, u32 size, int offset)
 		i++;
 		ret = sceIoLseek32(g_iso_fd, offset, PSP_SEEK_SET);
 
-		if (ret >= 0) {
+		if(ret >= 0) {
 			i = 0;
 			break;
 		} else {
@@ -276,7 +276,7 @@ int read_raw_data(u8* addr, u32 size, int offset)
 		}
 	} while(i < 16);
 
-	if (i == 16) {
+	if(i == 16) {
 		ret = 0x80010013;
 		goto exit;
 	}
@@ -284,7 +284,7 @@ int read_raw_data(u8* addr, u32 size, int offset)
 	for(i=0; i<16; ++i) {
 		ret = sceIoRead(g_iso_fd, addr, size);
 
-		if (ret >= 0) {
+		if(ret >= 0) {
 			i = 0;
 			break;
 		} else {
@@ -292,7 +292,7 @@ int read_raw_data(u8* addr, u32 size, int offset)
 		}
 	}
 
-	if (i == 16) {
+	if(i == 16) {
 		ret = 0x80010013;
 		goto exit;
 	}
@@ -312,10 +312,10 @@ int read_cso_sector(u8 *addr, int sector)
 	n_sector = sector - g_CISO_cur_idx;
 
 	// not within sector idx cache?
-	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
+	if(g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if(ret < 0) {
 			ret = -4;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -330,7 +330,7 @@ int read_cso_sector(u8 *addr, int sector)
 	offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 
 	// is plain?
-	if (g_CISO_idx_cache[n_sector] & 0x80000000) {
+	if(g_CISO_idx_cache[n_sector] & 0x80000000) {
 		// loc_968
 		return read_raw_data(addr, SECTOR_SIZE, offset);
 	}
@@ -338,10 +338,10 @@ int read_cso_sector(u8 *addr, int sector)
 	sector++;
 	n_sector = sector - g_CISO_cur_idx;
 
-	if (g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
+	if(g_CISO_cur_idx == -1 || n_sector < 0 || n_sector >= NELEMS(g_CISO_idx_cache)) {
 		ret = read_raw_data((u8*)g_CISO_idx_cache, sizeof(g_CISO_idx_cache), (sector << 2) + sizeof(struct CISO_header));
 
-		if (ret < 0) {
+		if(ret < 0) {
 			ret = -5;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -356,15 +356,15 @@ int read_cso_sector(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
-	if (size <= SECTOR_SIZE)
+	if(size <= SECTOR_SIZE)
 		size = SECTOR_SIZE;
 
-	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
+	if(offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		// loc_93C
 		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
 
 		/* May not reach CISO_DEC_BUFFER_SIZE */	
-		if (ret < 0) {
+		if(ret < 0) {
 			// loc_95C
 			g_ciso_dec_buf_offset = 0xFFF00000;
 			ret = -6;
@@ -390,11 +390,11 @@ int read_cso_data(u8* addr, u32 size, int offset)
 	int read_bytes;
 	int pos = offset & 0x7FF;
 
-	if (pos) {
+	if(pos) {
 		// loc_A80
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret != SECTOR_SIZE) {
+		if(ret != SECTOR_SIZE) {
 			ret = -7;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -412,14 +412,14 @@ int read_cso_data(u8* addr, u32 size, int offset)
 
 	// loc_9E4
 	// more than 1 block left
-	if (size / SECTOR_SIZE > 0) {
+	if(size / SECTOR_SIZE > 0) {
 		int i;
 		int block_cnt = size / SECTOR_SIZE;
 
 		for(i=0; i<block_cnt; ++i) {
 			ret = read_cso_sector(addr, cur_block);
 
-			if (ret != SECTOR_SIZE) {
+			if(ret != SECTOR_SIZE) {
 				ret = -8;
 				printk("%s: -> %d\n", __func__, ret);
 
@@ -433,10 +433,10 @@ int read_cso_data(u8* addr, u32 size, int offset)
 		}
 	}
 
-	if (size != 0) {
+	if(size != 0) {
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if (ret != SECTOR_SIZE) {
+		if(ret != SECTOR_SIZE) {
 			ret = -9;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -461,9 +461,9 @@ struct read_data_args {
 struct read_data_args args;
 
 // 30C
-int read_data (struct read_data_args *args)
+int read_data(struct read_data_args *args)
 {
-	if (g_is_ciso != 0) {
+	if(g_is_ciso != 0) {
 		// ciso decompess
 		return read_cso_data(args->address, args->size, args->offset);
 	} else {
@@ -490,13 +490,13 @@ int sub_00000054(u32 a0, u8 *a1, u32 a2)
 	return ret;
 }
 
-int sub_00000514 (int fd)
+int sub_00000514(int fd)
 {
 	int ret;
 	
 	ret = sceIoClose(fd);
 
-	if (fd == g_iso_fd) {
+	if(fd == g_iso_fd) {
 		g_iso_fd = -1;
 		_sw(-1, g_sceNp9660_driver_text_addr + g_offs->StoreFd2);
 		clear_cache();
@@ -510,7 +510,7 @@ int sub_00000514 (int fd)
 // 0x000003D8
 int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
 {
-	if (g_SceNpUmdMount_thid == thid) {
+	if(g_SceNpUmdMount_thid == thid) {
 		SceModule2 *pMod;
 
 		pMod = (SceModule2*) sceKernelFindModuleByName("sceNp9660_driver");
@@ -566,7 +566,7 @@ int module_start(SceSize args, void* argp)
 	g_iso_fn = sctrlSEGetUmdFile();
 	pMod = (SceModule2*)sceKernelFindModuleByName("sceThreadManager");
 
-	if (pMod != NULL) {
+	if(pMod != NULL) {
 		// sceKernelCreateThread export
 		_sw((u32)&myKernelCreateThread, pMod->text_addr + g_offs->sceKernelCreateThread); 
 
@@ -578,10 +578,10 @@ int module_start(SceSize args, void* argp)
 
 	clear_cache();
 
-	while ( 1 ) {
+	while( 1 ) {
 		fd = sceIoOpen(g_iso_fn, PSP_O_RDONLY, 0);
 
-		if (fd >= 0) {
+		if(fd >= 0) {
 			break;
 		}
 

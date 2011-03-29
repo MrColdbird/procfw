@@ -443,7 +443,7 @@ static int umd_devctl_read(void *outdata, int outlen, struct LbaParams *param)
 	}
 
 	ret = iso_read_with_stack(offset, outdata, byte_size_total);
-	printk("%s: offset: 0x%08X len: 0x%08X -> 0x%08X\n", __func__, offset, byte_size_total, ret);
+//	printk("%s: offset: 0x%08X len: 0x%08X -> 0x%08X\n", __func__, offset, byte_size_total, ret);
 
 	return ret;
 }
@@ -581,7 +581,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 	}
 
 exit:
-	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
+//	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
 
 	return ret;
 }

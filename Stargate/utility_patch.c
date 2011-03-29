@@ -31,11 +31,32 @@ typedef struct _UtilityHookEntry {
 static int (*_sceUtilityLoadModule)(int id);
 static int (*_sceUtilityUnloadModule)(int id);
 
+#ifdef CONFIG_620
+static int g_mp3_loaded = 0;
+#endif
+
 int myUtilityLoadModule(int id)
 {
 	int ret;
 
+#ifdef CONFIG_620
+	// In FW 6.20, libmp3.prx load/unload code is buggy
+	// It cannot load/unload again once got loaded
+	// Doing so will result in user memory corrupted (in DBTVS)
+	if(psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
+		ret = 0;
+		printk("%s: [FAKE] 0x%04X -> %d\n", __func__, id, ret);
+
+		return ret;
+	}
+#endif
+	
 	ret = (*_sceUtilityLoadModule)(id);
+
+	if(psp_fw_version == FW_620 && id == 0x304 && ret == 0) {
+		g_mp3_loaded = 1;
+	}
+	
 	printk("%s: 0x%04X -> 0x%08X\n", __func__, id, ret);
 
 	// fake NPDRM load in np9660
@@ -50,6 +71,15 @@ int myUtilityLoadModule(int id)
 int myUtilityUnloadModule(int id)
 {
 	int ret;
+
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
+		ret = 0;
+		printk("%s: [FAKE] 0x%04X -> %d\n", __func__, id, ret);
+
+		return ret;
+	}
+#endif
 
 	ret = (*_sceUtilityUnloadModule)(id);
 	printk("%s: 0x%04X -> 0x%08X\n", __func__, id, ret);

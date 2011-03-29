@@ -431,7 +431,7 @@ static nid_entry InterruptManagerForKernel_nid[] = {
 	{ 0x0FC68A56, 0x4E401A35, }, // sceKernelSetPrimarySyscallHandler
 	{ 0xF4D443F3, 0xCBCBEF90, }, // sceKernelRegisterSystemCallTable
 	{ 0x36B1EF81, 0xB1F5E99B, }, // sceKernelQueryIntrHandlerInfo
-	{ 0xEB988556, 0x399FF74C, },  // sceKernelQuerySystemCall(5xx)
+	{ 0xEB988556, 0x399FF74C, }, // sceKernelQuerySystemCall(5xx)
 
 	{ 0x07E138EE, 0xE4B71544, }, 
 	{ 0xD8410DE6, 0x11981C80, }, 

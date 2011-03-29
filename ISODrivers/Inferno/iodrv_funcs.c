@@ -236,7 +236,8 @@ static int IoRead(PspIoDrvFileArg *arg, char *data, int len)
 	ret = sceKernelWaitSema(g_umd9660_sema_id, 1, 0);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
 	idx = (int)arg->arg;
@@ -244,7 +245,8 @@ static int IoRead(PspIoDrvFileArg *arg, char *data, int len)
 	ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
 	read_len = len;
@@ -255,24 +257,33 @@ static int IoRead(PspIoDrvFileArg *arg, char *data, int len)
 
 	retv = iso_read_with_stack(offset * ISO_SECTOR_SIZE, data, read_len * ISO_SECTOR_SIZE);
 
-	if(retv < 0) {
-		return retv;
+	if(retv <= 0) {
+		ret = retv;
+		goto exit;
 	}
 
+	retv = retv / ISO_SECTOR_SIZE;
 	ret = sceKernelWaitSema(g_umd9660_sema_id, 1, 0);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
-	g_open_slot[idx].offset += retv * ISO_SECTOR_SIZE;
+	g_open_slot[idx].offset += retv;
 	ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
-	return retv * ISO_SECTOR_SIZE;
+	ret = retv;
+
+exit:
+	printk("%s: len 0x%08X -> 0x%08X\n", __func__, len, ret);
+
+	return ret;
 }
 
 // 0x000000D8
@@ -283,7 +294,8 @@ static SceOff IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 	ret = sceKernelWaitSema(g_umd9660_sema_id, 1, NULL);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
 	idx = (int)arg->arg;
@@ -302,10 +314,12 @@ static SceOff IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 		ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 		if(ret < 0) {
-			return -1;
+			ret = -1;
+			goto exit;
 		}
 
-		return 0x80010016;
+		ret = 0x80010016;
+		goto exit;
 	}
 
 	if (g_total_sectors < g_open_slot[idx].offset) {
@@ -315,10 +329,16 @@ static SceOff IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 	ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 	if(ret < 0) {
-		return -1;
+		ret = -1;
+		goto exit;
 	}
 
-	return g_open_slot[idx].offset;
+	ret = g_open_slot[idx].offset;
+
+exit:
+	printk("%s: ofs=0x%08X, whence=%d -> 0x%08X\n", __func__, (u32)ofs, whence, ret);
+
+	return ret;
 }
 
 // 0x0000083C
@@ -329,65 +349,79 @@ static int IoIoctl(PspIoDrvFileArg *arg, unsigned int cmd, void *indata, int inl
 	idx = (int)arg->arg;
 
 	if(cmd == 0x01F010DB) {
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01D20001) {
 		/* added more data len checks */
 		if(outdata == NULL || outlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 		
 		/* Read fd current offset */
 		ret = sceKernelWaitSema(g_umd9660_sema_id, 1, NULL);
 
 		if(ret < 0) {
-			return -1;
+			ret = -1;
+			goto exit;
 		}
 
 		_sw(g_open_slot[idx].offset, (u32)outdata);
 		ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 
 		if(ret < 0) {
-			return -1;
+			ret = -1;
+			goto exit;
 		}
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F100A6) {
 		/* UMD file seek whence */
 		struct IoIoctlSeekCmd *seek_cmd;
 
 		if (indata == NULL || inlen < sizeof(struct IoIoctlSeekCmd)) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		seek_cmd = (struct IoIoctlSeekCmd *)indata;
-
-		return IoLseek(arg, seek_cmd->offset, seek_cmd->whence);
+		ret = IoLseek(arg, seek_cmd->offset, seek_cmd->whence);
+		goto exit;
 	} else if(cmd == 0x01F30003) {
 		u32 len;
 
 		if(indata == NULL || inlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		len = *(u32*)indata;
 
 		if(outdata == NULL || outlen < len) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
-		return IoRead(arg, outdata, len);
+		ret = IoRead(arg, outdata, len);
+		goto exit;
 	}
 
 	printk("%s: Unknown ioctl 0x%08X\n", __func__, cmd);
+	ret = 0x80010086;
 
-	return 0x80010086;
+exit:
+	printk("%s: cmd:0x%08X -> 0x%08X\n", __func__, cmd, ret);
+
+	return ret;
 }
 
 // 0x00000488
-static int umd_raw_read(void *outdata, int outlen, struct LbaParams *param)
+static int umd_devctl_read(void *outdata, int outlen, struct LbaParams *param)
 {
 	u32 lba_top, byte_size_total, byte_size_start;
 	u32 offset;
+	int ret;
 
 	byte_size_total = param->byte_size_total;
 
@@ -400,32 +434,31 @@ static int umd_raw_read(void *outdata, int outlen, struct LbaParams *param)
 
 	if(!byte_size_start) {
 		offset = lba_top * ISO_SECTOR_SIZE;
-		goto exit;
-	}
-
-	if(param->byte_size_centre) {
+	} else if(param->byte_size_centre) {
 		offset = lba_top * ISO_SECTOR_SIZE - byte_size_start + ISO_SECTOR_SIZE;
-		goto exit;
-	}
-
-	if(!param->byte_size_last) {
+	} else if(!param->byte_size_last) {
 		offset = lba_top * ISO_SECTOR_SIZE + byte_size_start;
-		goto exit;
+	} else {
+		offset = lba_top * ISO_SECTOR_SIZE - byte_size_start + ISO_SECTOR_SIZE;
 	}
 
-	offset = lba_top * ISO_SECTOR_SIZE - byte_size_start + ISO_SECTOR_SIZE;
+	ret = iso_read_with_stack(offset, outdata, byte_size_total);
+	printk("%s: offset: 0x%08X len: 0x%08X -> 0x%08X\n", __func__, offset, byte_size_total, ret);
 
-exit:
-	return iso_read_with_stack(offset, outdata, byte_size_total);
+	return ret;
 }
 
 // 0x000004F4
 static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd, void *indata, int inlen, void *outdata, int outlen)
 {
+	int ret;
+
 	if(cmd == 0x01F00003) {
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F010DB) {
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F20001) {
 		// get UMD disc type 
 		// 0 = No disc.
@@ -436,14 +469,16 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(-1, (u32)(outdata));
 		_sw(0x10, (u32)(outdata+4));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F100A4) {
 		/* missing 0x01F100A4, seek UMD disc (raw). */
 		if(indata == NULL || inlen < 4) {
 			return 0x80010016;
 		}
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F300A5) {
 		/* missing 0x01F300A5, prepare UMD data into cache */
 		if(indata == NULL || inlen < 4) {
@@ -456,11 +491,13 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		_sw(1, (u32)outdata);
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01F20002 || cmd == 0x01F20003) {
 		_sw(g_total_sectors, (u32)(outdata));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01E18030) {
 		return 1;
 	} else if(cmd == 0x01E180D3) {
@@ -475,7 +512,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		_sw((u32)g_sector_buf, (u32)(outdata));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01E280A9) {
 		/* Added check for outdata */
 		if(outdata == NULL || outlen < 4) {
@@ -484,7 +522,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		_sw(ISO_SECTOR_SIZE, (u32)(outdata));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01E38034) {
 		if(indata == NULL || outdata == NULL) {
 			return 0x80010016;
@@ -492,7 +531,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		_sw(0, (u32)(outdata));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	} else if(cmd == 0x01E380C0 || cmd == 0X01F200A1 || cmd == 0x01F200A2) {
 		/**
 		 * 0x01E380C0: read sectors general
@@ -503,7 +543,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 			return 0x80010016;
 		}
 
-		return umd_raw_read(outdata, outlen, indata);
+		ret = umd_devctl_read(outdata, outlen, indata);
+		goto exit;
 	} else if(cmd == 0x01E38012) {
 		int outlen2 = outlen;
 
@@ -518,12 +559,16 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		_sw(g_total_sectors, (u32)(outdata + 0x1C));
 		_sw(g_total_sectors, (u32)(outdata + 0x24));
 
-		return 0;
+		ret = 0;
+		goto exit;
 	}
 
 	printk("%s: Unknown cmd 0x%08X\n", __func__, cmd);
+	ret = 0x80010086;
+exit:
+	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
 
-	return 0x80010086;
+	return ret;
 }
 
 // 0x000023EC

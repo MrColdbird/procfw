@@ -461,35 +461,42 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		goto exit;
 	} else if(cmd == 0x01F20001) {
 		// get UMD disc type 
-		// 0 = No disc.
-		// 0x10 = Game disc.
-		// 0x20 = Video disc.
-		// 0x40 = Audio disc.
-		// 0x80 = Cleaning disc.
 		_sw(-1, (u32)(outdata));
 		_sw(0x10, (u32)(outdata+4));
 
 		ret = 0;
 		goto exit;
-	} else if(cmd == 0x01F100A4) {
-		/* missing 0x01F100A4, seek UMD disc (raw). */
+	} else if(cmd == 0x01F100A3) {
+		/* missing cmd in march33, seek UMD disc (raw). */
 		if(indata == NULL || inlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		ret = 0;
 		goto exit;
-	} else if(cmd == 0x01F300A5) {
-		/* missing 0x01F300A5, prepare UMD data into cache */
-		if(indata == NULL || inlen < 4) {
-			return 0x80010016;
+	} else if(cmd == 0x01F100A4 || cmd == 0x01F300A5) {
+		/* missing cmd in march33, prepare UMD data into cache */
+		if(indata == NULL || inlen < 16) {
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		if(outdata == NULL || outlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		_sw(1, (u32)outdata);
+
+		ret = 0;
+		goto exit;
+	} else if(cmd == 0x01F300A7 || cmd == 0x01F300A8 || cmd == 0x01F300A9) {
+		/* missing cmd in march33, cache control */
+		if(indata == NULL || inlen < 4) {
+			ret = 0x80010016;
+			goto exit;
+		}
 
 		ret = 0;
 		goto exit;
@@ -499,15 +506,19 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		ret = 0;
 		goto exit;
 	} else if(cmd == 0x01E18030) {
-		return 1;
+		ret = 1;
+		goto exit;
 	} else if(cmd == 0x01E180D3) {
-		return 0x80010086;
+		ret = 0x80010086;
+		goto exit;
 	} else if(cmd == 0x01E080A8) {
-		return 0x80010086;
+		ret = 0x80010086;
+		goto exit;
 	} else if(cmd == 0x01E28035) {
 		/* Added check for outdata */
 		if(outdata == NULL || outlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		_sw((u32)g_sector_buf, (u32)(outdata));
@@ -517,7 +528,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 	} else if(cmd == 0x01E280A9) {
 		/* Added check for outdata */
 		if(outdata == NULL || outlen < 4) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		_sw(ISO_SECTOR_SIZE, (u32)(outdata));
@@ -526,7 +538,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		goto exit;
 	} else if(cmd == 0x01E38034) {
 		if(indata == NULL || outdata == NULL) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		_sw(0, (u32)(outdata));
@@ -540,7 +553,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		 * 0x01F200A2: read sectors dircache
 		 */
 		if(indata == NULL || outdata == NULL) {
-			return 0x80010016;
+			ret = 0x80010016;
+			goto exit;
 		}
 
 		ret = umd_devctl_read(outdata, outlen, indata);
@@ -561,10 +575,11 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		ret = 0;
 		goto exit;
+	} else {
+		printk("%s: Unknown cmd 0x%08X\n", __func__, cmd);
+		ret = 0x80010086;
 	}
 
-	printk("%s: Unknown cmd 0x%08X\n", __func__, cmd);
-	ret = 0x80010086;
 exit:
 	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
 

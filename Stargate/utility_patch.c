@@ -53,9 +53,11 @@ int myUtilityLoadModule(int id)
 	
 	ret = (*_sceUtilityLoadModule)(id);
 
+#ifdef CONFIG_620
 	if(psp_fw_version == FW_620 && id == 0x304 && ret == 0) {
 		g_mp3_loaded = 1;
 	}
+#endif
 	
 	printk("%s: 0x%04X -> 0x%08X\n", __func__, id, ret);
 

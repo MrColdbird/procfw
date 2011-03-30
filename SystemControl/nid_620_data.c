@@ -835,7 +835,7 @@ static nid_entry sceSyscon_driver_nid[] = {
 	{ 0x72EDA9AF, 0x90DDB37B, }, // sceSysconGetGSensorVersion
 	{ 0xC68F1573, 0x12AFA8CB, }, // sceSysconCtrlGSensor
 	{ 0x7C8A5503, 0xC0CA6581, }, // sceSysconGetScvCode
-	{ 0x2EE82492, UNKNOWNNID, }, // sceSysconCtrlTachyonWDT
+//	{ 0x2EE82492, 0x2EE82492, }, // sceSysconCtrlTachyonWDT
 
 	{ 0x64FA0B22, 0xA0BA861F, },
 	{ 0x4AB44BFC, 0x6B8C9E3F, },
@@ -970,8 +970,8 @@ static nid_entry sceSysreg_driver_nid[] = {
 	{ 0xF5EA8570, 0x1CAB8282, },  // sceSysregAtahddResetDisable
 	{ 0x3E961C02, 0x48546F11, },  // sceSysregUsbhostResetEnable
 	{ 0xACFA3764, 0xB03747DB, },  // sceSysregUsbhostResetDisable
-	{ 0x44F6CDA7, 0xEF64EFDD, },  // sceSysregMeBusClockEnable
-	{ 0x158AD4FC, 0xF6922705, },  // sceSysregMeBusClockDisable
+	{ 0x44F6CDA7, 0x2B3BE2C8, },  // sceSysregMeBusClockEnable
+	{ 0x158AD4FC, 0x774775CA, },  // sceSysregMeBusClockDisable
 	{ 0x4D4CE2B8, 0xDF06373E, },  // sceSysregAwRegABusClockEnable
 	{ 0x789BD609, 0x9EBD0CD2, },  // sceSysregAwRegABusClockDisable
 	{ 0x391CE1C0, 0x6637667D, },  // sceSysregAwRegBBusClockEnable

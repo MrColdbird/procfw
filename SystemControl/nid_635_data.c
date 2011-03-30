@@ -835,7 +835,7 @@ static nid_entry sceSyscon_driver_nid[] = {
 	{ 0x72EDA9AF, 0xA33EA207, }, // sceSysconGetGSensorVersion
 	{ 0xC68F1573, 0x315CABD2, }, // sceSysconCtrlGSensor
 	{ 0x7C8A5503, 0xDCA40C65, }, // sceSysconGetScvCode
-	{ 0x2EE82492, 0x2EE82492, }, // sceSysconCtrlTachyonWDT
+//	{ 0x2EE82492, 0x2EE82492, }, // sceSysconCtrlTachyonWDT
 
 	{ 0x64FA0B22, 0x716FEABC, },
 	{ 0x4AB44BFC, 0x9C99FD01, },
@@ -1072,8 +1072,6 @@ static nid_entry sceSysreg_driver_nid[] = {
 	{ 0xE88B77ED, 0xCD852877, }, 
 	{ 0x312F9419, 0x40FD846E, }, 
 	{ 0x844AF6BD, 0x7DA92F37, }, 
-	{ 0x77DED992, 0x9B2871A8, }, 
-	{ 0x6879790B, 0x3160E8A2, }, 
 	{ 0xEE8760C6, 0xB31774D7, }, 
 	{ 0x5664F8B5, 0xF22C6FBB, }, 
 	{ 0x44704E1D, 0x7EC19A9A, }, 

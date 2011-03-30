@@ -1056,11 +1056,11 @@ static nid_entry sceSysreg_driver_nid[] = {
 	{ 0x4EE8E2C8, 0x2ECAA478, },  // sceSysregIntrEnd
 	{ 0x083F56E2, 0x0CBB0657, },  // sceSysregEnableIntr
 	{ 0x7C5B543C, 0x8B0E4451, },  // sceSysregDisableIntr
+	{ 0xA9997109, 0xB70793D7, },  // sceSysregMeResetEnable(371)
+	{ 0x76220E94, 0xE2606FCB, },  // sceSysregMeResetDisable(371)
+	{ 0x3199CF1C, 0xD74D9041, },  // sceSysregMeBusClockEnable(371)
+	{ 0x07881A0B, 0x64FA9D42, },  // sceSysregMeBusClockDisable(371)
 
-	{ 0xA9997109, 0xB70793D7, }, 
-	{ 0x76220E94, 0xE2606FCB, }, 
-	{ 0x3199CF1C, 0xD74D9041, }, 
-	{ 0x07881A0B, 0x64FA9D42, }, 
 	{ 0x55B18B84, 0xA07C29A9, }, 
 	{ 0x2112E686, 0x47E9B7BC, }, 
 	{ 0x7B9E9A53, 0x3440E941, }, 

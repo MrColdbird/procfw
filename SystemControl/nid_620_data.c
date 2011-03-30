@@ -989,100 +989,98 @@ static nid_entry sceSysreg_driver_nid[] = {
 	{ 0x63B9EB65, 0xA8235369, },  // sceSysregApbBusClockEnable
 	{ 0xE1AA9788, 0x1663DA05, },  // sceSysregApbBusClockDisable
 	{ 0xAA63C8BD, 0xE7849809, },  // sceSysregAudioBusClockEnable
-	{ 0x054AC8C6, UNKNOWNNID, },  // sceSysregAudioBusClockDisable
-	{ 0xE45BED6A, UNKNOWNNID, },  // sceSysregAtahddBusClockEnable
-	{ 0x681B35C4, UNKNOWNNID, },  // sceSysregAtahddBusClockDisable
-	{ 0xE321F41A, UNKNOWNNID, },  // sceSysregUsbhostBusClockEnable
-	{ 0x4D2FFC60, UNKNOWNNID, },  // sceSysregUsbhostBusClockDisable
-	{ 0x6B01D71B, UNKNOWNNID, },  // sceSysregAtaClkEnable
-	{ 0xFC186A83, UNKNOWNNID, },  // sceSysregAtaClkDisable
-	{ 0xB59DB832, UNKNOWNNID, },  // sceSysregAtahddClkEnable
-	{ 0x9155812C, UNKNOWNNID, },  // sceSysregAtahddClkDisable
-	{ 0xDA4FCA1D, UNKNOWNNID, },  // sceSysregUsbhostClkEnable
-	{ 0x228A73E1, UNKNOWNNID, },  // sceSysregUsbhostClkDisable
-	{ 0x31154490, UNKNOWNNID, },  // sceSysregMsifClkEnable
-	{ 0x8E2D835D, UNKNOWNNID, },  // sceSysregMsifClkDisable
-	{ 0xE8533DCA, UNKNOWNNID, },  // sceSysregApbTimerClkEnable
-	{ 0xF6D83AD0, UNKNOWNNID, },  // sceSysregApbTimerClkDisable
-	{ 0xA9CD1C1F, UNKNOWNNID, },  // sceSysregAudioClkEnable
-	{ 0x2F216F38, UNKNOWNNID, },  // sceSysregAudioClkDisable
-	{ 0xE3AECFFA, UNKNOWNNID, },  // sceSysregGpioClkEnable
-	{ 0x3BBD0C0C, UNKNOWNNID, },  // sceSysregGpioClkDisable
-	{ 0xC1DA05D2, UNKNOWNNID, },  // sceSysregAudioClkoutClkEnable
-	{ 0xDE170397, UNKNOWNNID, },  // sceSysregAudioClkoutClkDisable
-	{ 0x7234EA80, UNKNOWNNID, },  // sceSysregUsbClkEnable
-	{ 0x38EC3281, UNKNOWNNID, },  // sceSysregUsbClkDisable
-	{ 0xBC68D9B6, UNKNOWNNID, },  // sceSysregUsbIoEnable
-	{ 0xA3C8E075, UNKNOWNNID, },  // sceSysregUsbIoDisable
-	{ 0x79338EA3, UNKNOWNNID, },  // sceSysregAtaIoEnable
-	{ 0xCADB92AA, UNKNOWNNID, },  // sceSysregAtaIoDisable
-	{ 0xD74F1D48, UNKNOWNNID, },  // sceSysregMsifIoEnable
-	{ 0x18172C6A, UNKNOWNNID, },  // sceSysregMsifIoDisable
-	{ 0xBB26CF1F, UNKNOWNNID, },  // sceSysregAudioIoEnable
-	{ 0x8E2FB536, UNKNOWNNID, },  // sceSysregAudioIoDisable
-	{ 0xF844DDF3, UNKNOWNNID, },  // sceSysregAudioClkoutIoEnable
-	{ 0x29A119A1, UNKNOWNNID, },  // sceSysregAudioClkoutIoDisable
-	{ 0x8B95C17F, UNKNOWNNID, },  // sceSysregAtahddIoEnable
-	{ 0xCCF911C0, UNKNOWNNID, },  // sceSysregAtahddIoDisable
-	{ 0xB627582E, UNKNOWNNID, },  // sceSysregGpioIoEnable
-	{ 0x1E9C3607, UNKNOWNNID, },  // sceSysregGpioIoDisable
-	{ 0x633595F2, UNKNOWNNID, },  // sceSysregUsbGetConnectStatus
-	{ 0x32471457, UNKNOWNNID, },  // sceSysregUsbQueryIntr
-	{ 0x692F31FF, UNKNOWNNID, },  // sceSysregUsbAcquireIntr
-	{ 0xFFEB6E00, UNKNOWNNID, },  // sceSysregUsbhostQueryIntr
-	{ 0x87C2BA20, UNKNOWNNID, },  // sceSysregUsbhostAcquireIntr
-	{ 0xD43E98F6, UNKNOWNNID, },  // sceSysregMsifGetConnectStatus
-	{ 0xBF91FBDA, UNKNOWNNID, },  // sceSysregMsifQueryConnectIntr
-	{ 0x36A75390, UNKNOWNNID, },  // sceSysregMsifAcquireConnectIntr
-	{ 0x61BFF85F, UNKNOWNNID, },  // sceSysregInterruptToOther
-	{ 0x9FC87ED4, UNKNOWNNID, },  // sceSysregSemaTryLock
-	{ 0x8BE2D520, UNKNOWNNID, },  // sceSysregSemaUnlock
-	{ 0xB21B6CBF, UNKNOWNNID, },  // sceSysregPllGetFrequency
-	{ 0xB4560C45, UNKNOWNNID, },  // sceSysregPllGetOutSelect
+	{ 0x054AC8C6, 0x44C4DA5F, },  // sceSysregAudioBusClockDisable
+	{ 0xE45BED6A, 0x77831D41, },  // sceSysregAtahddBusClockEnable
+	{ 0x681B35C4, 0xB2B17B0F, },  // sceSysregAtahddBusClockDisable
+	{ 0xE321F41A, 0xB85674BC, },  // sceSysregUsbhostBusClockEnable
+	{ 0x4D2FFC60, 0x5EAFED61, },  // sceSysregUsbhostBusClockDisable
+	{ 0x6B01D71B, 0xEF64EFDD, },  // sceSysregAtaClkEnable
+	{ 0xFC186A83, 0xF6922705, },  // sceSysregAtaClkDisable
+	{ 0xB59DB832, 0x0E441BEB, },  // sceSysregAtahddClkEnable
+	{ 0x9155812C, 0x91616908, },  // sceSysregAtahddClkDisable
+	{ 0xDA4FCA1D, 0x39FF613D, },  // sceSysregUsbhostClkEnable
+	{ 0x228A73E1, 0x53F6D550, },  // sceSysregUsbhostClkDisable
+	{ 0x31154490, 0xCA901512, },  // sceSysregMsifClkEnable
+	{ 0x8E2D835D, 0x046FE30E, },  // sceSysregMsifClkDisable
+	{ 0xE8533DCA, 0x565B8650, },  // sceSysregApbTimerClkEnable
+	{ 0xF6D83AD0, 0xC4C1F135, },  // sceSysregApbTimerClkDisable
+	{ 0xA9CD1C1F, 0xB733A263, },  // sceSysregAudioClkEnable
+	{ 0x2F216F38, 0x0DD07A50, },  // sceSysregAudioClkDisable
+	{ 0xE3AECFFA, 0x14D3ACBC, },  // sceSysregGpioClkEnable
+	{ 0x3BBD0C0C, 0x7BFA7EEA, },  // sceSysregGpioClkDisable
+	{ 0xC1DA05D2, 0x34EED467, },  // sceSysregAudioClkoutClkEnable
+	{ 0xDE170397, 0x5122CA96, },  // sceSysregAudioClkoutClkDisable
+	{ 0x7234EA80, 0xEB5ADBE4, },  // sceSysregUsbClkEnable
+	{ 0x38EC3281, 0x4D23058C, },  // sceSysregUsbClkDisable
+	{ 0xBC68D9B6, 0xF5509B44, },  // sceSysregUsbIoEnable
+	{ 0xA3C8E075, 0x14E314B0, },  // sceSysregUsbIoDisable
+	{ 0x79338EA3, 0x2C0E5FA5, },  // sceSysregAtaIoEnable
+	{ 0xCADB92AA, 0x25EA91E5, },  // sceSysregAtaIoDisable
+	{ 0xD74F1D48, 0xE4D3F01F, },  // sceSysregMsifIoEnable
+	{ 0x18172C6A, 0xEBBD8E0C, },  // sceSysregMsifIoDisable
+	{ 0xBB26CF1F, 0x5D3DD0B3, },  // sceSysregAudioIoEnable
+	{ 0x8E2FB536, 0x266F1C65, },  // sceSysregAudioIoDisable
+	{ 0xF844DDF3, 0x94914740, },  // sceSysregAudioClkoutIoEnable
+	{ 0x29A119A1, 0xA25740B8, },  // sceSysregAudioClkoutIoDisable
+	{ 0x8B95C17F, 0x87176F00, },  // sceSysregAtahddIoEnable
+	{ 0xCCF911C0, 0xB50B1767, },  // sceSysregAtahddIoDisable
+	{ 0xB627582E, 0xE932D752, },  // sceSysregGpioIoEnable
+	{ 0x1E9C3607, 0x73B789C9, },  // sceSysregGpioIoDisable
+	{ 0x633595F2, 0x13E2ACB2, },  // sceSysregUsbGetConnectStatus
+	{ 0x32471457, 0xECFBBCB5, },  // sceSysregUsbQueryIntr
+	{ 0x692F31FF, 0x4100075B, },  // sceSysregUsbAcquireIntr
+	{ 0xFFEB6E00, 0x8E51EE5A, },  // sceSysregUsbhostQueryIntr
+	{ 0x87C2BA20, 0x26BBB4C8, },  // sceSysregUsbhostAcquireIntr
+	{ 0xD43E98F6, 0x6EFCF152, },  // sceSysregMsifGetConnectStatus
+	{ 0xBF91FBDA, 0x2B3033AD, },  // sceSysregMsifQueryConnectIntr
+	{ 0x36A75390, 0x68F3EA50, },  // sceSysregMsifAcquireConnectIntr
+	{ 0x61BFF85F, 0x3620CA9E, },  // sceSysregInterruptToOther
+	{ 0x9FC87ED4, 0x4643F826, },  // sceSysregSemaTryLock
+	{ 0x8BE2D520, 0x314A489C, },  // sceSysregSemaUnlock
+	{ 0xB21B6CBF, 0x181F6AFF, },  // sceSysregPllGetFrequency
+	{ 0xB4560C45, 0xD47B7BE0, },  // sceSysregPllGetOutSelect
 	{ 0xDCA57573, 0x81667490, },  // sceSysregPllSetOutSelect
-	{ 0x1969E840, UNKNOWNNID, },  // sceSysregMsifClkSelect
-	{ 0x1D382514, UNKNOWNNID, },  // sceSysregMsifDelaySelect
-	{ 0x03340297, UNKNOWNNID, },  // sceSysregApbTimerClkSelect
-	{ 0x9100B4E5, UNKNOWNNID, },  // sceSysregAudioClkSelect
-	{ 0x833E6FB1, UNKNOWNNID, },  // sceSysregAtaClkSelect
-	{ 0x8CE2F97A, UNKNOWNNID, },  // sceSysregAtahddClkSelect
-	{ 0x0A83FC7B, UNKNOWNNID, },  // sceSysregAudioClkoutClkSelect
-	{ 0x3EA188AD, UNKNOWNNID, },  // sceSysregRequestIntr
-	{ 0xCD0F6715, UNKNOWNNID, },  // sceSysregDoTimerEvent
-	{ 0xF3443B9A, UNKNOWNNID, },  // sceSysregSetAwEdramSize
-	{ 0x53A6838B, UNKNOWNNID, },  // sceSysregPllGetBaseFrequency
+	{ 0x1969E840, 0xBDB91784, },  // sceSysregMsifClkSelect
+	{ 0x1D382514, 0x8F046FDE, },  // sceSysregMsifDelaySelect
+	{ 0x03340297, 0x35AF8BE3, },  // sceSysregApbTimerClkSelect
+	{ 0x9100B4E5, 0x9EBB3C43, },  // sceSysregAudioClkSelect
+	{ 0x833E6FB1, 0x55528C0B, },  // sceSysregAtaClkSelect
+	{ 0x8CE2F97A, 0x5E45F850, },  // sceSysregAtahddClkSelect
+	{ 0x0A83FC7B, 0x47966D28, },  // sceSysregAudioClkoutClkSelect
+	{ 0x3EA188AD, 0xB13D48CD, },  // sceSysregRequestIntr
+	{ 0xCD0F6715, 0x2737D937, },  // sceSysregDoTimerEvent
+	{ 0xF3443B9A, 0x0D0AE159, },  // sceSysregSetAwEdramSize
+	{ 0x53A6838B, 0xA684D1B0, },  // sceSysregPllGetBaseFrequency
 	{ 0xBB3623DF, 0xA0F3053B, },  // sceSysregPllUpdateFrequency
 	{ 0x25673620, 0x7ADF93F1, },  // sceSysregIntrInit
 	{ 0x4EE8E2C8, 0x8F224A0F, },  // sceSysregIntrEnd
 	{ 0x083F56E2, 0x787CCE85, },  // sceSysregEnableIntr
 	{ 0x7C5B543C, 0xBBE75ABD, },  // sceSysregDisableIntr
+	{ 0xA9997109, 0x97EA6913, },  // sceSysregMeResetEnable(371)
+	{ 0x76220E94, 0x2D858336, },  // sceSysregMeResetDisable(371)
+	{ 0x3199CF1C, 0x2B3BE2C8, },  // sceSysregMeBusClockEnable(371)
+	{ 0x07881A0B, 0x774775CA, },  // sceSysregMeBusClockDisable(371)
 
-	{ 0xA9997109, 0x97EA6913, }, 
-	{ 0x76220E94, 0x2D858336, }, 
-	{ 0x3199CF1C, 0xEF64EFDD, }, 
-	{ 0x07881A0B, 0xF6922705, }, 
-	{ 0x55B18B84, UNKNOWNNID, }, 
-	{ 0x2112E686, UNKNOWNNID, }, 
-	{ 0x7B9E9A53, UNKNOWNNID, }, 
-	{ 0x7BDF0556, UNKNOWNNID, }, 
-	{ 0x8D0FED1E, UNKNOWNNID, }, 
-	{ 0xA46E9CA8, UNKNOWNNID, }, 
-	{ 0xB08A4E85, UNKNOWNNID, }, 
-	{ 0xA41929DA, UNKNOWNNID, }, 
-	{ 0xE88B77ED, UNKNOWNNID, }, 
-	{ 0x312F9419, UNKNOWNNID, }, 
-	{ 0x844AF6BD, UNKNOWNNID, }, 
-	{ 0x77DED992, UNKNOWNNID, }, 
-	{ 0x6879790B, UNKNOWNNID, }, 
+	{ 0x55B18B84, 0x75857874, }, 
+	{ 0x2112E686, 0xF450CD9F, }, 
+	{ 0x7B9E9A53, 0x1CB5AE24, }, 
+	{ 0x7BDF0556, 0x18D9BFAB, }, 
+	{ 0x8D0FED1E, 0x371C2599, }, 
+	{ 0xA46E9CA8, 0xC4330C30, }, 
+	{ 0xB08A4E85, 0x5178FB81, }, 
+	{ 0xA41929DA, 0x290BE4E7, }, 
+	{ 0xE88B77ED, 0x73CC040F, }, 
+	{ 0x312F9419, 0x0A492798, }, 
+	{ 0x844AF6BD, 0xE58D8630, }, 
 	{ 0xEE8760C6, 0x91143B9B, }, 
-	{ 0x5664F8B5, UNKNOWNNID, }, 
-	{ 0x44704E1D, UNKNOWNNID, }, 
-	{ 0x584AD989, UNKNOWNNID, }, 
-	{ 0x377F035F, UNKNOWNNID, }, 
+	{ 0x5664F8B5, 0xE4CB1700, }, 
+	{ 0x44704E1D, 0xDC17E0E9, }, 
+	{ 0x584AD989, 0x22EB25C4, }, 
+	{ 0x377F035F, 0x51938C20, }, 
 	{ 0xAB3185FD, 0x73DF64ED, }, 
-	{ 0x0EA487FA, UNKNOWNNID, }, 
+	{ 0x0EA487FA, 0x175283DF, }, 
 	{ 0x136E8F5A, 0xC5076887, }, 
-	{ 0xF4811E00, UNKNOWNNID, }, 
+	{ 0xF4811E00, 0xE977730A, }, 
 };
 
 static nid_entry sceDve_driver_nid[] = {

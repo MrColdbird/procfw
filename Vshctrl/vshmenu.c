@@ -99,10 +99,13 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 			}
 		}
 	} else {
-		if (sceKernelFindModuleByName("htmlviewer_plugin_module"))
+		if (sceKernelFindModuleByName("sceVshOSK_Module"))
 			goto exit;
 
-		if (sceKernelFindModuleByName("sceVshOSK_Module"))
+		// TODO: Fix this somehow... don't know how yet.
+		// TRIGGER: Launch camera, exit it again, press select, no satellite comes up. Same for browser and PSN.
+		// SOURCE: These 3 plugins don't unload until another plugin is loaded up, breaking the satellite
+		if (sceKernelFindModuleByName("htmlviewer_plugin_module"))
 			goto exit;
 
 		if (sceKernelFindModuleByName("camera_plugin_module"))

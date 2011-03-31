@@ -10,7 +10,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x3FC9AE6A, 0xFE9BC18B, }, // sceKernelDevkitVersion
 	{ 0x536AD5E1, 0x6DD87F6B, }, // SysMemForKernel_536AD5E1
 	{ 0x636C953B, 0x96BFE779, }, // sceKernelAllocHeapMemory
-	{ 0xC9805775, 0x9BAA857E, }, // sceKernelDeleteHeap 
+	{ 0xC9805775, 0x9BAA857E, }, // sceKernelDeleteHeap
 	{ 0x7B749390, 0xC2A8C491, }, // sceKernelFreeHeapMemory
 	{ 0x1C1FBFE7, 0xC6A782DA, }, // sceKernelCreateHeap
 	{ 0x55A40B2C, 0xE057A674, }, // sceKernelQueryMemoryPartitionInfo
@@ -292,11 +292,11 @@ static nid_entry ExceptionManagerForKernel_nid[] = {
 	{ 0x15ADC862, UNKNOWNNID, }, // sceKernelRegisterNmiHandler
 	{ 0xB15357C9, UNKNOWNNID, }, // sceKernelReleaseNmiHandler
 
-	{ 0xFC26C354, 0x7DDFBCC7, }, 
+	{ 0xFC26C354, 0x7DDFBCC7, },
 };
 
 static nid_entry IoFileMgrForKernel_nid[] = {
-	{ 0x3C54E908, 0xF0AD3C72, }, // sceIoReopen 
+	{ 0x3C54E908, 0xF0AD3C72, }, // sceIoReopen
 	{ 0x411106BA, 0x0AB86E5D, }, // sceIoGetThreadCwd
 	{ 0xA905B705, 0xEB5BE7EC, }, // sceIoCloseAll
 	{ 0xCB0A151F, 0x9D5CDC31, }, // sceIoChangeThreadCwd
@@ -310,17 +310,17 @@ static nid_entry IoFileMgrForKernel_nid[] = {
 static nid_entry scePower_driver_nid[] = {
 	{ 0xEFD3C963, 0xE59EF335, }, // scePowerTick
 	{ 0x87440F5E, 0x7F480684, }, // scePowerIsPowerOnline
-	{ 0x0AFD0D8B, 0xBC8823E8, }, // scePowerIsBatteryExist 
-	{ 0x1E490401, 0x5202A826, }, // scePowerIsBatteryCharging 
-	{ 0xD3075926, 0x279492B3, }, // scePowerIsLowBattery 
+	{ 0x0AFD0D8B, 0xBC8823E8, }, // scePowerIsBatteryExist
+	{ 0x1E490401, 0x5202A826, }, // scePowerIsBatteryCharging
+	{ 0xD3075926, 0x279492B3, }, // scePowerIsLowBattery
 	{ 0x2085D15D, 0xE5F8596E, }, // scePowerGetBatteryLifePercent
-	{ 0x8EFB3FA2, 0xB3C30947, }, // scePowerGetBatteryLifeTime 
+	{ 0x8EFB3FA2, 0xB3C30947, }, // scePowerGetBatteryLifeTime
 	{ 0x28E12023, 0xE66978D7, }, // scePowerGetBatteryTemp
-	{ 0x483CE86B, 0x3C7B0B84, }, // scePowerGetBatteryVolt 
-	{ 0x2B7C7CF4, 0x47F4E1A8, }, // scePowerRequestStandby 
-	{ 0xFEE03A2F, 0xFDB5BFE9, }, // scePowerGetCpuClockFrequency 
-	{ 0x478FE6F5, 0xBF5BA7FC, }, // scePowerGetBusClockFrequency 
-	{ 0x737486F2, 0xEBD177D6, }, // scePowerSetClockFrequency 
+	{ 0x483CE86B, 0x3C7B0B84, }, // scePowerGetBatteryVolt
+	{ 0x2B7C7CF4, 0x47F4E1A8, }, // scePowerRequestStandby
+	{ 0xFEE03A2F, 0xFDB5BFE9, }, // scePowerGetCpuClockFrequency
+	{ 0x478FE6F5, 0xBF5BA7FC, }, // scePowerGetBusClockFrequency
+	{ 0x737486F2, 0xEBD177D6, }, // scePowerSetClockFrequency
 	{ 0xD6E50D7B, 0x1A41E0ED, }, // scePowerRegisterCallback(3.71)
 	{ 0x04B7766E, 0x1A41E0ED, }, // scePowerRegisterCallback(1.50)
 	{ 0x1688935C, 0xBF5BA7FC, }, // scePowerGetBusClockFrequencyInt
@@ -388,17 +388,17 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0xA4D02055, 0x5BB0D018, }, // scePower_driver_835ADE3F
 	{ 0x9C40E184, 0xE59EF335, }, // scePowerTick(371)
 	{ 0xCB49F5CE, 0xA73D777D, }, // scePowerGetBatteryChargeCycle
-	{ 0x0442D852, 0x599A2901, },  // scePowerRequestColdReset
-	{ 0x733F973B, 0xF52F66EB, },  // scePowerBatteryEnableUsbCharging
-	{ 0x90285886, 0xC2B7CD0C, },  // scePowerBatteryDisableUsbCharging
+	{ 0x0442D852, 0x599A2901, }, // scePowerRequestColdReset
+	{ 0x733F973B, 0xF52F66EB, }, // scePowerBatteryEnableUsbCharging
+	{ 0x90285886, 0xC2B7CD0C, }, // scePowerBatteryDisableUsbCharging
 
-	{ 0x9B1A9C5F, 0x47F4E1A8, }, 
-	{ 0xE65F00BD, 0x599A2901, }, 
-	{ 0xD7B9C925, 0x2D5A880D, }, 
+	{ 0x9B1A9C5F, 0x47F4E1A8, },
+	{ 0xE65F00BD, 0x599A2901, },
+	{ 0xD7B9C925, 0x2D5A880D, },
 };
 
 static nid_entry InterruptManagerForKernel_nid[] = {
-	{ 0x8A389411, 0xC03C8D51, }, // sceKernelDisableSubIntr 
+	{ 0x8A389411, 0xC03C8D51, }, // sceKernelDisableSubIntr
 	{ 0xD2E8363F, 0x2BF441EF, }, // QueryIntrHandlerInfo
 	{ 0x8B61808B, 0xAC9306F0, }, // sceKernelQuerySystemCall
 	{ 0x53991063, UNKNOWNNID, }, // InterruptManagerForKernel_53991063
@@ -433,21 +433,21 @@ static nid_entry InterruptManagerForKernel_nid[] = {
 	{ 0x36B1EF81, 0x2BF441EF, }, // sceKernelQueryIntrHandlerInfo
 	{ 0xEB988556, 0xAC9306F0, }, // sceKernelQuerySystemCall(5xx)
 
-	{ 0x07E138EE, 0x89081386, }, 
-	{ 0xD8410DE6, 0x79EE281A, }, 
-	{ 0x8DC2BAEF, 0x114435E5, }, 
-	{ 0x0B907DBC, 0xF952C56F, }, 
-	{ 0x7A05D976, 0x80EE1E2E, }, 
-	{ 0x7EF7500F, 0xB8D11C47, }, 
-	{ 0x05E9D6C4, 0x36A721FB, }, 
-	{ 0xD63F3B31, 0xA359F4BA, }, 
-	{ 0x72CE22E8, 0x157ADE6A, }, 
+	{ 0x07E138EE, 0x89081386, },
+	{ 0xD8410DE6, 0x79EE281A, },
+	{ 0x8DC2BAEF, 0x114435E5, },
+	{ 0x0B907DBC, 0xF952C56F, },
+	{ 0x7A05D976, 0x80EE1E2E, },
+	{ 0x7EF7500F, 0xB8D11C47, },
+	{ 0x05E9D6C4, 0x36A721FB, },
+	{ 0xD63F3B31, 0xA359F4BA, },
+	{ 0x72CE22E8, 0x157ADE6A, },
 };
 
 static nid_entry sceCtrl_driver_nid[] = {
-	{ 0x454455AC, 0xD073ECA4, },  //sceCtrlReadBufferPositive
-	{ 0xC4AAD55F, 0x3CA6922B, },  //sceCtrlPeekBufferPositive
-	{ 0x28E71A16, 0x262DD0DC, },  //sceCtrlSetSamplingMode
+	{ 0x454455AC, 0xD073ECA4, }, //sceCtrlReadBufferPositive
+	{ 0xC4AAD55F, 0x3CA6922B, }, //sceCtrlPeekBufferPositive
+	{ 0x28E71A16, 0x262DD0DC, }, //sceCtrlSetSamplingMode
 	{ 0x3E65A0EA, 0x04A88056, }, // sceCtrlInit
 	{ 0xE03956E9, 0x8FDE3DD5, }, // sceCtrlEnd
 	{ 0xC3F607F3, 0xA0798B29, }, // sceCtrlSuspend
@@ -529,31 +529,31 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0x43645E69, 0xE26E49E7, }, // sceAudioSRCOutputBlocking
 	{ 0x80F1F7E0, 0x0C4213E3, }, // sceAudioInit
 	{ 0x210567F7, 0x3C20F1F3, }, // sceAudioEnd
-	{ 0xA2BEAA6C, 0x45543440, }, // sceAudioSetFrequency 
-	{ 0xB61595C0, 0x6354634C, }, // sceAudioLoopbackTest 
-	{ 0x927AC32B, 0xBF1E8C42, }, // sceAudioSetVolumeOffset 
-	{ 0x8C1009B2, 0xA5C0603B, }, // sceAudioOutput 
-	{ 0x136CAF51, 0x2FD643D0, }, // sceAudioOutputBlocking 
-	{ 0xE2D56B2D, 0x548EEFD1, }, // sceAudioOutputPanned 
-	{ 0x13F592BC, 0x23F19798, }, // sceAudioOutputPannedBlocking 
-	{ 0x5EC81C55, 0x64B9E089, }, // sceAudioChReserve 
-	{ 0x41EFADE7, 0x45457EE5, }, // sceAudioOneshotOutput 
-	{ 0x6FC46853, 0xA05BAA21, }, // sceAudioChRelease 
-	{ 0xB011922F, 0x77EBE4A2, }, // sceAudioGetChannelRestLength 
-	{ 0xCB2E439E, 0x6F968893, }, // sceAudioSetChannelDataLen 
-	{ 0x95FD0C2D, 0xCD62C216, }, // sceAudioChangeChannelConfig 
-	{ 0xB7E1D8E7, 0x57AB835D, }, // sceAudioChangeChannelVolume 
-	{ 0x38553111, 0xA502088E, }, // sceAudioSRCChReserve 
-	{ 0x5C37C0AE, 0xF462A7B9, }, // sceAudioSRCChRelease 
-	{ 0xE0727056, 0xE26E49E7, }, // sceAudioSRCOutputBlocking 
-	{ 0x086E5895, 0x7F93FE1C, }, // sceAudioInputBlocking 
-	{ 0x6D4BEC68, 0xEC8B87CD, }, // sceAudioInput 
-	{ 0xA708C6A6, 0xFA700131, }, // sceAudioGetInputLength 
-	{ 0x87B2E651, 0x6B9C59FE, }, // sceAudioWaitInputEnd 
-	{ 0x7DE61688, 0xB82D416A, }, // sceAudioInputInit 
-	{ 0xE926D3FB, 0xB82D416A, }, // sceAudioInputInitEx 
-	{ 0xA633048E, 0x3076A373, }, // sceAudioPollInputEnd 
-	{ 0xE9D97901, 0x79AF2DA3, }, // sceAudioGetChannelRestLen 
+	{ 0xA2BEAA6C, 0x45543440, }, // sceAudioSetFrequency
+	{ 0xB61595C0, 0x6354634C, }, // sceAudioLoopbackTest
+	{ 0x927AC32B, 0xBF1E8C42, }, // sceAudioSetVolumeOffset
+	{ 0x8C1009B2, 0xA5C0603B, }, // sceAudioOutput
+	{ 0x136CAF51, 0x2FD643D0, }, // sceAudioOutputBlocking
+	{ 0xE2D56B2D, 0x548EEFD1, }, // sceAudioOutputPanned
+	{ 0x13F592BC, 0x23F19798, }, // sceAudioOutputPannedBlocking
+	{ 0x5EC81C55, 0x64B9E089, }, // sceAudioChReserve
+	{ 0x41EFADE7, 0x45457EE5, }, // sceAudioOneshotOutput
+	{ 0x6FC46853, 0xA05BAA21, }, // sceAudioChRelease
+	{ 0xB011922F, 0x77EBE4A2, }, // sceAudioGetChannelRestLength
+	{ 0xCB2E439E, 0x6F968893, }, // sceAudioSetChannelDataLen
+	{ 0x95FD0C2D, 0xCD62C216, }, // sceAudioChangeChannelConfig
+	{ 0xB7E1D8E7, 0x57AB835D, }, // sceAudioChangeChannelVolume
+	{ 0x38553111, 0xA502088E, }, // sceAudioSRCChReserve
+	{ 0x5C37C0AE, 0xF462A7B9, }, // sceAudioSRCChRelease
+	{ 0xE0727056, 0xE26E49E7, }, // sceAudioSRCOutputBlocking
+	{ 0x086E5895, 0x7F93FE1C, }, // sceAudioInputBlocking
+	{ 0x6D4BEC68, 0xEC8B87CD, }, // sceAudioInput
+	{ 0xA708C6A6, 0xFA700131, }, // sceAudioGetInputLength
+	{ 0x87B2E651, 0x6B9C59FE, }, // sceAudioWaitInputEnd
+	{ 0x7DE61688, 0xB82D416A, }, // sceAudioInputInit
+	{ 0xE926D3FB, 0xB82D416A, }, // sceAudioInputInitEx
+	{ 0xA633048E, 0x3076A373, }, // sceAudioPollInputEnd
+	{ 0xE9D97901, 0x79AF2DA3, }, // sceAudioGetChannelRestLen
 };
 
 static nid_entry sceReg_driver_nid[] = {
@@ -682,9 +682,9 @@ static nid_entry sceGe_driver_nid[] = {
 	{ 0x9ACFF59D, 0x002E0226, }, // sceGeGetListIdList
 	{ 0x67B01D8E, 0x7FD1EBEF, }, // sceGeGetList
 	{ 0xE66CB92E, 0x58935A8B, }, // sceGeGetStack
-	{ 0x5BAA5439, 0xD4D665C9, },  // sceGeEdramSetSize
+	{ 0x5BAA5439, 0xD4D665C9, }, // sceGeEdramSetSize
 
-	{ 0xBAD6E1CA, 0xE08CA161, }, 
+	{ 0xBAD6E1CA, 0xE08CA161, },
 	{ 0xC576E897, 0xC774B373, },
 };
 
@@ -894,247 +894,247 @@ static nid_entry memlmd_nid[] = {
 };
 
 static nid_entry sceDdr_driver_nid[] = {
-	{ 0x286E1372, 0x37B1BD46, },  // sceDdrSetPowerDownCounter
-	{ 0xB5694ECD, 0xFAC28535, },  // sceDdrExecSeqCmd
-	{ 0x655A9AB0, 0xCDBED410, },  // sceDdrWriteMaxAllocate
-	{ 0x0DC43DE4, 0xF19FD587, },  // sceDdrGetPowerDownCounter
-	{ 0xD7C6C313, 0x0B4E8A52, },  // sceDdrSetup
-	{ 0x91CD8F94, 0x9B29E314, },  // sceDdrResetDevice
-	{ 0x4CE55E76, 0x25AB44F3, },  // sceDdrChangePllClock
+	{ 0x286E1372, 0x37B1BD46, }, // sceDdrSetPowerDownCounter
+	{ 0xB5694ECD, 0xFAC28535, }, // sceDdrExecSeqCmd
+	{ 0x655A9AB0, 0xCDBED410, }, // sceDdrWriteMaxAllocate
+	{ 0x0DC43DE4, 0xF19FD587, }, // sceDdrGetPowerDownCounter
+	{ 0xD7C6C313, 0x0B4E8A52, }, // sceDdrSetup
+	{ 0x91CD8F94, 0x9B29E314, }, // sceDdrResetDevice
+	{ 0x4CE55E76, 0x25AB44F3, }, // sceDdrChangePllClock
 
-	{ 0x6078F911, 0xEF5E4465, }, 
-	{ 0x5B5831E5, 0xD48CC758, }, 
-	{ 0xF23B7983, 0xBD40FC26, }, 
-	{ 0x6955346C, 0x8D5170F3, }, 
-	{ 0x888129E8, 0xB8D2E273, }, 
-	{ 0x7251F5AB, 0xD8910A05, }, 
+	{ 0x6078F911, 0xEF5E4465, },
+	{ 0x5B5831E5, 0xD48CC758, },
+	{ 0xF23B7983, 0xBD40FC26, },
+	{ 0x6955346C, 0x8D5170F3, },
+	{ 0x888129E8, 0xB8D2E273, },
+	{ 0x7251F5AB, 0xD8910A05, },
 };
 
 static nid_entry sceDmacplus_driver_nid[] = {
-	{ 0x29B50A82, 0x6CDDF704, },  // sceDmacplusLcdcSetBaseAddr
-	{ 0x8AE579CD, 0x82DC94B2, },  // sceDmacplusLcdcSetFormat
-	{ 0x241601AE, 0x80374042, },  // sceDmacplusLcdcGetFormat
-	{ 0xF8C7C180, 0xD9003581, },  // sceDmacplusLcdcEnable
-	{ 0x576522BC, 0x153E82A4, },  // sceDmacplusLcdcDisable
-	{ 0x3A98EE05, 0xD455CC19, },  // sceDmacplusAvcSync
-	{ 0x4B980588, 0xF760E230, },  // sceDmacplusSc2MeNormal16
-	{ 0x3438DA0B, 0x4786526C, },  // sceDmacplusSc2MeLLI
-	{ 0x58DE4914, 0x1110A88F, },  // sceDmacplusSc2MeSync
-	{ 0xBE693828, 0xE94BCE36, },  // sceDmacplusMe2ScNormal16
-	{ 0xAB49D2CB, 0x148E1147, },  // sceDmacplusMe2ScSync
-	{ 0x2D5940FF, 0xDC0A1A1D, },  // sceDmacplusMe2ScLLI
-	{ 0x28558DBF, 0x3FD8340C, },  // sceDmacTryMemcpy
-	{ 0xFD183BCF, 0x1801A63E, },  // sceDmacplusSc128LLI
-	{ 0x58C380BB, 0x8E39FD88, },  // sceDmacplusLcdcGetBaseAddr
-	{ 0xC7D33466, 0x558CDFAB, },  // sceDmacMemcpy
+	{ 0x29B50A82, 0x6CDDF704, }, // sceDmacplusLcdcSetBaseAddr
+	{ 0x8AE579CD, 0x82DC94B2, }, // sceDmacplusLcdcSetFormat
+	{ 0x241601AE, 0x80374042, }, // sceDmacplusLcdcGetFormat
+	{ 0xF8C7C180, 0xD9003581, }, // sceDmacplusLcdcEnable
+	{ 0x576522BC, 0x153E82A4, }, // sceDmacplusLcdcDisable
+	{ 0x3A98EE05, 0xD455CC19, }, // sceDmacplusAvcSync
+	{ 0x4B980588, 0xF760E230, }, // sceDmacplusSc2MeNormal16
+	{ 0x3438DA0B, 0x4786526C, }, // sceDmacplusSc2MeLLI
+	{ 0x58DE4914, 0x1110A88F, }, // sceDmacplusSc2MeSync
+	{ 0xBE693828, 0xE94BCE36, }, // sceDmacplusMe2ScNormal16
+	{ 0xAB49D2CB, 0x148E1147, }, // sceDmacplusMe2ScSync
+	{ 0x2D5940FF, 0xDC0A1A1D, }, // sceDmacplusMe2ScLLI
+	{ 0x28558DBF, 0x3FD8340C, }, // sceDmacTryMemcpy
+	{ 0xFD183BCF, 0x1801A63E, }, // sceDmacplusSc128LLI
+	{ 0x58C380BB, 0x8E39FD88, }, // sceDmacplusLcdcGetBaseAddr
+	{ 0xC7D33466, 0x558CDFAB, }, // sceDmacMemcpy
 
-	{ 0x1D73DDA8, 0x7CD63CBE, }, 
-	{ 0x74323807, 0x4E875FE8, }, 
-	{ 0xB2EFA681, 0x23452082, }, 
+	{ 0x1D73DDA8, 0x7CD63CBE, },
+	{ 0x74323807, 0x4E875FE8, },
+	{ 0xB2EFA681, 0x23452082, },
 };
 
 static nid_entry sceGpio_driver_nid[] = {
-	{ 0xCA8BE2EA, 0xD5469E56, },  // sceGpioGetPortMode
-	{ 0x37C8DADC, 0x317D9D2C, },  // sceGpioSetIntrMode
-	{ 0xF856CE46, 0xDB4F5CE2, },  // sceGpioGetIntrMode
-	{ 0x95135905, 0xE7BDAF50, },  // sceGpioPortInvert
-	{ 0x785206CD, 0xB0D23234, },  // sceGpioEnableIntr
-	{ 0x31F34AE6, 0x856D950A, },  // sceGpioQueryIntr
-	{ 0xBE77D1D0, 0x7AD284FD, },  // sceGpioAcquireIntr
-	{ 0xC6928224, 0xE8A497DE, },  // sceGpioGetCapturePort
-	{ 0x6B38B826, 0xEBF28F41, },  // sceGpioSetCapturePort
-	{ 0x5691CEFA, 0xD2A8B1B5, },  // sceGpioEnableTimerCapture
-	{ 0x2CDC8EDC, 0xEF344659, },  // sceGpioDisableTimerCapture
+	{ 0xCA8BE2EA, 0xD5469E56, }, // sceGpioGetPortMode
+	{ 0x37C8DADC, 0x317D9D2C, }, // sceGpioSetIntrMode
+	{ 0xF856CE46, 0xDB4F5CE2, }, // sceGpioGetIntrMode
+	{ 0x95135905, 0xE7BDAF50, }, // sceGpioPortInvert
+	{ 0x785206CD, 0xB0D23234, }, // sceGpioEnableIntr
+	{ 0x31F34AE6, 0x856D950A, }, // sceGpioQueryIntr
+	{ 0xBE77D1D0, 0x7AD284FD, }, // sceGpioAcquireIntr
+	{ 0xC6928224, 0xE8A497DE, }, // sceGpioGetCapturePort
+	{ 0x6B38B826, 0xEBF28F41, }, // sceGpioSetCapturePort
+	{ 0x5691CEFA, 0xD2A8B1B5, }, // sceGpioEnableTimerCapture
+	{ 0x2CDC8EDC, 0xEF344659, }, // sceGpioDisableTimerCapture
 };
 
 static nid_entry sceSysreg_driver_nid[] = {
-	{ 0xC29D614E, 0x9EF98522, },  // sceSysregTopResetEnable
-	{ 0xDC6139A4, 0x3B286D7A, },  // sceSysregScResetEnable
-	{ 0xDE59DACB, 0x97EA6913, },  // sceSysregMeResetEnable
-	{ 0x2DB0EB28, 0x2D858336, },  // sceSysregMeResetDisable
-	{ 0x26283A6F, 0x3CC1D73F, },  // sceSysregAwResetEnable
-	{ 0xA374195E, 0x2F353BF5, },  // sceSysregAwResetDisable
-	{ 0xD20581EA, 0xA9A2F237, },  // sceSysregVmeResetEnable
-	{ 0x7558064A, 0x67557011, },  // sceSysregVmeResetDisable
-	{ 0x9BB70D34, 0x119647A7, },  // sceSysregAvcResetEnable
-	{ 0xFD6C562B, 0x85C424F9, },  // sceSysregAvcResetDisable
-	{ 0xCD4FB614, 0xDA2E7D06, },  // sceSysregUsbResetEnable
-	{ 0x69EECBE5, 0xED6EF130, },  // sceSysregUsbResetDisable
-	{ 0xF5B80837, 0xC572A362, },  // sceSysregAtaResetEnable
-	{ 0x8075303F, 0x5F01289B, },  // sceSysregAtaResetDisable
-	{ 0x00C2628E, 0xE6A812AA, },  // sceSysregMsifResetEnable
-	{ 0xEC4BF81F, 0xF81EC5B9, },  // sceSysregMsifResetDisable
-	{ 0x8A7F9EB4, 0xF7A8BFA5, },  // sceSysregKirkResetEnable
-	{ 0xC32F2491, 0x43EEDE50, },  // sceSysregKirkResetDisable
-	{ 0xA23BC2C4, 0xE40DC039, },  // sceSysregAtahddResetEnable
-	{ 0xF5EA8570, 0x1CAB8282, },  // sceSysregAtahddResetDisable
-	{ 0x3E961C02, 0x48546F11, },  // sceSysregUsbhostResetEnable
-	{ 0xACFA3764, 0xB03747DB, },  // sceSysregUsbhostResetDisable
-	{ 0x44F6CDA7, 0x2B3BE2C8, },  // sceSysregMeBusClockEnable
-	{ 0x158AD4FC, 0x774775CA, },  // sceSysregMeBusClockDisable
-	{ 0x4D4CE2B8, 0xDF06373E, },  // sceSysregAwRegABusClockEnable
-	{ 0x789BD609, 0x9EBD0CD2, },  // sceSysregAwRegABusClockDisable
-	{ 0x391CE1C0, 0x6637667D, },  // sceSysregAwRegBBusClockEnable
-	{ 0x82D35024, 0x5AB2CF90, },  // sceSysregAwRegBBusClockDisable
-	{ 0xAF904657, 0x739A33F0, },  // sceSysregAwEdramBusClockEnable
-	{ 0x438AECE9, 0xA3C7B0C1, },  // sceSysregAwEdramBusClockDisable
-	{ 0x4F5AFBBE, 0x0FE3B0D7, },  // sceSysregKirkBusClockEnable
-	{ 0x845DD1A6, 0x2AF6987B, },  // sceSysregKirkBusClockDisable
-	{ 0x3E216017, 0xBA3FADB4, },  // sceSysregUsbBusClockEnable
-	{ 0xBFBABB63, 0x313DD64A, },  // sceSysregUsbBusClockDisable
-	{ 0x4716E71E, 0x3F36F3B1, },  // sceSysregMsifBusClockEnable
-	{ 0x826430C0, 0x7F2571B7, },  // sceSysregMsifBusClockDisable
-	{ 0x7CC6CBFD, 0x1B6F77C0, },  // sceSysregEmcddrBusClockEnable
-	{ 0xEE6B9411, 0xE95E59A1, },  // sceSysregEmcddrBusClockDisable
-	{ 0x63B9EB65, 0xA8235369, },  // sceSysregApbBusClockEnable
-	{ 0xE1AA9788, 0x1663DA05, },  // sceSysregApbBusClockDisable
-	{ 0xAA63C8BD, 0xE7849809, },  // sceSysregAudioBusClockEnable
-	{ 0x054AC8C6, 0x44C4DA5F, },  // sceSysregAudioBusClockDisable
-	{ 0xE45BED6A, 0x77831D41, },  // sceSysregAtahddBusClockEnable
-	{ 0x681B35C4, 0xB2B17B0F, },  // sceSysregAtahddBusClockDisable
-	{ 0xE321F41A, 0xB85674BC, },  // sceSysregUsbhostBusClockEnable
-	{ 0x4D2FFC60, 0x5EAFED61, },  // sceSysregUsbhostBusClockDisable
-	{ 0x6B01D71B, 0xEF64EFDD, },  // sceSysregAtaClkEnable
-	{ 0xFC186A83, 0xF6922705, },  // sceSysregAtaClkDisable
-	{ 0xB59DB832, 0x0E441BEB, },  // sceSysregAtahddClkEnable
-	{ 0x9155812C, 0x91616908, },  // sceSysregAtahddClkDisable
-	{ 0xDA4FCA1D, 0x39FF613D, },  // sceSysregUsbhostClkEnable
-	{ 0x228A73E1, 0x53F6D550, },  // sceSysregUsbhostClkDisable
-	{ 0x31154490, 0xCA901512, },  // sceSysregMsifClkEnable
-	{ 0x8E2D835D, 0x046FE30E, },  // sceSysregMsifClkDisable
-	{ 0xE8533DCA, 0x565B8650, },  // sceSysregApbTimerClkEnable
-	{ 0xF6D83AD0, 0xC4C1F135, },  // sceSysregApbTimerClkDisable
-	{ 0xA9CD1C1F, 0xB733A263, },  // sceSysregAudioClkEnable
-	{ 0x2F216F38, 0x0DD07A50, },  // sceSysregAudioClkDisable
-	{ 0xE3AECFFA, 0x14D3ACBC, },  // sceSysregGpioClkEnable
-	{ 0x3BBD0C0C, 0x7BFA7EEA, },  // sceSysregGpioClkDisable
-	{ 0xC1DA05D2, 0x34EED467, },  // sceSysregAudioClkoutClkEnable
-	{ 0xDE170397, 0x5122CA96, },  // sceSysregAudioClkoutClkDisable
-	{ 0x7234EA80, 0xEB5ADBE4, },  // sceSysregUsbClkEnable
-	{ 0x38EC3281, 0x4D23058C, },  // sceSysregUsbClkDisable
-	{ 0xBC68D9B6, 0xF5509B44, },  // sceSysregUsbIoEnable
-	{ 0xA3C8E075, 0x14E314B0, },  // sceSysregUsbIoDisable
-	{ 0x79338EA3, 0x2C0E5FA5, },  // sceSysregAtaIoEnable
-	{ 0xCADB92AA, 0x25EA91E5, },  // sceSysregAtaIoDisable
-	{ 0xD74F1D48, 0xE4D3F01F, },  // sceSysregMsifIoEnable
-	{ 0x18172C6A, 0xEBBD8E0C, },  // sceSysregMsifIoDisable
-	{ 0xBB26CF1F, 0x5D3DD0B3, },  // sceSysregAudioIoEnable
-	{ 0x8E2FB536, 0x266F1C65, },  // sceSysregAudioIoDisable
-	{ 0xF844DDF3, 0x94914740, },  // sceSysregAudioClkoutIoEnable
-	{ 0x29A119A1, 0xA25740B8, },  // sceSysregAudioClkoutIoDisable
-	{ 0x8B95C17F, 0x87176F00, },  // sceSysregAtahddIoEnable
-	{ 0xCCF911C0, 0xB50B1767, },  // sceSysregAtahddIoDisable
-	{ 0xB627582E, 0xE932D752, },  // sceSysregGpioIoEnable
-	{ 0x1E9C3607, 0x73B789C9, },  // sceSysregGpioIoDisable
-	{ 0x633595F2, 0x13E2ACB2, },  // sceSysregUsbGetConnectStatus
-	{ 0x32471457, 0xECFBBCB5, },  // sceSysregUsbQueryIntr
-	{ 0x692F31FF, 0x4100075B, },  // sceSysregUsbAcquireIntr
-	{ 0xFFEB6E00, 0x8E51EE5A, },  // sceSysregUsbhostQueryIntr
-	{ 0x87C2BA20, 0x26BBB4C8, },  // sceSysregUsbhostAcquireIntr
-	{ 0xD43E98F6, 0x6EFCF152, },  // sceSysregMsifGetConnectStatus
-	{ 0xBF91FBDA, 0x2B3033AD, },  // sceSysregMsifQueryConnectIntr
-	{ 0x36A75390, 0x68F3EA50, },  // sceSysregMsifAcquireConnectIntr
-	{ 0x61BFF85F, 0x3620CA9E, },  // sceSysregInterruptToOther
-	{ 0x9FC87ED4, 0x4643F826, },  // sceSysregSemaTryLock
-	{ 0x8BE2D520, 0x314A489C, },  // sceSysregSemaUnlock
-	{ 0xB21B6CBF, 0x181F6AFF, },  // sceSysregPllGetFrequency
-	{ 0xB4560C45, 0xD47B7BE0, },  // sceSysregPllGetOutSelect
-	{ 0xDCA57573, 0x81667490, },  // sceSysregPllSetOutSelect
-	{ 0x1969E840, 0xBDB91784, },  // sceSysregMsifClkSelect
-	{ 0x1D382514, 0x8F046FDE, },  // sceSysregMsifDelaySelect
-	{ 0x03340297, 0x35AF8BE3, },  // sceSysregApbTimerClkSelect
-	{ 0x9100B4E5, 0x9EBB3C43, },  // sceSysregAudioClkSelect
-	{ 0x833E6FB1, 0x55528C0B, },  // sceSysregAtaClkSelect
-	{ 0x8CE2F97A, 0x5E45F850, },  // sceSysregAtahddClkSelect
-	{ 0x0A83FC7B, 0x47966D28, },  // sceSysregAudioClkoutClkSelect
-	{ 0x3EA188AD, 0xB13D48CD, },  // sceSysregRequestIntr
-	{ 0xCD0F6715, 0x2737D937, },  // sceSysregDoTimerEvent
-	{ 0xF3443B9A, 0x0D0AE159, },  // sceSysregSetAwEdramSize
-	{ 0x53A6838B, 0xA684D1B0, },  // sceSysregPllGetBaseFrequency
-	{ 0xBB3623DF, 0xA0F3053B, },  // sceSysregPllUpdateFrequency
-	{ 0x25673620, 0x7ADF93F1, },  // sceSysregIntrInit
-	{ 0x4EE8E2C8, 0x8F224A0F, },  // sceSysregIntrEnd
-	{ 0x083F56E2, 0x787CCE85, },  // sceSysregEnableIntr
-	{ 0x7C5B543C, 0xBBE75ABD, },  // sceSysregDisableIntr
-	{ 0xA9997109, 0x97EA6913, },  // sceSysregMeResetEnable(371)
-	{ 0x76220E94, 0x2D858336, },  // sceSysregMeResetDisable(371)
-	{ 0x3199CF1C, 0x2B3BE2C8, },  // sceSysregMeBusClockEnable(371)
-	{ 0x07881A0B, 0x774775CA, },  // sceSysregMeBusClockDisable(371)
+	{ 0xC29D614E, 0x9EF98522, }, // sceSysregTopResetEnable
+	{ 0xDC6139A4, 0x3B286D7A, }, // sceSysregScResetEnable
+	{ 0xDE59DACB, 0x97EA6913, }, // sceSysregMeResetEnable
+	{ 0x2DB0EB28, 0x2D858336, }, // sceSysregMeResetDisable
+	{ 0x26283A6F, 0x3CC1D73F, }, // sceSysregAwResetEnable
+	{ 0xA374195E, 0x2F353BF5, }, // sceSysregAwResetDisable
+	{ 0xD20581EA, 0xA9A2F237, }, // sceSysregVmeResetEnable
+	{ 0x7558064A, 0x67557011, }, // sceSysregVmeResetDisable
+	{ 0x9BB70D34, 0x119647A7, }, // sceSysregAvcResetEnable
+	{ 0xFD6C562B, 0x85C424F9, }, // sceSysregAvcResetDisable
+	{ 0xCD4FB614, 0xDA2E7D06, }, // sceSysregUsbResetEnable
+	{ 0x69EECBE5, 0xED6EF130, }, // sceSysregUsbResetDisable
+	{ 0xF5B80837, 0xC572A362, }, // sceSysregAtaResetEnable
+	{ 0x8075303F, 0x5F01289B, }, // sceSysregAtaResetDisable
+	{ 0x00C2628E, 0xE6A812AA, }, // sceSysregMsifResetEnable
+	{ 0xEC4BF81F, 0xF81EC5B9, }, // sceSysregMsifResetDisable
+	{ 0x8A7F9EB4, 0xF7A8BFA5, }, // sceSysregKirkResetEnable
+	{ 0xC32F2491, 0x43EEDE50, }, // sceSysregKirkResetDisable
+	{ 0xA23BC2C4, 0xE40DC039, }, // sceSysregAtahddResetEnable
+	{ 0xF5EA8570, 0x1CAB8282, }, // sceSysregAtahddResetDisable
+	{ 0x3E961C02, 0x48546F11, }, // sceSysregUsbhostResetEnable
+	{ 0xACFA3764, 0xB03747DB, }, // sceSysregUsbhostResetDisable
+	{ 0x44F6CDA7, 0x2B3BE2C8, }, // sceSysregMeBusClockEnable
+	{ 0x158AD4FC, 0x774775CA, }, // sceSysregMeBusClockDisable
+	{ 0x4D4CE2B8, 0xDF06373E, }, // sceSysregAwRegABusClockEnable
+	{ 0x789BD609, 0x9EBD0CD2, }, // sceSysregAwRegABusClockDisable
+	{ 0x391CE1C0, 0x6637667D, }, // sceSysregAwRegBBusClockEnable
+	{ 0x82D35024, 0x5AB2CF90, }, // sceSysregAwRegBBusClockDisable
+	{ 0xAF904657, 0x739A33F0, }, // sceSysregAwEdramBusClockEnable
+	{ 0x438AECE9, 0xA3C7B0C1, }, // sceSysregAwEdramBusClockDisable
+	{ 0x4F5AFBBE, 0x0FE3B0D7, }, // sceSysregKirkBusClockEnable
+	{ 0x845DD1A6, 0x2AF6987B, }, // sceSysregKirkBusClockDisable
+	{ 0x3E216017, 0xBA3FADB4, }, // sceSysregUsbBusClockEnable
+	{ 0xBFBABB63, 0x313DD64A, }, // sceSysregUsbBusClockDisable
+	{ 0x4716E71E, 0x3F36F3B1, }, // sceSysregMsifBusClockEnable
+	{ 0x826430C0, 0x7F2571B7, }, // sceSysregMsifBusClockDisable
+	{ 0x7CC6CBFD, 0x1B6F77C0, }, // sceSysregEmcddrBusClockEnable
+	{ 0xEE6B9411, 0xE95E59A1, }, // sceSysregEmcddrBusClockDisable
+	{ 0x63B9EB65, 0xA8235369, }, // sceSysregApbBusClockEnable
+	{ 0xE1AA9788, 0x1663DA05, }, // sceSysregApbBusClockDisable
+	{ 0xAA63C8BD, 0xE7849809, }, // sceSysregAudioBusClockEnable
+	{ 0x054AC8C6, 0x44C4DA5F, }, // sceSysregAudioBusClockDisable
+	{ 0xE45BED6A, 0x77831D41, }, // sceSysregAtahddBusClockEnable
+	{ 0x681B35C4, 0xB2B17B0F, }, // sceSysregAtahddBusClockDisable
+	{ 0xE321F41A, 0xB85674BC, }, // sceSysregUsbhostBusClockEnable
+	{ 0x4D2FFC60, 0x5EAFED61, }, // sceSysregUsbhostBusClockDisable
+	{ 0x6B01D71B, 0xEF64EFDD, }, // sceSysregAtaClkEnable
+	{ 0xFC186A83, 0xF6922705, }, // sceSysregAtaClkDisable
+	{ 0xB59DB832, 0x0E441BEB, }, // sceSysregAtahddClkEnable
+	{ 0x9155812C, 0x91616908, }, // sceSysregAtahddClkDisable
+	{ 0xDA4FCA1D, 0x39FF613D, }, // sceSysregUsbhostClkEnable
+	{ 0x228A73E1, 0x53F6D550, }, // sceSysregUsbhostClkDisable
+	{ 0x31154490, 0xCA901512, }, // sceSysregMsifClkEnable
+	{ 0x8E2D835D, 0x046FE30E, }, // sceSysregMsifClkDisable
+	{ 0xE8533DCA, 0x565B8650, }, // sceSysregApbTimerClkEnable
+	{ 0xF6D83AD0, 0xC4C1F135, }, // sceSysregApbTimerClkDisable
+	{ 0xA9CD1C1F, 0xB733A263, }, // sceSysregAudioClkEnable
+	{ 0x2F216F38, 0x0DD07A50, }, // sceSysregAudioClkDisable
+	{ 0xE3AECFFA, 0x14D3ACBC, }, // sceSysregGpioClkEnable
+	{ 0x3BBD0C0C, 0x7BFA7EEA, }, // sceSysregGpioClkDisable
+	{ 0xC1DA05D2, 0x34EED467, }, // sceSysregAudioClkoutClkEnable
+	{ 0xDE170397, 0x5122CA96, }, // sceSysregAudioClkoutClkDisable
+	{ 0x7234EA80, 0xEB5ADBE4, }, // sceSysregUsbClkEnable
+	{ 0x38EC3281, 0x4D23058C, }, // sceSysregUsbClkDisable
+	{ 0xBC68D9B6, 0xF5509B44, }, // sceSysregUsbIoEnable
+	{ 0xA3C8E075, 0x14E314B0, }, // sceSysregUsbIoDisable
+	{ 0x79338EA3, 0x2C0E5FA5, }, // sceSysregAtaIoEnable
+	{ 0xCADB92AA, 0x25EA91E5, }, // sceSysregAtaIoDisable
+	{ 0xD74F1D48, 0xE4D3F01F, }, // sceSysregMsifIoEnable
+	{ 0x18172C6A, 0xEBBD8E0C, }, // sceSysregMsifIoDisable
+	{ 0xBB26CF1F, 0x5D3DD0B3, }, // sceSysregAudioIoEnable
+	{ 0x8E2FB536, 0x266F1C65, }, // sceSysregAudioIoDisable
+	{ 0xF844DDF3, 0x94914740, }, // sceSysregAudioClkoutIoEnable
+	{ 0x29A119A1, 0xA25740B8, }, // sceSysregAudioClkoutIoDisable
+	{ 0x8B95C17F, 0x87176F00, }, // sceSysregAtahddIoEnable
+	{ 0xCCF911C0, 0xB50B1767, }, // sceSysregAtahddIoDisable
+	{ 0xB627582E, 0xE932D752, }, // sceSysregGpioIoEnable
+	{ 0x1E9C3607, 0x73B789C9, }, // sceSysregGpioIoDisable
+	{ 0x633595F2, 0x13E2ACB2, }, // sceSysregUsbGetConnectStatus
+	{ 0x32471457, 0xECFBBCB5, }, // sceSysregUsbQueryIntr
+	{ 0x692F31FF, 0x4100075B, }, // sceSysregUsbAcquireIntr
+	{ 0xFFEB6E00, 0x8E51EE5A, }, // sceSysregUsbhostQueryIntr
+	{ 0x87C2BA20, 0x26BBB4C8, }, // sceSysregUsbhostAcquireIntr
+	{ 0xD43E98F6, 0x6EFCF152, }, // sceSysregMsifGetConnectStatus
+	{ 0xBF91FBDA, 0x2B3033AD, }, // sceSysregMsifQueryConnectIntr
+	{ 0x36A75390, 0x68F3EA50, }, // sceSysregMsifAcquireConnectIntr
+	{ 0x61BFF85F, 0x3620CA9E, }, // sceSysregInterruptToOther
+	{ 0x9FC87ED4, 0x4643F826, }, // sceSysregSemaTryLock
+	{ 0x8BE2D520, 0x314A489C, }, // sceSysregSemaUnlock
+	{ 0xB21B6CBF, 0x181F6AFF, }, // sceSysregPllGetFrequency
+	{ 0xB4560C45, 0xD47B7BE0, }, // sceSysregPllGetOutSelect
+	{ 0xDCA57573, 0x81667490, }, // sceSysregPllSetOutSelect
+	{ 0x1969E840, 0xBDB91784, }, // sceSysregMsifClkSelect
+	{ 0x1D382514, 0x8F046FDE, }, // sceSysregMsifDelaySelect
+	{ 0x03340297, 0x35AF8BE3, }, // sceSysregApbTimerClkSelect
+	{ 0x9100B4E5, 0x9EBB3C43, }, // sceSysregAudioClkSelect
+	{ 0x833E6FB1, 0x55528C0B, }, // sceSysregAtaClkSelect
+	{ 0x8CE2F97A, 0x5E45F850, }, // sceSysregAtahddClkSelect
+	{ 0x0A83FC7B, 0x47966D28, }, // sceSysregAudioClkoutClkSelect
+	{ 0x3EA188AD, 0xB13D48CD, }, // sceSysregRequestIntr
+	{ 0xCD0F6715, 0x2737D937, }, // sceSysregDoTimerEvent
+	{ 0xF3443B9A, 0x0D0AE159, }, // sceSysregSetAwEdramSize
+	{ 0x53A6838B, 0xA684D1B0, }, // sceSysregPllGetBaseFrequency
+	{ 0xBB3623DF, 0xA0F3053B, }, // sceSysregPllUpdateFrequency
+	{ 0x25673620, 0x7ADF93F1, }, // sceSysregIntrInit
+	{ 0x4EE8E2C8, 0x8F224A0F, }, // sceSysregIntrEnd
+	{ 0x083F56E2, 0x787CCE85, }, // sceSysregEnableIntr
+	{ 0x7C5B543C, 0xBBE75ABD, }, // sceSysregDisableIntr
+	{ 0xA9997109, 0x97EA6913, }, // sceSysregMeResetEnable(371)
+	{ 0x76220E94, 0x2D858336, }, // sceSysregMeResetDisable(371)
+	{ 0x3199CF1C, 0x2B3BE2C8, }, // sceSysregMeBusClockEnable(371)
+	{ 0x07881A0B, 0x774775CA, }, // sceSysregMeBusClockDisable(371)
 
-	{ 0x55B18B84, 0x75857874, }, 
-	{ 0x2112E686, 0xF450CD9F, }, 
-	{ 0x7B9E9A53, 0x1CB5AE24, }, 
-	{ 0x7BDF0556, 0x18D9BFAB, }, 
-	{ 0x8D0FED1E, 0x371C2599, }, 
-	{ 0xA46E9CA8, 0xC4330C30, }, 
-	{ 0xB08A4E85, 0x5178FB81, }, 
-	{ 0xA41929DA, 0x290BE4E7, }, 
-	{ 0xE88B77ED, 0x73CC040F, }, 
-	{ 0x312F9419, 0x0A492798, }, 
-	{ 0x844AF6BD, 0xE58D8630, }, 
-	{ 0xEE8760C6, 0x91143B9B, }, 
-	{ 0x5664F8B5, 0xE4CB1700, }, 
-	{ 0x44704E1D, 0xDC17E0E9, }, 
-	{ 0x584AD989, 0x22EB25C4, }, 
-	{ 0x377F035F, 0x51938C20, }, 
-	{ 0xAB3185FD, 0x73DF64ED, }, 
-	{ 0x0EA487FA, 0x175283DF, }, 
-	{ 0x136E8F5A, 0xC5076887, }, 
-	{ 0xF4811E00, 0xE977730A, }, 
+	{ 0x55B18B84, 0x75857874, },
+	{ 0x2112E686, 0xF450CD9F, },
+	{ 0x7B9E9A53, 0x1CB5AE24, },
+	{ 0x7BDF0556, 0x18D9BFAB, },
+	{ 0x8D0FED1E, 0x371C2599, },
+	{ 0xA46E9CA8, 0xC4330C30, },
+	{ 0xB08A4E85, 0x5178FB81, },
+	{ 0xA41929DA, 0x290BE4E7, },
+	{ 0xE88B77ED, 0x73CC040F, },
+	{ 0x312F9419, 0x0A492798, },
+	{ 0x844AF6BD, 0xE58D8630, },
+	{ 0xEE8760C6, 0x91143B9B, },
+	{ 0x5664F8B5, 0xE4CB1700, },
+	{ 0x44704E1D, 0xDC17E0E9, },
+	{ 0x584AD989, 0x22EB25C4, },
+	{ 0x377F035F, 0x51938C20, },
+	{ 0xAB3185FD, 0x73DF64ED, },
+	{ 0x0EA487FA, 0x175283DF, },
+	{ 0x136E8F5A, 0xC5076887, },
+	{ 0xF4811E00, 0xE977730A, },
 };
 
 static nid_entry sceDve_driver_nid[] = {
-	{ 0x0836B2B5, 0x9E03BCF9, },  // sceDvePowerOn
-	{ 0x17BC42E4, 0x5BC934E9, },  // sceDvePowerOff
-	{ 0xADE8C471, 0xE5EE11B3, },  // sceDveResetEnable
-	{ 0xD986F31B, 0x50005CD3, },  // sceDveResetDisable
-	{ 0xB7827F16, 0x46C595A3, },  // sceDveUnk1
-	{ 0x34E9274D, 0xE926B3B8, },  // sceDveUnk2
-	{ 0xE84E975E, 0xAB7574D1, },  // sceDveUnk3
-	{ 0x0B85524C, 0x194FE107, },  // sceDveUnk4
-	{ 0xA265B504, 0x024D7064, },  // sceDveUnk5
-	{ 0xAE2A6570, 0x7C77EDA7, },  // sceDveDisplayOn
-	{ 0xD8863512, 0xDB6BCBD6, },  // sceDveUnk10
-	{ 0xA2D53F99, 0x46E070DD, },  // sceDveDisplayOff
-	{ 0xF0CF5A67, 0x0F748EAC, },  // sceDveUnk12
-	{ 0xBF910381, 0xAA503020, },  // sceDveUnk11
-	{ 0x36970008, 0x096FA2AE, },  // sceDveUnk7
-	{ 0x59E1B113, 0xF1175122, },  // sceDveUnk8
-	{ 0xC9362C91, 0x9FC8CDA7, },  // sceDveGetDisplayMode
-	{ 0x22D50DA7, 0xBD65CFAE, },  // sceDveInit
-	{ 0x292F15DA, 0x762C12FE, },  // sceDveUnk9
+	{ 0x0836B2B5, 0x9E03BCF9, }, // sceDvePowerOn
+	{ 0x17BC42E4, 0x5BC934E9, }, // sceDvePowerOff
+	{ 0xADE8C471, 0xE5EE11B3, }, // sceDveResetEnable
+	{ 0xD986F31B, 0x50005CD3, }, // sceDveResetDisable
+	{ 0xB7827F16, 0x46C595A3, }, // sceDveUnk1
+	{ 0x34E9274D, 0xE926B3B8, }, // sceDveUnk2
+	{ 0xE84E975E, 0xAB7574D1, }, // sceDveUnk3
+	{ 0x0B85524C, 0x194FE107, }, // sceDveUnk4
+	{ 0xA265B504, 0x024D7064, }, // sceDveUnk5
+	{ 0xAE2A6570, 0x7C77EDA7, }, // sceDveDisplayOn
+	{ 0xD8863512, 0xDB6BCBD6, }, // sceDveUnk10
+	{ 0xA2D53F99, 0x46E070DD, }, // sceDveDisplayOff
+	{ 0xF0CF5A67, 0x0F748EAC, }, // sceDveUnk12
+	{ 0xBF910381, 0xAA503020, }, // sceDveUnk11
+	{ 0x36970008, 0x096FA2AE, }, // sceDveUnk7
+	{ 0x59E1B113, 0xF1175122, }, // sceDveUnk8
+	{ 0xC9362C91, 0x9FC8CDA7, }, // sceDveGetDisplayMode
+	{ 0x22D50DA7, 0xBD65CFAE, }, // sceDveInit
+	{ 0x292F15DA, 0x762C12FE, }, // sceDveUnk9
 
-	{ 0xB2E4E437, 0x4210EB3C, }, 
-	{ 0xDEB2F80C, 0xA1401BA2, }, 
-	{ 0x93828323, 0x2F863B65, }, 
+	{ 0xB2E4E437, 0x4210EB3C, },
+	{ 0xDEB2F80C, 0xA1401BA2, },
+	{ 0x93828323, 0x2F863B65, },
 };
 
 static nid_entry sceHprm_driver_nid[] = {
-	{ 0xC7154136, 0xE611E89B, },  // sceHprmRegisterCallback
-	{ 0xFD7DE6CD, 0xBF4C183C, },  // sceHprmUnregitserCallback
-	{ 0x8EC787E0, 0x0CB055CC, },  // sceHprmUpdateCableType
-	{ 0xBAD0828E, 0x732EC325, },  // sceHprmGetModel
-	{ 0x4D1E622C, 0x1F631BD7, },  // sceHprmReset
-	{ 0x2BCEC83E, 0x00CFE490, },  // sceHprmPeekLatch
-	{ 0x40D2F9F0, 0x5FC5E53B, },  // sceHprmReadLatch
-	{ 0x7B038374, 0x34906CFF, },  // sceHprmGetInternalState
-	{ 0xF04591FA, 0x5CE3A57B, },  // sceHprmSetIdleCancelKey
-	{ 0x971AE8FB, 0xEC254B64, },  // sceHprmGetIdleCancelKey
-	{ 0x71B5FB67, 0x8A898B38, },  // sceHprmGetHpDetect
-	{ 0x7E69EDA4, 0x2E49469C, },  // sceHprmIsHeadphoneExist
-	{ 0x208DB1BD, 0x4C9BEDA4, },  // sceHprmIsRemoteExist
-	{ 0x219C58F1, 0xE0F76A26, },  // sceHprmIsMicrophoneExist
-	{ 0xC1777D84, 0x62CDFB12, },  // sceHprmGetCableType
-	{ 0xD22913DB, 0x1EECCA1A, },  // sceHprmSetConnectCallback
+	{ 0xC7154136, 0xE611E89B, }, // sceHprmRegisterCallback
+	{ 0xFD7DE6CD, 0xBF4C183C, }, // sceHprmUnregitserCallback
+	{ 0x8EC787E0, 0x0CB055CC, }, // sceHprmUpdateCableType
+	{ 0xBAD0828E, 0x732EC325, }, // sceHprmGetModel
+	{ 0x4D1E622C, 0x1F631BD7, }, // sceHprmReset
+	{ 0x2BCEC83E, 0x00CFE490, }, // sceHprmPeekLatch
+	{ 0x40D2F9F0, 0x5FC5E53B, }, // sceHprmReadLatch
+	{ 0x7B038374, 0x34906CFF, }, // sceHprmGetInternalState
+	{ 0xF04591FA, 0x5CE3A57B, }, // sceHprmSetIdleCancelKey
+	{ 0x971AE8FB, 0xEC254B64, }, // sceHprmGetIdleCancelKey
+	{ 0x71B5FB67, 0x8A898B38, }, // sceHprmGetHpDetect
+	{ 0x7E69EDA4, 0x2E49469C, }, // sceHprmIsHeadphoneExist
+	{ 0x208DB1BD, 0x4C9BEDA4, }, // sceHprmIsRemoteExist
+	{ 0x219C58F1, 0xE0F76A26, }, // sceHprmIsMicrophoneExist
+	{ 0xC1777D84, 0x62CDFB12, }, // sceHprmGetCableType
+	{ 0xD22913DB, 0x1EECCA1A, }, // sceHprmSetConnectCallback
 
-	{ 0x9C1D9ADB, 0xDA01152D, }, 
-	{ 0xB6B6786B, 0x61650073, }, 
-	{ 0x21E8AFD5, 0xEAE19005, }, 
-	{ 0x6BC7BEE9, 0xCDACC031, }, 
-	{ 0xC0FE0FAD, 0xC61FC867, }, 
-	{ 0x7B1A14B8, 0x2F028F97, }, 
-	{ 0x1528D408, 0x61650073, }, 
-	{ 0x133DE8FA, 0x74B54AEA, }, 
+	{ 0x9C1D9ADB, 0xDA01152D, },
+	{ 0xB6B6786B, 0x61650073, },
+	{ 0x21E8AFD5, 0xEAE19005, },
+	{ 0x6BC7BEE9, 0xCDACC031, },
+	{ 0xC0FE0FAD, 0xC61FC867, },
+	{ 0x7B1A14B8, 0x2F028F97, },
+	{ 0x1528D408, 0x61650073, },
+	{ 0x133DE8FA, 0x74B54AEA, },
 };
 
 static nid_entry sceMesgLed_driver_nid[] = {
@@ -1142,11 +1142,11 @@ static nid_entry sceMesgLed_driver_nid[] = {
 };
 
 static nid_entry sceClockgen_driver_nid[] = {
-	{ 0x4EB657D5, 0xACC30ECE, },  // sceClockgenAudioClkSetFreq
+	{ 0x4EB657D5, 0xACC30ECE, }, // sceClockgenAudioClkSetFreq
 };
 
 static nid_entry sceCodec_driver_nid[] = {
-	{ 0x20C61103, 0xBCE58DC4, },  // sceCodecSelectVolumeTable
+	{ 0x20C61103, 0xBCE58DC4, }, // sceCodecSelectVolumeTable
 };
 
 static nid_entry scePaf_nid[] = {

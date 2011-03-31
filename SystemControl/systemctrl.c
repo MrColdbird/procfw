@@ -339,7 +339,7 @@ int sctrlHENGetVersion()
 
 int sctrlHENGetMinorVersion()
 {
-	return 0x3;
+	return 0x4;
 }
 
 PspIoDrv *sctrlHENFindDriver(char *drvname)

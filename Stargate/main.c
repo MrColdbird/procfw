@@ -25,7 +25,7 @@
 #include "stargate.h"
 #include "stargate_patch_offset.h"
 
-#ifndef PSID_CHECK
+#ifdef PSID_CHECK
 #include "psid_check.h"
 #endif
 
@@ -36,7 +36,7 @@ static STMOD_HANDLER previous;
 SEConfig conf;
 u32 psp_fw_version;
 
-#ifndef PSID_CHECK
+#ifdef PSID_CHECK
 static int g_crash = 0;
 #endif
 
@@ -120,7 +120,7 @@ static int stargate_module_chain(SceModule2 *mod)
 		patch_analog_imports((SceModule*)mod);
 	}
 
-#ifndef PSID_CHECK
+#ifdef PSID_CHECK
 	if(g_crash) {
 		crash_me();
 	}
@@ -170,7 +170,7 @@ int module_start(SceSize args, void *argp)
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
 
-#ifndef PSID_CHECK
+#ifdef PSID_CHECK
 	g_crash = confirm_usage_right();
 #endif
 

@@ -102,16 +102,19 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		if (sceKernelFindModuleByName("sceVshOSK_Module"))
 			goto exit;
 
-		// TODO: Fix this somehow... don't know how yet.
-		// TRIGGER: Launch camera, exit it again, press select, no satellite comes up. Same for browser and PSN.
-		// SOURCE: These 3 plugins don't unload until another plugin is loaded up, breaking the satellite
-		if (sceKernelFindModuleByName("htmlviewer_plugin_module"))
+		if (get_thread_id("movie_player") >= 0)
 			goto exit;
 
-		if (sceKernelFindModuleByName("camera_plugin_module"))
+		if (get_thread_id("audio_buffer") >= 0)
 			goto exit;
 
-		if (sceKernelFindModuleByName("psn_plugin_module"))
+		if (get_thread_id("music_player") >= 0)
+			goto exit;
+
+		if (get_thread_id("SceHtmlViewer") >= 0)
+			goto exit;
+
+		if (get_thread_id("SceNpSignupEvent") >= 0)
 			goto exit;
 
 		if (!(ctrl->Buttons & PSP_CTRL_SELECT))

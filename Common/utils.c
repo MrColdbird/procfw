@@ -161,3 +161,32 @@ int get_device_name(char *device, int size, const char* path)
 
 	return 0;
 }
+
+SceUID get_thread_id(const char *name)
+{
+	int ret, count, i;
+	SceUID ids[128];
+
+	ret = sceKernelGetThreadmanIdList(SCE_KERNEL_TMID_Thread, ids, sizeof(ids), &count);
+
+	if(ret < 0) {
+		return -1;
+	}
+
+	for(i=0; i<count; ++i) {
+		SceKernelThreadInfo info;
+
+		info.size = sizeof(info);
+		ret = sceKernelReferThreadStatus(ids[i], &info);
+
+		if(ret < 0) {
+			continue;
+		}
+
+		if(0 == strcmp(info.name, name)) {
+			return ids[i];
+		}
+	}
+
+	return -2;
+}

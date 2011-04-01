@@ -54,4 +54,6 @@ static inline void hexdump(void *addr, int size)
 
 int get_device_name(char *device, int size, const char* path);
 
+SceUID get_thread_id(const char *name);
+
 #endif

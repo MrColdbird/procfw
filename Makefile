@@ -27,6 +27,10 @@ ifeq ($(CONFIG_620), 1)
 OPT_FLAGS+=CONFIG_620=1
 endif
 
+ifeq ($(PSID_CHECK), 1)
+RELEASE_OPTION=PSID_CHECK=1
+endif
+
 #DEBUG=1
 
 ifeq ($(DEBUG), 1)
@@ -54,7 +58,7 @@ endif
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(INFERNO); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION) $(RELEASE_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
@@ -84,7 +88,7 @@ clean:
 	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(INFERNO); make clean $(DEBUG_OPTION)
-	@cd $(STARGATE); make clean $(DEBUG_OPTION)
+	@cd $(STARGATE); make clean $(DEBUG_OPTION) $(RELEASE_OPTION)
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 ifeq ($(CONFIG_620), 1)
 	@cd $(PERMANENT); make clean $(DEBUG_OPTION)

@@ -99,23 +99,51 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 			}
 		}
 	} else {
+		// Block Satellite Menu in OSK
 		if (sceKernelFindModuleByName("sceVshOSK_Module"))
 			goto exit;
 
-		if (get_thread_id("movie_player") >= 0)
+		// Block Satellite while using Skype
+		if (sceKernelFindModuleByName("Skyhost"))
 			goto exit;
 
-		if (get_thread_id("audio_buffer") >= 0)
+		// Block Satellite Menu in HTML Viewer (Bugged on Thread Monitor too, this is faster...)
+		if (sceKernelFindModuleByName("htmlviewer_plugin_module"))
 			goto exit;
 
-		if (get_thread_id("music_player") >= 0)
+		// Block Satellite while mounting USB
+		if (sceKernelFindModuleByName("sceUSB_Stor_Driver"))
 			goto exit;
 
-		if (get_thread_id("SceHtmlViewer") >= 0)
+		// Block Satellite Menu while highlighting Multimedia-EBOOTs
+		if (get_thread_id("movie_player") >= 0 || get_thread_id("audio_buffer") >= 0 || get_thread_id("music_player") >= 0)
 			goto exit;
 
+		// Block Satellite Menu in NP Signup Module (Blue PSN Login Screen)
 		if (get_thread_id("SceNpSignupEvent") >= 0)
 			goto exit;
+
+		// Block Satellite Menu while playing Music
+		if (get_thread_id("VshCacheIoPrefetchThread") >= 0)
+			goto exit;
+
+		// Block Satellite Menu while watching Videos
+		if (get_thread_id("VideoDecoder") >= 0 || get_thread_id("AudioDecoder") >= 0)
+			goto exit;
+
+		// Block Satellite Menu while a Standard Dialog / Error is displayed
+		if (get_thread_id("ScePafJob") >= 0)
+			goto exit;
+
+		// Block Satellite Menu in PSN Store
+		if (get_thread_id("ScePSStoreBrowser2") >= 0)
+			goto exit;
+
+		// Block Satellite while accessing a DHCP Router
+		if (get_thread_id("SceNetDhcpClient") >= 0)
+			goto exit;
+
+		// TODO: Block it properly with Go!-Cam, I don't have one, you LZ?
 
 		if (!(ctrl->Buttons & PSP_CTRL_SELECT))
 			goto exit;

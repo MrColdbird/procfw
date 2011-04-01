@@ -7,6 +7,11 @@ OBJS = main.o key_decrypt.o pauth.o nodrm.o utility_patch.o loadmodule_patch.o a
 INCDIR = ../include ../Common
 CFLAGS = -Os -G0 -Wall -fno-pic
 
+ifeq ($(PSID_CHECK), 1)
+CFLAGS += -DPSID_CHECK=1
+OBJS += psid_check.o
+endif
+
 ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
 OBJS += ../Common/printk.o

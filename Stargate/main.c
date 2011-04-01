@@ -25,12 +25,20 @@
 #include "stargate.h"
 #include "stargate_patch_offset.h"
 
+#ifdef PSID_CHECK
+#include "psid_check.h"
+#endif
+
 PSP_MODULE_INFO("stargate", 0x1007, 1, 0);
 PSP_MAIN_THREAD_ATTR(0);
 
 static STMOD_HANDLER previous;
 SEConfig conf;
 u32 psp_fw_version;
+
+#ifdef PSID_CHECK
+static int g_crash = 0;
+#endif
 
 #define MAX_MODULE_NUMBER 256
 
@@ -111,6 +119,12 @@ static int stargate_module_chain(SceModule2 *mod)
 	if(conf.noanalog) {
 		patch_analog_imports((SceModule*)mod);
 	}
+
+#ifdef PSID_CHECK
+	if(g_crash) {
+		crash_me();
+	}
+#endif
 	
 	return 0;
 }
@@ -155,7 +169,12 @@ int module_start(SceSize args, void *argp)
 #endif
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
+
+#ifdef PSID_CHECK
+	g_crash = confirm_usage_right();
+#endif
+
 	sync_cache();
-	
+
 	return 0;
 }

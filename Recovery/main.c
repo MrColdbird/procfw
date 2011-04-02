@@ -94,11 +94,6 @@ void suspend_thread(const char *thread_name)
 
 	ret = get_thread_id(thread_name);
 
-	if(ret < 0) {
-		no_vsh = 1;
-		return;
-	}
-
 	sceKernelSuspendThread(ret);
 }
 
@@ -117,10 +112,16 @@ void resume_thread(const char *thread_name)
 void suspend_vsh_thread(void)
 {
 	suspend_thread("SCE_VSH_GRAPHICS");
+	suspend_thread("movie_player");
+	suspend_thread("audio_buffer");
+	suspend_thread("music_player");
 }
 
 void resume_vsh_thread(void)
 {
+	resume_thread("music_player");
+	resume_thread("audio_buffer");
+	resume_thread("movie_player");
 	resume_thread("SCE_VSH_GRAPHICS");
 }
 
@@ -166,6 +167,14 @@ void recovery_exit(void)
 
 int main_thread(SceSize size, void *argp)
 {
+	int thid;
+
+	thid = get_thread_id("SCE_VSH_GRAPHICS");
+
+	if(thid < 0) {
+		no_vsh = 1;
+	}
+	
 	sctrlSEGetConfig(&g_config);
 	vpl_init();
 	suspend_vsh_thread();

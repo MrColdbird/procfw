@@ -115,10 +115,6 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		if (sceKernelFindModuleByName("sceUSB_Stor_Driver"))
 			goto exit;
 
-		// Block Satellite Menu while highlighting Multimedia-EBOOTs
-		if (get_thread_id("movie_player") >= 0 || get_thread_id("audio_buffer") >= 0 || get_thread_id("music_player") >= 0)
-			goto exit;
-
 		// Block Satellite Menu in NP Signup Module (Blue PSN Login Screen)
 		if (get_thread_id("SceNpSignupEvent") >= 0)
 			goto exit;

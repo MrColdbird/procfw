@@ -73,7 +73,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xCDA3A2F7, 0xA4AC3934, }, // SysMemForKernel_CDA3A2F7
 	{ 0x960B888C, 0x55C21972, }, // SysMemForKernel_960B888C
 	{ 0x452E3696, 0x957A966D, }, // sceKernelGetSystemStatus
-	{ 0x95F5E8DA, 0x98ACDE01, }, // SysMemForKernel_95F5E8DA
+	{ 0x95F5E8DA, 0x98ACDE01, }, // sceKernelSetSystemStatus
 	{ 0x0D547E7F, 0xAB5E85E5, }, // sceKernelGetUMDData
 	{ 0x3C4C5630, 0xAB5E85E5, }, // sceKernelGetUMDData (635 to 620)
 	{ 0x419DB8F4, 0x02AEA33F, }, // sceKernelRegisterGetIdFunc
@@ -86,7 +86,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xCE8D3DB3, 0x040CDA4C, }, // SysMemForKernel_CE8D3DB3
 	{ 0x55E4719C, 0xAAE557BF, }, // SysMemForKernel_55E4719C
 	{ 0x6D8E0CDF, 0x2F756CC8, }, // SysMemForKernel_6D8E0CDF
-	{ 0xA262FEF0, 0x1205AE0C, }, // SysMemForKernel_A262FEF0
+	{ 0xA262FEF0, 0x1205AE0C, }, // sceKernelGetAllowReplaceUmd
 	{ 0xF91FE6AA, 0x4BFF26D9, }, // sceKernelSetParamSfo
 	{ 0xDEC0A0D8, 0x031563B1, }, // sceKernelGetCompilerVersion
 	{ 0x7ECBDBD9, 0xBD71F23A, }, // sceKernelGetDNAS
@@ -101,7 +101,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x2269BFA2, 0x2DC2E222, }, // SysMemForKernel_2269BFA2
 	{ 0xCD617A94, 0xAB5E85E5, }, // sceKernelGetGameInfo
 	{ 0xF77D77CB, 0x374DF838, }, // sceKernelSetCompilerVersion
-	{ 0x38495D84, 0x2E0F38E5, }, // SysMemForKernel_38495D84
+	{ 0x38495D84, 0x2E0F38E5, }, // sceKernelGetInitialRandomValue
 	{ 0x29A5899B, 0xC5485286, }, // sceKernelSetRebootKernel
 	{ 0x071D9804, 0x13DC1D8E, }, // SysMemForKernel_071D9804
 	{ 0x02786087, 0x00E0050D, }, // SysMemForKernel_02786087

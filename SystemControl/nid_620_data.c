@@ -189,11 +189,11 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0x05D915DB, 0x0FEC2F68, }, // sceKernelGetModuleIdListForKernel
 	{ 0x52A86C21, 0xF9FD7790, }, // sceKernelGetModuleFromUID
 	{ 0xAFF947D4, 0x24F00493, }, // sceKernelCreateAssignModule
-	{ 0xA6D40F56, 0x141827CE, }, // LoadCoreForKernel_18CFDAA0
+	{ 0xA6D40F56, 0x141827CE, }, // LoadCoreForKernel_A6D40F56
 	{ 0x929B5C69, 0xFB770EC0, }, // sceKernelGetModuleListWithAlloc
-	{ 0x4440853B, 0x4B4306C2, }, // LoadCoreForKernel_67F8DA3F
-	{ 0xFA3101A4, 0x8409BAA8, }, // LoadCoreForKernel_12A85ED1
-	{ 0x0C0D8B7F, 0x7A0890AD, }, // LoadCoreForKernel_DA143BE9
+	{ 0x4440853B, 0x4B4306C2, }, // LoadCoreForKernel_4440853B
+	{ 0xFA3101A4, 0x8409BAA8, }, // LoadCoreForKernel_FA3101A4
+	{ 0x0C0D8B7F, 0x7A0890AD, }, // LoadCoreForKernel_0C0D8B7F
 	{ 0x3BB7AC18, 0x60BC436F, }, // sceKernelLoadCoreMode
 };
 
@@ -225,7 +225,7 @@ static nid_entry LoadExecForKernel_nid[] = {
 	{ 0x061D9514, 0xEFA048F1, }, // sceKernelLoadExecVSHMs4
 	{ 0xB7AB08DA, 0xD1DFD7A6, }, // sceKernelLoadExecVSHMs5
 	{ 0x11412288, 0xFABD21E5, }, // LoadExecForKernel_11412288
-	{ 0x6D8D3A3A, 0x9D1ED0DF, }, // LoadExecForKernel_4A9446E7
+	{ 0x6D8D3A3A, 0x9D1ED0DF, }, // LoadExecForKernel_6D8D3A3A
 
 	{ 0xD3D13800, 0x596ABD6B, },
 	{ 0x15EB8575, 0xE717E255, },

@@ -168,7 +168,7 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0x0DE1F600, 0x72ACE067, }, // sceKernelLinkLibraryEntriesForUser
 	{ 0xDA1B09AA, UNKNOWNNID, }, // sceKernelUnLinkLibraryEntries
 	{ 0xC99DD47A, 0xCA78DE3E, }, // sceKernelQueryLoadCoreCB
-	{ 0x616FCCCD, 0xE7053775, }, // LoadCoreForKernel_616FCCCD
+	{ 0x616FCCCD, 0xE7053775, }, // sceKernelSetBootCallbackLevel
 	{ 0xF32A2940, UNKNOWNNID, }, // sceKernelModuleFromUID
 	{ 0x6B2371C2, 0x08581343, }, // sceKernelDeleteModule
 	{ 0x7320D964, UNKNOWNNID, }, // sceKernelModuleAssign
@@ -177,16 +177,16 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0xAE7C6E76, 0xD127FC6F, }, // sceKernelRegisterModule
 	{ 0x82CE54ED, UNKNOWNNID, }, // sceKernelModuleCount
 	{ 0xC0584F0C, UNKNOWNNID, }, // sceKernelGetModuleList
-	{ 0x7E63F86D, 0xE96FE2F9, }, // LoadCoreForKernel_7E63F86D
-	{ 0xB370DF29, 0x093B2B69, }, // LoadCoreForKernel_B370DF29
-	{ 0x5248A98F, 0xDA42ED6E, }, // LoadCoreForKernel_5248A98F
-	{ 0xC0913394, 0x07738DC3, }, // LoadCoreForKernel_C0913394
+	{ 0x7E63F86D, 0xE96FE2F9, }, // sceKernelGetLibraryLinkInfo
+	{ 0xB370DF29, 0x093B2B69, }, // sceKernelGetLibraryList
+	{ 0x5248A98F, 0xDA42ED6E, }, // sceKernelLoadModuleBootLoadCore
+	{ 0xC0913394, 0x07738DC3, }, // sceKernelLinkLibraryEntriesWithModule
 	{ 0xEC20C661, 0xF871EA38, }, // LoadCoreForKernel_EC20C661
 	{ 0xCDCAA8B2, 0x7396DD7E, }, // LoadCoreForKernel_CDCAA8B2
-	{ 0xCD0F3BAC, 0x03A5DC1A, }, // LoadCoreForKernel_CD0F3BAC
-	{ 0x8D8A8ACE, 0x557A5FCE, }, // LoadCoreForKernel_8D8A8ACE
-	{ 0x74CF001A, 0x58EDE585, }, // LoadCoreForKernel_74CF001A
-	{ 0x05D915DB, 0x92082A0F, }, // LoadCoreForKernel_05D915DB
+	{ 0xCD0F3BAC, 0x03A5DC1A, }, // sceKernelCreateModule
+	{ 0x8D8A8ACE, 0x557A5FCE, }, // sceKernelAssignModule
+	{ 0x74CF001A, 0x58EDE585, }, // sceKernelReleaseModule
+	{ 0x05D915DB, 0x92082A0F, }, // sceKernelGetModuleIdListForKernel
 	{ 0x52A86C21, 0xAA178840, }, // sceKernelGetModuleFromUID
 	{ 0xAFF947D4, 0xF39800BF, }, // sceKernelCreateAssignModule
 	{ 0xA6D40F56, 0x18CFDAA0, }, // LoadCoreForKernel_18CFDAA0

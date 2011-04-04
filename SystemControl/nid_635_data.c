@@ -36,7 +36,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xEB4C0E1B, UNKNOWNNID, }, // sceKernelQueryBlockSize
 	{ 0x82CCA14F, 0x2C66EDAD, }, // sceKernelQueryMemoryBlockInfo
 	{ 0x2F3B7611, UNKNOWNNID, }, // SysMemForKernel_2F3B7611
-	{ 0x7B3E7441, 0x6FBF9146, }, // SysMemForKernel_7B3E7441
+	{ 0x7B3E7441, 0x6FBF9146, }, // sceKernelMemoryExtendSize
 	{ 0x6C1DCD41, 0x9671866E, }, // sceKernelCallUIDFunction
 	{ 0x5367923C, 0x64532109, }, // sceKernelCallUIDObjFunction
 	{ 0xCE05CCB7, 0xEF680DB5, }, // SysMemForKernel_CE05CCB7
@@ -63,8 +63,8 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x6D6200DD, UNKNOWNNID, }, // sceKernelSysMemDumpBlock
 	{ 0x621037F5, UNKNOWNNID, }, // sceKernelSysMemDumpTail
 	{ 0xA089ECA4, UNKNOWNNID, }, // sceKernelMemset
-	{ 0x2F808748, 0x09DF9219, }, // SysMemForKernel_2F808748
-	{ 0x1C4B1713, 0x653512FD, }, // SysMemForKernel_1C4B1713
+	{ 0x2F808748, 0x09DF9219, }, // sceKernelMemset32
+	{ 0x1C4B1713, 0x653512FD, }, // sceKernelMemmove
 	{ 0xE400FDB0, UNKNOWNNID, }, // sceKernelSysMemInit
 	{ 0x1890BE9C, 0x3091BF11, }, // sceKernelSysMemMemSize
 	{ 0x03072750, 0xF3BE5639, }, // sceKernelSysMemMaxFreeMemSize
@@ -83,9 +83,9 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x0D1D8AC8, 0x13CD48DA, }, // sceKernelMemmoveWithFill
 	{ 0x97B18FA8, 0xD9B4E550, }, // sceKernelCopyGameInfo
 	{ 0xE40D3A1D, 0x9C6BBA4B, }, // sceKernelSetUmdData
-	{ 0xCE8D3DB3, 0x5B7174DF, }, // SysMemForKernel_CE8D3DB3
-	{ 0x55E4719C, 0x47BEE932, }, // SysMemForKernel_55E4719C
-	{ 0x6D8E0CDF, 0x80C7689B, }, // SysMemForKernel_6D8E0CDF
+	{ 0xCE8D3DB3, 0x5B7174DF, }, // sceKernelGetQTGP2
+	{ 0x55E4719C, 0x47BEE932, }, // sceKernelSetQTGP2
+	{ 0x6D8E0CDF, 0x80C7689B, }, // sceKernelGetQTGP3
 	{ 0xA262FEF0, 0x966EB2BE, }, // sceKernelGetAllowReplaceUmd
 	{ 0xF91FE6AA, 0x2A3505B9, }, // sceKernelSetParamSfo
 	{ 0xDEC0A0D8, 0xD3E4C505, }, // sceKernelGetCompilerVersion
@@ -96,17 +96,17 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xE0058030, 0x7364BD00, }, // sceKernelMemoryShrinkSize
 	{ 0x719792F1, 0x59B2DB30, }, // sceKernelMemoryOpenSize
 	{ 0x101C3E59, 0xEC0C0088, }, // sceKernelMemoryCloseSize
-	{ 0xE0645895, 0x06BF45B1, }, // SysMemForKernel_E0645895
-	{ 0xCBB05241, 0x72DB42EC, }, // SysMemForKernel_CBB05241
+	{ 0xE0645895, 0x06BF45B1, }, // sceKernelGetSysmemIdList
+	{ 0xCBB05241, 0x72DB42EC, }, // sceKernelSetAllowReplaceUmd
 	{ 0x2269BFA2, 0x24159F2C, }, // SysMemForKernel_2269BFA2
 	{ 0xCD617A94, 0x3C4C5630, }, // sceKernelGetGameInfo
 	{ 0xF77D77CB, 0x13DC7920, }, // sceKernelSetCompilerVersion
 	{ 0x38495D84, 0x6D336C84, }, // sceKernelGetInitialRandomValue
 	{ 0x29A5899B, 0xE0A74F2D, }, // sceKernelSetRebootKernel
-	{ 0x071D9804, 0xDF0A82F7, }, // SysMemForKernel_071D9804
-	{ 0x02786087, 0x2F64305B, }, // SysMemForKernel_02786087
+	{ 0x071D9804, 0xDF0A82F7, }, // sceKernelApiEvaluationInit
+	{ 0x02786087, 0x2F64305B, }, // sceKernelRegisterApiEvaluation
 	{ 0x1F7F7F40, 0xFCDCADE4, }, // SysMemForKernel_1F7F7F40
-	{ 0x049CC735, 0xB6ACE0D6, }, // SysMemForKernel_049CC735
+	{ 0x049CC735, 0xB6ACE0D6, }, // sceKernelApiEvaluationReport
 	{ 0x39351245, 0x728E1A2C, }, // SysMemForKernel_39351245
 	{ 0xD2E3A399, 0x0D0F4EED, }, // SysMemForKernel_D2E3A399
 	{ 0x4852F8DD, 0x94FD149B, }, // SysMemForKernel_4852F8DD

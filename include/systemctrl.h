@@ -5,6 +5,7 @@
 #include <pspkernel.h>
 #include <psploadexec_kernel.h>
 #include <pspinit.h>
+#include <pspctrl.h>
 
 /**
  * Restart the vsh.
@@ -290,5 +291,7 @@ int sctrlHENSetMemory(u32 p2, u32 p8);
 void sctrlHENPatchSyscall(void *addr, void *newaddr);
 
 int sctrlKernelQuerySystemCall(void *func_addr);
+
+void sctrlCtrlRegisterButtonCallback(int id, u32 mask, void * handler, void * argp);
 
 #endif

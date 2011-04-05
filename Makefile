@@ -31,8 +31,6 @@ ifeq ($(PSID_CHECK), 1)
 RELEASE_OPTION=PSID_CHECK=1
 endif
 
-#DEBUG=1
-
 ifeq ($(DEBUG), 1)
 DEBUG_OPTION=DEBUG=1
 endif

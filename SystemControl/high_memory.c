@@ -211,3 +211,16 @@ void patch_partitions(void)
 	display_meminfo();
 	unlock_high_memory(0);
 }
+
+void disable_PauseGame(u32 text_addr)
+{
+	if(g_high_memory_enabled) {
+		int i = 0;
+		#ifdef CONFIG_620
+		for(; i < 5; i++) _sw(0, text_addr + 0x5D0 + i * 4);
+		#endif
+		#ifdef CONFIG_635
+		for(; i < 6; i++) _sw(0, text_addr + 0x5EC + i * 4);
+		#endif
+	}
+}

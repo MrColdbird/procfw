@@ -44,6 +44,7 @@ void patch_umdcache(u32 text_addr);
 void prepatch_partitions(void);
 void patch_partitions(void);
 void unlock_high_memory(u32 forced);
+void disable_PauseGame(u32 text_addr);
 
 void patch_mesgled(SceModule* mod);
 void patch_npsignup(u32 text_addr);

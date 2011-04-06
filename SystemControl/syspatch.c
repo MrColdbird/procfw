@@ -120,6 +120,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
+		disable_PauseGame(mod->text_addr);
 		patch_sceChkreg();
 		sync_cache();
 	} 

@@ -73,13 +73,14 @@ static int syspatch_module_chain(SceModule2 *mod)
 	// load after lflash
 	if(0 == strcmp(mod->modname, "sceDisplay_Service")) {
 		load_config();
-
 		patch_sceLoadExec();
 		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceMediaSync(mod->text_addr);
+		SceModule * impose = sctrlKernelFindModuleByName("sceImpose_Driver");
+		if(impose) disable_PauseGame(impose->text_addr);
 		sync_cache();
 		usb_charge();
 	}
@@ -120,7 +121,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
-		disable_PauseGame(mod->text_addr);
 		patch_sceChkreg();
 		sync_cache();
 	} 

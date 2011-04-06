@@ -52,8 +52,6 @@ extern int sceKernelStartModule_620(SceUID modid, SceSize argsize, void *argp, i
 int sceKernelUnloadModule_620(SceUID modid);
 extern SceUID _sceKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
 extern SceUID sceKernelLoadModuleWithApitype2_620(int apitype, const char *path, int flags, SceKernelLMOption *option);
-extern void sceCtrlRegisterButtonCallback(int id, u32 mask, void * handler, void * argp);
-extern void sceCtrlRegisterButtonCallback_620(int id, u32 mask, void * handler, void * argp);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -920,14 +918,4 @@ SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flag
 	};
 
 	return ret;
-}
-
-void sctrlCtrlRegisterButtonCallback(int id, u32 mask, void * handler, void * argp)
-{
-#ifdef CONFIG_635
-	sceCtrlRegisterButtonCallback(id, mask, handler, argp);
-#endif
-#ifdef CONFIG_620
-	sceCtrlRegisterButtonCallback_620(id, mask, handler, argp);
-#endif
 }

@@ -31,8 +31,7 @@ OBJS = main.o \
 	   systemctrl_patch_offset.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
-	   ../Common/strsafe.o \
-	   ../Common/registry.o
+	   ../Common/strsafe.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \
@@ -41,9 +40,7 @@ IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/InterruptManagerForKernel.o \
 		  ../Imports/sceResmgr_driver.o \
 		  ../Imports/InitForKernel.o \
-		  ../Imports/LoadExecForKernel.o \
-		  ../Imports/sceCtrl_driver.o \
-		  ../Imports/sceReg_driver.o
+		  ../Imports/LoadExecForKernel.o
 
 OBJS += $(IMPORTS)
 
@@ -54,8 +51,6 @@ ifeq ($(DEBUG), 1)
 CFLAGS += -DDEBUG=1
 OBJS += validate_stub.o ../Common/printk.o
 endif
-
-CFLAGS += -DSYSTEMCONTROL=1
 
 ifeq ($(CONFIG_620), 1)
 CFLAGS += -DCONFIG_620=1

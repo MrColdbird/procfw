@@ -10,8 +10,6 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
-#include "libs.h"
-#include "registry.h"
 #include "systemctrl_patch_offset.h"
 
 typedef struct _MemPart {
@@ -212,93 +210,4 @@ void patch_partitions(void)
 	g_high_memory_enabled = 1;
 	display_meminfo();
 	unlock_high_memory(0);
-}
-
-// home menu state
-#define GAME_STATE 0
-#define HOME_STATE 1
-#define DEAD_STATE 2
-int home_menu_state = 0;
-
-u32 enterbutton = PSP_CTRL_CIRCLE;
-u32 cancelbutton = PSP_CTRL_CROSS;
-
-void (*real_button_callback)(int, int, void*) = NULL;
-
-#define PRESSED_BUTTON(button) ((previous & button) == 0 && (current & button) == button)
-
-void button_hook_handler(u32 current, u32 previous, void * argp)
-{
-	// game state
-	if(home_menu_state == 0) {
-		// home button pressed
-		if(PRESSED_BUTTON(PSP_CTRL_HOME)) {
-			home_menu_state = DEAD_STATE;
-		}
-	}
-
-	// home state
-	else if(home_menu_state == 1) {
-		// home or cancel button pressed
-		if(PRESSED_BUTTON(PSP_CTRL_HOME) || PRESSED_BUTTON(cancelbutton)) {
-			home_menu_state = GAME_STATE;
-		}
-
-		// up button pressed
-		else if(PRESSED_BUTTON(PSP_CTRL_UP)) {
-			home_menu_state = DEAD_STATE;
-		}
-	}
-
-	// deadlock state
-	else if(home_menu_state == 2) {
-		// filter enter button
-		current &= ~enterbutton;
-		previous &= ~enterbutton;
-
-		// home or cancel button pressed
-		if(PRESSED_BUTTON(PSP_CTRL_HOME) || PRESSED_BUTTON(cancelbutton)) {
-			home_menu_state = GAME_STATE;
-		}
-
-		// down button pressed
-		else if(PRESSED_BUTTON(PSP_CTRL_DOWN)) {
-			home_menu_state = HOME_STATE;
-		}
-	}
-
-	// forward to real handler
-	real_button_callback(current, previous, argp);
-}
-
-void set_button_callback(int id, u32 mask, void * handler, void * argp)
-{
-	// impose button callback
-	if(id == 0 && mask == 0x21C10000) {
-		// save handler
-		real_button_callback = handler;
-
-		// register hook handler
-		handler = button_hook_handler;
-	}
-
-	// register button callback
-	sctrlCtrlRegisterButtonCallback(id, mask, handler, argp);
-}
-
-void patch_home_menu(SceModule2 * mod)
-{
-#ifdef CONFIG_635
-	int callbacknid = 0x5D8CE0B2;
-#endif
-#ifdef CONFIG_620
-	int callbacknid = 0xEB6CDD17;
-#endif
-	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", callbacknid, set_button_callback, 0);
-	int xisenter = 0;
-	get_registry_value("/CONFIG/SYSTEM/XMB", "button_assign", &xisenter);
-	if(xisenter) {
-		enterbutton = PSP_CTRL_CROSS;
-		cancelbutton = PSP_CTRL_CIRCLE;
-	}
 }

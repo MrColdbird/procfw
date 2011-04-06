@@ -120,7 +120,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
-		if(psp_model == PSP_GO) patch_home_menu(mod);
 		patch_sceChkreg();
 		sync_cache();
 	} 

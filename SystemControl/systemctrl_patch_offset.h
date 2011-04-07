@@ -141,6 +141,11 @@ struct sceLoadExecPatch {
 	u32 sceKernelExitVSHVSHCheck2;
 };
 
+struct sceImposeDriverPatch {
+	int nr_nop;
+	u32 offset;
+};
+
 typedef struct _PatchOffset {
 	u32 fw_version;
 	struct InterruptManPatch interruptman_patch;
@@ -162,6 +167,7 @@ typedef struct _PatchOffset {
 	struct sceLoaderCorePatch loadercore_patch;
 	struct sceLoadExecPatch loadexec_patch_other;
 	struct sceLoadExecPatch loadexec_patch_05g;
+	struct sceImposeDriverPatch impose_patch;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

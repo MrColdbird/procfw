@@ -214,13 +214,15 @@ void patch_partitions(void)
 
 void disable_PauseGame(u32 text_addr)
 {
+	int i;
+
+	if(psp_model != PSP_GO) {
+		return;
+	}
+
 	if(g_high_memory_enabled) {
-		int i = 0;
-		#ifdef CONFIG_620
-		for(; i < 5; i++) _sw(0, text_addr + 0x5D0 + i * 4);
-		#endif
-		#ifdef CONFIG_635
-		for(; i < 6; i++) _sw(0, text_addr + 0x5EC + i * 4);
-		#endif
+		for(i=0; i<g_offs->impose_patch.nr_nop; i++) {
+			_sw(NOP, text_addr + g_offs->impose_patch.offset + i * 4);
+		}
 	}
 }

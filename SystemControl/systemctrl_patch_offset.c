@@ -168,6 +168,10 @@ PatchOffset g_635_offsets = {
 		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
 		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
 	},
+	.impose_patch = {
+		6,
+		0x000005EC,
+	},
 };
 #endif
 
@@ -333,6 +337,10 @@ PatchOffset g_620_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x000025E8,
 		.sceKernelExitVSHVSHCheck1 = 0x00001674,
 		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
+	},
+	.impose_patch = {
+		5,
+		0x000005D0,
 	},
 };
 #endif

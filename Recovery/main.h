@@ -103,7 +103,8 @@ struct MenuEntry {
 
 struct ValueOption {
 	int *value;
-	int limit;
+	int limit_start;
+	int limit_end;
 };
 
 struct Menu {

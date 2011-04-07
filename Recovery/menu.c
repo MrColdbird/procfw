@@ -113,24 +113,26 @@ static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 
 static struct ValueOption g_iso_mode_option = {
 	&g_config.umdmode,
-	MODE_INFERNO+1,
+	1, MODE_INFERNO+1,
 };
 
 static struct ValueOption g_xmb_usbdevice_option = {
 	&g_config.usbdevice,
-	PSP_USBDEVICE_UMD9660+1+1,
+	0, PSP_USBDEVICE_UMD9660+1+1, /* plus 1 for no usbdevice */
 };
 
 static struct ValueOption g_fake_region_option = {
 	&g_config.fakeregion,
-	FAKE_REGION_DEBUG_TYPE_II+1,
+	0, FAKE_REGION_DEBUG_TYPE_II+1,
 };
 
 static int change_option(struct MenuEntry *entry, int direct)
 {
 	struct ValueOption *c = (struct ValueOption*)entry->arg;
 
-	*c->value = limit_int(*c->value, direct, c->limit);
+	*c->value -= c->limit_start;
+	*c->value = limit_int(*c->value, direct, c->limit_end - c->limit_start);
+	*c->value += c->limit_start;
 
 	return 0;
 }
@@ -159,47 +161,47 @@ static int change_option_by_enter(struct MenuEntry *entry)
 
 static struct ValueOption g_mac_hidden_option = {
 	&g_config.machidden,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_usb_charge_option = {
 	&g_config.usbcharge,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_skip_logo_option = {
 	&g_config.skiplogo,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_skip_gameboot_option = {
 	&g_config.skipgameboot,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_hide_pic_option = {
 	&g_config.hidepic,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_use_version_option = {
 	&g_config.useversion,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_use_ownupdate_option = {
 	&g_config.useownupdate,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_flash_protect_option = {
 	&g_config.flashprot,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_hibblock_option = {
 	&g_config.hibblock,
-	2,
+	0, 2,
 };
 
 static int display_iso_mode(struct MenuEntry* entry, char *buf, int size)
@@ -346,32 +348,32 @@ static int display_use_oldplugin(struct MenuEntry* entry, char *buf, int size)
 
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_game_plugin_option = {
 	&g_config.pluggame,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_pops_plugin_option = {
 	&g_config.plugpop,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_use_nodrm_option = {
 	&g_config.usenodrm,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_use_noanalog_option = {
 	&g_config.noanalog,
-	2,
+	0, 2,
 };
 
 static struct ValueOption g_use_oldplugin = {
 	&g_config.oldplugin,
-	2,
+	0, 2,
 };
 
 static struct MenuEntry g_advanced_menu_entries[] = {
@@ -536,12 +538,12 @@ static int display_game(struct MenuEntry* entry, char *buf, int size)
 
 struct ValueOption g_xmb_clock_option = {
 	&g_xmb_clock_number,
-	9,
+	0, 9,
 };
 
 struct ValueOption g_game_clock_option = {
 	&g_game_clock_number,
-	9
+	0, 9,
 };
 
 static void update_clock_config(void)

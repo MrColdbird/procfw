@@ -38,8 +38,6 @@ int psp_model = 0;
 
 u32 psp_fw_version = 0;
 
-int dump_kmem = 0;
-
 //load reboot function
 int (* LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 
@@ -264,11 +262,6 @@ int kernel_permission_call(void)
 	//save LoadReboot function
 	LoadReboot = (void*)loadexec->text_addr + patch->LoadReboot;
 
-	if (dump_kmem) {
-		memcpy((void*)0x08A00000, (void*)0x88000000, 0x400000);
-		memcpy((void*)(0x08A00000+0x400000), (void*)0xBFC00200, 0x100);
-	}
-
 	_sceKernelIcacheInvalidateAll();
 	_sceKernelDcacheWritebackInvalidateAll();
 
@@ -383,17 +376,6 @@ int install_in_cfw(void)
 	}
 
 	return 0;
-}
-
-void input_dump_kmem(void)
-{
-	SceCtrlData ctl;
-	sceCtrlReadBufferPositive(&ctl, 1);
-
-	if (ctl.Buttons & PSP_CTRL_LTRIGGER) {
-		dump_kmem = 1;
-		pspDebugScreenPrintf("Kernel memory will be dumped into ms0:/KMEM.BIN and ms0:/SEED.BIN\n");
-	}
 }
 
 int write_file(const char *path, unsigned char *buf, int size)
@@ -540,8 +522,6 @@ version_OK:
 		return 0;
 	}
 
-	input_dump_kmem();
-
 #ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
 		//create a fitting one
@@ -610,25 +590,6 @@ version_OK:
 #endif
 
 	pspSdkEnableInterrupts(interrupts);
-
-	if ( dump_kmem ) {
-		SceUID fd;
-
-		fd = sceIoOpen("ms0:/kmem.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-		if (fd >= 0) {
-			sceIoWrite(fd, (void*)0x08A00000, 0x400000);
-			sceIoClose(fd);
-		}
-
-		fd = sceIoOpen("ms0:/seed.bin", PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-		if (fd >= 0) {
-			sceIoWrite(fd, (void*)(0x08A00000+0x400000), 0x100);
-			sceIoClose(fd);
-		}
-	}
-
 	printk("exploit -> 0x%08X\n", result);
 
 exit:

@@ -165,6 +165,7 @@ void load_default_conf(SEConfig *config)
 	config->hibblock = 1;
 	config->noanalog = 0;
 	config->oldplugin = 1;
+	config->htmlviewer_custom_save_location = 0;
 }
 
 void load_config(void)

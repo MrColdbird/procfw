@@ -23,6 +23,7 @@ struct VshctrlPatch {
 	u32 RifTypeCheck;
 	u32 RifNpDRMCheck;
 	u32 sceCtrlReadBufferPositiveNID;
+	u32 htmlviewer_save_location;
 };
 
 struct MsVideoMainPatch {

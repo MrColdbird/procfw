@@ -63,6 +63,7 @@ typedef struct
 	int hibblock;
 	int noanalog;
 	int oldplugin;
+	int htmlviewer_custom_save_location;
 } SEConfig;
 
 /**

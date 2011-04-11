@@ -39,6 +39,7 @@ static void patch_sceCtrlReadBufferPositive(SceModule2 *mod);
 static void patch_Gameboot(SceModule2 *mod); 
 static void patch_hibblock(SceModule2 *mod); 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
+static void patch_htmlviewer_plugin_module(u32 text_addr);
 
 static int vshpatch_module_chain(SceModule2 *mod)
 {
@@ -84,6 +85,11 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(conf.useownupdate && 0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
 		patch_SceUpdateDL_Library(text_addr);
+		sync_cache();
+	}
+
+	if(conf.htmlviewer_custom_save_location && 0 == strcmp(mod->modname, "htmlviewer_plugin_module")) {
+		patch_htmlviewer_plugin_module(text_addr);
 		sync_cache();
 	}
 
@@ -323,6 +329,15 @@ static void patch_msvideo_main_plugin_module(u32 text_addr)
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[7]);
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[8]);
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[9]);
+}
+
+static void patch_htmlviewer_plugin_module(u32 text_addr)
+{
+	char *p;
+
+	p = (void*)(text_addr + g_offs->vshctrl_patch.htmlviewer_save_location); // "/PSP/COMMON"
+
+	strcpy(p, "/ISO");
 }
 
 static void patch_vsh_module(SceModule2 * mod)

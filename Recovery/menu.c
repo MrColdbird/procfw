@@ -49,6 +49,7 @@ const char * g_messages[] = {
 	"Flash 3",
 	"UMD Disc",
 	"Charge battery when USB cable is plugged in",
+	"Use htmlviewer custom save location",
 	"Hide MAC address",
 	"Skip Sony Logo at Startup",
 	"Skip Game Boot Screen",
@@ -169,6 +170,11 @@ static struct ValueOption g_usb_charge_option = {
 	0, 2,
 };
 
+static struct ValueOption g_htmlviewer_custom_save_location_option = {
+	&g_config.htmlviewer_custom_save_location,
+	0, 2,
+};
+
 static struct ValueOption g_skip_logo_option = {
 	&g_config.skiplogo,
 	0, 2,
@@ -221,6 +227,13 @@ static int display_xmb_usbdevice(struct MenuEntry* entry, char *buf, int size)
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
+
+	return 0;
+}
+
+static int display_htmlviewer_custom_save_location(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[HTMLVIEWER_CUSTOM_SAVE_LOCATION], get_bool_name(g_config.htmlviewer_custom_save_location));
 
 	return 0;
 }
@@ -290,6 +303,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
 	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
 	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect_option },
+	{ NULL, 0, 0, &display_htmlviewer_custom_save_location, &change_option, &change_option_by_enter, &g_htmlviewer_custom_save_location_option },
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},

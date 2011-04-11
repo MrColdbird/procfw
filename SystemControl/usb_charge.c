@@ -25,35 +25,35 @@ static inline void *get_power_driver_function(u32 nid)
 
 static u32 usb_charge_timer_handler(SceUID uid, SceInt64 unk0, SceInt64 unk1, void *common)
 {
-	int (*_scePower_driver_E11A1999)(int) = NULL;
-	int (*_scePower_driver_F3A08560)(int) = NULL;
-	int (*_sceUsb_driver_AE5DE6AF)(char *, int, int) = NULL;
-	int (*_sceUsb_driver_C21645A4)(void) = NULL;
+	int (*_scePowerBatteryEnableUsbCharging)(int) = NULL;
+	int (*_scePowerBatteryDisableUsbCharging)(int) = NULL;
+	int (*_sceUsbStart)(char *, int, int) = NULL;
+	int (*_sceUsbGetState)(void) = NULL;
 	int ret;
 	static int is_charging = 0;
 
-	_sceUsb_driver_AE5DE6AF = get_usb_driver_function(0xAE5DE6AF);
-	_sceUsb_driver_C21645A4 = get_usb_driver_function(0xC21645A4);
-	_scePower_driver_F3A08560 = get_power_driver_function(0xF3A08560);
-	_scePower_driver_E11A1999 = get_power_driver_function(0xE11A1999);
+	_sceUsbStart = get_usb_driver_function(0xAE5DE6AF);
+	_sceUsbGetState = get_usb_driver_function(0xC21645A4);
+	_scePowerBatteryDisableUsbCharging = get_power_driver_function(0x90285886);
+	_scePowerBatteryEnableUsbCharging = get_power_driver_function(0x733F973B);
 
-	if(_sceUsb_driver_AE5DE6AF == NULL ||
-			_sceUsb_driver_C21645A4 == NULL ||
-			_scePower_driver_F3A08560 == NULL ||
-			_scePower_driver_E11A1999 == NULL) {
+	if(_sceUsbStart == NULL ||
+			_sceUsbGetState == NULL ||
+			_scePowerBatteryDisableUsbCharging == NULL ||
+			_scePowerBatteryEnableUsbCharging == NULL) {
 		return 2000000;
 	}
 	
-	(*_sceUsb_driver_AE5DE6AF)("USBBusDriver", 0, 0);
-	ret = (*_sceUsb_driver_C21645A4)() & 0x20;
+	(*_sceUsbStart)("USBBusDriver", 0, 0);
+	ret = (*_sceUsbGetState)() & 0x20;
 
 	if (is_charging == 1 && ret == 0) {
 		printk("%s: stops charging\n", __func__);
-		(*_scePower_driver_F3A08560)(0);
+		(*_scePowerBatteryDisableUsbCharging)(0);
 		is_charging = 0;
 	} else if (is_charging == 0 && ret != 0) {
 		printk("%s: starts charging\n", __func__);
-		(*_scePower_driver_E11A1999)(1);
+		(*_scePowerBatteryEnableUsbCharging)(1);
 		is_charging = 1;
 	}
 

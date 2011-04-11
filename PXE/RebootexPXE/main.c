@@ -101,10 +101,8 @@ void main(int arg1, int arg2, int arg3, int arg4)
 	_sw(MAKE_CALL(_sceBootLfatClose), REBOOT_START + patch->sceBootLfatCloseCall);
 	_sw(MAKE_CALL(_UnpackBootConfig), REBOOT_START + patch->UnpackBootConfigCall);
 
-	//Killing Function Part #1 - jr $ra
-	_sw(0x03E00008, REBOOT_START + patch->RebootexCheck1);
-	//Killing Function Part #2 - li $v0, 1
-	_sw(0x24020001, REBOOT_START + patch->RebootexCheck1 + 4);
+	//Killing Function
+	MAKE_DUMMY_FUNCTION_RETURN_1(REBOOT_START + patch->RebootexCheck1);
 	//Killing Branch Check bltz ...
 	_sw(NOP, REBOOT_START + patch->RebootexCheck2);
 	//Killing Branch Check bltz ...

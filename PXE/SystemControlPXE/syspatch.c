@@ -52,8 +52,7 @@ int installer_thread(SceSize args, void * argp)
 void patch_vsh_module(u32 text_addr)
 {
 	//force module start error + unload
-	_sw(0x03E00008, text_addr + g_pxe_offs->vsh_module_patch.module_start);
-	_sw(0x24020001, text_addr + g_pxe_offs->vsh_module_patch.module_start + 4);
+	MAKE_DUMMY_FUNCTION_RETURN_1(text_addr + g_pxe_offs->vsh_module_patch.module_start);
 
 	//spawn installer thread (to avoid modulemgr is busy error)
 	SceUID thid = sceKernelCreateThread("installer_thread", installer_thread, 0x1A, 0x2000, 0, NULL);

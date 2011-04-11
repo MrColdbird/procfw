@@ -88,7 +88,6 @@ static int syspatch_module_chain(SceModule2 *mod)
 		}
 
 		sync_cache();
-		usb_charge();
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {
@@ -128,6 +127,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
 		patch_sceChkreg();
+		usb_charge();
 		sync_cache();
 	} 
 

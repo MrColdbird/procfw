@@ -475,7 +475,16 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 
 		ret = 0;
 		goto exit;
-	} else if(cmd == 0x01F100A4 || cmd == 0x01F300A5) {
+	} else if(cmd == 0x01F100A4) {
+		/* missing cmd in march33, prepare UMD data into cache */
+		if(indata == NULL || inlen < 16) {
+			ret = 0x80010016;
+			goto exit;
+		}
+
+		ret = 0;
+		goto exit;
+	} else if(cmd == 0x01F300A5) {
 		/* missing cmd in march33, prepare UMD data into cache */
 		if(indata == NULL || inlen < 16) {
 			ret = 0x80010016;
@@ -581,7 +590,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 	}
 
 exit:
-//	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
+	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
 
 	return ret;
 }

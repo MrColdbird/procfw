@@ -124,8 +124,7 @@ static void patch_Gameboot(SceModule2 *mod)
 
 static void patch_hibblock(SceModule2 *mod)
 {
-	_sw(0x03E00008, mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck);
-	_sw(0x00001021, mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck + 4);
+	MAKE_DUMMY_FUNCTION_RETURN_0(mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck);
 }
 
 static inline void ascii2utf16(char *dest, const char *src)
@@ -284,12 +283,10 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 static void patch_game_plugin_module(u32 text_addr)
 {
 	//disable executable check for normal homebrew
-	_sw(0x03E00008, text_addr + g_offs->vshctrl_patch.HomebrewCheck); // jr $ra
-	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.HomebrewCheck + 4); // move $v0, $zr
+	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->vshctrl_patch.HomebrewCheck);
 
 	//kill ps1 eboot check
-	_sw(0x03E00008, text_addr + g_offs->vshctrl_patch.PopsCheck); //jr $ra
-	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.PopsCheck + 4); // move $v0, $zr
+	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->vshctrl_patch.PopsCheck);
 
 	//kill multi-disc ps1 check
 	_sw(NOP, text_addr + g_offs->vshctrl_patch.MultiDiscPopsCheck);

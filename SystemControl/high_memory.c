@@ -47,8 +47,7 @@ void patch_umdcache(u32 text_addr)
 		return;
 	
 	//kill module start
-	_sw(0x03E00008, text_addr + g_offs->high_memory_patch.umd_cache_module_start);
-	_sw(0x24020001, text_addr + g_offs->high_memory_patch.umd_cache_module_start+4);
+	MAKE_DUMMY_FUNCTION_RETURN_1(text_addr + g_offs->high_memory_patch.umd_cache_module_start);
 }
 
 void unlock_high_memory(u32 forced)

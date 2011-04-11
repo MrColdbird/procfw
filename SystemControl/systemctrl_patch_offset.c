@@ -172,6 +172,10 @@ PatchOffset g_635_offsets = {
 		6,
 		0x000005EC,
 	},
+	.usb_patch = {
+		.scePowerBatteryDisableUsbChargingStub = 0x00009050,
+		.scePowerBatteryEnableUsbChargingStub = 0x00009048,
+	},
 };
 #endif
 
@@ -341,6 +345,10 @@ PatchOffset g_620_offsets = {
 	.impose_patch = {
 		5,
 		0x000005D0,
+	},
+	.usb_patch = {
+		.scePowerBatteryDisableUsbChargingStub = 0x00008FE8,
+		.scePowerBatteryEnableUsbChargingStub = 0x00008FF0,
 	},
 };
 #endif

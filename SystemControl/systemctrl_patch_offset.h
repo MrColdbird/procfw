@@ -146,6 +146,11 @@ struct sceImposeDriverPatch {
 	u32 offset;
 };
 
+struct sceUSBDriverPatch {
+	u32 scePowerBatteryDisableUsbChargingStub;
+	u32 scePowerBatteryEnableUsbChargingStub;
+};
+
 typedef struct _PatchOffset {
 	u32 fw_version;
 	struct InterruptManPatch interruptman_patch;
@@ -168,6 +173,7 @@ typedef struct _PatchOffset {
 	struct sceLoadExecPatch loadexec_patch_other;
 	struct sceLoadExecPatch loadexec_patch_05g;
 	struct sceImposeDriverPatch impose_patch;
+	struct sceUSBDriverPatch usb_patch;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

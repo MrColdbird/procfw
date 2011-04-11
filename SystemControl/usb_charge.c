@@ -12,6 +12,7 @@
 #include "printk.h"
 #include "rebootex_conf.h"
 #include "libs.h"
+#include "systemctrl_patch_offset.h"
 
 static inline void *get_usb_driver_function(u32 nid)
 {
@@ -27,42 +28,45 @@ static u32 usb_charge_timer_handler(SceUID uid, SceInt64 unk0, SceInt64 unk1, vo
 {
 	int (*_scePowerBatteryEnableUsbCharging)(int) = NULL;
 	int (*_scePowerBatteryDisableUsbCharging)(int) = NULL;
-	int (*_sceUsbStart)(char *, int, int) = NULL;
-	int (*_sceUsbGetState)(void) = NULL;
-	int ret;
-	static int is_charging = 0;
+	int (*_scePowerIsBatteryCharging) (void);
+	static int is_charging = 0, charge_break = 0;
 
-	_sceUsbStart = get_usb_driver_function(0xAE5DE6AF);
-	_sceUsbGetState = get_usb_driver_function(0xC21645A4);
 	_scePowerBatteryDisableUsbCharging = get_power_driver_function(0x90285886);
 	_scePowerBatteryEnableUsbCharging = get_power_driver_function(0x733F973B);
+	_scePowerIsBatteryCharging = get_power_driver_function(0x1E490401);
 
-	if(_sceUsbStart == NULL ||
-			_sceUsbGetState == NULL ||
-			_scePowerBatteryDisableUsbCharging == NULL ||
-			_scePowerBatteryEnableUsbCharging == NULL) {
+	if(_scePowerBatteryDisableUsbCharging == NULL ||
+			_scePowerBatteryEnableUsbCharging == NULL ||
+			_scePowerIsBatteryCharging == NULL
+			) {
 		return 2000000;
 	}
-	
-	(*_sceUsbStart)("USBBusDriver", 0, 0);
-	ret = (*_sceUsbGetState)() & 0x20;
 
-	if (is_charging == 1 && ret == 0) {
-		printk("%s: stops charging\n", __func__);
-		(*_scePowerBatteryDisableUsbCharging)(0);
-		is_charging = 0;
-	} else if (is_charging == 0 && ret != 0) {
-		printk("%s: starts charging\n", __func__);
-		(*_scePowerBatteryEnableUsbCharging)(1);
-		is_charging = 1;
+	if(_scePowerIsBatteryCharging()) {
+		return 2000000;
 	}
 
-	return 5000000;
+	if(is_charging == 1) {
+		if(charge_break != 0) {
+			_scePowerBatteryDisableUsbCharging(0);
+		}
+
+		charge_break = !charge_break;
+		is_charging = 0;
+
+		return 5000000;
+	}
+
+	_scePowerBatteryEnableUsbCharging(1);
+	is_charging = 1;
+
+	return 15000000;
 }
 
 void usb_charge(void)
 {
 	SceUID vtimer;
+	SceModule2 *mod;
 
 	if (!conf.usbcharge || psp_model == PSP_1000 ) {
 		return;
@@ -78,4 +82,14 @@ void usb_charge(void)
 
 	sceKernelStartVTimer(vtimer);
 	sceKernelSetVTimerHandlerWide(vtimer, 5000000, usb_charge_timer_handler, NULL);
+
+	mod = (SceModule2*)sctrlKernelFindModuleByName("sceUSB_Driver");
+
+	if (mod != NULL) {
+		u32 text_addr;
+
+		text_addr = mod->text_addr;
+		MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->usb_patch.scePowerBatteryDisableUsbChargingStub);
+		MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->usb_patch.scePowerBatteryEnableUsbChargingStub);
+	}
 }

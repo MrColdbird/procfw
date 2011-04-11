@@ -24,6 +24,16 @@ enum {
 		_sw(NOP, (original)+4); \
 	} while ( 0 );
 
+#define MAKE_DUMMY_FUNCTION_RETURN_0(a) do {\
+	_sw(0x03E00008, a);\
+	_sw(0x00001021, a + 4);\
+} while (0)
+
+#define MAKE_DUMMY_FUNCTION_RETURN_1(a) do {\
+	_sw(0x03E00008, a);\
+	_sw(0x24020001, a + 4);\
+} while (0)
+
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 

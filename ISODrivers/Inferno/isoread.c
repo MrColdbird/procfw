@@ -177,13 +177,16 @@ static int is_ciso(SceUID fd)
 		}
 
 		if(g_ciso_block_buf == NULL) {
-			g_ciso_block_buf = oe_malloc(ISO_SECTOR_SIZE);
+			g_ciso_block_buf = oe_malloc(ISO_SECTOR_SIZE + 64);
 
 			if(g_ciso_block_buf == NULL) {
 				ret = -3;
 				printk("%s: -> %d\n", __func__, ret);
 				goto exit;
 			}
+
+			if((u32)g_ciso_block_buf & 63)
+				g_ciso_block_buf = (void*)(((u32)g_ciso_block_buf & (~63)) + 64);
 		}
 
 		ret = 0;

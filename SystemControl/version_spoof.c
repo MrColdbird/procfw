@@ -81,7 +81,7 @@ int versionspoofer(u8 *buf, u32 size, u32* newsize)
 	int result = sceResmgr_driver_9DC14891(buf, size, newsize);
 
 	if(!rebootex_conf.recovery_mode && conf.useversion && strstr((const char*)buf, "release:")) {
-		char tmpbuf[159];
+		char tmpbuf[164];
 		int tmpsize;
 		u32 k1;
 

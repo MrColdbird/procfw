@@ -258,7 +258,7 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
 		
 		if(conf.useversion) {
-			char tmpbuf[159];
+			char tmpbuf[164];
 			int tmpsize;
 
 			tmpsize = load_version_txt(tmpbuf, sizeof(tmpbuf));

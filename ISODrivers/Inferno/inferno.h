@@ -40,9 +40,12 @@ extern int g_iso_opened;
 extern SceUID g_iso_fd;
 extern int g_total_sectors;
 extern struct IoReadArg g_read_arg;
+extern int g_disc_type;
 
 extern int iso_open(void);
 extern int iso_read(struct IoReadArg *args);
 extern int iso_read_with_stack(u32 offset, void *ptr, u32 data_len);
+
+extern int infernoSetDiscType(int type);
 
 #endif

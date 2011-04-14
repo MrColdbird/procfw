@@ -38,7 +38,10 @@ int myCtrlPeekBufferPositive(SceCtrlData *pad_data, int count)
 	int ret;
 
 	ret = sceCtrlPeekBufferPositive(pad_data, count);
-	remove_analog_input(pad_data);
+
+	if(ret >= 0) {
+		remove_analog_input(pad_data);
+	}
 
 	return ret;
 }
@@ -48,7 +51,10 @@ int myCtrlPeekBufferNegative(SceCtrlData *pad_data, int count)
 	int ret;
 
 	ret = sceCtrlPeekBufferNegative(pad_data, count);
-	remove_analog_input(pad_data);
+
+	if(ret >= 0) {
+		remove_analog_input(pad_data);
+	}
 
 	return ret;
 }
@@ -58,7 +64,10 @@ int myCtrlReadBufferPositive(SceCtrlData *pad_data, int count)
 	int ret;
 
 	ret = sceCtrlReadBufferPositive(pad_data, count);
-	remove_analog_input(pad_data);
+
+	if(ret >= 0) {
+		remove_analog_input(pad_data);
+	}
 
 	return ret;
 }
@@ -68,7 +77,10 @@ int myCtrlReadBufferNegative(SceCtrlData *pad_data, int count)
 	int ret;
 
 	ret = sceCtrlReadBufferNegative(pad_data, count);
-	remove_analog_input(pad_data);
+
+	if(ret >= 0) {
+		remove_analog_input(pad_data);
+	}
 
 	return ret;
 }

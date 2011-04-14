@@ -39,6 +39,8 @@ SceUID g_umd_cbid = 0;
 
 SceUID g_drive_status_evf = -1;
 
+int g_disc_type = PSP_UMD_TYPE_GAME;
+
 extern int sceKernelCancelSema(SceUID semaid, int newcount, int *num_wait_threads);
 
 int sceUmdCheckMedium(void)
@@ -129,21 +131,38 @@ int sceUmdUnRegisterUMDCallBack(int cbid)
 	return ret;
 }
 
+int infernoSetDiscType(int type)
+{
+	int oldtype;
+
+	oldtype = g_disc_type;
+	g_disc_type = type;
+
+	return oldtype;
+}
+
 int sceUmdGetDiscInfo(pspUmdInfo *info)
 {
 	int ret;
 	u32 k1;
 
+	if(!check_memory(info, sizeof(*info))) {
+		ret = 0x80010016;
+		goto exit;
+	}
+
 	k1 = pspSdkSetK1(0);
 
 	if(info != NULL && sizeof(*info) == info->size) {
-		info->type = PSP_UMD_TYPE_GAME;
+		info->type = g_disc_type;
 		ret = 0;
 	} else {
 		ret = 0x80010016;
 	}
 
 	pspSdkSetK1(k1);
+
+exit:
 	printk("%s: -> 0x%08X\n", __func__, ret);
 
 	return ret;
@@ -377,6 +396,10 @@ int sceUmdActivate(int unit, const char* drive)
 	u32 k1;
 	int value;
 
+	if(drive == NULL || !check_memory(drive, strlen(drive) + 1)) {
+		return 0x80010016;
+	}
+
 	k1 = pspSdkSetK1(0);
 
 	if(0 != strcmp(drive, "disc0:")) {
@@ -412,6 +435,10 @@ int sceUmdDeactivate(int unit, const char *drive)
 {
 	int ret;
 	u32 k1;
+
+	if(drive == NULL || !check_memory(drive, strlen(drive) + 1)) {
+		return 0x80010016;
+	}
 
 	k1 = pspSdkSetK1(0);
 	ret = sceIoUnassign(drive);

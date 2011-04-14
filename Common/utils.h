@@ -67,6 +67,6 @@ int get_device_name(char *device, int size, const char* path);
 SceUID get_thread_id(const char *name);
 
 /** Check if user syscall didn't pass kernel memory, as OFW did */
-int check_memory(void *addr, int size);
+int check_memory(const void *addr, int size);
 
 #endif

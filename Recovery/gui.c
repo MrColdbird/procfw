@@ -236,10 +236,10 @@ exit:
 
 int limit_int(int value, int direct, int limit)
 {
-	if(limit == 0)
+	if(limit == 0 || limit == 1)
 		return 0;
 
-	value += direct;
+	value += direct; //-1
 
 	if(value >= limit) {
 		value = value % limit;

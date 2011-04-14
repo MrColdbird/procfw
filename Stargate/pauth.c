@@ -64,6 +64,18 @@ int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key)
 	int ret;
 	PauthCipher *cipher;
 
+	if(!check_memory(p, size)) {
+		return 0x80000021;
+	}
+
+	if(!check_memory(newsize, sizeof(newsize))) {
+		return 0x80000021;
+	}
+
+	if(!check_memory(xor_key, 16)) {
+		return 0x80000021;
+	}
+
 	k1 = pspSdkSetK1(0);
 
 	tag = *((u32*)(p+0xd0));

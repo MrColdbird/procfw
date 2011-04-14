@@ -279,6 +279,11 @@ int myNpDrmRenameCheck(char *fn)
 		goto exit;
 	}
 
+	if(!check_memory(fn, strlen(fn) + 1)) {
+		ret = 0x80550910;
+		goto exit;
+	}
+
 	ret = check_file_is_encrypted_by_path(fn);
 
 	if (ret == 0) {

@@ -190,3 +190,18 @@ SceUID get_thread_id(const char *name)
 
 	return -2;
 }
+
+int check_memory(void *addr, int size)
+{
+	void *end_addr;
+	u32 k1;
+
+	k1 = pspSdkGetK1();
+	end_addr = addr + size - 1;
+
+	if((int)(((u32)end_addr | (u32)addr) & (k1 << 11)) < 0) {
+		return 0;
+	}
+
+	return 1;
+}

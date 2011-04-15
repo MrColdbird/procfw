@@ -155,12 +155,16 @@ void patch_mesgled(SceModule* mod1)
 {
 	SceModule2 *mod = (SceModule2*) mod1;
 	u32 text_addr;
-	u32 *offsets = g_offs->mesgled_patch.mesg_decrypt_homebrew;
+	int i;
    
 	text_addr = mod->text_addr;
-	mesgled_decrypt = (void*)(text_addr+0xE0);
+	mesgled_decrypt = (void*)(text_addr + g_offs->mesgled_patch.mesgled_decrypt);
 
-	if (psp_model < NELEMS(offsets) && offsets[psp_model] != 0xDEADBEEF) {
-		_sw(MAKE_CALL(_mesgled_decrypt), text_addr+offsets[psp_model]);
+	if (psp_model < NELEMS(g_offs->mesgled_patch.mesg_decrypt_call) && g_offs->mesgled_patch.mesg_decrypt_call[psp_model][0] != 0xDEADBEEF) {
+		for(i=0; i<NELEMS(g_offs->mesgled_patch.mesg_decrypt_call[psp_model]); ++i) {
+			_sw(MAKE_CALL(_mesgled_decrypt), text_addr + g_offs->mesgled_patch.mesg_decrypt_call[psp_model][i]);
+		}
 	}
+
+	_sw(MAKE_CALL(_mesgled_decrypt), text_addr + g_offs->mesgled_patch.mesg_decrypt_call_common);
 }

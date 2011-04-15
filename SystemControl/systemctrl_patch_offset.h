@@ -27,7 +27,9 @@ struct MemlmdPatch {
 };
 
 struct MesgledPatch {
-	u32 mesg_decrypt_homebrew[9];
+	u32 mesg_decrypt_call_common;
+	u32 mesg_decrypt_call[9][4];
+	u32 mesgled_decrypt;
 };
 
 struct SystemCtrlExportPatch {

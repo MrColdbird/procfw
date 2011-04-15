@@ -41,17 +41,21 @@ PatchOffset g_635_offsets = {
 		.memlmd_decrypt_call2 = 0x00000FDC,
 	},
 	.mesgled_patch = {
-		.mesg_decrypt_homebrew = {
-			0x00001D20, // 01g
-			0x00001DD0, // 02g
-			0x00001E60, // 03g
-			0x00001E60, // 04g
-			0x00001EF8, // 05g
-			0xDEADBEEF, // 06g
-			0x00001E60, // 07g
-			0xDEADBEEF, // 08g
-			0x00001E60, // 09g
+		/* 0x380280F0 */
+		.mesg_decrypt_call_common = 0x00001ADC,
+		.mesg_decrypt_call = {
+			/* 0x457B0CF0 0xE71C010B 0xADF305F0 0x457B0AF0 */
+			{ 0x00001DF4, 0x00003884, 0x00003AE0, 0x00001E84, }, // 01g
+			{ 0x00001EEC, 0x00003DF4, 0x00004098, 0x00001F7C, }, // 02g
+			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, }, // 03g
+			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, }, // 04g
+			{ 0x00002134, 0x000047F0, 0x00004B24, 0x000021C4, }, // 05g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 06g
+			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, }, // 07g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 08g
+			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, }, // 09g
 		},
+		.mesgled_decrypt = 0x000000E0,
 	},
 	.systemctrl_export_patch = {
 		.sctrlKernelLoadExecVSHWithApitype = 0x0000236C,
@@ -215,17 +219,21 @@ PatchOffset g_620_offsets = {
 		.memlmd_decrypt_call2 = 0x00000F0C,
 	},
 	.mesgled_patch = {
-		.mesg_decrypt_homebrew = {
-			0x00001DB4, // 01g
-			0x00001E44, // 02g
-			0x00001ED4, // 03g
-			0x00001ED4, // 04g
-			0x00001F64, // 05g
-			0xDEADBEEF, // 06g
-			0xDEADBEEF, // 07g
-			0xDEADBEEF, // 08g
-			0xDEADBEEF, // 09g
+		/* 0x380208F0 */
+		.mesg_decrypt_call_common = 0x00001908,
+		.mesg_decrypt_call = {
+			/* 0x457B0CF0 0xE71C010B 0xADF305F0 0x457B0AF0 */
+			{ 0x00001E3C, 0x00003808, 0x00003BC4, 0x00001ECC, }, // 01g
+			{ 0x00001ECC, 0x00003D10, 0x0000415C, 0x00001F5C, }, // 02g
+			{ 0x00001F5C, 0x000041F0, 0x00004684, 0x00001FEC, }, // 03g
+			{ 0x00001F5C, 0x000041F0, 0x00004684, 0x00001FEC, }, // 04g
+			{ 0x00001FEC, 0x00004674, 0x00004B50, 0x0000207C, }, // 05g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 06g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 07g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 08g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, }, // 09g
 		},
+		.mesgled_decrypt = 0x000000E0,
 	},
 	.systemctrl_export_patch = {
 		.sctrlKernelLoadExecVSHWithApitype = 0x00002304,

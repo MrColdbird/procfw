@@ -8,8 +8,6 @@
 #include "strsafe.h"
 #include "rebootex_conf.h"
 
-#define PLUGIN_PATH "ms0:/seplugins/"
-
 static void patch_devicename(SceUID modid)
 {
 	SceModule2 *mod;
@@ -49,16 +47,23 @@ int load_start_module(char *path)
 	SceUID modid;
 	int status;
 
+	if(psp_model == PSP_GO) {
+		if(0 == strncmp(path, "ef", 2) ||
+				0 == strncmp(path, "ms", 2)) {
+			if(sctrlKernelBootFrom() == 0x50) {
+				strncpy(path, "ef", 2);
+			} else if(sctrlKernelBootFrom() == 0x40) {
+				strncpy(path, "ms", 2);
+			}
+		}
+	}
+
 	modid = sctrlKernelLoadModule(path, 0, NULL);
 
 	if(modid < 0) {
-		if(0 == strnicmp(path, "ef", 2)) {
-			strncpy(path, "ms", 2);
-		} else { 
-			strncpy(path, "ef", 2);
-		}
+		printk("%s: load module %s -> 0x%08X\n", __func__, path, modid);
 
-		modid = sctrlKernelLoadModule(path, 0, NULL);
+		return ret;
 	}
 
 	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
@@ -113,16 +118,10 @@ static void load_plugin(char * path)
 	
 	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
-	if (fd < 0) {
-		// retry on ef0
-		strncpy(path, "ef", 2);
-		fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
+	if(fd < 0) {
+		printk("%s: open %s failed 0x%08X\n", __func__, path, fd);
 
-		if(fd < 0) {
-			printk("%s: open %s failed 0x%08X\n", __func__, path, fd);
-
-			return;
-		}
+		return;
 	}
 
 	do {
@@ -165,25 +164,33 @@ int load_plugins(void)
 {
 	unsigned int key = sceKernelApplicationType();
 
-	char * bootconf = NULL;
-
 	if(rebootex_conf.recovery_mode) {
 		return 0;
 	}
 
 	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
-		bootconf = PLUGIN_PATH "vsh.txt";
+		/* ms0 cannot be accessed in vsh at startup */
+		if(psp_model == PSP_GO) {
+			load_plugin("ef0:/seplugins/vsh.txt");
+		} else {
+			load_plugin("ms0:/seplugins/vsh.txt");
+		}
 	} //game mode
 	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
-		bootconf = PLUGIN_PATH "game.txt";
+		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
+			load_plugin("ef0:/seplugins/game.txt");
+		} else {
+			load_plugin("ms0:/seplugins/game.txt");
+		}
 	} //ps1 mode
 	else if(conf.plugpop && key == PSP_INIT_KEYCONFIG_POPS) {
-		bootconf = PLUGIN_PATH "pops.txt";
+		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
+			load_plugin("ef0:/seplugins/pops.txt");
+		} else {
+			load_plugin("ms0:/seplugins/pops.txt");
+		}
 	}
-
-	//load mode specific plugins
-	load_plugin(bootconf);
 
 	//return success
 	return 0;

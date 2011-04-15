@@ -291,4 +291,6 @@ void sctrlHENPatchSyscall(void *addr, void *newaddr);
 
 int sctrlKernelQuerySystemCall(void *func_addr);
 
+int sctrlKernelBootFrom(void);
+
 #endif

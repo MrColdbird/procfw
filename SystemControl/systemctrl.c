@@ -52,6 +52,8 @@ extern int sceKernelStartModule_620(SceUID modid, SceSize argsize, void *argp, i
 int sceKernelUnloadModule_620(SceUID modid);
 extern SceUID _sceKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
 extern SceUID sceKernelLoadModuleWithApitype2_620(int apitype, const char *path, int flags, SceKernelLMOption *option);
+extern int sceKernelBootFromGo635(void);
+extern int sceKernelBootFromGo620(void);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -918,4 +920,17 @@ SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flag
 	};
 
 	return ret;
+}
+
+int sctrlKernelBootFrom(void)
+{
+	if(psp_model == PSP_GO) {
+		if(psp_fw_version == FW_635) {
+			return sceKernelBootFromGo635();
+		} else if(psp_fw_version == FW_620) {
+			return sceKernelBootFromGo620();
+		}
+	}
+
+	return sceKernelBootFrom();
 }

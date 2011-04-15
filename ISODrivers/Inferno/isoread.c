@@ -17,9 +17,6 @@
 #include "systemctrl_private.h"
 #include "inferno.h"
 
-extern int sceKernelBootFromGo635(void);
-extern int sceKernelBootFromGo620(void);
-
 // 0x00002784
 struct IoReadArg g_read_arg;
 
@@ -69,16 +66,6 @@ static struct CISO_header g_CISO_hdr;
 // 0x00002500
 static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
 
-static int sceKernelBootFromGo(void)
-{
-	if(psp_fw_version == FW_635)
-		return sceKernelBootFromGo635();
-	else if(psp_fw_version == FW_620)
-		return sceKernelBootFromGo620();
-
-	return -1;
-}
-
 // 0x00000368
 static void wait_until_ms0_ready(void)
 {
@@ -88,7 +75,7 @@ static void wait_until_ms0_ready(void)
 	drvname = "mscmhc0:";
 
 	if(psp_model == PSP_GO) {
-		bootfrom = sceKernelBootFromGo();
+		bootfrom = sctrlKernelBootFrom();
 		printk("%s: bootfrom: 0x%08X\n", __func__, bootfrom);
 
 		if(bootfrom == 0x50) {

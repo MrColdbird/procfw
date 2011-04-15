@@ -57,13 +57,35 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 	return (*memlmd_unsigner)(prx, size, use_polling);
 }
 
+static u32 g_comp_tag[] = {
+	0x28796DAA,
+	0x7316308C,
+	0x3EAD0AEE,
+	0x8555ABF2,
+	0xC6BA41D3,
+	0x55668D96,
+	0xC01DB15D,
+};
+
+static inline int is_comp_tag(u32 tag)
+{
+	int i;
+
+	for(i=0; i<NELEMS(g_comp_tag); ++i) {
+		if(g_comp_tag[i] == tag)
+			return 1;
+	}
+
+	return 0;
+}
+
 static inline int is_prx_compressed(u8 *prx, u32 size)
 {
 	if (size < 0x160)
 		return 0;
 
 	if (*(u16*)(prx+0x150) == 0x8B1F) {
-		if (*(u16*)(prx+0x1E) == 0x0000 || *(u16*)(prx+0x3E) == 0x0000) {
+		if(is_comp_tag(*(u32*)(prx + 0x130))) {
 			return 1;
 		}
 	}

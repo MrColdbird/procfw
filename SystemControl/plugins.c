@@ -46,13 +46,16 @@ int load_start_module(char *path)
 	int ret;
 	SceUID modid;
 	int status;
+	int bootfrom;
+
+	bootfrom = sctrlKernelBootFrom();
 
 	if(psp_model == PSP_GO) {
 		if(0 == strncmp(path, "ef", 2) ||
 				0 == strncmp(path, "ms", 2)) {
-			if(sctrlKernelBootFrom() == 0x50) {
+			if(bootfrom == 0x50) {
 				strncpy(path, "ef", 2);
-			} else if(sctrlKernelBootFrom() == 0x40) {
+			} else if(bootfrom == 0x40) {
 				strncpy(path, "ms", 2);
 			}
 		}
@@ -66,7 +69,7 @@ int load_start_module(char *path)
 		return ret;
 	}
 
-	if(conf.oldplugin && modid >= 0 && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
+	if(conf.oldplugin && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {
 		patch_devicename(modid);
 	}
 

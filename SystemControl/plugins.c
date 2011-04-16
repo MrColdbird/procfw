@@ -66,7 +66,7 @@ int load_start_module(char *path)
 	if(modid < 0) {
 		printk("%s: load module %s -> 0x%08X\n", __func__, path, modid);
 
-		return ret;
+		return modid;
 	}
 
 	if(conf.oldplugin && psp_model == PSP_GO && 0 == strnicmp(path, "ef", 2)) {

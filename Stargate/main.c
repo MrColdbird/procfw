@@ -82,6 +82,19 @@ exit:
 	pspSdkSetK1(k1);
 }
 
+static inline int is_homebrews_runlevel(void)
+{
+	int apitype;
+
+	apitype = sceKernelInitApitype();
+
+	if(apitype == 0x152 || apitype == 0x141) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static int stargate_module_chain(SceModule2 *mod)
 {
 	if (previous)
@@ -120,25 +133,16 @@ static int stargate_module_chain(SceModule2 *mod)
 		patch_analog_imports((SceModule*)mod);
 	}
 
+	if(!is_homebrews_runlevel()) {
+		hide_cfw_folder((SceModule*)mod);
+	}
+
 #ifdef PSID_CHECK
 	if(g_crash) {
 		crash_me();
 	}
 #endif
 	
-	return 0;
-}
-
-static inline int is_homebrews_runlevel(void)
-{
-	int apitype;
-
-	apitype = sceKernelInitApitype();
-	
-	if(apitype == 0x152 || apitype == 0x141) {
-		return 1;
-	}
-
 	return 0;
 }
 

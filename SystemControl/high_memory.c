@@ -41,7 +41,7 @@ void patch_umdcache(u32 text_addr)
 	if (ret != PSP_INIT_KEYCONFIG_GAME)
 		return;
 
-	ret = sceKernelBootFrom();
+	ret = sctrlKernelBootFrom();
 
 	if (ret != 0x40 && ret != 0x50)
 		return;

@@ -8,6 +8,8 @@
 #include "strsafe.h"
 #include "rebootex_conf.h"
 
+static void wait_memory_stick_ready_timeout(int is_ef0);
+
 static void patch_devicename(SceUID modid)
 {
 	SceModule2 *mod;
@@ -118,6 +120,12 @@ static void load_plugin(char * path)
 
 	if (path == NULL)
 		return;
+
+	if(0 == strncmp(path, "ef", 2)) {
+		wait_memory_stick_ready_timeout(1);
+	} else if(0 == strncmp(path, "ms", 2)) {
+		wait_memory_stick_ready_timeout(0);
+	}
 	
 	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
@@ -163,24 +171,15 @@ static void load_plugin(char * path)
 	sceIoClose(fd);
 }
 
-static void wait_until_ms0_ready_timeout(int is_vsh)
+static void wait_memory_stick_ready_timeout(int is_ef0)
 {
 	int ret, status = 0, bootfrom, retries = 0;
 	const char *drvname;
 
-	drvname = "mscmhc0:";
-
-	if(psp_model == PSP_GO) {
-		if(is_vsh) {
-			drvname = "mscmhcemu0:";
-		} else {
-			bootfrom = sctrlKernelBootFrom();
-			printk("%s: bootfrom: 0x%08X\n", __func__, bootfrom);
-
-			if(bootfrom == 0x50) {
-				drvname = "mscmhcemu0:";
-			}
-		}
+	if(is_ef0) {
+		drvname = "mscmhcemu0:";
+	} else {
+		drvname = "mscmhc0:";
 	}
 
 	while( retries < 50 ) {
@@ -208,16 +207,13 @@ int load_plugins(void)
 		return 0;
 	}
 
-	wait_until_ms0_ready_timeout(key == PSP_INIT_KEYCONFIG_VSH ? 1 : 0);
-
-	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
-		/* ms0 cannot be accessed in vsh at startup */
 		if(psp_model == PSP_GO) {
 			load_plugin("ef0:/seplugins/vsh.txt");
-		} else {
-			load_plugin("ms0:/seplugins/vsh.txt");
 		}
+
+		// for now we disable vsh.txt on ms0
+		// load_plugin("ms0:/seplugins/vsh.txt");
 	} //game mode
 	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
 		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {

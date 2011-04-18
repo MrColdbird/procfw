@@ -113,7 +113,7 @@ static char *get_line(int fd, char *linebuf, int bufsiz)
 	return linebuf;
 }
 
-static void load_plugin(char * path)
+static void load_plugin(char * path, int is_vsh)
 {
 	char linebuf[256], *p, *q;
 	int fd, len;
@@ -123,7 +123,7 @@ static void load_plugin(char * path)
 
 	if(0 == strncmp(path, "ef", 2)) {
 		wait_memory_stick_ready_timeout(1);
-	} else if(0 == strncmp(path, "ms", 2)) {
+	} else if(0 == strncmp(path, "ms", 2) && !is_vsh) {
 		wait_memory_stick_ready_timeout(0);
 	}
 	
@@ -209,24 +209,23 @@ int load_plugins(void)
 
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
 		if(psp_model == PSP_GO) {
-			load_plugin("ef0:/seplugins/vsh.txt");
+			load_plugin("ef0:/seplugins/vsh.txt", 1);
 		}
 
-		// for now we disable vsh.txt on ms0
-		// load_plugin("ms0:/seplugins/vsh.txt");
+		load_plugin("ms0:/seplugins/vsh.txt", 1);
 	} //game mode
 	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
 		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
-			load_plugin("ef0:/seplugins/game.txt");
+			load_plugin("ef0:/seplugins/game.txt", 0);
 		} else {
-			load_plugin("ms0:/seplugins/game.txt");
+			load_plugin("ms0:/seplugins/game.txt", 0);
 		}
 	} //ps1 mode
 	else if(conf.plugpop && key == PSP_INIT_KEYCONFIG_POPS) {
 		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
-			load_plugin("ef0:/seplugins/pops.txt");
+			load_plugin("ef0:/seplugins/pops.txt", 0);
 		} else {
-			load_plugin("ms0:/seplugins/pops.txt");
+			load_plugin("ms0:/seplugins/pops.txt", 0);
 		}
 	}
 

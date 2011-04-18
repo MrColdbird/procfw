@@ -37,12 +37,7 @@ void patch_SceUpdateDL_Library(u32 text_addr)
 	}
 	
 	p = (char*)(text_addr + g_offs->custom_update_patch. SceUpdateDL_UpdateListStr);
-
-	if(psp_model == PSP_GO) {
-		strcpy(p, "http://pro.coldbird.eu/pspgo-updatelist.txt");
-	} else {
-		strcpy(p, "http://pro.coldbird.eu/psp-updatelist.txt");
-	}
+	sprintf(p, "http://pro.coldbird.eu/psp-updatelist.txt?fw=0x%08X&model=0%dg", psp_fw_version, psp_model + 1);
 
 	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall1);
 	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall2);

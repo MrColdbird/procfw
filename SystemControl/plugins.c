@@ -163,6 +163,39 @@ static void load_plugin(char * path)
 	sceIoClose(fd);
 }
 
+static void wait_until_ms0_ready_timeout(void)
+{
+	int ret, status = 0, bootfrom, retries = 0;
+	const char *drvname;
+
+	drvname = "mscmhc0:";
+
+	if(psp_model == PSP_GO) {
+		bootfrom = sctrlKernelBootFrom();
+		printk("%s: bootfrom: 0x%08X\n", __func__, bootfrom);
+
+		if(bootfrom == 0x50) {
+			drvname = "mscmhcemu0:";
+		}
+	}
+
+	while( retries < 50 ) {
+		ret = sceIoDevctl(drvname, 0x02025801, 0, 0, &status, sizeof(status));
+		retries++;
+
+		if(ret < 0) {
+			sceKernelDelayThread(20000);
+			continue;
+		}
+
+		if(status == 4) {
+			break;
+		}
+
+		sceKernelDelayThread(20000);
+	}
+}
+
 int load_plugins(void)
 {
 	unsigned int key = sceKernelApplicationType();
@@ -170,6 +203,8 @@ int load_plugins(void)
 	if(rebootex_conf.recovery_mode) {
 		return 0;
 	}
+
+	wait_until_ms0_ready_timeout();
 
 	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {

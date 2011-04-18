@@ -163,7 +163,7 @@ static void load_plugin(char * path)
 	sceIoClose(fd);
 }
 
-static void wait_until_ms0_ready_timeout(void)
+static void wait_until_ms0_ready_timeout(int is_vsh)
 {
 	int ret, status = 0, bootfrom, retries = 0;
 	const char *drvname;
@@ -171,11 +171,15 @@ static void wait_until_ms0_ready_timeout(void)
 	drvname = "mscmhc0:";
 
 	if(psp_model == PSP_GO) {
-		bootfrom = sctrlKernelBootFrom();
-		printk("%s: bootfrom: 0x%08X\n", __func__, bootfrom);
-
-		if(bootfrom == 0x50) {
+		if(is_vsh) {
 			drvname = "mscmhcemu0:";
+		} else {
+			bootfrom = sctrlKernelBootFrom();
+			printk("%s: bootfrom: 0x%08X\n", __func__, bootfrom);
+
+			if(bootfrom == 0x50) {
+				drvname = "mscmhcemu0:";
+			}
 		}
 	}
 
@@ -204,7 +208,7 @@ int load_plugins(void)
 		return 0;
 	}
 
-	wait_until_ms0_ready_timeout();
+	wait_until_ms0_ready_timeout(key == PSP_INIT_KEYCONFIG_VSH ? 1 : 0);
 
 	//visual shell
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {

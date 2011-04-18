@@ -149,23 +149,23 @@ void load_default_conf(SEConfig *config)
 {
 	memset(config, 0, sizeof(*config));
 	config->magic = get_conf_magic();
-	config->umdmode = MODE_NP9660;
+	config->umdmode = MODE_INFERNO;
 	config->usbcharge = 0;
 	config->machidden = 1;
-	config->skipgameboot = 1;
+	config->skipgameboot = 0;
 	config->hidepic = 0;
 	config->plugvsh = config->pluggame = config->plugpop = 1;
 	config->usbdevice = 0;
 	config->flashprot = 1;
 	config->fakeregion = FAKE_REGION_DISABLED;
-	config->skiplogo = 1;
-	config->useversion = 1;
+	config->skiplogo = 0;
+	config->useversion = 0;
 	config->useownupdate = 1;
 	config->usenodrm = 1;
 	config->hibblock = 1;
 	config->noanalog = 0;
 	config->oldplugin = 1;
-	config->htmlviewer_custom_save_location = 0;
+	config->htmlviewer_custom_save_location = 1;
 }
 
 void load_config(void)

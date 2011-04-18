@@ -19,7 +19,7 @@ void patch_sceInterruptManager(void)
 	_sw(NOP, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck1+4);
 
 	// disable crash code
-	_sw(NOP, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck2);
+	_sw(0x408F7000, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck2); // mct0 $t7, $EPC
 	_sw(NOP, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck2+4);
 
 	//TODO currently syscall on kernel module patch is not really working

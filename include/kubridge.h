@@ -93,6 +93,9 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot);
 */
 int kuKernelGetModel(void);
 
+/**
+ * Invalidate the entire instruction cache
+ */
+void kuKernelIcacheInvalidateAll(void);
 
 #endif
-

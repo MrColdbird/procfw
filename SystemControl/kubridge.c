@@ -43,7 +43,7 @@ int kuKernelInitApitype(void)
 
 int kuKernelBootFrom()
 {
-	return sceKernelBootFrom();
+	return sctrlKernelBootFrom();
 }
 
 int kuKernelInitFileName(char *initfilename)
@@ -93,3 +93,11 @@ int kuKernelGetModel(void)
 	return sctrlKernelGetModel();
 }
 
+void kuKernelIcacheInvalidateAll(void)
+{
+	u32 k1;
+	
+	k1 = pspSdkSetK1(0);
+	sync_cache();
+	pspSdkSetK1(k1);
+}

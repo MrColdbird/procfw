@@ -16,6 +16,7 @@ PSP_EXPORT_FUNC_HASH(kuKernelInitKeyConfig)
 PSP_EXPORT_FUNC_HASH(kuKernelGetUserLevel)
 PSP_EXPORT_FUNC_HASH(kuKernelSetDdrMemoryProtection)
 PSP_EXPORT_FUNC_HASH(kuKernelGetModel)
+PSP_EXPORT_FUNC_HASH(kuKernelIcacheInvalidateAll)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlForUser, 0, 0x4001)

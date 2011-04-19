@@ -10,6 +10,6 @@ clean:
 	make -C libpspsystemctrl_kernel clean
 	make -C libpspsystemctrl_user clean
 	make -C libpspkubridge clean
-	@rm ../../libs/libpspsystemctrl_kernel.a
-	@rm ../../libs/libpspsystemctrl_user.a
-	@rm ../../libs/libpspkubridge.a
+	@rm ../../libs/libpspsystemctrl_kernel.a || true
+	@rm ../../libs/libpspsystemctrl_user.a || true
+	@rm ../../libs/libpspkubridge.a || true

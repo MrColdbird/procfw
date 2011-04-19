@@ -64,7 +64,8 @@ const char * g_messages[] = {
 	"Pops Plugin",
 	"NoDRM Engine",
 	"Block Analog Input in Game",
-	"Old Plugin Support (PSP-Go only) ",
+	"Old Plugin Support (PSP-Go only)",
+	"Hide CFW Files from ISO game",
 	"CPU Speed",
 	"XMB CPU/BUS",
 	"Game CPU/BUS",
@@ -360,6 +361,13 @@ static int display_use_oldplugin(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_hide_cfw_dirs(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[HIDE_CFW_DIRS], get_bool_name(g_config.hide_cfw_dirs));
+
+	return 0;
+}
+
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
 	0, 2,
@@ -390,6 +398,11 @@ static struct ValueOption g_use_oldplugin = {
 	0, 2,
 };
 
+static struct ValueOption g_hide_cfw_dirs = {
+	&g_config.hide_cfw_dirs,
+	0, 2,
+};
+
 static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
@@ -397,6 +410,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
+	{ NULL, 0, 0, &display_hide_cfw_dirs, &change_option, &change_option_by_enter, &g_hide_cfw_dirs},
 };
 
 static struct Menu g_advanced_menu = {

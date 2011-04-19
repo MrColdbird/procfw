@@ -120,7 +120,7 @@ static int stargate_module_chain(SceModule2 *mod)
 		patch_analog_imports((SceModule*)mod);
 	}
 
-	if(conf.usenodrm) {
+	if(conf.hide_cfw_dirs) {
 		hide_cfw_folder((SceModule*)mod);
 	}
 

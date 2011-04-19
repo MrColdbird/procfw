@@ -166,6 +166,7 @@ void load_default_conf(SEConfig *config)
 	config->noanalog = 0;
 	config->oldplugin = 1;
 	config->htmlviewer_custom_save_location = 1;
+	config->hide_cfw_dirs = 1;
 }
 
 void load_config(void)

@@ -22,8 +22,6 @@ int g_high_memory_enabled = 0;
 
 static u8 g_p8_size = 4;
 
-static inline int is_homebrews_runlevel(void);
-
 static inline u32 *get_partition(int pid)
 {
 	u32 * (*get_memory_partition)(int pid) = (void *)(g_offs->high_memory_patch.get_partition);
@@ -114,7 +112,7 @@ static void modify_partition(MemPart *part)
 	((u32*)(meminfo[4]))[5] = (size << 21) | 0xFC;
 }
 
-static inline int is_homebrews_runlevel(void)
+int is_homebrews_runlevel(void)
 {
 	int apitype;
 

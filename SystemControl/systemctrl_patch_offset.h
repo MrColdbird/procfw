@@ -136,7 +136,7 @@ struct sceLoaderCorePatch {
 struct sceLoadExecPatch {
 	u32 LoadReboot;
 	u32 LoadRebootCall;
-	u32 RebootAddress;
+	u32 RebootJump;
 	u32 sceKernelLoadExecWithApiTypeCheck1;
 	u32 sceKernelLoadExecWithApiTypeCheck2;
 	u32 sceKernelExitVSHVSHCheck1;

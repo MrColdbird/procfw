@@ -6,7 +6,7 @@
 struct sceLoadExecPatch {
 	u32 LoadReboot;
 	u32 LoadRebootCall;
-	u32 RebootAddress;
+	u32 RebootJump;
 };
 
 typedef struct _PatchOffset {

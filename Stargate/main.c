@@ -120,7 +120,9 @@ static int stargate_module_chain(SceModule2 *mod)
 		patch_analog_imports((SceModule*)mod);
 	}
 
-	hide_cfw_folder((SceModule*)mod);
+	if(conf.usenodrm) {
+		hide_cfw_folder((SceModule*)mod);
+	}
 
 #ifdef PSID_CHECK
 	if(g_crash) {

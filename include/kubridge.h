@@ -154,7 +154,7 @@ struct KernelCallArg {
  * Call a kernel function with kernel privilege
  *
  * @param func_addr - kernel function address
- * @param args - kernel argument and return value
+ * @param args - kernel arguments and return values
  *
  * return < 0 on error
  */
@@ -164,9 +164,7 @@ int kuKernelCall(void *func_addr, struct KernelCallArg *args);
  * Call a kernel function with kernel privilege and extended stack
  *
  * @param func_addr - kernel function address
- * @param args - kernel argument and return value
- *
- * @note ret2 in args is always 0xDEADBEEF
+ * @param args - kernel arguments and return values
  *
  * return < 0 on error
  */

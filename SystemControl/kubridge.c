@@ -10,6 +10,7 @@
 #include "main.h"
 #include "utils.h"
 #include "systemctrl.h"
+#include "kubridge.h"
 #include "printk.h"
 
 SceUID kuKernelLoadModule(const char *path, int flags, SceKernelLMOption *option)
@@ -100,4 +101,108 @@ void kuKernelIcacheInvalidateAll(void)
 	k1 = pspSdkSetK1(0);
 	sync_cache();
 	pspSdkSetK1(k1);
+}
+
+u32 kuKernelPeekw(void *addr)
+{
+	return _lw((u32)addr);
+}
+
+void kuKernelPokew(void *addr, u32 value)
+{
+	_sw(value, (u32)addr);
+}
+
+void *kuKernelMemcpy(void *dest, const void *src, size_t num)
+{
+	void *addr;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
+	addr = memcpy(dest, src, num);
+	pspSdkSetK1(k1);
+
+	return addr;
+}
+
+int kuKernelFindModuleByName(char *modname, SceModule *mod)
+{
+	SceModule2 *pmod;
+
+	if(modname == NULL || mod == NULL) {
+		return -1;
+	}
+
+	pmod = (SceModule2*) sctrlKernelFindModuleByName(modname);
+
+	if(pmod == NULL) {
+		return -2;
+	}
+
+	memcpy(mod, pmod, sizeof(*pmod));
+	
+	return 0;
+}
+
+int kuKernelCall(void *func_addr, struct KernelCallArg *args)
+{
+	u32 k1, level;
+	u64 ret;
+	u64 (*func)(u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
+
+	if(func_addr == NULL || args == NULL) {
+		return -1;
+	}
+
+	k1 = pspSdkSetK1(0);
+	level = sctrlKernelSetUserLevel(8);
+	func = func_addr;
+	ret = (*func)(args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7, args->arg8, args->arg9, args->arg10, args->arg11, args->arg12);
+	args->ret1 = (u32)(ret);
+	args->ret2 = (u32)(ret >> 32);
+	sctrlKernelSetUserLevel(level);
+	pspSdkSetK1(k1);
+
+	return 0;
+}
+
+struct KernelCallArgExtendStack {
+	struct KernelCallArg args;
+	void *func_addr;
+};
+
+static int kernel_call_stack(struct KernelCallArgExtendStack *args_stack)
+{
+	int ret;
+	struct KernelCallArg *args;
+	int (*func)(u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
+
+	args = &args_stack->args;
+	func = args_stack->func_addr;
+	ret = (*func)(args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7, args->arg8, args->arg9, args->arg10, args->arg11, args->arg12);
+
+	return ret;
+}
+
+int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int stack_size)
+{
+	u32 k1, level;
+	int ret;
+	struct KernelCallArgExtendStack args_stack;
+
+	if(func_addr == NULL || args == NULL) {
+		return -1;
+	}
+
+	k1 = pspSdkSetK1(0);
+	level = sctrlKernelSetUserLevel(8);
+	memcpy(&args_stack.args, args, sizeof(*args));
+	args_stack.func_addr = func_addr;
+	ret = sceKernelExtendKernelStack(stack_size, (void*)&kernel_call_stack, &args_stack);
+	args->ret1 = ret;
+	args->ret2 = 0xDEADBEEF;
+	sctrlKernelSetUserLevel(level);
+	pspSdkSetK1(k1);
+
+	return 0;
 }

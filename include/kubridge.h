@@ -94,8 +94,82 @@ int kuKernelSetDdrMemoryProtection(void *addr, int size, int prot);
 int kuKernelGetModel(void);
 
 /**
+ * Find module by name
+ *
+ * @param modname - Name of Module
+ * @param mod - module structure for output (actually treated as SceModule2)
+ *
+ * @return < 0 on error
+ */
+int kuKernelFindModuleByName(char *modname, SceModule *mod);
+
+/**
  * Invalidate the entire instruction cache
  */
 void kuKernelIcacheInvalidateAll(void);
+
+/**
+ * Read 4 bytes from memory (with kernel memory access)
+ *
+ * @param addr - Address to read, must have 4 bytes alignment
+ */
+u32 kuKernelPeekw(void *addr);
+
+/**
+ * Write 4 bytes to memory (with kernel memory access)
+ *
+ * @param addr - Address to write, must have 4 bytes alignment
+ */
+void kuKernelPokew(void *addr, u32 value);
+
+/**
+ * memcpy (with kernel memory access)
+ *
+ * @param dest - Destination address
+ * @param src - Source address
+ * @param num - copy bytes count
+ *
+ * @return Destination address
+ */
+void *kuKernelMemcpy(void *dest, const void *src, size_t num);
+
+struct KernelCallArg {
+	u32 arg1;
+	u32 arg2;
+	u32 arg3;
+	u32 arg4;
+	u32 arg5;
+	u32 arg6;
+	u32 arg7;
+	u32 arg8;
+	u32 arg9;
+	u32 arg10;
+	u32 arg11;
+	u32 arg12;
+	u32 ret1;
+	u32 ret2;
+};
+
+/**
+ * Call a kernel function with kernel privilege
+ *
+ * @param func_addr - kernel function address
+ * @param args - kernel argument and return value
+ *
+ * return < 0 on error
+ */
+int kuKernelCall(void *func_addr, struct KernelCallArg *args);
+
+/**
+ * Call a kernel function with kernel privilege and extended stack
+ *
+ * @param func_addr - kernel function address
+ * @param args - kernel argument and return value
+ *
+ * @note ret2 in args is always 0xDEADBEEF
+ *
+ * return < 0 on error
+ */
+int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int stack_size);
 
 #endif

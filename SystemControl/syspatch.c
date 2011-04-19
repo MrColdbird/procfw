@@ -18,6 +18,7 @@ static STMOD_HANDLER previous;
 
 static void patch_sceWlan_Driver(u32 text_addr);
 static void patch_scePower_Service(u32 text_addr);
+static void patch_sceUmdMan_driver(SceModule* mod);
 
 static inline void set_clock(void)
 {
@@ -87,6 +88,11 @@ static int syspatch_module_chain(SceModule2 *mod)
 			disable_PauseGame(impose->text_addr);
 		}
 
+		sync_cache();
+	}
+
+	if(0 == strcmp(mod->modname, "sceUmdMan_driver")) {
+		patch_sceUmdMan_driver(mod);
 		sync_cache();
 	}
 
@@ -163,6 +169,18 @@ static void patch_scePower_Service(u32 text_addr)
 {
 	// scePowerGetBacklightMaximum always returns 4
 	_sw(NOP, text_addr + g_offs->power_service_patch.scePowerGetBacklightMaximumCheck);
+}
+
+static int _sceKernelBootFromForUmdMan(void)
+{
+	return 0x20;
+}
+
+static void patch_sceUmdMan_driver(SceModule* mod)
+{
+	if(is_homebrews_runlevel()) {
+		hook_import_bynid(mod, "InitForKernel", 0x27932388, _sceKernelBootFromForUmdMan, 0);
+	}
 }
 
 void syspatch_init()

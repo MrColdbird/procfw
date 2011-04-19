@@ -234,14 +234,12 @@ static int check_valid_version_txt(const void *buf, int size)
 static void patch_sysconf_plugin_module(SceModule2 *mod)
 {
 	void *p;
-	char str[20];
+	char str[30];
 	u32 text_addr;
 	u32 minor_version;
 
 	text_addr = mod->text_addr;
-
 	minor_version = sctrlHENGetMinorVersion();
-
 	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
 
 	if(minor_version != 0) {
@@ -258,15 +256,27 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
 		
 		if(conf.useversion) {
-			char tmpbuf[164];
+			char *tmpbuf;
 			int tmpsize;
 
-			tmpsize = load_version_txt(tmpbuf, sizeof(tmpbuf));
+			tmpsize = 164;
+			tmpbuf = oe_malloc(tmpsize);
+
+			if(tmpbuf == NULL) {
+				goto out;
+			}
+
+			tmpsize = load_version_txt(tmpbuf, tmpsize);
 
 			if(tmpsize > 0 && check_valid_version_txt(tmpbuf, tmpsize) == 0) {
 				sprintf(str, "[ Model: 0%dg Fake: %.4s ]", psp_model+1, tmpbuf + sizeof("release:") - 1);
 			} else {
+out:
 				sprintf(str, "[ Model: 0%dg ]", psp_model+1);
+			}
+
+			if(tmpbuf != NULL) {
+				oe_free(tmpbuf);
 			}
 		} else {
 			sprintf(str, "[ Model: 0%dg ]", psp_model+1);
@@ -276,8 +286,6 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	}
 
 	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
-	
-	sync_cache();
 }
 
 static void patch_game_plugin_module(u32 text_addr)

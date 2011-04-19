@@ -1,5 +1,5 @@
 TARGET = Rebootex
-OBJS = main.o rebootex_patch_offset.o ../Common/utils.o imports.o
+OBJS = main.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o imports.o
 
 CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
 

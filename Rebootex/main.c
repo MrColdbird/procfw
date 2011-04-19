@@ -7,7 +7,7 @@
 #include "systemctrl.h"
 #include "utils.h"
 #include "../Rebootex_bin/rebootex.h"
-#include "rebootex_patch_offset.h"
+#include "../PXE/Launcher/launcher_patch_offset.h"
 #include "rebootex_conf.h"
 
 u32 psp_model;
@@ -104,7 +104,7 @@ void patch_sceLoadExec(int mode)
 {
 	SceModule2 * loadexec = (SceModule2*)sctrlKernelFindModuleByName("sceLoadExec");
 	u32 text_addr;
-	struct LoadExecPatch *patch;
+	struct sceLoadExecPatch *patch;
 
 	if (loadexec == NULL) {
 		return;

@@ -63,7 +63,7 @@ void patch_sceLoadExec(void)
 	_sw(MAKE_CALL(load_reboot), loadexec->text_addr + patch->LoadRebootCall);
 
 	//patch Rebootex position to 0x88FC0000
-	_sw(0x3C0188FC, loadexec->text_addr + patch->RebootAddress); // lui $at, 0x88FC
+	_sw(0x3C0188FC, loadexec->text_addr + patch->RebootJump); // lui $at, 0x88FC
 
 	//save LoadReboot function
 	LoadReboot = (void*)(loadexec->text_addr + patch->LoadReboot);

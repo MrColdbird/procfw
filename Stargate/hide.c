@@ -10,9 +10,11 @@
 int hideIoDread(SceUID fd, SceIoDirent * dir)
 {
 	int result = sceIoDread(fd, dir);
-	if(strncasecmp(dir->d_name, "iso", 3) == 0 || strncasecmp(dir->d_name, "seplugins", 9) == 0) {
+
+	if(strcasecmp(dir->d_name, "iso") == 0 || strcasecmp(dir->d_name, "seplugins") == 0 || strcasecmp(dir->d_name, "isocache.bin") == 0) {
 		result = sceIoDread(fd, dir);
 	}
+
 	return result;
 }
 

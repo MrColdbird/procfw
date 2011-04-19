@@ -95,6 +95,9 @@ void kernel_call_test_with_stack(void)
 
 int main_thread(SceSize args, void *argp)
 {
+	u32 key;
+	SceCtrlData ctl;
+
 	pspDebugScreenInit();
 
 	printk("PRO kuBridge test\n\n");
@@ -104,6 +107,19 @@ int main_thread(SceSize args, void *argp)
 	cahce_invalidate_test();
 	kernel_call_test();
 	kernel_call_test_with_stack();
+
+	printk("Press X to exit.\n");
+
+	sceCtrlReadBufferPositive(&ctl, 1);
+	key = ctl.Buttons;
+
+	while (key != PSP_CTRL_CROSS) {
+		sceKernelDelayThread(50000);
+		sceCtrlReadBufferPositive(&ctl, 1);
+		key = ctl.Buttons;
+	}
+
+	sceKernelExitGame();
 
 	return 0;
 }

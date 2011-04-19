@@ -18,6 +18,8 @@
 static int (*g_VshMenuCtrl) (SceCtrlData *, int);
 static SceUID g_satelite_mod_id = -1;
 
+int (*g_sceCtrlReadBufferPositive) (SceCtrlData *, int) = NULL;
+
 int vctrlVSHRegisterVshMenu(int (* ctrl)(SceCtrlData *, int))
 {
 	u32 k1;
@@ -85,7 +87,7 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 	u32 k1;
 	SceUID modid;
 
-	ret = sceCtrlReadBufferPositive(ctrl, count);
+	ret = (*g_sceCtrlReadBufferPositive)(ctrl, count);
 	k1 = pspSdkSetK1(0);
 
 	if (sceKernelFindModuleByName("VshCtrlSatelite")) {
@@ -115,6 +117,10 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		if (sceKernelFindModuleByName("sceUSB_Stor_Driver"))
 			goto exit;
 
+		// Block Recovery menu
+		if (sceKernelFindModuleByName("Recovery"))
+			goto exit;
+		
 		// Block Satellite Menu in NP Signup Module (Blue PSN Login Screen)
 		if (get_thread_id("SceNpSignupEvent") >= 0)
 			goto exit;

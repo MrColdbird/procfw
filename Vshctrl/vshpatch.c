@@ -12,7 +12,9 @@
 #include "systemctrl.h"
 #include "printk.h"
 #include "xmbiso.h"
+#include "systemctrl.h"
 #include "systemctrl_se.h"
+#include "systemctrl_private.h"
 #include "main.h"
 #include "virtual_pbp.h"
 #include "strsafe.h"
@@ -20,6 +22,8 @@
 
 extern int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count);
 extern void patch_sceUSB_Driver(void);
+
+extern int (*g_sceCtrlReadBufferPositive) (SceCtrlData *, int);
 
 typedef struct _HookUserFunctions {
 	u32 nid;
@@ -35,7 +39,7 @@ static void patch_vsh_module(SceModule2 * mod);
 
 static void hook_iso_file_io(void);
 static void hook_iso_directory_io(void);
-static void patch_sceCtrlReadBufferPositive(SceModule2 *mod); 
+static void patch_sceCtrlReadBufferPositive(void); 
 static void patch_Gameboot(SceModule2 *mod); 
 static void patch_hibblock(SceModule2 *mod); 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
@@ -59,11 +63,11 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "vsh_module")) {
 		patch_vsh_module(mod);
+		patch_sceCtrlReadBufferPositive();
 		sync_cache();
 	}
 
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
-		patch_sceCtrlReadBufferPositive(mod);
 		patch_Gameboot(mod);
 
 		if(psp_model == PSP_GO && conf.hibblock) {
@@ -111,9 +115,14 @@ static int _sceDisplaySetHoldMode(int a0)
 	return 0;
 }
 
-static void patch_sceCtrlReadBufferPositive(SceModule2 *mod)
+static void patch_sceCtrlReadBufferPositive(void)
 {
-	hook_import_bynid((SceModule*)mod, "sceCtrl_driver", g_offs->vshctrl_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
+	SceModule* mod;
+
+	mod = sceKernelFindModuleByName("sceVshBridge_Driver");
+	hook_import_bynid(mod, "sceCtrl_driver", g_offs->vshctrl_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
+	g_sceCtrlReadBufferPositive = (void *) sctrlHENFindFunction("sceController_Service", "sceCtrl", 0x1F803938);
+	sctrlHENPatchSyscall(g_sceCtrlReadBufferPositive, _sceCtrlReadBufferPositive);
 }
 
 static void patch_Gameboot(SceModule2 *mod)

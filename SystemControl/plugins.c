@@ -173,7 +173,7 @@ static void load_plugin(char * path, int is_vsh)
 
 static void wait_memory_stick_ready_timeout(int is_ef0)
 {
-	int ret, status = 0, bootfrom, retries = 0;
+	int ret, status = 0, retries = 0;
 	const char *drvname;
 
 	if(is_ef0) {

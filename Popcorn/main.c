@@ -37,6 +37,7 @@ extern u8 g_icon_png[0x3730];
 static u32 g_icon0_status;
 static u32 g_keys_bin_found;
 static u32 g_is_custom_ps1;
+static SceUID g_plain_doc_fd = -1;
 
 static STMOD_HANDLER g_previous = NULL;
 
@@ -173,9 +174,45 @@ static int myIoClose(SceUID fd)
 		ret = sceIoClose(fd);
 	}
 
+	if(g_plain_doc_fd == fd) {
+		g_plain_doc_fd = -1;
+	}
+
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 
 	return ret;
+}
+
+static const char *get_filename(const char *path)
+{
+	const char *p;
+
+	if(path == NULL) {
+		return NULL;
+	}
+
+	p = strrchr(path, '/');
+
+	if(p == NULL) {
+		p = path;
+	} else {
+		p++;
+	}
+
+	return p;
+}
+
+static int is_eboot_pbp_path(const char *path)
+{
+	const char *p;
+
+	p = get_filename(path);
+
+	if(p != NULL && 0 == strcmp(p, "EBOOT.PBP")) {
+		return 1;
+	}
+
+	return 0;
 }
 
 static int check_file_is_decrypted(const char *filename)
@@ -184,6 +221,10 @@ static int check_file_is_decrypted(const char *filename)
 	u32 k1;
 	int result = 0, ret;
 	u8 buf[16] __attribute__((aligned(64)));
+
+	if(is_eboot_pbp_path(filename)) {
+		goto exit;
+	}
 
 	k1 = pspSdkSetK1(0);
 	fd = sceIoOpen(filename, PSP_O_RDONLY, 0777);
@@ -214,6 +255,37 @@ exit:
 	return result;
 }
 
+static int is_document_path(const char *path)
+{
+	const char *p;
+
+	p = get_filename(path);
+	
+	if(p != NULL && 0 == strcmp(p, "DOCUMENT.DAT")) {
+		return 1;
+	}
+
+	return 0;
+}
+
+static int sceIoOpenPlain(const char *file, int flag, int mode)
+{
+	int ret;
+
+	if(flag == 0x40000001 && check_file_is_decrypted(file)) {
+		printk("%s: removed PGD open flag\n", __func__);
+		ret = sceIoOpen(file, flag & ~0x40000000, mode);
+
+		if(ret >= 0 && is_document_path(file)) {
+			g_plain_doc_fd = ret;
+		}
+	} else {
+		ret = sceIoOpen(file, flag, mode);
+	}
+
+	return ret;
+}
+
 static int myIoOpen(const char *file, int flag, int mode)
 {
 	int ret;
@@ -226,15 +298,10 @@ static int myIoOpen(const char *file, int flag, int mode)
 			printk("%s: [FAKE]\n", __func__);
 			ret = ACT_DAT_FD;
 		} else {
-			if(g_is_custom_ps1 && check_file_is_decrypted(file)) {
-				printk("%s: removed PGD open flag\n", __func__);
-				ret = sceIoOpen(file, flag & ~0x40000000, mode);
-			} else {
-				ret = sceIoOpen(file, flag, mode);
-			}
+			ret = sceIoOpenPlain(file, flag, mode);
 		}		
 	} else {
-		ret = sceIoOpen(file, flag, mode);
+		ret = sceIoOpenPlain(file, flag, mode);
 	}
 
 	printk("%s: %s 0x%08X -> 0x%08X\n", __func__, file, flag, ret);
@@ -255,7 +322,7 @@ static int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void
 		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
 	}
 
-	if (g_is_custom_ps1) {
+	if (g_is_custom_ps1 || (g_plain_doc_fd >= 0 && g_plain_doc_fd == fd)) {
 		if (cmd == 0x04100001) {
 			ret = 0;
 			printk("%s: [FAKE] 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, cmd, ret);

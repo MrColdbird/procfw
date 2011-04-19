@@ -173,15 +173,17 @@ struct KernelCallArgExtendStack {
 
 static int kernel_call_stack(struct KernelCallArgExtendStack *args_stack)
 {
-	int ret;
+	u64 ret;
 	struct KernelCallArg *args;
 	int (*func)(u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32, u32);
 
 	args = &args_stack->args;
 	func = args_stack->func_addr;
 	ret = (*func)(args->arg1, args->arg2, args->arg3, args->arg4, args->arg5, args->arg6, args->arg7, args->arg8, args->arg9, args->arg10, args->arg11, args->arg12);
+	args->ret1 = (u32)(ret);
+	args->ret2 = (u32)(ret >> 32);
 
-	return ret;
+	return 0;
 }
 
 int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int stack_size)
@@ -199,10 +201,8 @@ int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int sta
 	memcpy(&args_stack.args, args, sizeof(*args));
 	args_stack.func_addr = func_addr;
 	ret = sceKernelExtendKernelStack(stack_size, (void*)&kernel_call_stack, &args_stack);
-	args->ret1 = ret;
-	args->ret2 = 0xDEADBEEF;
 	sctrlKernelSetUserLevel(level);
 	pspSdkSetK1(k1);
 
-	return 0;
+	return ret;
 }

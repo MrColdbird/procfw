@@ -7,6 +7,7 @@
 size_t strncpy_s(char *strDest, size_t numberOfElements, const char *strSource, size_t count);
 size_t strncat_s(char *strDest, size_t numberOfElements, const char *strSource, size_t count);
 int strncasecmp(const char *s1, const char *s2, size_t n);
+int strcasecmp(const char *s1, const char *s2);
 
 static inline size_t strcpy_s(char *strDestination, size_t numberOfElements, const char *strSource)
 {

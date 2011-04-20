@@ -561,16 +561,16 @@ version_OK:
 
 	switch(psp_model) {
 		case PSP_GO:
-			printf("PSP BRITE N-1000(psp-go) Detected ....\n");
+			printf("PSP GO BRITE Detected ....\n");
 			break;
 		case PSP_9000:
-			printf("PSP BRITE 9000 Detected ....\n");
+			printf("PSP BRITE 3000(09g) Detected ....\n");
 			break;
 		case PSP_7000:
-			printf("PSP BRITE 7000 Detected ....\n");
+			printf("PSP BRITE 3000(07g) Detected ....\n");
 			break;
 		case PSP_4000:
-			printf("PSP BRITE 4000 Detected ....\n");
+			printf("PSP BRITE 3000(04g) Detected ....\n");
 			break;
 		case PSP_3000:
 			printf("PSP BRITE 3000 Detected ....\n");

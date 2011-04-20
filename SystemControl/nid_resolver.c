@@ -48,15 +48,39 @@ resolver_config* get_nid_resolver(const char *libname)
 	return NULL;
 }
 
+static int binary_search(const nid_entry *nids, size_t n, u32 old_nid)
+{
+	int low, high, mid;
+
+	low = 0;
+	high = n - 1;
+
+	while (low <= high) {
+		mid = (low + high) / 2;
+
+		if(old_nid == nids[mid].old) {
+			return mid;
+		} else if (old_nid < nids[mid].old) {
+			high = mid - 1;
+		} else {
+			low = mid + 1;
+		}
+	}
+
+	return -1;
+}
+
 u32 resolve_nid(resolver_config *resolver, u32 nid)
 {
 	int i;
 	u32 new;
 
-	for(i=0; i<resolver->nidcount; ++i) {
+	i = binary_search(resolver->nidtable, resolver->nidcount, nid);
+
+	if(i >= 0) {
 		new = resolver->nidtable[i].new;
 
-		if(new != UNKNOWNNID && nid == resolver->nidtable[i].old) {
+		if(new != UNKNOWNNID) {
 			printk("%s: %s_%08X->%s_%08X\n", __func__, resolver->name, nid, resolver->name, new);
 
 			return new;
@@ -299,6 +323,51 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	return ret;
 }
 
+static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const void *))
+{
+	int j;
+	void *saved = oe_malloc(s);
+
+	for(j=1; j<n; ++j) {
+		int i = j-1;
+		void *value = base + j*s;
+
+		while(i >= 0 && cmp(base + i*s, value) > 0) {
+			i--;
+		}
+
+		if(++i == j)
+			continue;
+
+		memmove(saved, value, s);
+		memmove(base+(i+1)*s, base+i*s, s*(j-i));
+		memmove(base+i*s, saved, s);
+	}
+
+	oe_free(saved);
+}
+
+static int cmp_nid(const void *a, const void *b)
+{
+	const nid_entry *nid_a, *nid_b;
+
+	nid_a = a, nid_b = b;
+
+	if(nid_a->old < nid_b->old)
+		return 0;
+
+	return 1;
+}
+
+static void sort_nid_table(resolver_config *table, u32 size)
+{
+	u32 i;
+
+	for(i=0; i<size; ++i) {
+		insert_sort(table[i].nidtable, table[i].nidcount, sizeof(table[i].nidtable[0]), &cmp_nid);
+	}
+}
+
 void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
@@ -326,6 +395,8 @@ void setup_nid_resolver(void)
 			break;
 #endif
 	}
+
+	sort_nid_table(nid_fix, nid_fix_size);
 }
 
 void resolve_syscon_driver(SceModule *mod)

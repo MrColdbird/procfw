@@ -92,7 +92,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdMan_driver")) {
-		patch_sceUmdMan_driver(mod);
+		patch_sceUmdMan_driver((SceModule*)mod);
 		sync_cache();
 	}
 

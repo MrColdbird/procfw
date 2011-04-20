@@ -6,6 +6,7 @@
 #include "printk.h"
 #include "utils.h"
 #include "libs.h"
+#include "strsafe.h"
 
 static char *g_blacklist[] = {
 	"iso",

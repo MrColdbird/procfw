@@ -234,7 +234,6 @@ static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 
 void patch_sceMesgLed()
 {
 	SceModule2 *mod;
-	u32 psp_model;
 	u32 intr, text_addr;
 
 	mod = (SceModule2*)sceKernelFindModuleByName("sceMesgLed");
@@ -243,14 +242,12 @@ void patch_sceMesgLed()
 		return;
 	}
 
-	psp_model = sceKernelGetModel();
 	intr = MAKE_CALL(_mesgled_decrypt);
 	text_addr = mod->text_addr;
-	mesgled_decrypt = (void*)(text_addr+0xE0);
+	mesgled_decrypt = (void*)(text_addr + g_offs->mesgled_decrypt);
 
-	if(psp_model < NELEMS(g_offs->sceMesgLedDecryptGame1) && 
-			g_offs->sceMesgLedDecryptGame1[psp_model] != 0xDEADBEEF &&
-		   	g_offs->sceMesgLedDecryptGame2[psp_model] != 0xDEADBEEF) {
+	if(g_offs->sceMesgLedDecryptGame1[psp_model] != 0xDEADBEEF &&
+			g_offs->sceMesgLedDecryptGame2[psp_model] != 0xDEADBEEF) {
 		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame1[psp_model]);
 		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame2[psp_model]);
 	} else {

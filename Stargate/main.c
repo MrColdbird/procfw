@@ -34,6 +34,7 @@ PSP_MAIN_THREAD_ATTR(0);
 
 static STMOD_HANDLER previous;
 SEConfig conf;
+u32 psp_model;
 u32 psp_fw_version;
 
 #ifdef PSID_CHECK
@@ -152,6 +153,7 @@ int module_start(SceSize args, void *argp)
 		return 1;
 	}
 
+	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/log_stargate.txt");

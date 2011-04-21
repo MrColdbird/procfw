@@ -7,6 +7,7 @@ typedef struct _PatchOffset {
 	u32 fw_version;
 	u32 sceMesgLedDecryptGame1[9];
 	u32 sceMesgLedDecryptGame2[9];
+	u32 mesgled_decrypt;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

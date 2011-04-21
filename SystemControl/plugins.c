@@ -173,23 +173,24 @@ static void load_plugin(char * path, int wait)
 
 static void wait_memory_stick_ready_timeout(int wait)
 {
-	int ret, status = 0, retries = 0;
-	const char *drvname;
+	int retries = 0;
+	SceUID dfd;
 
-	drvname = "mscmhc0:";
+	dfd = -1;
 
 	while(retries < wait / 100000) {
-		ret = sceIoDevctl(drvname, 0x02025801, 0, 0, &status, sizeof(status));
-		retries++;
+		dfd = sceIoDopen("ms0:/");
 
-		if(ret >= 0) {
-			if(status == 4) {
-				break;
-			}
+		if(dfd >= 0) {
+			break;
 		}
 
-		printk("%s devctl(%s) -> 0x%08X, 0x%08X\n", __func__, drvname, ret, status);
 		sceKernelDelayThread(100000);
+		retries++;
+	}
+
+	if(dfd >= 0) {
+		sceIoDclose(dfd);
 	}
 }
 

@@ -222,7 +222,7 @@ static int check_file_is_decrypted(const char *filename)
 	int result = 0, ret;
 	u8 buf[16] __attribute__((aligned(64)));
 
-	if(is_eboot_pbp_path(filename)) {
+	if(!g_is_custom_ps1 && is_eboot_pbp_path(filename)) {
 		goto exit;
 	}
 

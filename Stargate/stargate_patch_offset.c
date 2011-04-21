@@ -30,6 +30,7 @@ PatchOffset g_635_offsets = {
 		0xDEADBEEF, // 08g
 		0x00003540, // 09g
 	},
+	.mesgled_decrypt = 0x000000E0,
 };
 #endif
 
@@ -58,6 +59,7 @@ PatchOffset g_620_offsets = {
 		0xDEADBEEF, // 08g
 		0xDEADBEEF, // 09g
 	},
+	.mesgled_decrypt = 0x000000E0,
 };
 #endif
 

@@ -8,7 +8,9 @@
 #include "strsafe.h"
 #include "rebootex_conf.h"
 
-static void wait_memory_stick_ready_timeout(int is_ef0);
+#define WAIT_MEMORY_STICK_TIMEOUT ( 2 * 1000000 )
+
+static void wait_memory_stick_ready_timeout(int wait);
 
 static void patch_devicename(SceUID modid)
 {
@@ -113,7 +115,7 @@ static char *get_line(int fd, char *linebuf, int bufsiz)
 	return linebuf;
 }
 
-static void load_plugin(char * path, int is_vsh)
+static void load_plugin(char * path, int wait)
 {
 	char linebuf[256], *p, *q;
 	int fd, len;
@@ -121,12 +123,10 @@ static void load_plugin(char * path, int is_vsh)
 	if (path == NULL)
 		return;
 
-	if(0 == strncmp(path, "ef", 2)) {
-		wait_memory_stick_ready_timeout(1);
-	} else if(0 == strncmp(path, "ms", 2) && !is_vsh) {
-		wait_memory_stick_ready_timeout(0);
+	if(wait && 0 == strncmp(path, "ms", 2)) {
+		wait_memory_stick_ready_timeout(wait);
 	}
-	
+
 	fd = sceIoOpen(path, PSP_O_RDONLY, 0777);
 
 	if(fd < 0) {
@@ -171,31 +171,25 @@ static void load_plugin(char * path, int is_vsh)
 	sceIoClose(fd);
 }
 
-static void wait_memory_stick_ready_timeout(int is_ef0)
+static void wait_memory_stick_ready_timeout(int wait)
 {
 	int ret, status = 0, retries = 0;
 	const char *drvname;
 
-	if(is_ef0) {
-		drvname = "mscmhcemu0:";
-	} else {
-		drvname = "mscmhc0:";
-	}
+	drvname = "mscmhc0:";
 
-	while( retries < 50 ) {
+	while(retries < wait / 100000) {
 		ret = sceIoDevctl(drvname, 0x02025801, 0, 0, &status, sizeof(status));
 		retries++;
 
-		if(ret < 0) {
-			sceKernelDelayThread(20000);
-			continue;
+		if(ret >= 0) {
+			if(status == 4) {
+				break;
+			}
 		}
 
-		if(status == 4) {
-			break;
-		}
-
-		sceKernelDelayThread(20000);
+		printk("%s devctl(%s) -> 0x%08X, 0x%08X\n", __func__, drvname, ret, status);
+		sceKernelDelayThread(100000);
 	}
 }
 
@@ -209,23 +203,24 @@ int load_plugins(void)
 
 	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
 		if(psp_model == PSP_GO) {
-			load_plugin("ef0:/seplugins/vsh.txt", 1);
+			load_plugin("ef0:/seplugins/vsh.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		}
 
-		load_plugin("ms0:/seplugins/vsh.txt", 1);
+		// pspgo has smaller wait time
+		load_plugin("ms0:/seplugins/vsh.txt", psp_model == PSP_GO ? WAIT_MEMORY_STICK_TIMEOUT / 10 : WAIT_MEMORY_STICK_TIMEOUT);
 	} //game mode
 	else if(conf.pluggame && key == PSP_INIT_KEYCONFIG_GAME) {
 		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
-			load_plugin("ef0:/seplugins/game.txt", 0);
+			load_plugin("ef0:/seplugins/game.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		} else {
-			load_plugin("ms0:/seplugins/game.txt", 0);
+			load_plugin("ms0:/seplugins/game.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		}
 	} //ps1 mode
 	else if(conf.plugpop && key == PSP_INIT_KEYCONFIG_POPS) {
 		if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
-			load_plugin("ef0:/seplugins/pops.txt", 0);
+			load_plugin("ef0:/seplugins/pops.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		} else {
-			load_plugin("ms0:/seplugins/pops.txt", 0);
+			load_plugin("ms0:/seplugins/pops.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		}
 	}
 

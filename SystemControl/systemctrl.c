@@ -956,3 +956,21 @@ int sctrlPatchModule(const char *modname, u32 inst, u32 offset)
 	
 	return ret;
 }
+
+u32 sctrlModuleTextAddr(char *modname)
+{
+	u32 k1, text_addr;
+	SceModule2 *mod;
+
+	k1 = pspSdkSetK1(0);
+	mod = (SceModule2*) sctrlKernelFindModuleByName(modname);
+	text_addr = 0;
+
+	if(mod != NULL) {
+		text_addr = mod->text_addr;
+	}
+
+	pspSdkSetK1(k1);
+	
+	return text_addr;
+}

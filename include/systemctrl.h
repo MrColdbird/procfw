@@ -304,4 +304,13 @@ int sctrlKernelBootFrom(void);
  */
 int sctrlPatchModule(const char *modname, u32 inst, u32 offset);
 
+/**
+ * Get module text address
+ *
+ * @param modname - module name
+ * 
+ * @return text address, or 0 if not found
+ */
+u32 sctrlModuleTextAddr(char *modname);
+
 #endif

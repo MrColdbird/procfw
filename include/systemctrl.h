@@ -293,4 +293,15 @@ int sctrlKernelQuerySystemCall(void *func_addr);
 
 int sctrlKernelBootFrom(void);
 
+/**
+ * Patch module by offset
+ *
+ * @param modname - module name
+ * @param inst  - instruction
+ * @param offset - module patch offset
+ *
+ * @return < 0 on error
+ */
+int sctrlPatchModule(const char *modname, u32 inst, u32 offset);
+
 #endif

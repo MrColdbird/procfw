@@ -302,7 +302,7 @@ int sctrlKernelBootFrom(void);
  *
  * @return < 0 on error
  */
-int sctrlPatchModule(const char *modname, u32 inst, u32 offset);
+int sctrlPatchModule(char *modname, u32 inst, u32 offset);
 
 /**
  * Get module text address

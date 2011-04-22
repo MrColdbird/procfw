@@ -935,7 +935,7 @@ int sctrlKernelBootFrom(void)
 	return sceKernelBootFrom();
 }
 
-int sctrlPatchModule(const char *modname, u32 inst, u32 offset)
+int sctrlPatchModule(char *modname, u32 inst, u32 offset)
 {
 	u32 k1;
 	SceModule2 *mod;

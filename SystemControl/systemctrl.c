@@ -934,3 +934,25 @@ int sctrlKernelBootFrom(void)
 
 	return sceKernelBootFrom();
 }
+
+int sctrlPatchModule(const char *modname, u32 inst, u32 offset)
+{
+	u32 k1;
+	SceModule2 *mod;
+	int ret;
+
+	k1 = pspSdkSetK1(0);
+	mod = (SceModule2*) sctrlKernelFindModuleByName(modname);
+
+	if(mod != NULL) {
+		_sw(inst, mod->text_addr + offset);
+		sync_cache();
+		ret = 0;
+	} else {
+		ret = -1;
+	}
+
+	pspSdkSetK1(k1);
+	
+	return ret;
+}

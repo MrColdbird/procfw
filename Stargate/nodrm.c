@@ -256,6 +256,18 @@ int myIoOpenAsync(const char *file, int flag, int mode)
 
 	if(is_plain) {
 		fd = sceIoOpenAsync(file, PSP_O_RDONLY, mode);
+
+		if(fd >= 0) {
+			int ret;
+
+			ret = add_nodrm_fd(fd); 
+
+			if (ret < 0) {
+				printk("%s: add_nodrm_fd -> %d\n", __func__, ret);
+			} else {
+				fd = NODRM_MAGIC_FD + ret; 
+			}
+		}
 	} else {
 		fd = sceIoOpenAsync(file, flag, mode);
 	}

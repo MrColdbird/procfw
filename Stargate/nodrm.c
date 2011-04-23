@@ -447,17 +447,18 @@ int myIoClose(SceUID fd)
 	if (real_fd >= 0) {
 		ret = sceIoClose(real_fd);
 
-		if (ret >= 0) {
+		if (ret == 0) {
 			ret = remove_nodrm_fd(real_fd);
 
 			if (ret < 0) {
 				printk("%s: remove_nodrm_fd -> %d\n", __func__, ret);
 			}
+
+			ret = 0;
 		} else {
 			printk("%s: sceIoClose 0x%08X -> 0x%08X\n", __func__, real_fd, ret);
 		}
 		
-//		printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 	} else {
 		ret = sceIoClose(fd);
 	}
@@ -475,12 +476,14 @@ int myIoCloseAsync(SceUID fd)
 	if (real_fd >= 0) {
 		ret = sceIoCloseAsync(real_fd);
 
-		if (ret >= 0) {
+		if (ret == 0) {
 			ret = remove_nodrm_fd(real_fd);
 
 			if (ret < 0) {
 				printk("%s: remove_nodrm_fd -> %d\n", __func__, ret);
 			}
+
+			ret = 0;
 		} else {
 			printk("%s: sceIoCloseAsync 0x%08X -> 0x%08X\n", __func__, real_fd, ret);
 		}

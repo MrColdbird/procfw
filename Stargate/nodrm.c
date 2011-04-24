@@ -20,8 +20,13 @@ typedef struct _NoDrmHookEntry {
 	void *hook_addr;
 } NoDrmHookEntry;
 
-static SceUID *g_fds;
-static u32 g_fds_cnt = 0;
+struct NoDrmFd {
+	SceUID fd;
+	SceUID real_fd;
+	struct NoDrmFd *next;
+};
+
+static struct NoDrmFd *g_head = NULL, *g_tail = NULL;
 
 // found in KHBBS
 static u8 g_drm_magic_1[8] = {
@@ -119,80 +124,112 @@ static inline int is_encrypted_flag(int flag)
 
 static inline SceUID nodrm2real(SceUID nodrm)
 {
-	nodrm -= NODRM_MAGIC_FD;
+	struct NoDrmFd *fds;
 
-	if (nodrm < 0 || nodrm >= g_fds_cnt)
+	if (nodrm < 0)
 		return -1;
 
-	if (g_fds == NULL)
+	for(fds = g_head; fds != NULL; fds = fds->next) {
+		if(fds->fd == nodrm)
+			break;
+	}
+
+	if(fds == NULL)
 		return -2;
 
-	return g_fds[nodrm];
+	return fds->real_fd;
 }
 
-static inline int get_free_nodrm(void)
+static SceUID get_free_fd(void)
 {
-	int i;
+	struct NoDrmFd *fds;
+	SceUID free_fd;
 
-	if (g_fds == NULL)
-		return -1;
+	free_fd = NODRM_MAGIC_FD;
 
-	for(i=0; i<g_fds_cnt; ++i) {
-		if (g_fds[i] == -1) {
-			return i;
+	do {
+		for(fds = g_head; fds != NULL; fds = fds->next) {
+			if(fds->fd == free_fd)
+				break;
 		}
-	}
 
-	return -2;
+		if(fds != NULL) {
+			free_fd++;
+		}
+	} while(fds != NULL);
+
+	return free_fd;
 }
 
-static int add_nodrm_fd(SceUID fd)
+static int add_nodrm_fd(SceUID real_fd)
 {
-	int slot;
+	struct NoDrmFd *slot;
 
-	if (fd < 0)
+	if (real_fd < 0)
 		return -1;
 
 	lock();
-	slot = get_free_nodrm();
+	slot = (struct NoDrmFd*)oe_malloc(sizeof(*slot));
 
-	if(slot < 0) {
+	if(slot == NULL) {
 		unlock();
 
 		return -2;
 	}
 
-	g_fds[slot] = fd;
-	unlock();
-
-	return slot;
-}
-
-static int remove_nodrm_fd(SceUID fd)
-{
-	int i, ret;
-
-	lock();
-
-	if (g_fds == NULL) {
-		unlock();
-
-		return -1;
-	}
+	slot->fd = get_free_fd();
+	slot->real_fd = real_fd;
+	slot->next = NULL;
 	
-	for(i=0; i<g_fds_cnt; ++i) {
-		if (g_fds[i] == fd) {
-			ret = g_fds[i];
-			g_fds[i] = -1;
-			unlock();
-
-			return ret;
-		}
+	if(g_head == NULL) {
+		g_head = g_tail = slot;
+	} else {
+		g_tail->next = slot;
+		g_tail = slot;
 	}
 
 	unlock();
 
-	return -2;
+	return 0;
+}
+
+static int remove_nodrm_fd(SceUID real_fd)
+{
+	int ret;
+	struct NoDrmFd *fds, *prev;
+
+	lock();
+
+	for(prev = NULL, fds = g_head; fds != NULL; prev = fds, fds = fds->next) {
+		if(real_fd == fds->real_fd) {
+			break;
+		}
+	}
+
+	if(fds != NULL) {
+		if(prev == NULL) {
+			g_head = fds->next;
+
+			if(g_head == NULL) {
+				g_tail = NULL;
+			}
+		} else {
+			prev->next = fds->next;
+
+			if(g_tail == fds) {
+				g_tail = prev;
+			}
+		}
+
+		oe_free(fds);
+		ret = 0;
+	} else {
+		ret = -1;
+	}
+
+	unlock();
+
+	return ret;
 }
 
 int myIoOpen(const char *file, int flag, int mode)
@@ -714,27 +751,11 @@ int nodrm_get_npdrm_functions(void)
 
 int nodrm_init(void)
 {
-	int i;
-
 #ifdef DEBUG
 	g_nodrm_sema = sceKernelCreateSema("NoDrmSema", 0, 1, 1, NULL);
 #else
 	g_nodrm_sema = sceKernelCreateSema("", 0, 1, 1, NULL);
 #endif
-
-	g_fds = oe_malloc(sizeof(g_fds[0]) * MAX_NODRM_FD);
-
-	if(g_fds == NULL) {
-		printk("g_fds cannot allocate.\n");
-
-		return -1;
-	}
-
-	g_fds_cnt = MAX_NODRM_FD;
-
-	for(i=0; i<g_fds_cnt; ++i) {
-		g_fds[i] = -1;
-	}
 
 	return 0;
 }

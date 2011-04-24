@@ -12,68 +12,117 @@
 #include "dirent_track.h"
 #include "main.h"
 
-static struct IoDirentEntry g_iodirent[MAX_DIRENT_NUMBER];
+static inline void lock() {}
+static inline void unlock() {}
 
-struct IoDirentEntry *dirent_get_unused(void)
+static struct IoDirentEntry *g_head = NULL, *g_tail = NULL;
+
+static struct IoDirentEntry *dirent_get_unused(void)
 {
-	int i;
+	struct IoDirentEntry *entry;
 
-	for(i=0; i<MAX_DIRENT_NUMBER; ++i) {
-		if(!g_iodirent[i].used) {
-			return &g_iodirent[i];
+	entry = oe_malloc(sizeof(*entry));
+
+	if(entry == NULL) {
+		return entry;
+	}
+
+	memset(entry->path, 0, sizeof(entry->path));
+	entry->dfd = entry->iso_dfd = -1;
+	entry->next = NULL;
+
+	return entry;
+}
+
+static int add_magic_dfd(struct IoDirentEntry *slot)
+{
+	lock();
+
+	if(g_head == NULL) {
+		g_head = g_tail = slot;
+	} else {
+		g_tail->next = slot;
+		g_tail = slot;
+	}
+
+	unlock();
+
+	return 0;
+}
+
+static int remove_magic_dfd(struct IoDirentEntry *slot)
+{
+	int ret;
+	struct IoDirentEntry *fds, *prev;
+
+	lock();
+
+	for(prev = NULL, fds = g_head; fds != NULL; prev = fds, fds = fds->next) {
+		if(slot == fds) {
+			break;
 		}
 	}
 
-	printk("%s: iodirent full\n", __func__);
+	if(fds != NULL) {
+		if(prev == NULL) {
+			g_head = fds->next;
 
-	return NULL;
-}
+			if(g_head == NULL) {
+				g_tail = NULL;
+			}
+		} else {
+			prev->next = fds->next;
 
-void dirent_add(struct IoDirentEntry *p, SceUID dfd, SceUID iso_dfd, const char *path)
-{
-	if(p < g_iodirent || p >=  g_iodirent + MAX_DIRENT_NUMBER) {
-		return;
+			if(g_tail == fds) {
+				g_tail = prev;
+			}
+		}
+
+		oe_free(fds);
+		ret = 0;
+	} else {
+		ret = -1;
 	}
 
-	p->used = 1;
+	unlock();
+
+	return ret;
+}
+
+int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
+{
+	struct IoDirentEntry *p;
+   
+	p = dirent_get_unused();
+
+	if(p == NULL) {
+		return -1;
+	}
+
 	p->dfd = dfd;
 	p->iso_dfd = iso_dfd;
 	STRCPY_S(p->path, path);
-//	printk("%s: 0x%08X 0x%08X %s\n", __func__, dfd, iso_dfd, path);
+	add_magic_dfd(p);
+
+	return 0;
 }
 
 void dirent_remove(struct IoDirentEntry *p)
 {
-	if(p < g_iodirent || p >=  g_iodirent + MAX_DIRENT_NUMBER) {
-		return;
-	}
-
-	memset(p, 0, sizeof(*p));
+	remove_magic_dfd(p);
 }
 
-struct IoDirentEntry *dirent_search(SceUID orig)
+struct IoDirentEntry *dirent_search(SceUID magic)
 {
-	int i;
-	struct IoDirentEntry *p;
+	struct IoDirentEntry *fds;
 
-	if(orig < 0) {
-		p = NULL;
-		goto exit;
+	if (magic < 0)
+		return NULL;
+
+	for(fds = g_head; fds != NULL; fds = fds->next) {
+		if(fds->dfd == magic)
+			break;
 	}
 
-	for(i=0; i<MAX_DIRENT_NUMBER; ++i) {
-		if(g_iodirent[i].used) {
-			if(orig == g_iodirent[i].dfd) {
-				p = &g_iodirent[i];
-				goto exit;
-			}
-		}
-	}
-
-	p = NULL;
-
-exit:
-//	printk("%s: 0x%08X -> 0x%08X\n", __func__, orig, (u32)p);
-
-	return p;
+	return fds;
 }

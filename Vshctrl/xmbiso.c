@@ -146,10 +146,9 @@ SceUID gamedopen(const char * dirname)
 	result = sceIoDopen(dirname);
 	
 	if(is_game_dir(dirname)) {
-		struct IoDirentEntry *entry;
 		char path[256];
 		const char *p;
-		int iso_dfd;
+		int iso_dfd, ret;
 		
 		get_device_name(path, sizeof(path), dirname);
 		STRCAT_S(path, "/ISO");
@@ -159,15 +158,6 @@ SceUID gamedopen(const char * dirname)
 		if(p != NULL) {
 			p += sizeof("/PSP/GAME") - 1;
 			STRCAT_S(path, p);
-		}
-
-		entry = dirent_get_unused();
-
-		if(entry == NULL) {
-			printk("%s: dirent_get_unused -> NULL\n", __func__);
-
-			result = -1;
-			goto exit;
 		}
 
 		k1 = pspSdkSetK1(0);
@@ -182,7 +172,14 @@ SceUID gamedopen(const char * dirname)
 			result = iso_dfd;
 		}
 		
-		dirent_add(entry, result, iso_dfd, dirname);
+		ret = dirent_add(result, iso_dfd, dirname); 
+
+		if(ret < 0) {
+			printk("%s: dirent_add -> %d\n", __func__, ret);
+
+			result = -1;
+			goto exit;
+		}
 	}
 
 exit:

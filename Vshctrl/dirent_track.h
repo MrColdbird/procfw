@@ -2,16 +2,13 @@
 #define DIRENT_TRACK_H
 
 struct IoDirentEntry {
-	u32 used;
+	char path[128];
 	SceUID dfd, iso_dfd;
-	char path[64];
+	struct IoDirentEntry *next;
 };
 
-#define MAX_DIRENT_NUMBER 2
-
-struct IoDirentEntry *dirent_get_unused(void);
-void dirent_add(struct IoDirentEntry *p, SceUID dfd, SceUID iso_dfd, const char *path);
+int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path);
 void dirent_remove(struct IoDirentEntry *p);
-struct IoDirentEntry *dirent_search(SceUID orig);
+struct IoDirentEntry *dirent_search(SceUID magic);
 
 #endif

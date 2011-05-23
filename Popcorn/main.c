@@ -174,7 +174,7 @@ static int myIoClose(SceUID fd)
 		ret = sceIoClose(fd);
 	}
 
-	if(g_plain_doc_fd == fd) {
+	if(g_plain_doc_fd == fd && ret == 0) {
 		g_plain_doc_fd = -1;
 	}
 

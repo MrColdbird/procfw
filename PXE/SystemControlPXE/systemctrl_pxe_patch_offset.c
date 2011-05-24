@@ -36,6 +36,12 @@ PXEPatchOffset *g_pxe_offs = NULL;
 
 void setup_pxe_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_639
+	if(fw_version == g_pxe_639_offsets.fw_version) {
+		g_pxe_offs = &g_pxe_639_offsets;
+	}
+#endif
+
 #ifdef CONFIG_635
 	if(fw_version == g_pxe_635_offsets.fw_version) {
 		g_pxe_offs = &g_pxe_635_offsets;

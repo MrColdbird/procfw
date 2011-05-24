@@ -170,6 +170,12 @@ int menu_setup(void)
 
 	//xmb clock
 	if( cpu2no(cnf.vshcpuspeed) && ( bus2no(cnf.vshbusspeed)))	{		
+
+#ifdef CONFIG_639
+		if(psp_fw_version == FW_639)
+			scePaf_sprintf(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
+#endif
+
 #ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
@@ -189,6 +195,11 @@ int menu_setup(void)
 
 	//game clock
 	if(cpu2no(cnf.umdisocpuspeed) && (bus2no(cnf.umdisobusspeed))) {		
+#ifdef CONFIG_639
+		if(psp_fw_version == FW_639)
+			scePaf_sprintf(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
+#endif
+
 #ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
@@ -208,6 +219,11 @@ int menu_setup(void)
 
 	//usb device
 	if((cnf.usbdevice>0) && (cnf.usbdevice<5)) {
+#ifdef CONFIG_639
+		if(psp_fw_version == FW_639)
+			scePaf_sprintf(device_buf, "Flash %d", cnf.usbdevice-1);	
+#endif
+
 #ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
 			scePaf_sprintf(device_buf, "Flash %d", cnf.usbdevice-1);	

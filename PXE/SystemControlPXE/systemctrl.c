@@ -37,6 +37,11 @@ int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelExitVSH(param);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelExitVSH(param);
@@ -118,6 +123,11 @@ u32 sctrlKernelGetModel(void)
 	u32 model = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			model = sceKernelGetModel();
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			model = sceKernelGetModel();
@@ -151,6 +161,11 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			mod = sceKernelFindModuleByName(modname);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByName(modname);
@@ -174,6 +189,11 @@ int sctrlKernelQuerySystemCall(void *func_addr)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelQuerySystemCall(func_addr);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelQuerySystemCall(func_addr);
@@ -196,6 +216,11 @@ int sctrlKernelCheckExecFile(unsigned char * buffer, int * check)
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelCheckExecFile(buffer, check);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelCheckExecFile(buffer, check);
@@ -216,6 +241,11 @@ int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelLoadModule(path, flags, option);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelLoadModule(path, flags, option);
@@ -236,6 +266,11 @@ int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *statu
 	int ret = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelStartModule(modid, argsize, argp, status, option);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			ret = sceKernelStartModule(modid, argsize, argp, status, option);

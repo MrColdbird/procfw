@@ -26,6 +26,11 @@ u32 sctrlKernelGetModel(void)
 	u32 model = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			model = sceKernelGetModel();
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			model = sceKernelGetModel();
@@ -59,6 +64,11 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			mod = sceKernelFindModuleByName(modname);
+			break;
+#endif
 #ifdef CONFIG_635
 		case FW_635:
 			mod = sceKernelFindModuleByName(modname);

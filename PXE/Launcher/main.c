@@ -274,6 +274,12 @@ int main(int argc, char * argv[])
 
 	psp_fw_version = sceKernelDevkitVersion();
 
+#ifdef CONFIG_639
+	if(psp_fw_version == FW_639) {
+		goto version_OK;
+	}
+#endif
+
 #ifdef CONFIG_620
 	if(psp_fw_version == FW_620) {
 		goto version_OK;

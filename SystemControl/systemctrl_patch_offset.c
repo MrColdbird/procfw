@@ -157,20 +157,20 @@ PatchOffset g_639_offsets = {
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002D5C,
 		.RebootJump = 0x00002DA8,
-		.sceKernelLoadExecWithApiTypeCheck1 = 0x000023B8,
-		.sceKernelLoadExecWithApiTypeCheck2 = 0x000023FC,
-		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
-		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
-	},
-	.loadexec_patch_05g = {
-		// TODO
-		.LoadReboot = 0x00000000,
-		.LoadRebootCall = 0x00002F90,
-		.RebootJump = 0x00002FDC,
 		.sceKernelLoadExecWithApiTypeCheck1 = 0x000023D0,
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002668,
 		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
+	},
+	.loadexec_patch_05g = {
+		// TODO
+		.LoadReboot = 0x00000000,
+		.LoadRebootCall = 0x00002F28,
+		.RebootJump = 0x00002F74,
+		.sceKernelLoadExecWithApiTypeCheck1 = 0x000025A4,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0x000025E8,
+		.sceKernelExitVSHVSHCheck1 = 0x00001674,
+		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
 	},
 	.impose_patch = {
 		6,

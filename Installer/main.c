@@ -11,6 +11,10 @@
 #include "galaxy.h"
 #include "inferno.h"
 
+#ifdef CONFIG_639
+#include "march33.h"
+#endif
+
 #ifdef CONFIG_635
 #include "march33.h"
 #endif
@@ -210,6 +214,13 @@ int install_cfw(void)
 	for(i=0; i<NELEMS(g_old_cfw_files); ++i) {
 		sceIoRemove(g_old_cfw_files[i]);
 	}
+
+#ifdef CONFIG_639
+	if(psp_fw_version == FW_639) {
+		g_file_lists[4].buf = march33;
+		g_file_lists[4].size = &size_march33;
+	}
+#endif
 
 #ifdef CONFIG_635
 	if(psp_fw_version == FW_635) {
@@ -529,6 +540,12 @@ int main(int argc, char *argv[])
 	}
 #endif
 
+#ifdef CONFIG_639
+	if(psp_fw_version == FW_639) {
+		goto version_OK;
+	}
+#endif
+	
 	printf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
 	goto exit;
 	

@@ -73,6 +73,11 @@ int EatKey(SceCtrlData *pad_data, int count)
 
 	// copy true value
 
+#ifdef CONFIG_639
+	if(psp_fw_version == FW_639)
+		scePaf_memcpy(&ctrl_pad, pad_data, sizeof(SceCtrlData));
+#endif
+
 #ifdef CONFIG_635
 	if(psp_fw_version == FW_635)
 		scePaf_memcpy(&ctrl_pad, pad_data, sizeof(SceCtrlData));
@@ -151,6 +156,11 @@ int TSRThread(SceSize args, void *argp)
 	sceKernelChangeThreadPriority(0, 8);
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
+
+#ifdef CONFIG_639
+	if(psp_fw_version == FW_639)
+		scePaf_memcpy(&cnf_old, &cnf, sizeof(SEConfig));
+#endif
 
 #ifdef CONFIG_635
 	if(psp_fw_version == FW_635)

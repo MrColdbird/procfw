@@ -13,7 +13,7 @@ PatchOffset g_639_offsets = {
 		.sceDisplaySetHoldModeCall = 0x00001A14,
 		.HibBlockCheck = 0x000051A8,
 		.SystemVersionStr = 0x0002A1FC,
-		.SystemVersionMessage = "6.35 PRO-%c",
+		.SystemVersionMessage = "6.39 PRO-%c",
 		.SystemVersion = 0x00018F3C,
 		.MacAddressStr = 0x0002E4D8,
 		.HomebrewCheck = 0x000202A8,
@@ -189,6 +189,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_639
+	if(fw_version == g_639_offsets.fw_version) {
+		g_offs = &g_639_offsets;
+	}
+#endif
+
 #ifdef CONFIG_635
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;

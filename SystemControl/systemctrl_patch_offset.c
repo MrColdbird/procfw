@@ -41,9 +41,10 @@ PatchOffset g_639_offsets = {
 		.memlmd_decrypt_call2 = 0x00000FDC,
 	},
 	.mesgled_patch = {
+		// TODO
 		.mesg_decrypt_call = {
 			/*0x457B0CF0  0xE71C010B  0xADF305F0  0x457B0AF0  0x380280F0 */
-			{ 0x00001DF4, 0x00003884, 0x00003AE0, 0x00001E84, 0x00001ADC }, // 01g
+			{ 0x00001DF4, 0x00003914, 0x00003B70, 0x00001E84, 0x00001ADC }, // 01g
 			{ 0x00001EEC, 0x00003DF4, 0x00004098, 0x00001F7C, 0x00001B70 }, // 02g
 			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, 0x00001BB8 }, // 03g
 			{ 0x0000200C, 0x0000431C, 0x00004608, 0x0000209C, 0x00001BB8 }, // 04g
@@ -56,16 +57,16 @@ PatchOffset g_639_offsets = {
 		.mesgled_decrypt = 0x000000E0,
 	},
 	.systemctrl_export_patch = {
-		.sctrlKernelLoadExecVSHWithApitype = 0x0000236C,
-		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025C0,
+		.sctrlKernelLoadExecVSHWithApitype = 0x00002384,
+		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025C0, // TODO
 		.sctrlKernelSetUserLevel = 0x00019E80,
 		.sctrlKernelSetDevkitVersion = 0x88011998,
 		.sctrlHENFindDriver = 0x00002A44,
-		.sctrlKernelSetUMDEmuFile = 0x000099B8,
-		.sctrlKernelSetInitFileName = 0x000099B4,
+		.sctrlKernelSetUMDEmuFile = 0x000099B8, // TODO
+		.sctrlKernelSetInitFileName = 0x000099B4, // TODO
 	},
 	.validate_stub_patch = {
-		.StartModule = 0x00007004,
+		.StartModule = 0x00007000,
 		.StartModuleCall = 0x00000290,
 	},
 	.march33_patch = {
@@ -82,7 +83,7 @@ PatchOffset g_639_offsets = {
 		.FreqCheck = 0x000026C0,
 	},
 	.power_service_patch = {
-		.scePowerGetBacklightMaximumCheck = 0x00000E10,
+		.scePowerGetBacklightMaximumCheck = 0x00000E20,
 	},
 	.nid_resolver_patch = {
 		.sceKernelLinkLibraryEntries = 0x000011D4,
@@ -112,12 +113,12 @@ PatchOffset g_639_offsets = {
 		{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 	},
 	.module_handler_patch = {
-		.ProbeExec3 = 0x00008864,
-		.ProbeExec3Call = 0x00007C6C,
-		.sceKernelCheckExecFileImport = 0x000087E4,
-		.PartitionCheck = 0x00007FE0,
-		.PartitionCheckCall1 = 0x0000652C,
-		.PartitionCheckCall2 = 0x000068A8,
+		.ProbeExec3 = 0x00008860,
+		.ProbeExec3Call = 0x00007C68,
+		.sceKernelCheckExecFileImport = 0x000087E0,
+		.PartitionCheck = 0x00007FDC,
+		.PartitionCheckCall1 = 0x00006528,
+		.PartitionCheckCall2 = 0x000068A4,
 		.DeviceCheck1 = 0x00000760,
 		.DeviceCheck2 = 0x000007C0,
 		.DeviceCheck3 = 0x000030B0,
@@ -126,8 +127,8 @@ PatchOffset g_639_offsets = {
 		.DeviceCheck6 = 0x00003444,
 		.DeviceCheck7 = 0x0000349C,
 		.DeviceCheck8 = 0x000034C8,
-		.PrologueModule = 0x00008134,
-		.PrologueModuleCall = 0x00007058,
+		.PrologueModule = 0x00008130,
+		.PrologueModuleCall = 0x00007054,
 	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x00007DC0,
@@ -154,21 +155,22 @@ PatchOffset g_639_offsets = {
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
-		.LoadRebootCall = 0x00002D44,
-		.RebootJump = 0x00002D90,
+		.LoadRebootCall = 0x00002D5C,
+		.RebootJump = 0x00002DA8,
 		.sceKernelLoadExecWithApiTypeCheck1 = 0x000023B8,
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x000023FC,
 		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
 		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
 	},
 	.loadexec_patch_05g = {
+		// TODO
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002F90,
 		.RebootJump = 0x00002FDC,
-		.sceKernelLoadExecWithApiTypeCheck1 = 0x0000260C,
-		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002650,
-		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
-		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
+		.sceKernelLoadExecWithApiTypeCheck1 = 0x000023D0,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002668,
+		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
+		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
 	},
 	.impose_patch = {
 		6,
@@ -537,6 +539,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_639
+	if(fw_version == g_639_offsets.fw_version) {
+		g_offs = &g_639_offsets;
+	}
+#endif
+
 #ifdef CONFIG_635
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;

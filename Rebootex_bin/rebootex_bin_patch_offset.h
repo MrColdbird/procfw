@@ -53,23 +53,24 @@ PatchOffset g_639_offsets = {
 	.iCacheFlushAll = 0x000001E4,
 	.dCacheFlushAll = 0x00000938,
 	.rebootex_patch_01g = {
-		.sceBootLfatOpen = 0x00008624,
-		.sceBootLfatRead = 0x00008798,
-		.sceBootLfatClose = 0x0000873C,
-		.UnpackBootConfig = 0x0000588C,
-		.sceBootLfatOpenCall = 0x00002764,
-		.sceBootLfatReadCall = 0x000027D4,
-		.sceBootLfatCloseCall = 0x00002800,
-		.UnpackBootConfigCall = 0x00007348,
-		.RebootexCheck1 = 0x0000389C,
-		.RebootexCheck2 = 0x0000275C,
-		.RebootexCheck3 = 0x000027B0,
-		.RebootexCheck4 = 0x000027C8,
-		.RebootexCheck5 = 0x00007648,
-		.LoadCoreModuleStartCall = 0x00005764,
-		.UnpackBootConfigBufferAddress = 0x00007308,
+		.sceBootLfatOpen = 0x00008250,
+		.sceBootLfatRead = 0x000083C4,
+		.sceBootLfatClose = 0x00008368,
+		.UnpackBootConfig = 0x0000569C,
+		.sceBootLfatOpenCall = 0x00002768,
+		.sceBootLfatReadCall = 0x000027D8,
+		.sceBootLfatCloseCall = 0x00002804,
+		.UnpackBootConfigCall = 0x0000711C,
+		.RebootexCheck1 = 0x00003848,
+		.RebootexCheck2 = 0x00002760,
+		.RebootexCheck3 = 0x000027B4,
+		.RebootexCheck4 = 0x000027CC,
+		.RebootexCheck5 = 0x000073B4,
+		.LoadCoreModuleStartCall = 0x00005594,
+		.UnpackBootConfigBufferAddress = 0x000070F8,
 	},
 	.rebootex_patch_other = {
+		// TODO
 		.sceBootLfatOpen = 0x000086F0,
 		.sceBootLfatRead = 0x00008864,
 		.sceBootLfatClose = 0x00008808,
@@ -204,6 +205,12 @@ PatchOffset *g_offs = NULL;
 
 static inline void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_639
+	if(fw_version == g_639_offsets.fw_version) {
+		g_offs = &g_639_offsets;
+	}
+#endif
+
 #ifdef CONFIG_635
 	if(fw_version == g_635_offsets.fw_version) {
 		g_offs = &g_635_offsets;

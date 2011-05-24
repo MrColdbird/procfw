@@ -252,7 +252,6 @@ void do_exploit(void)
 	}
 
 	sceHttpStorageOpen(-612, 0, 0);
-	sceKernelDelayThread(100000);
 	sync_cache();
 	sceHttpStorageOpen((g_offs->sceKernelPowerLockForUser>>2), 0, 0); // scePowerLock override
 	sync_cache();

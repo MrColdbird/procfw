@@ -13,6 +13,11 @@ CFLAGS += -DCONFIG_635=1
 PSP_FW_VERSION = 635
 endif
 
+ifeq ($(CONFIG_639), 1)
+CFLAGS += -DCONFIG_639=1
+PSP_FW_VERSION = 639
+endif
+
 LDFLAGS = -mno-crt0 -nostartfiles -L ../libs
 LIBS += -lpspsystemctrl_kernel -lpspkubridge
 

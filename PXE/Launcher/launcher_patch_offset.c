@@ -1,8 +1,30 @@
 #include <pspsdk.h>
 #include "launcher_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620)
-#error You have to define CONFIG_620 or CONFIG_635
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#endif
+
+#ifdef CONFIG_639
+PatchOffset g_639_offsets = {
+	.fw_version = FW_639,
+	.sceKernelIcacheInvalidateAll = 0x88000E98,
+	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
+	.sceKernelFindModuleByName = 0x88017000 + 0x000072D8,
+	.sceKernelGetModel = 0x8800A13C,
+	.loadexec_patch_05g = {
+		.LoadReboot = 0x00000000,
+		.LoadRebootCall = 0x00002F90,
+		.RebootJump = 0x00002FDC,
+	},
+	.loadexec_patch_other= {
+		.LoadReboot = 0x00000000,
+		.LoadRebootCall = 0x00002D44,
+		.RebootJump = 0x00002D90,
+	},
+	.sceKernelPowerLockForUser = 0x8800CC34,
+	.sceKernelPowerLockForUser_data_offset = 0x000040F4,
+};
 #endif
 
 #ifdef CONFIG_635

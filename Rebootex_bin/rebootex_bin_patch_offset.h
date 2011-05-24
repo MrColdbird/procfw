@@ -4,8 +4,8 @@
 #include <pspsdk.h>
 #include "utils.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620)
-#error You have to define CONFIG_620 or CONFIG_635
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
 #endif
 
 struct RebootexPatch {
@@ -46,6 +46,57 @@ typedef struct _PatchOffset {
 } PatchOffset;
 
 extern PatchOffset *g_offs;
+
+#ifdef CONFIG_639
+PatchOffset g_639_offsets = {
+	.fw_version = FW_639,
+	.iCacheFlushAll = 0x000001E4,
+	.dCacheFlushAll = 0x00000938,
+	.rebootex_patch_01g = {
+		.sceBootLfatOpen = 0x00008624,
+		.sceBootLfatRead = 0x00008798,
+		.sceBootLfatClose = 0x0000873C,
+		.UnpackBootConfig = 0x0000588C,
+		.sceBootLfatOpenCall = 0x00002764,
+		.sceBootLfatReadCall = 0x000027D4,
+		.sceBootLfatCloseCall = 0x00002800,
+		.UnpackBootConfigCall = 0x00007348,
+		.RebootexCheck1 = 0x0000389C,
+		.RebootexCheck2 = 0x0000275C,
+		.RebootexCheck3 = 0x000027B0,
+		.RebootexCheck4 = 0x000027C8,
+		.RebootexCheck5 = 0x00007648,
+		.LoadCoreModuleStartCall = 0x00005764,
+		.UnpackBootConfigBufferAddress = 0x00007308,
+	},
+	.rebootex_patch_other = {
+		.sceBootLfatOpen = 0x000086F0,
+		.sceBootLfatRead = 0x00008864,
+		.sceBootLfatClose = 0x00008808,
+		.UnpackBootConfig = 0x0000595C,
+		.sceBootLfatOpenCall = 0x00002834,
+		.sceBootLfatReadCall = 0x000028A4,
+		.sceBootLfatCloseCall = 0x000028D0,
+		.UnpackBootConfigCall = 0x00007438,
+		.RebootexCheck1 = 0x0000396C,
+		.RebootexCheck2 = 0x0000282C,
+		.RebootexCheck3 = 0x00002880,
+		.RebootexCheck4 = 0x00002898,
+		.RebootexCheck5 = 0x00007714,
+		.LoadCoreModuleStartCall = 0x00005834,
+		.UnpackBootConfigBufferAddress = 0x000073F8,
+	},
+	.loadcore_patch = {
+		.DecryptPSP = 0x00007B08 - 0x00000BBC,
+		.sceKernelCheckExecFile = 0x00007AE8 - 0x00000BBC,
+		.DecryptPSPCall1 = 0x000041A4 - 0x00000BBC,
+		.DecryptPSPCall2 = 0x00005CA4 - 0x00000BBC,
+		.sceKernelCheckExecFileCall1 = 0x00005CC8 - 0x00000BBC,
+		.sceKernelCheckExecFileCall2 = 0x00005CF8 - 0x00000BBC,
+		.sceKernelCheckExecFileCall3 = 0x00005D90 - 0x00000BBC,
+	},
+};
+#endif
 
 #ifdef CONFIG_635
 PatchOffset g_635_offsets = {

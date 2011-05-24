@@ -1,8 +1,37 @@
 #include <pspsdk.h>
 #include "stargate_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620)
-#error You have to define CONFIG_620 or CONFIG_635
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#endif
+
+#ifdef CONFIG_639
+PatchOffset g_639_offsets = {
+	.fw_version = FW_639,
+	.sceMesgLedDecryptGame1 = {
+		0x00002B28, // 01g
+		0x00002F08, // 02g
+		0x000032A8, // 03g
+		0x000032A8, // 04g
+		0x00003614, // 05g
+		0xDEADBEEF, // 06g
+		0x000032A8, // 07g
+		0xDEADBEEF, // 08g
+		0x000032A8, // 09g
+	},
+	.sceMesgLedDecryptGame2 = {
+		0x00002DC0, // 01g
+		0x000031A0, // 02g
+		0x00003540, // 03g
+		0x00003540, // 04g
+		0x000038AC, // 05g
+		0xDEADBEEF, // 06g
+		0x00003540, // 07g
+		0xDEADBEEF, // 08g
+		0x00003540, // 09g
+	},
+	.mesgled_decrypt = 0x000000E0,
+};
 #endif
 
 #ifdef CONFIG_635

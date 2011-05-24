@@ -1,8 +1,17 @@
 #include <pspsdk.h>
 #include "systemctrl_pxe_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620)
-#error You have to define CONFIG_620 or CONFIG_635
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#endif
+
+#ifdef CONFIG_639
+PXEPatchOffset g_pxe_639_offsets = {
+	.fw_version = FW_639,
+	.vsh_module_patch = {
+		.module_start = 0x0000F570,
+	},
+};
 #endif
 
 #ifdef CONFIG_635

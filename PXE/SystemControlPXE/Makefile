@@ -25,6 +25,11 @@ CFLAGS += -DCONFIG_635=1
 PSP_FW_VERSION = 635
 endif
 
+ifeq ($(CONFIG_639), 1)
+CFLAGS += -DCONFIG_639=1
+PSP_FW_VERSION = 639
+endif
+
 BUILD_PRX = 1
 PRX_EXPORTS = exports.exp
 

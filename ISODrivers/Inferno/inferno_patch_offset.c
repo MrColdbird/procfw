@@ -1,8 +1,20 @@
 #include <pspsdk.h>
 #include "inferno_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620)
-#error You have to define CONFIG_620 or CONFIG_635
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#endif
+
+#ifdef CONFIG_639
+PatchOffset g_639_offsets = {
+	.fw_version = FW_639,
+	.patches = {
+		0x00004020,
+		0x00004058,
+		0x0000410C,
+		0x000042E8,
+	},
+};
 #endif
 
 #ifdef CONFIG_635

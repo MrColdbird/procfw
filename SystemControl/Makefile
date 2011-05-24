@@ -64,6 +64,12 @@ OBJS += nid_635_data.o
 PSP_FW_VERSION = 635
 endif
 
+ifeq ($(CONFIG_639), 1)
+CFLAGS += -DCONFIG_639=1
+OBJS += nid_639_data.o
+PSP_FW_VERSION = 639
+endif
+
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 

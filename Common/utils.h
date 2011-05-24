@@ -1,6 +1,7 @@
 #ifndef UTILS_H
 #define UTILS_H
 
+#define FW_639 0x06030910
 #define FW_635 0x06030510
 #define FW_620 0x06020010
 

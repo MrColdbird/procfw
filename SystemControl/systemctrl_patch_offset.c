@@ -87,9 +87,9 @@ PatchOffset g_639_offsets = {
 	},
 	.nid_resolver_patch = {
 		.sceKernelLinkLibraryEntries = 0x000011D4,
-		.sceKernelLinkLibraryEntriesCall = 0x0000844C,
+		.sceKernelLinkLibraryEntriesCall = 0x00008448,
 		.sceKernelLinkLibraryEntriesForUser = 0x00002924,
-		.sceKernelLinkLibraryEntriesForUserCall = 0x00008198,
+		.sceKernelLinkLibraryEntriesForUserCall = 0x00008194,
 		.sceKernelIcacheClearAll = 0x000077CC,
 		.sceSysconPowerStandby = 0x00002C6C,
 	},

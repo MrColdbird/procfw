@@ -17,8 +17,8 @@ typedef struct _PatchOffset {
 	u32 sceKernelGetModel;
 	struct sceLoadExecPatch loadexec_patch_05g;
 	struct sceLoadExecPatch loadexec_patch_other;
-	u32 patchRangeStart;
-	u32 patchRangeEnd;
+	u32 sceKernelPowerLockForUser;
+	u16 sceKernelPowerLockForUser_data_offset;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

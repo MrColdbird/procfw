@@ -317,9 +317,9 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	text_addr = mod->text_addr;
 
 	if (psp_model == PSP_GO) {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype_05g); // 0x00002558 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype_05g);
 	} else {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype); // 0x00002304 in 6.20
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype);
 	}
 
 	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);

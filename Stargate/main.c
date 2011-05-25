@@ -88,10 +88,19 @@ static int stargate_module_chain(SceModule2 *mod)
 	if (previous)
 		(*previous)(mod);
 
-	if(psp_fw_version == FW_635 || psp_fw_version == FW_620) {
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
 		// for MHP3rd: a 6.36 game
 		hook_import_bynid((SceModule*)mod, "scePauth", 0x98B83B5D, myPauth_98B83B5D, 1);
 	}
+#endif
+
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		// for MHP3rd: a 6.36 game
+		hook_import_bynid((SceModule*)mod, "scePauth", 0x98B83B5D, myPauth_98B83B5D, 1);
+	}
+#endif
 
 	patch_utility((SceModule*)mod);
 	patch_load_module((SceModule*)mod);
@@ -163,7 +172,19 @@ int module_start(SceSize args, void *argp)
 	printk("stargate started\n");
 	sctrlSEGetConfig(&conf);
 	patch_sceMesgLed();
-	myPauth_init();
+
+#ifdef CONFIG_620
+	if(psp_fw_version == FW_620) {
+		myPauth_init();
+	}
+#endif
+
+#ifdef CONFIG_635
+	if(psp_fw_version == FW_635) {
+		myPauth_init();
+	}
+#endif
+
 	load_module_get_function();
 
 	if(conf.usenodrm) {

@@ -157,7 +157,7 @@ PatchOffset g_639_offsets = {
 		.LoadRebootCall = 0x00002D5C,
 		.RebootJump = 0x00002DA8,
 		.sceKernelLoadExecWithApiTypeCheck1 = 0x000023D0,
-		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002668,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002414,
 		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
 	},

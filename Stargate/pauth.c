@@ -9,6 +9,12 @@
 #include "stargate.h"
 #include "utils.h"
 
+#if !defined(CONFIG_620) && !defined(CONFIG_635)
+int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key)
+{
+	return 0;
+}
+#else
 static SceUID g_sema = -1;
 
 typedef struct {
@@ -116,3 +122,4 @@ int myPauth_init(void)
 
 	return g_sema >= 0 ? 0 : -1;
 }
+#endif

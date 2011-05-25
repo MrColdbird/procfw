@@ -498,7 +498,7 @@ int sub_00000514(int fd)
 
 	if(fd == g_iso_fd) {
 		g_iso_fd = -1;
-		_sw(-1, g_sceNp9660_driver_text_addr + g_offs->StoreFd2);
+		_sw(-1, g_sceNp9660_driver_text_addr + g_offs->StoreFd);
 		clear_cache();
 
 		return ret;

@@ -68,6 +68,7 @@ int PatchLoadCore(void * arg1, void * arg2, void * arg3, int (* module_bootstart
 int AddPRX(char * buffer, char * insertafter, char * prxname, u32 flags);
 void RenameModule(void *buffer, char *mod_name, char *new_mod_name);
 void load_configure(void);
+void freezeme(unsigned int color);
 
 //reboot function
 void (* reboot)(int arg1, int arg2, int arg3, int arg4) = (void *)REBOOT_START;
@@ -493,4 +494,13 @@ void RenameModule(void *buffer, char *mod_name, char *new_mod_name)
 		return;
 
 	_strcpy(names_start + pmod->module_path, new_mod_name);
+}
+
+void freezeme(unsigned int color)
+{
+	while(1)
+	{
+		unsigned int *p = (unsigned int*) 0x04000000;
+		while (p < (unsigned int*) 0x04400000) *p++ = color;
+	}
 }

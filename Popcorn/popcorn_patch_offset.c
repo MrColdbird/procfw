@@ -9,60 +9,60 @@
 PatchOffset g_639_offsets = {
 	.fw_version = FW_639,
 	.popsman_patch = {
-		.sceIoOpenImport = 0x00003B98,
-		.sceIoLseekImport = 0x00003BA0,
-		.sceIoIoctlImport = 0x00003BA8,
-		.sceIoReadImport = 0x00003BB0,
-		.sceIoReadAsyncImport = 0x00003BC8,
-		.sceIoGetstatImport = 0x00003BD0,
-		.sceIoCloseImport = 0x00003BC0,
+		.sceIoOpenImport = 0x00003BA8,
+		.sceIoLseekImport = 0x00003BB0,
+		.sceIoIoctlImport = 0x00003BB8,
+		.sceIoReadImport = 0x00003BC0,
+		.sceIoReadAsyncImport = 0x00003BD8,
+		.sceIoGetstatImport = 0x00003BE0,
+		.sceIoCloseImport = 0x00003BD0,
 		.get_rif_path = 0x00000190,
 		.get_rif_path_call1 = 0x00002798,
 		.get_rif_path_call2 = 0x00002C58,
 		.sceNpDrmGetVersionKeyCall = 0x000029C4,
 		.scePspNpDrm_driver_9A34AC9F_Call = 0x00002DA8,
 		.scePopsManLoadModuleCheck = 0x00001E80,
-		.sceDrmBBCipherInitImport = 0x00003CB0,
-		.sceDrmBBCipherUpdateImport = 0x00003CA8,
-		.sceDrmBBCipherFinalImport = 0x00003CC8,
-		.sceDrmBBMacInitImport = 0x00003CB8,
-		.sceDrmBBMacUpdateImport = 0x00003CC0,
-		.sceDrmBBMacFinalImport = 0x00003CD0,
-		.sceDrmBBMacFinal2Import = 0x00003CD8,
+		.sceDrmBBCipherInitImport = 0x00003CC0,
+		.sceDrmBBCipherUpdateImport = 0x00003CB8,
+		.sceDrmBBCipherFinalImport = 0x00003CD8,
+		.sceDrmBBMacInitImport = 0x00003CC8,
+		.sceDrmBBMacUpdateImport = 0x00003CD0,
+		.sceDrmBBMacFinalImport = 0x00003CE0,
+		.sceDrmBBMacFinal2Import = 0x00003CE8,
 	},
 	.pops_patch = {
 		.decomp = {
-			{ 0x000D5404, 0x0000DAC0 }, // 01G
-			{ 0x000D64BC, 0x0000DAC0 }, // 02G
-			{ 0x000D64BC, 0x0000DAC0 }, // 03G
-			{ 0x000D64FC, 0x0000DB00 }, // 04G
-			{ 0x000D8488, 0x0000E218 }, // 05G
+			{ 0x000D5654, 0x0000DC04 }, // 01G
+			{ 0x000D671C, 0x0000DC04 }, // 02G
+			{ 0x000D671C, 0x0000DC04 }, // 03G
+			{ 0x000D670C, 0x0000DC08 }, // 04G
+			{ 0x000D8488, 0x0000E218 }, // 05G TODO
 			{ 0x00000000, 0x00000000 }, // unused
-			{ 0x000D64FC, 0x0000DB00 }, // 07G
+			{ 0x000D670C, 0x0000DC08 }, // 07G
 			{ 0x00000000, 0x00000000 }, // unused
-			{ 0x000D64FC, 0x0000DB00 }, // 09G
+			{ 0x000D670C, 0x0000DC08 }, // 09G
 		},
 		.ICON0SizeOffset = {
-			0x00036CF8, // 01G
-			0x00037D34, // 02G
-			0x00037D34, // 03G
-			0x00037D74, // 04G
-			0x00039B5C, // 05G
+			0x00036F54, // 01G
+			0x00037F90, // 02G
+			0x00037F90, // 03G
+			0x00037F90, // 04G
+			0x00039B5C, // 05G TODO
 			0xDEADBEEF, // unused
-			0x00037D74, // 07G
+			0x00037F90, // 07G
 			0xDEADBEEF, // unused
-			0x00037D74, // 09G
+			0x00037F90, // 09G
 		},
 		.manualNameCheck = {
-			0x000251C0, // 01G
-			0x000256CC, // 02G
-			0x000256CC, // 03G
-			0x0002570C, // 04G
-			0x00025FA0, // 05G
+			0x0002541C, // 01G
+			0x00025928, // 02G
+			0x00025928, // 03G
+			0x00025928, // 04G
+			0x00025FA0, // 05G TODO
 			0xDEADBEEF, // unused
-			0x0002570C, // 07G
+			0x00025928, // 07G
 			0xDEADBEEF, // unused
-			0x0002570C, // 09G
+			0x00025928, // 09G
 		},
 		.sceMeAudio_67CD7972_NID = 0x67CD7972,
 	},

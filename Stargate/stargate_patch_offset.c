@@ -9,26 +9,26 @@
 PatchOffset g_639_offsets = {
 	.fw_version = FW_639,
 	.sceMesgLedDecryptGame1 = {
-		0x00002B28, // 01g
-		0x00002F08, // 02g
-		0x000032A8, // 03g
-		0x000032A8, // 04g
-		0x00003614, // 05g
+		0x00002BB8, // 01g
+		0x00002F98, // 02g
+		0x00003338, // 03g
+		0x00003338, // 04g
+		0x00003614, // 05g TODO
 		0xDEADBEEF, // 06g
-		0x000032A8, // 07g
+		0x00003338, // 07g
 		0xDEADBEEF, // 08g
-		0x000032A8, // 09g
+		0x00003338, // 09g
 	},
 	.sceMesgLedDecryptGame2 = {
-		0x00002DC0, // 01g
-		0x000031A0, // 02g
-		0x00003540, // 03g
-		0x00003540, // 04g
-		0x000038AC, // 05g
+		0x00002E50, // 01g
+		0x00003230, // 02g
+		0x000035D0, // 03g
+		0x000035D0, // 04g
+		0x000038AC, // 05g TODO
 		0xDEADBEEF, // 06g
-		0x00003540, // 07g
+		0x000035D0, // 07g
 		0xDEADBEEF, // 08g
-		0x00003540, // 09g
+		0x000035D0, // 09g
 	},
 	.mesgled_decrypt = 0x000000E0,
 };

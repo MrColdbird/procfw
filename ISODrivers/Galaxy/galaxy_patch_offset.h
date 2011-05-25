@@ -6,7 +6,6 @@
 typedef struct _PatchOffset {
 	u32 fw_version;
 	u32 StoreFd;
-	u32 StoreFd2;
 	u32 Data1;
 	u32 Data2;
 	u32 Data3;

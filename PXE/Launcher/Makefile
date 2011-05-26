@@ -1,5 +1,5 @@
 TARGET = pxe_launcher
-OBJS = main.o imports.o launcher_patch_offset.o ../../Common/utils.o
+OBJS = main.o imports.o launcher_patch_offset.o syscall.o ../../Common/utils.o
 EXTRA_CLEAN = Rebootex_prx.h Installer.h
 
 all: $(OBJS)
@@ -38,6 +38,7 @@ PSP_EBOOT_TITLE = 635
 endif
 
 ifeq ($(CONFIG_639), 1)
+OBJS += kxp_639.o
 CFLAGS += -DCONFIG_639=1
 PSP_FW_VERSION = 639
 PSP_EBOOT_TITLE = 639

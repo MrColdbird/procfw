@@ -1,5 +1,5 @@
 TARGET = fast_recovery
-OBJS = main.o imports.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o
+OBJS = main.o imports.o syscall.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o
 LIBS =
 CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
 CXXFLAGS = $(CFLAGS)
@@ -27,6 +27,7 @@ endif
 
 ifeq ($(CONFIG_639), 1)
 CFLAGS += -DCONFIG_639=1
+OBJS += kxp_639.o
 PSP_FW_VERSION = 639
 PSP_EBOOT_TITLE = 639
 endif

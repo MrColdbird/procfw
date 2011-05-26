@@ -413,8 +413,8 @@ PatchOffset g_620_offsets = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
 		.sctrlKernelSetDevkitVersion = 0x88011AAC,
 		.sctrlHENFindDriver = 0x00002A38,
-		.sctrlKernelSetUMDEmuFile = 0x00009990 + 0x00000008;   /* See 0x00005BFC */
-		.sctrlKernelSetInitFileName = 0x00009990 + 0x00000004; /* See 0x00004F28 */
+		.sctrlKernelSetUMDEmuFile = 0x00009990 + 0x00000008,   /* See 0x00005BFC */
+		.sctrlKernelSetInitFileName = 0x00009990 + 0x00000004, /* See 0x00004F28 */
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00006FD4,

@@ -13,7 +13,7 @@ PatchOffset g_639_offsets = {
 		0x00002F98, // 02g
 		0x00003338, // 03g
 		0x00003338, // 04g
-		0x00003614, // 05g TODO
+		0x000036A4, // 05g
 		0xDEADBEEF, // 06g
 		0x00003338, // 07g
 		0xDEADBEEF, // 08g
@@ -24,7 +24,7 @@ PatchOffset g_639_offsets = {
 		0x00003230, // 02g
 		0x000035D0, // 03g
 		0x000035D0, // 04g
-		0x000038AC, // 05g TODO
+		0x0000393C, // 05g
 		0xDEADBEEF, // 06g
 		0x000035D0, // 07g
 		0xDEADBEEF, // 08g

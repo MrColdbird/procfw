@@ -12,10 +12,10 @@ PatchOffset g_639_offsets = {
 	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
 	.sceKernelFindModuleByName = 0x88017000 + 0x000072D8,
 	.sceKernelGetModel = 0x8800A13C,
-	.loadexec_patch_05g = { // TODO
+	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
-		.LoadRebootCall = 0x00002F90,
-		.RebootJump = 0x00002FDC,
+		.LoadRebootCall = 0x00002FA8,
+		.RebootJump = 0x00002FF4,
 	},
 	.loadexec_patch_other= {
 		.LoadReboot = 0x00000000,

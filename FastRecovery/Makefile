@@ -25,12 +25,17 @@ PSP_FW_VERSION = 635
 PSP_EBOOT_TITLE = 635
 endif
 
+ifeq ($(CONFIG_639), 1)
+CFLAGS += -DCONFIG_639=1
+PSP_FW_VERSION = 639
+PSP_EBOOT_TITLE = 639
+endif
+
 BUILD_PRX = 1
 PSP_EBOOT_TITLE += PRO-B Fast Recovery
 
 EXTRA_TARGETS = EBOOT.PBP
 PSP_EBOOT_ICON = ICON0.PNG
-PSP_FW_VERSION = 635
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

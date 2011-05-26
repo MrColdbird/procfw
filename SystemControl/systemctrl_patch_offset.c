@@ -47,7 +47,7 @@ PatchOffset g_639_offsets = {
 			{ 0x00001EEC, 0x00003E84, 0x00004128, 0x00001F7C, 0x00001B70 }, // 02g
 			{ 0x0000200C, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 03g
 			{ 0x0000200C, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 04g
-			{ 0x00002134, 0x000047F0, 0x00004B24, 0x000021C4, 0x00001C04 }, // 05g TODO
+			{ 0x00002134, 0x00004880, 0x00004BB4, 0x000021C4, 0x00001C04 }, // 05g
 			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 06g
 			{ 0x0000200C, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 07g
 			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 08g
@@ -57,12 +57,12 @@ PatchOffset g_639_offsets = {
 	},
 	.systemctrl_export_patch = {
 		.sctrlKernelLoadExecVSHWithApitype = 0x00002384,
-		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025C0, // TODO
+		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025D8,
 		.sctrlKernelSetUserLevel = 0x00019E80,
 		.sctrlKernelSetDevkitVersion = 0x88011998,
 		.sctrlHENFindDriver = 0x00002A44,
-		.sctrlKernelSetUMDEmuFile = 0x000099B8, // TODO
-		.sctrlKernelSetInitFileName = 0x000099B4, // TODO
+		.sctrlKernelSetUMDEmuFile = 0x000099A0 + 0x00000008,   /* See 0x00005C28 */
+		.sctrlKernelSetInitFileName = 0x000099A0 + 0x00000004, /* See 0x00004F54 */
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00007000,
@@ -162,14 +162,13 @@ PatchOffset g_639_offsets = {
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
 	},
 	.loadexec_patch_05g = {
-		// TODO
 		.LoadReboot = 0x00000000,
-		.LoadRebootCall = 0x00002F28,
-		.RebootJump = 0x00002F74,
-		.sceKernelLoadExecWithApiTypeCheck1 = 0x000025A4,
-		.sceKernelLoadExecWithApiTypeCheck2 = 0x000025E8,
-		.sceKernelExitVSHVSHCheck1 = 0x00001674,
-		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
+		.LoadRebootCall = 0x00002FA8,
+		.RebootJump = 0x00002FF4,
+		.sceKernelLoadExecWithApiTypeCheck1 = 0x00002624,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002668,
+		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
+		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
 	},
 	.impose_patch = {
 		6,
@@ -238,8 +237,8 @@ PatchOffset g_635_offsets = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
 		.sctrlKernelSetDevkitVersion = 0x88011998,
 		.sctrlHENFindDriver = 0x00002A44,
-		.sctrlKernelSetUMDEmuFile = 0x000099B8,
-		.sctrlKernelSetInitFileName = 0x000099B4,
+		.sctrlKernelSetUMDEmuFile = 0x000099B0 + 0x00000008,   /* See 0x00005C2C */
+		.sctrlKernelSetInitFileName = 0x000099B0 + 0x00000004, /* See 0x00004F58 */
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00007004,
@@ -414,8 +413,8 @@ PatchOffset g_620_offsets = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
 		.sctrlKernelSetDevkitVersion = 0x88011AAC,
 		.sctrlHENFindDriver = 0x00002A38,
-		.sctrlKernelSetUMDEmuFile = 0x00009998,
-		.sctrlKernelSetInitFileName = 0x00009994,
+		.sctrlKernelSetUMDEmuFile = 0x00009990 + 0x00000008;   /* See 0x00005BFC */
+		.sctrlKernelSetInitFileName = 0x00009990 + 0x00000004; /* See 0x00004F28 */
 	},
 	.validate_stub_patch = {
 		.StartModule = 0x00006FD4,

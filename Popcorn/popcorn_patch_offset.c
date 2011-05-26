@@ -36,7 +36,7 @@ PatchOffset g_639_offsets = {
 			{ 0x000D671C, 0x0000DC04 }, // 02G
 			{ 0x000D671C, 0x0000DC04 }, // 03G
 			{ 0x000D670C, 0x0000DC04 }, // 04G
-			{ 0x000D8488, 0x0000E218 }, // 05G TODO
+			{ 0x000D8698, 0x0000E31C }, // 05G
 			{ 0x00000000, 0x00000000 }, // unused
 			{ 0x000D670C, 0x0000DC04 }, // 07G
 			{ 0x00000000, 0x00000000 }, // unused
@@ -47,7 +47,7 @@ PatchOffset g_639_offsets = {
 			0x00037F90, // 02G
 			0x00037F90, // 03G
 			0x00037F90, // 04G
-			0x00039B5C, // 05G TODO
+			0x00039D78, // 05G
 			0xDEADBEEF, // unused
 			0x00037F90, // 07G
 			0xDEADBEEF, // unused
@@ -58,7 +58,7 @@ PatchOffset g_639_offsets = {
 			0x00025928, // 02G
 			0x00025928, // 03G
 			0x00025928, // 04G
-			0x00025FA0, // 05G TODO
+			0x000261BC, // 05G
 			0xDEADBEEF, // unused
 			0x00025928, // 07G
 			0xDEADBEEF, // unused

@@ -22,6 +22,8 @@ PatchOffset g_639_offsets = {
 		.LoadRebootCall = 0x00002D5C,
 		.RebootJump = 0x00002DA8,
 	},
+	.patchRangeStart = 0xDEADBEEF,
+	.patchRangeEnd = 0xDEADBEEF,
 	.sceKernelPowerLockForUser = 0x8800CC34,
 	.sceKernelPowerLockForUser_data_offset = 0x000040F4,
 };
@@ -44,6 +46,8 @@ PatchOffset g_635_offsets = {
 		.LoadRebootCall = 0x00002D44,
 		.RebootJump = 0x00002D90,
 	},
+	.patchRangeStart = 0x0000A110,
+	.patchRangeEnd = 0x0000A1F0,
 	.sceKernelPowerLockForUser = 0x8800CC34,
 	.sceKernelPowerLockForUser_data_offset = 0x000040F4,
 };
@@ -66,6 +70,8 @@ PatchOffset g_620_offsets = {
 		.LoadRebootCall = 0x00002CD8,
 		.RebootJump = 0x00002D24,
 	},
+	.patchRangeStart = 0x0000CCB0,
+	.patchRangeEnd = 0x0000CCC0,
 	.sceKernelPowerLockForUser = 0x8800CCBC,
 	.sceKernelPowerLockForUser_data_offset = 0x00004234,
 };

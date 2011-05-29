@@ -23,6 +23,7 @@
 #include <psputility.h>
 #include <stdio.h>
 
+#include "printk.h"
 #include "common.h"
 #include "vshctrl.h"
 #include "systemctrl.h"

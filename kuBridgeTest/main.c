@@ -130,7 +130,7 @@ int main_thread(SceSize args, void *argp)
 	sceCtrlReadBufferPositive(&ctl, 1);
 	key = ctl.Buttons;
 
-	while (key != PSP_CTRL_CROSS) {
+	while (0 == (key & PSP_CTRL_CROSS)) {
 		sceKernelDelayThread(50000);
 		sceCtrlReadBufferPositive(&ctl, 1);
 		key = ctl.Buttons;

@@ -8,6 +8,11 @@ CFLAGS = -Os -G0 -Wall
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
+ifeq ($(DEBUG), 1)
+CFLAGS += -DDEBUG=1
+OBJS += ../Common/printk.o ../Common/utils.o
+endif
+
 ifeq ($(CONFIG_620), 1)
 CFLAGS += -DCONFIG_620=1
 PSP_FW_VERSION = 620

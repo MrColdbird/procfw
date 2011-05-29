@@ -30,6 +30,7 @@
 #include "printk.h"
 #include "systemctrl_se.h"
 #include "systemctrl_private.h"
+#include "../Satelite/ui.h"
 #include "main.h"
 
 static int (*g_VshMenuCtrl) (SceCtrlData *, int);
@@ -164,8 +165,10 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 
 		// TODO: Block it properly with Go!-Cam, I don't have one, you LZ?
 
-		if (!(ctrl->Buttons & PSP_CTRL_SELECT))
+		/* filter out fault PSP sending dead keyscan */
+		if ((ctrl->Buttons & ALL_CTRL) != PSP_CTRL_SELECT) {
 			goto exit;
+		}
 
 		printk("%s: loading satelite\n", __func__);
 		modid = load_satelite();

@@ -207,7 +207,7 @@ static int add_nodrm_fd(SceUID real_fd)
 
 	unlock();
 
-	return 0;
+	return slot->fd;
 }
 
 static int remove_nodrm_fd(SceUID real_fd)
@@ -267,7 +267,7 @@ int myIoOpen(const char *file, int flag, int mode)
 				if (ret < 0) {
 					printk("%s: add_nodrm_fd -> %d\n", __func__, ret);
 				} else {
-					fd = NODRM_MAGIC_FD + ret; 
+					fd = ret; 
 				}
 
 				// pass the plain fd to user
@@ -319,7 +319,7 @@ int myIoOpenAsync(const char *file, int flag, int mode)
 			if (ret < 0) {
 				printk("%s: add_nodrm_fd -> %d\n", __func__, ret);
 			} else {
-				fd = NODRM_MAGIC_FD + ret; 
+				fd = ret; 
 			}
 		}
 	} else {

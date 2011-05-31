@@ -89,9 +89,9 @@ PatchOffset g_639_offsets = {
 		.MsMediaInsertedCheck = 0x000009E8,
 	},
 	.psnfix_patch = {
-		.NPSignupImageVersion = 0x000370D0,
-		.NPSigninCheck = 0x00006C94,
-		.NPSigninImageVersion = 0x00009664,
+		.NPSignupImageVersion = 0x00037264,
+		.NPSigninCheck = 0x00006CB4,
+		.NPSigninImageVersion = 0x00009684,
 		.NPMatchVersionMajor = 0x00004604,
 		.NPMatchVersionMinor = 0x0000460C,
 	},

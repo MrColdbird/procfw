@@ -22,11 +22,14 @@
 #include <pspkernel.h>
 #include <psputility.h>
 #include <stdio.h>
+#include <pspumd.h>
 
 #include "printk.h"
 #include "common.h"
 #include "vshctrl.h"
 #include "systemctrl.h"
+#include "systemctrl_se.h"
+#include "kubridge.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -40,6 +43,8 @@ extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
 extern int scePowerRequestSuspend(void);
 
+extern char umdvideo_path[256];
+
 int menu_mode  = 0;
 u32 cur_buttons = 0xFFFFFFFF;
 u32 button_on  = 0;
@@ -52,11 +57,13 @@ SEConfig cnf;
 static SEConfig cnf_old;
 
 u32 psp_fw_version;
+u32 psp_model;
 
 int module_start(int argc, char *argv[])
 {
 	int	thid;
 
+	psp_model = kuKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	thid = sceKernelCreateThread("VshMenu_Thread", TSRThread, 16 , 0x1000 ,0 ,0);
 
@@ -169,11 +176,40 @@ int load_start_module(char *path)
 	return ret;
 }
 
+int get_umdvideo_num(void)
+{
+	SceIoDirent dir;
+	int result = 0, dfd;
+
+	memset(&dir, 0, sizeof(dir));
+
+	dfd = sceIoDopen("ms0:/ISO/VIDEO");
+
+	while (sceIoDread(dfd, &dir) > 0) {
+		const char *p;
+
+		p = strrchr(dir.d_name, '.');
+
+		if(p == NULL)
+			p = dir.d_name;
+
+		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso")) {
+			result++;
+		}
+	}
+
+	sceIoDclose(dfd);
+
+	return result;
+}
+
 int TSRThread(SceSize args, void *argp)
 {
 	sceKernelChangeThreadPriority(0, 8);
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
+
+	umdvideo_num = get_umdvideo_num();
 
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639)
@@ -215,6 +251,31 @@ int TSRThread(SceSize args, void *argp)
 		scePowerRequestSuspend();
 	} else if (stop_flag == 6) {
 		load_start_module("flash0:/vsh/module/_recovery.prx");
+	} else if (stop_flag == 7) {
+		char isopath[256];
+		SceIoStat stat;
+
+#ifdef CONFIG_639
+		if(psp_fw_version == FW_639)
+			scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+#endif
+
+#ifdef CONFIG_635
+		if(psp_fw_version == FW_635)
+			scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+#endif
+
+#ifdef CONFIG_620
+		if (psp_fw_version == FW_620)
+			scePaf_sprintf_620(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+#endif
+
+		if(0 == sceIoGetstat(isopath, &stat)) {
+			sctrlSESetUmdFile(isopath);
+			sctrlSESetBootConfFileIndex(MODE_VSHUMD);
+			sctrlSESetDiscType(PSP_UMD_TYPE_VIDEO);
+			sctrlKernelExitVSH(NULL);
+		}
 	}
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);

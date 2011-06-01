@@ -42,5 +42,7 @@ int vctrlVSHExitVSHMenu(SEConfig *conf, char *videoiso, int disctype);
 
 int vctrlVSHUpdateConfig(SEConfig *config);
 
+int vshDetectDiscType(const char *path);
+
 #endif
 

@@ -271,9 +271,14 @@ int TSRThread(SceSize args, void *argp)
 #endif
 
 		if(0 == sceIoGetstat(isopath, &stat)) {
+			int type;
+
+			type = vshDetectDiscType(isopath);
+			printk("%s: detected disc type 0x%02X for %s\n", __func__, type, isopath);
+			type = type >= 0 ? type : PSP_UMD_TYPE_VIDEO;
 			sctrlSESetUmdFile(isopath);
 			sctrlSESetBootConfFileIndex(MODE_VSHUMD);
-			sctrlSESetDiscType(PSP_UMD_TYPE_VIDEO);
+			sctrlSESetDiscType(type);
 			sctrlKernelExitVSH(NULL);
 		}
 	}

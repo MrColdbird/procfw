@@ -582,19 +582,15 @@ int patch_bootconf_inferno(char *buffer, int length)
 }
 
 static struct add_module umdvideo_add_mods[] = {
-//	{ "/kd/mgr.prx", "/kd/amctrl.prx", VSH_RUNLEVEL },
-	{ PATH_UMDVIDEO+sizeof(PATH_FLASH0)-2, "/kd/isofs.prx", VSH_RUNLEVEL },
-//	{ "/kd/isofs.prx", "/kd/utility.prx", VSH_RUNLEVEL },
+	{ "/kd/isofs.prx", "/kd/utility.prx", VSH_RUNLEVEL },
+	{ PATH_UMDVIDEO+sizeof(PATH_FLASH0)-2, "/kd/chnnlsv.prx", VSH_RUNLEVEL },
 };
 
 static struct del_module umdvideo_del_mods[] = {
-#if 0
 	{ "/kd/mediaman.prx", VSH_RUNLEVEL },
 	{ "/kd/ata.prx", VSH_RUNLEVEL },
 	{ "/kd/umdman.prx", VSH_RUNLEVEL },
 	{ "/kd/umd9660.prx", VSH_RUNLEVEL },
-	{ "/kd/np9660.prx", VSH_RUNLEVEL },
-#endif
 };
 
 int patch_bootconf_umdvideo(char *buffer, int length)

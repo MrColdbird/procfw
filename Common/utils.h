@@ -70,12 +70,14 @@ void sync_cache(void);
  */
 int is_cpu_intr_enable(void);
 
-void fill_vram(u32 color);
-
 #ifdef DEBUG
 void hexdump(void *addr, int size);
+void fill_vram(u32 color);
 #else
 static inline void hexdump(void *addr, int size)
+{
+}
+static inline void fill_vram(u32 color)
 {
 }
 #endif

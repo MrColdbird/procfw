@@ -32,6 +32,7 @@ char freq_buf[3+3+2] = "";
 char freq2_buf[3+3+2] = "";
 char device_buf[13] = "";
 const char str_default[] = "Default";
+char umdvideo_path[256] = "None";
 
 const char * enable_disable[] ={
 	"Disable",
@@ -45,14 +46,14 @@ const char *iso[]={
 	"Inferno",
 };
 
-#define TMENU_MAX 10
+#define TMENU_MAX 11
 
 enum{
 	TMENU_XMB_CLOCK,
 	TMENU_GAME_CLOCK,
 	TMENU_USB_DEVICE,
 	TMENU_UMD_MODE,
-//	TMENU_UMD_VIDEO,
+	TMENU_UMD_VIDEO,
 //	TMENU_XMB_PLUGINS,
 //	TMENU_GAME_PLUGINS,
 //	TMENU_POPS_PLUGINS,
@@ -75,7 +76,7 @@ const char *top_menu_list[TMENU_MAX] ={
 	"CPU CLOCK GAME ",
 	"USB DEVICE     ",
 	"UMD ISO MODE   ",
-//	"ISO VIDEO MOUNT",
+	"ISO VIDEO MOUNT",
 //	"XMB  PLUGINS   ",
 //	"GAME PLUGINS   ",
 //	"POPS PLUGINS   ",
@@ -101,11 +102,55 @@ static int menu_sel = TMENU_XMB_CLOCK;
 const int xyPoint[] ={0x98, 0x30, 0xC0, 0xA0, 0x70, 0x08, 0x0E, 0xA8};//data243C=
 const int xyPoint2[] ={0xB0, 0x30, 0xD8, 0xB8, 0x88, 0x08, 0x11, 0xC0};//data2458=
 
+int get_umdvideo_path(int n, char *path, int len)
+{
+	SceUID dfd;
+	SceIoDirent dir;
+	int ret;
+
+	if(n <= 0 || n > umdvideo_num)
+		return -1;
+
+	dfd = sceIoDopen("ms0:/ISO/VIDEO");
+
+	if(dfd < 0) {
+		return -2;
+	}
+
+	memset(&dir, 0, sizeof(dir));
+
+	while((ret = sceIoDread(dfd, &dir)) > 0) {
+		const char *p;
+
+		p = strrchr(dir.d_name, '.');
+
+		if(p == NULL)
+			p = dir.d_name;
+
+		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso")) {
+			if(--n == 0) {
+				break;
+			}
+		}
+	}
+
+	sceIoDclose(dfd);
+
+	if(ret <= 0) {
+		return -3;
+	}
+
+	strncpy(path, dir.d_name, len);
+	path[len-1] = '\0';
+
+	return 0;
+}
+
 int menu_draw(void)
 {
 	u32 fc,bc;
 	const char *msg;
-	int max_menu;
+	int max_menu, cur_menu;
 	const int *pointer;
 	int xPointer;
 	
@@ -123,6 +168,10 @@ int menu_draw(void)
 	blit_string(pointer[0], pointer[1], "PRO VSH MENU");
 
 	for(max_menu=0;max_menu<TMENU_MAX;max_menu++) {
+		if(psp_model == PSP_GO && max_menu == TMENU_UMD_VIDEO) {
+			continue;
+		}
+
 		fc = 0xffffff;
 		bc = (max_menu==menu_sel) ? 0xff8080 : 0xc00000ff;
 		blit_set_color(fc,bc);
@@ -154,12 +203,23 @@ int menu_draw(void)
 					break;
 			}
 
-			blit_string(xPointer, (pointer[5] + max_menu)*8, msg);
+			cur_menu = max_menu;
+
+			if(psp_model == PSP_GO && max_menu > TMENU_UMD_VIDEO) {
+				cur_menu--;
+			} 
+
+			blit_string(xPointer, (pointer[5] + cur_menu)*8, msg);
 			msg = item_str[max_menu];
 
 			if(msg) {
 				blit_set_color(item_fcolor[max_menu],bc);
-				blit_string( (pointer[6] * 8) + 128, (pointer[5] + max_menu)*8, msg);
+
+				if(psp_model == PSP_GO) {
+					blit_string( (pointer[6] * 8) + 128, (pointer[5] + cur_menu)*8, msg);
+				} else {
+					blit_string( (pointer[6] * 8) + 128, (pointer[5] + cur_menu)*8, msg);
+				}
 			}
 		}
 	}
@@ -261,8 +321,9 @@ int menu_setup(void)
 			device="Memory Stick";
 
 		bridge = device;
-	}	
+	}
 
+	item_str[TMENU_UMD_VIDEO] = umdvideo_path;
 	item_str[TMENU_USB_DEVICE] = bridge;
 	item_str[TMENU_UMD_MODE] = iso[cnf.umdmode];
 	
@@ -287,6 +348,10 @@ int menu_ctrl(u32 button_on)
 
 	menu_sel = limit(menu_sel+direction, 0, TMENU_MAX-1);
 
+	if(psp_model == PSP_GO && menu_sel == TMENU_UMD_VIDEO) {
+		menu_sel = limit(menu_sel+direction, 0, TMENU_MAX-1);
+	}
+
 	// LEFT & RIGHT
 	direction = -2;
 
@@ -310,6 +375,17 @@ int menu_ctrl(u32 button_on)
 			break;
 		case TMENU_UMD_MODE:
 			if(direction) change_umd_mode( direction );
+			break;
+		case TMENU_UMD_VIDEO:
+			if(direction) {
+			   	change_umd_mount_idx(direction);
+
+				if (0 != get_umdvideo_path(umdvideo_idx, umdvideo_path, sizeof(umdvideo_path))) {
+					strcpy(umdvideo_path, "None");
+				}
+			} else {
+				return 7; // Mount UMDVideo ISO flag
+			}
 			break;
 		case TMENU_RECOVERY_MENU:
 			if(direction==0) {

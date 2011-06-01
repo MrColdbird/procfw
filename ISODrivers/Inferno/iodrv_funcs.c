@@ -479,7 +479,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 	} else if(cmd == 0x01F20001) {
 		// get UMD disc type 
 		_sw(-1, (u32)(outdata));
-		_sw(0x10, (u32)(outdata+4));
+		_sw(g_disc_type, (u32)(outdata+4));
 
 		ret = 0;
 		goto exit;

@@ -581,30 +581,30 @@ int patch_bootconf_inferno(char *buffer, int length)
 	return result;
 }
 
-static struct add_module umdvideo_add_mods[] = {
+static struct add_module vshumd_add_mods[] = {
 	{ "/kd/isofs.prx", "/kd/utility.prx", VSH_RUNLEVEL },
-	{ PATH_UMDVIDEO+sizeof(PATH_FLASH0)-2, "/kd/chnnlsv.prx", VSH_RUNLEVEL },
+	{ PATH_INFERNO+sizeof(PATH_FLASH0)-2, "/kd/chnnlsv.prx", VSH_RUNLEVEL },
 };
 
-static struct del_module umdvideo_del_mods[] = {
+static struct del_module vshumd_del_mods[] = {
 	{ "/kd/mediaman.prx", VSH_RUNLEVEL },
 	{ "/kd/ata.prx", VSH_RUNLEVEL },
 	{ "/kd/umdman.prx", VSH_RUNLEVEL },
 	{ "/kd/umd9660.prx", VSH_RUNLEVEL },
 };
 
-int patch_bootconf_umdvideo(char *buffer, int length)
+int patch_bootconf_vshumd(char *buffer, int length)
 {
 	int newsize, result, ret;
 
 	result = length;
 
-	int i; for(i=0; i<NELEMS(umdvideo_del_mods); ++i) {
-		RemovePrx(buffer, umdvideo_del_mods[i].prxname, umdvideo_del_mods[i].flags);
+	int i; for(i=0; i<NELEMS(vshumd_del_mods); ++i) {
+		RemovePrx(buffer, vshumd_del_mods[i].prxname, vshumd_del_mods[i].flags);
 	}
-
-	for(i=0; i<NELEMS(umdvideo_add_mods); ++i) {
-		newsize = MovePrx(buffer, umdvideo_add_mods[i].insertbefore, umdvideo_add_mods[i].prxname, umdvideo_add_mods[i].flags);
+	
+	for(i=0; i<NELEMS(vshumd_add_mods); ++i) {
+		newsize = MovePrx(buffer, vshumd_add_mods[i].insertbefore, vshumd_add_mods[i].prxname, vshumd_add_mods[i].flags);
 
 		if (newsize > 0) result = newsize;
 	}
@@ -675,8 +675,8 @@ int _UnpackBootConfig(char **p_buffer, int length)
 
 			if (newsize > 0) result = newsize;
 			break;
-		case UMDVIDEO_MODE:
-			newsize = patch_bootconf_umdvideo(buffer, length);
+		case VSHUMD_MODE:
+			newsize = patch_bootconf_vshumd(buffer, length);
 
 			if (newsize > 0) result = newsize;
 			break;

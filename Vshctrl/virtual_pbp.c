@@ -908,6 +908,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	//set iso mode for reboot
 	sctrlSESetBootConfFileIndex(config.umdmode);
+	sctrlSESetDiscType(PSP_UMD_TYPE_GAME);
 
 	//high memory disabled because it hurts pspgo resuming interrupted game
 //	sctrlHENSetMemory(55, 0);

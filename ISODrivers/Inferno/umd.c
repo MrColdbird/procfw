@@ -561,3 +561,16 @@ exit:
 
 	return error_code;
 }
+
+static u32 g_unk_data = 0;
+
+/* Used by vshbridge */
+u32 sceUmd_107064CC(void)
+{
+	return g_unk_data;
+}
+
+void sceUmd_C886430B(u32 a0)
+{
+	g_unk_data = a0;
+}

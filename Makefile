@@ -16,7 +16,6 @@ SATELITE = Satelite
 POPCORN = Popcorn
 RECOVERY = Recovery
 PERMANENT = Permanent
-UMDVIDEO = Umdvideo
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -58,7 +57,6 @@ endif
 
 # Creating Live-System Components
 	@cd $(RECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(UMDVIDEO); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@rm -f ./Common/*.o
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -105,7 +103,6 @@ endif
 	@cd $(SYSTEMCONTROLPXE); make clean $(DEBUG_OPTION)
 	@cd $(POPCORN); make clean $(DEBUG_OPTION)
 	@cd $(RECOVERY); make clean $(DEBUG_OPTION)
-	@cd $(UMDVIDEO); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 
 deps:

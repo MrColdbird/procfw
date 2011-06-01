@@ -47,6 +47,7 @@
 #include "usbdevice.h"
 #include "vshctrl.h"
 #include "recovery.h"
+#include "umdvideo.h"
 #include "config.h"
 
 #include "../Permanent/ppatch_config.h"
@@ -208,6 +209,7 @@ struct InstallList g_file_lists[] = {
 	{ inferno, &size_inferno, PATH_INFERNO, },
 	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
 	{ popcorn, &size_popcorn, PATH_POPCORN, },
+	{ umdvideo, &size_umdvideo, PATH_UMDVIDEO, },
 	{ satelite, &size_satelite, PATH_SATELITE, },
 	{ recovery, &size_recovery, PATH_RECOVERY, },
 };

@@ -1128,3 +1128,13 @@ u32 sctrlModuleTextAddr(char *modname)
 	
 	return text_addr;
 }
+
+void sctrlSESetDiscType(int type)
+{
+	rebootex_conf.iso_disc_type = type;
+}
+
+int sctrlSEGetDiscType(void)
+{
+	return rebootex_conf.iso_disc_type;
+}

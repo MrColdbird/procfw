@@ -55,6 +55,7 @@ int setup_umd_device(void)
 	int ret;
 
 	g_iso_fn = GetUmdFile();
+	infernoSetDiscType(sctrlSEGetDiscType());
 	ret = sceIoAddDrv(&g_iodrv);
 
 	if(ret < 0) {
@@ -68,7 +69,7 @@ int setup_umd_device(void)
 }
 
 // 00001514
-int init_march33(void)
+int init_inferno(void)
 {
 	g_drive_status = 50;
 	g_umd_cbid = -1;
@@ -87,7 +88,7 @@ int module_start(SceSize args, void* argp)
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/inferno.txt");
-	printk("March33 reversed started FW=0x%08X %02dg\n", psp_fw_version, psp_model+1);
+	printk("Inferno started FW=0x%08X %02dg\n", psp_fw_version, psp_model+1);
 
 	ret = setup_umd_device();
 
@@ -95,7 +96,7 @@ int module_start(SceSize args, void* argp)
 		return ret;
 	}
 
-	ret = init_march33();
+	ret = init_inferno();
 
 	return MIN(ret, 0);
 }

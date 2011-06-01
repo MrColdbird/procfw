@@ -149,7 +149,6 @@ void build_rebootex_configure(void)
 	conf->psp_model = psp_model;
 	conf->rebootex_size = size_rebootex;
 	conf->psp_fw_version = psp_fw_version;
-	conf->iso_mode = 4;
 }
 
 //load reboot wrapper

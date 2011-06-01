@@ -97,6 +97,9 @@ static void wait_until_ms0_ready(void)
 
 		if(bootfrom == 0x50) {
 			drvname = "mscmhcemu0:";
+		} else {
+			// vsh mode?
+			return;
 		}
 	}
 
@@ -246,6 +249,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 			i = 0;
 			break;
 		} else {
+			printk("%s: lseek32 retry %d error 0x%08X\n", __func__, i, ret);
 			iso_open();
 		}
 	} while(i < 16);
@@ -262,6 +266,7 @@ static int read_raw_data(u8* addr, u32 size, int offset)
 			i = 0;
 			break;
 		} else {
+			printk("%s: read retry %d error 0x%08X\n", __func__, i, ret);
 			iso_open();
 		}
 	}

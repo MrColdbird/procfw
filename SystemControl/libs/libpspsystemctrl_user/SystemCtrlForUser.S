@@ -3,7 +3,7 @@
 #include "pspimport.s"
 
 // Build files
-// SystemCtrlForUser_0000.o SystemCtrlForUser_0001.o SystemCtrlForUser_0002.o SystemCtrlForUser_0003.o SystemCtrlForUser_0004.o SystemCtrlForUser_0005.o SystemCtrlForUser_0006.o SystemCtrlForUser_0007.o SystemCtrlForUser_0008.o SystemCtrlForUser_0009.o SystemCtrlForUser_0010.o SystemCtrlForUser_0011.o SystemCtrlForUser_0012.o SystemCtrlForUser_0013.o SystemCtrlForUser_0014.o SystemCtrlForUser_0015.o SystemCtrlForUser_0016.o SystemCtrlForUser_0017.o SystemCtrlForUser_0018.o SystemCtrlForUser_0019.o SystemCtrlForUser_0020.o SystemCtrlForUser_0021.o SystemCtrlForUser_0022.o SystemCtrlForUser_0023.o SystemCtrlForUser_0024.o SystemCtrlForUser_0025.o SystemCtrlForUser_0026.o SystemCtrlForUser_0027.o SystemCtrlForUser_0028.o SystemCtrlForUser_0029.o SystemCtrlForUser_0030.o SystemCtrlForUser_0031.o SystemCtrlForUser_0032.o SystemCtrlForUser_0033.o SystemCtrlForUser_0034.o SystemCtrlForUser_0035.o SystemCtrlForUser_0036.o SystemCtrlForUser_0037.o SystemCtrlForUser_0038.o SystemCtrlForUser_0039.o SystemCtrlForUser_0040.o SystemCtrlForUser_0041.o 
+// SystemCtrlForUser_0000.o SystemCtrlForUser_0001.o SystemCtrlForUser_0002.o SystemCtrlForUser_0003.o SystemCtrlForUser_0004.o SystemCtrlForUser_0005.o SystemCtrlForUser_0006.o SystemCtrlForUser_0007.o SystemCtrlForUser_0008.o SystemCtrlForUser_0009.o SystemCtrlForUser_0010.o SystemCtrlForUser_0011.o SystemCtrlForUser_0012.o SystemCtrlForUser_0013.o SystemCtrlForUser_0014.o SystemCtrlForUser_0015.o SystemCtrlForUser_0016.o SystemCtrlForUser_0017.o SystemCtrlForUser_0018.o SystemCtrlForUser_0019.o SystemCtrlForUser_0020.o SystemCtrlForUser_0021.o SystemCtrlForUser_0022.o SystemCtrlForUser_0023.o SystemCtrlForUser_0024.o SystemCtrlForUser_0025.o SystemCtrlForUser_0026.o SystemCtrlForUser_0027.o SystemCtrlForUser_0028.o SystemCtrlForUser_0029.o SystemCtrlForUser_0030.o SystemCtrlForUser_0031.o SystemCtrlForUser_0032.o SystemCtrlForUser_0033.o SystemCtrlForUser_0034.o SystemCtrlForUser_0035.o SystemCtrlForUser_0036.o SystemCtrlForUser_0037.o SystemCtrlForUser_0038.o SystemCtrlForUser_0039.o SystemCtrlForUser_0040.o SystemCtrlForUser_0041.o SystemCtrlForUser_0042.o SystemCtrlForUser_0043.o SystemCtrlForUser_0044.o 
 
 #ifdef F_SystemCtrlForUser_0000
 	IMPORT_START "SystemCtrlForUser",0x40090000
@@ -87,47 +87,56 @@
 	IMPORT_FUNC  "SystemCtrlForUser",0xBC939DC1,sctrlSESetBootConfFileIndex
 #endif
 #ifdef F_SystemCtrlForUser_0027
-	IMPORT_FUNC  "SystemCtrlForUser",0x5CB025F0,sctrlSESetBootConfFileIndex
+	IMPORT_FUNC  "SystemCtrlForUser",0x70B92B45,sctrlSEGetBootConfFileIndex
 #endif
 #ifdef F_SystemCtrlForUser_0028
-	IMPORT_FUNC  "SystemCtrlForUser",0xAD4D5EA5,sctrlSESetConfigEx
+	IMPORT_FUNC  "SystemCtrlForUser",0x5CB025F0,sctrlSESetBootConfFileIndex
 #endif
 #ifdef F_SystemCtrlForUser_0029
-	IMPORT_FUNC  "SystemCtrlForUser",0x8E426F09,sctrlSEGetConfigEx
+	IMPORT_FUNC  "SystemCtrlForUser",0xAD4D5EA5,sctrlSESetConfigEx
 #endif
 #ifdef F_SystemCtrlForUser_0030
-	IMPORT_FUNC  "SystemCtrlForUser",0x1DDDAD0C,sctrlSESetConfig
+	IMPORT_FUNC  "SystemCtrlForUser",0x8E426F09,sctrlSEGetConfigEx
 #endif
 #ifdef F_SystemCtrlForUser_0031
-	IMPORT_FUNC  "SystemCtrlForUser",0x16C3B7EE,sctrlSEGetConfig
+	IMPORT_FUNC  "SystemCtrlForUser",0x1DDDAD0C,sctrlSESetConfig
 #endif
 #ifdef F_SystemCtrlForUser_0032
-	IMPORT_FUNC  "SystemCtrlForUser",0x8D5BE1F0,sctrlKernelSetInitApitype
+	IMPORT_FUNC  "SystemCtrlForUser",0x16C3B7EE,sctrlSEGetConfig
 #endif
 #ifdef F_SystemCtrlForUser_0033
-	IMPORT_FUNC  "SystemCtrlForUser",0x2BA770CD,sctrlKernelSetUMDEmuFile
+	IMPORT_FUNC  "SystemCtrlForUser",0x8D5BE1F0,sctrlKernelSetInitApitype
 #endif
 #ifdef F_SystemCtrlForUser_0034
-	IMPORT_FUNC  "SystemCtrlForUser",0x128112C3,sctrlKernelSetInitFileName
+	IMPORT_FUNC  "SystemCtrlForUser",0x2BA770CD,sctrlKernelSetUMDEmuFile
 #endif
 #ifdef F_SystemCtrlForUser_0035
-	IMPORT_FUNC  "SystemCtrlForUser",0x9947E189,FindProc
+	IMPORT_FUNC  "SystemCtrlForUser",0x128112C3,sctrlKernelSetInitFileName
 #endif
 #ifdef F_SystemCtrlForUser_0036
-	IMPORT_FUNC  "SystemCtrlForUser",0x98012538,SetSpeed
+	IMPORT_FUNC  "SystemCtrlForUser",0x9947E189,FindProc
 #endif
 #ifdef F_SystemCtrlForUser_0037
-	IMPORT_FUNC  "SystemCtrlForUser",0xCC9ADCF8,sctrlHENSetSpeed
+	IMPORT_FUNC  "SystemCtrlForUser",0x98012538,SetSpeed
 #endif
 #ifdef F_SystemCtrlForUser_0038
-	IMPORT_FUNC  "SystemCtrlForUser",0x56CEAF00,sctrlKernelQuerySystemCall
+	IMPORT_FUNC  "SystemCtrlForUser",0xCC9ADCF8,sctrlHENSetSpeed
 #endif
 #ifdef F_SystemCtrlForUser_0039
-	IMPORT_FUNC  "SystemCtrlForUser",0x053FAC1D,sctrlKernelBootFrom
+	IMPORT_FUNC  "SystemCtrlForUser",0x56CEAF00,sctrlKernelQuerySystemCall
 #endif
 #ifdef F_SystemCtrlForUser_0040
-	IMPORT_FUNC  "SystemCtrlForUser",0x62CAC4CF,sctrlPatchModule
+	IMPORT_FUNC  "SystemCtrlForUser",0x053FAC1D,sctrlKernelBootFrom
 #endif
 #ifdef F_SystemCtrlForUser_0041
+	IMPORT_FUNC  "SystemCtrlForUser",0x62CAC4CF,sctrlPatchModule
+#endif
+#ifdef F_SystemCtrlForUser_0042
 	IMPORT_FUNC  "SystemCtrlForUser",0x2A868045,sctrlModuleTextAddr
+#endif
+#ifdef F_SystemCtrlForUser_0043
+	IMPORT_FUNC  "SystemCtrlForUser",0x31C6160D,sctrlSESetDiscType
+#endif
+#ifdef F_SystemCtrlForUser_0044
+	IMPORT_FUNC  "SystemCtrlForUser",0xABEF849B,sctrlSEGetDiscType
 #endif

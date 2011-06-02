@@ -949,7 +949,7 @@ static int get_ISO_shortname(char *s_name, u32 size, const char *l_name)
 			if (ret >= 0) {
 				if (!strcmp(dirent->d_name, p+1)) {
 					strncpy(s_name, l_name, MIN(p + 1 - l_name, size));
-					s_name[MIN(p + 1 - l_name, size)] = '\0';
+					s_name[MIN(p + 1 - l_name, size-1)] = '\0';
 					strcat(s_name, pri_dirent->s_name);
 					printk("%s: final %s\n", __func__, s_name);
 					result = 0;

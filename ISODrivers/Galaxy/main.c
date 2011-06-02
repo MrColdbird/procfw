@@ -202,6 +202,7 @@ int open_iso(void)
 			break;
 		}
 
+		printk("%s: ioopen %s -> 0x%08X\n", __func__, g_iso_fn, g_iso_fd);
 		sceKernelDelayThread(10000);
 	}
 

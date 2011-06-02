@@ -278,6 +278,7 @@ void frame_start(void)
 {
 	scePowerTick(0);
 	sceDisplayWaitVblank();
+	pspDebugScreenSetOffset((int)get_drawing_buffer() - 0x44000000);
 	memset(get_drawing_buffer(), 0, 512*272*4);
 }
 
@@ -285,7 +286,6 @@ void frame_end(void)
 {
 	g_display_flip = !g_display_flip;
 	sceDisplaySetFrameBuf(get_display_buffer(), 512, PSP_DISPLAY_PIXEL_FORMAT_8888, PSP_DISPLAY_SETBUF_NEXTFRAME);
-	pspDebugScreenSetOffset((int)get_drawing_buffer() - 0x44000000);
 	sceDisplayWaitVblank();
 }
 

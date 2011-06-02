@@ -190,7 +190,7 @@ int module_start(SceSize args, void *argp)
 	sctrlSEGetConfig(&conf);
 	patch_sceMesgLed();
 
-	if(1) {
+	if(conf.chn_iso) {
 		patch_IsoDrivers();
 	}
 

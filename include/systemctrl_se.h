@@ -66,6 +66,7 @@ typedef struct
 	int oldplugin;
 	int htmlviewer_custom_save_location;
 	int hide_cfw_dirs;
+	int chn_iso;
 } SEConfig;
 
 /**

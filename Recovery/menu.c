@@ -83,6 +83,7 @@ const char * g_messages[] = {
 	"Hide CFW Files from game",
 	"Block Analog Input in Game",
 	"Old Plugin Support (PSP-Go only)",
+	"Allow Non-latin1 ISO Filename",
 	"CPU Speed",
 	"XMB CPU/BUS",
 	"Game CPU/BUS",
@@ -378,6 +379,13 @@ static int display_use_oldplugin(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_chn_iso(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[ALLOW_NON_LATIN1_ISO_FILENAME], get_bool_name(g_config.chn_iso));
+
+	return 0;
+}
+
 static int display_hide_cfw_dirs(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[HIDE_CFW_DIRS], get_bool_name(g_config.hide_cfw_dirs));
@@ -415,6 +423,11 @@ static struct ValueOption g_use_oldplugin = {
 	0, 2,
 };
 
+static struct ValueOption g_chn_iso = {
+	&g_config.chn_iso,
+	0, 2,
+};
+
 static struct ValueOption g_hide_cfw_dirs = {
 	&g_config.hide_cfw_dirs,
 	0, 2,
@@ -428,6 +441,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_hide_cfw_dirs, &change_option, &change_option_by_enter, &g_hide_cfw_dirs},
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
+	{ NULL, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
 };
 
 static struct Menu g_advanced_menu = {

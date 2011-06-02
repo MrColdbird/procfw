@@ -120,10 +120,10 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 						}
 
 						_sw(0x03E00008, (u32)addr);
-						_sw(((syscall_num<<6)|12), (u32)addr + 4);
+						_sw(MAKE_SYSCALL(syscall_num), (u32)(addr + 4));
 					} else {
 						_sw(MAKE_JUMP(func), (u32)addr);
-						_sw(0, (u32)(addr + 4));
+						_sw(NOP, (u32)(addr + 4));
 					}
 
 					sceKernelDcacheWritebackInvalidateRange(addr, 8);

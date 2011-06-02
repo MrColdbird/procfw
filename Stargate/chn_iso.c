@@ -44,33 +44,40 @@ static int get_ISO_longname(char *l_name, const char *s_name, u32 size)
 {
 	const char *p;
 	SceUID fd;
-	char *prefix;
-	pspMsPrivateDirent *pri_dirent;
-	SceIoDirent *dirent;
+	char *prefix = NULL;
+	pspMsPrivateDirent *pri_dirent = NULL;
+	SceIoDirent *dirent = NULL;
 	int result = -7; /* Not found */
 
-	if (s_name == NULL || l_name == NULL)
-		return -1;
+	if (s_name == NULL || l_name == NULL) {
+		result = -2;
+		goto exit;
+	}
 
 	p = strrchr(s_name, '/');
 
-	if (p == NULL)
-		return -2;
+	if (p == NULL) {
+		result = -2;
+		goto exit;
+	}
 
 	prefix = oe_malloc(512);
 	pri_dirent = oe_malloc(sizeof(*pri_dirent));
 	dirent = oe_malloc(sizeof(*dirent));
 
 	if(prefix == NULL) {
-		return -3;
+		result = -3;
+		goto exit;
 	}
 
 	if(pri_dirent == NULL) {
-		return -4;
+		result = -4;
+		goto exit;
 	}
 
 	if(dirent == NULL) {
 		return -5;
+		goto exit;
 	}
 
 	strncpy(prefix, s_name, MIN(p + 1 - s_name, 512));
@@ -105,10 +112,11 @@ static int get_ISO_longname(char *l_name, const char *s_name, u32 size)
 		sceIoDclose(fd);
 	} else {
 		printk("%s: dopen %s -> 0x%08X\n", __func__, prefix, fd);
-
-		return -6;
+		result = -6;
+		goto exit;
 	}
 
+exit:
 	oe_free(prefix);
 	oe_free(pri_dirent);
 	oe_free(dirent);

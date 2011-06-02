@@ -891,45 +891,68 @@ typedef struct _pspMsPrivateDirent {
 	char l_name[1024];
 } pspMsPrivateDirent;
 
-static SceIoDirent g_dirent;
-static pspMsPrivateDirent g_pri_dirent;
-static char prefix[1024];
-
-static void get_ISO_shortname(char *s_name, const char *l_name)
+static int get_ISO_shortname(char *s_name, const char *l_name)
 {
 	const char *p;
 	SceUID fd;
+	char *prefix = NULL;
+	int result = -7;
+	pspMsPrivateDirent *pri_dirent = NULL;
+	SceIoDirent *dirent = NULL;
 
-	if (s_name == NULL || l_name == NULL)
-		return;
+	if (s_name == NULL || l_name == NULL) {
+		result = -1;
+		goto exit;
+	}
 
 	p = strrchr(l_name, '/');
 
-	if (p == NULL)
-		return;
+	if (p == NULL) {
+		result = -2;
+		goto exit;
+	}
 
-	strncpy_s(prefix, sizeof(prefix), l_name, p - l_name);
-	prefix[p - l_name] = '\0';
-	printk("%s: prefix %s\r\n", __func__, prefix);
+	prefix = oe_malloc(512);
+	pri_dirent = oe_malloc(sizeof(*pri_dirent));
+	dirent = oe_malloc(sizeof(*dirent));
 
+	if(prefix == NULL) {
+		result = -3;
+		goto exit;
+	}
+
+	if(pri_dirent == NULL) {
+		result = -4;
+		goto exit;
+	}
+
+	if(dirent == NULL) {
+		result = -5;
+		goto exit;
+	}
+
+	strncpy_s(prefix, 512, l_name, p + 1 - l_name);
+	prefix[MIN(p + 1 - l_name, 512-1)] = '\0';
+	printk("%s: prefix %s\n", __func__, prefix);
 	fd = sceIoDopen(prefix);
 
 	if (fd >= 0) {
 		int ret;
 
 		do {
-			memset(&g_dirent, 0, sizeof(g_dirent));
-			memset(&g_pri_dirent, 0, sizeof(g_pri_dirent));
-			g_pri_dirent.size = sizeof(g_pri_dirent);
-			g_dirent.d_private = (void*)&g_pri_dirent;
-			ret = sceIoDread(fd, &g_dirent);
+			memset(dirent, 0, sizeof(*dirent));
+			memset(pri_dirent, 0, sizeof(*pri_dirent));
+			pri_dirent->size = sizeof(*pri_dirent);
+			dirent->d_private = (void*)pri_dirent;
+			ret = sceIoDread(fd, dirent);
 
 			if (ret >= 0) {
-				if (!strcmp(g_dirent.d_name, p+1)) {
-					strncpy(s_name, l_name, p + 1 - l_name);
-					s_name[p + 1 - l_name] = '\0';
-					strcat(s_name, g_pri_dirent.s_name);
-					printk("%s: final %s\r\n", __func__, s_name);
+				if (!strcmp(dirent->d_name, p+1)) {
+					strncpy(s_name, l_name, MIN(p + 1 - l_name, 16));
+					s_name[MIN(p + 1 - l_name, 16)] = '\0';
+					strcat(s_name, pri_dirent->s_name);
+					printk("%s: final %s\n", __func__, s_name);
+					result = 0;
 
 					break;
 				}
@@ -938,8 +961,17 @@ static void get_ISO_shortname(char *s_name, const char *l_name)
 
 		sceIoDclose(fd);
 	} else {
-		printk("%s: sceIoDopen cannot open %s returns 0x%08X\r\n", __func__, prefix, fd);
+		printk("%s: sceIoDopen %s -> 0x%08X\n", __func__, prefix, fd);
+		result = -6;
+		goto exit;
 	}
+
+exit:
+	oe_free(prefix);
+	oe_free(pri_dirent);
+	oe_free(dirent);
+
+	return result;
 }
 
 int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)

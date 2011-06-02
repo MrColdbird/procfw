@@ -46,6 +46,7 @@ PatchOffset g_639_offsets = {
 		.RifNpDRMCheck = 0x0002042C,
 		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
 		.htmlviewer_save_location = 0x0001C7FC,
+		.ParamGetterNID = 0xEFBA62EF,
 	},
 	.msvideo_main_patch = {
 		.checks = {
@@ -106,6 +107,7 @@ PatchOffset g_635_offsets = {
 		.RifNpDRMCheck = 0x0002042C,
 		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
 		.htmlviewer_save_location = 0x0001C7FC,
+		.ParamGetterNID = 0xEFBA62EF,
 	},
 	.msvideo_main_patch = {
 		.checks = {
@@ -166,6 +168,7 @@ PatchOffset g_620_offsets = {
 		.RifNpDRMCheck = 0x0001EC8C,
 		.sceCtrlReadBufferPositiveNID = 0xD073ECA4,
 		.htmlviewer_save_location = 0x0001C7C0,
+		.ParamGetterNID = 0xA6E6A396,
 	},
 	.msvideo_main_patch = {
 		.checks = {

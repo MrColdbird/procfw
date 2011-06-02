@@ -398,7 +398,7 @@ int sctrlHENGetVersion()
 
 int sctrlHENGetMinorVersion()
 {
-	return 0x6;
+	return 0x7;
 }
 
 PspIoDrv *sctrlHENFindDriver(char *drvname)
@@ -1127,4 +1127,14 @@ u32 sctrlModuleTextAddr(char *modname)
 	pspSdkSetK1(k1);
 	
 	return text_addr;
+}
+
+void sctrlSESetDiscType(int type)
+{
+	rebootex_conf.iso_disc_type = type;
+}
+
+int sctrlSEGetDiscType(void)
+{
+	return rebootex_conf.iso_disc_type;
 }

@@ -35,6 +35,10 @@
 #error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
 #endif
 
+extern u32 psp_model;
+extern int umdvideo_idx;
+extern int umdvideo_num;
+
 int menu_draw(void);
 int menu_setup(void);
 int menu_ctrl(u32 button_on);
@@ -44,6 +48,7 @@ int bus2no(int cpu);
 void change_clock(int dir , int flag);
 void change_usb(int dir );
 void change_umd_mode(int dir );
+void change_umd_mount_idx(int dir);
 void change_plugins(int dir , int flag);
 void change_bool_option(int *p, int direction);
 void change_region(int dir, int max);

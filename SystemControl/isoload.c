@@ -50,3 +50,8 @@ void sctrlSESetBootConfFileIndex(int index)
 {
 	rebootex_conf.iso_mode = index;
 }
+
+u32 sctrlSEGetBootConfFileIndex(void)
+{
+	return rebootex_conf.iso_mode;
+}

@@ -42,4 +42,6 @@ extern int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u3
 void patch_for_620(SceModule *mod);
 void get_620_function(void);
 
+void patch_IsoDrivers(void);
+
 #endif

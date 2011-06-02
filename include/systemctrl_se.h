@@ -31,6 +31,7 @@ enum SEUmdModes
 	MODE_MARCH33 = 1,
 	MODE_NP9660 = 2,
 	MODE_INFERNO = 3,
+	MODE_VSHUMD = 4,
 };
 
 typedef struct
@@ -65,6 +66,7 @@ typedef struct
 	int oldplugin;
 	int htmlviewer_custom_save_location;
 	int hide_cfw_dirs;
+	int chn_iso;
 } SEConfig;
 
 /**
@@ -166,8 +168,14 @@ void sctrlSESetDiscOut(int out);
  * Sets the disctype.
  *
  * @param type - the disctype (0x10=game, 0x20=video, 0x40=audio)
+ * @note: Currently only inferno available, needs reset to take effect
 */
 void sctrlSESetDiscType(int type);
+
+/**
+ * Get the disctype.
+*/
+int sctrlSEGetDiscType(void);
 
 /**
  * Sets the current umd file (kernel only)
@@ -187,10 +195,15 @@ char *sctrlSEGetUmdFile();
 void sctrlSESetUmdFile(char *file);
 
 /** 
- * Sets the boot config file for next reboot (kernel only)
+ * Sets the boot config file for next reboot
  *
- * @param index - The index identifying the file (0 -> normal bootconf, 1 -> march33 driver bootconf, 2 -> np9660 bootcnf, 3 -> inferno bootconf)
+ * @param index - The index identifying the file (0 -> normal bootconf, 1 -> march33 driver bootconf, 2 -> np9660 bootcnf, 3 -> inferno bootconf), 4 -> inferno vsh mount
 */
 void sctrlSESetBootConfFileIndex(int index);
+
+/**
+ * Get the boot config index
+ */
+u32 sctrlSEGetBootConfFileIndex(void);
 
 #endif

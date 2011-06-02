@@ -23,6 +23,7 @@
 #include <pspiofilemgr.h>
 #include <stdio.h>
 #include <string.h>
+#include <pspumd.h>
 #include "main.h"
 #include "utils.h"
 #include "systemctrl.h"
@@ -46,8 +47,12 @@ int module_start(SceSize args, void* argp)
 
 	// always reset to NORMAL mode in VSH
 	// to avoid ISO mode is used in homebrews in next reboot
+
+	if(sctrlSEGetBootConfFileIndex() != MODE_VSHUMD) {
+		sctrlSESetUmdFile("");
+	}
+
 	sctrlSESetBootConfFileIndex(0);
-	sctrlSESetUmdFile("");
 
 	return 0;
 }

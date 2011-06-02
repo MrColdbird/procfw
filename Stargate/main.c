@@ -190,6 +190,10 @@ int module_start(SceSize args, void *argp)
 	sctrlSEGetConfig(&conf);
 	patch_sceMesgLed();
 
+	if(1) {
+		patch_IsoDrivers();
+	}
+
 #ifdef CONFIG_620
 	if(psp_fw_version == FW_620) {
 		myPauth_init();

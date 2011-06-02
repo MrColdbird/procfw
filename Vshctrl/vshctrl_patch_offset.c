@@ -69,6 +69,12 @@ PatchOffset g_639_offsets = {
 		},
 		.loadexecNID1 = 0x59BBA567,
 		.loadexecNID2 = 0xD4BA5699,
+		.PBPFWCheck = {
+			0x00011940,
+			0x00012124,
+			0x00012B08,
+			0x000131EC,
+		},
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
@@ -129,6 +135,12 @@ PatchOffset g_635_offsets = {
 		},
 		.loadexecNID1 = 0x59BBA567,
 		.loadexecNID2 = 0xD4BA5699,
+		.PBPFWCheck = {
+			0x00011940,
+			0x00012124,
+			0x00012B08,
+			0x000131EC,
+		},
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
@@ -189,6 +201,12 @@ PatchOffset g_620_offsets = {
 		},
 		.loadexecNID1 = 0x4ECCCDBC,
 		.loadexecNID2 = 0x2D5C9178,
+		.PBPFWCheck = {
+			0x0001136C,
+			0x00011BA0,
+			0x0001256C,
+			0x00012D8C,
+		},
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x0000819C,

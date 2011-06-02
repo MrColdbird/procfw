@@ -51,7 +51,7 @@ static STMOD_HANDLER previous;
 SEConfig conf;
 
 static void patch_sysconf_plugin_module(SceModule2 *mod);
-static void patch_game_plugin_module(SceModule2 * mod);
+static void patch_game_plugin_module(u32 text_addr);
 static void patch_vsh_module(SceModule2 * mod);
 
 static void hook_iso_file_io(void);
@@ -62,17 +62,11 @@ static void patch_hibblock(SceModule2 *mod);
 static void patch_msvideo_main_plugin_module(u32 text_addr);
 static void patch_htmlviewer_plugin_module(u32 text_addr);
 
-int (*realParamGetter)(void *, const char *, char *) = NULL;
-
 static int vshpatch_module_chain(SceModule2 *mod)
 {
 	u32 text_addr;
 
 	text_addr = mod->text_addr;
-
-	if(0 == strcmp(mod->modname, "sceVshCommonUtil_Module")) {
-		realParamGetter = (void*)sctrlHENFindFunction("sceVshCommonUtil_Module", "sceVshCommonUtil", g_offs->vshctrl_patch.ParamGetterNID);
-	}
 
 	if(0 == strcmp(mod->modname, "sysconf_plugin_module")) {
 		patch_sysconf_plugin_module(mod);
@@ -80,7 +74,7 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "game_plugin_module")) {
-		patch_game_plugin_module(mod);
+		patch_game_plugin_module(text_addr);
 		sync_cache();
 	}
 
@@ -263,17 +257,6 @@ static int check_valid_version_txt(const void *buf, int size)
 	return 0;
 }
 
-int fakeParamMinFW(void * unk, const char * key, void * unk2)
-{
-	// Killing Minimal Firmware Check
-	if(strcmp(key, "PSP_SYSTEM_VER") == 0) {
-		return 0x80120005;
-	}
-
-	// Forward to Firmware
-	return realParamGetter(unk, key, unk2);
-}
-
 static void patch_sysconf_plugin_module(SceModule2 *mod)
 {
 	void *p;
@@ -331,10 +314,8 @@ out:
 	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
 }
 
-static void patch_game_plugin_module(SceModule2 * mod)
+static void patch_game_plugin_module(u32 text_addr)
 {
-	u32 text_addr = mod->text_addr;
-
 	//disable executable check for normal homebrew
 	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->vshctrl_patch.HomebrewCheck);
 
@@ -363,9 +344,6 @@ static void patch_game_plugin_module(SceModule2 * mod)
 	_sw(0x10000010, text_addr + g_offs->vshctrl_patch.RifTypeCheck);
 	// fake npdrm call
 	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.RifNpDRMCheck);
-
-	//kill firmware check
-	hook_import_bynid((SceModule*)mod, "sceVshCommonUtil", g_offs->vshctrl_patch.ParamGetterNID, fakeParamMinFW, 1);
 }
 
 static void patch_msvideo_main_plugin_module(u32 text_addr)
@@ -402,9 +380,6 @@ static void patch_vsh_module(SceModule2 * mod)
 
 	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID1, gameloadexec, 1);
 	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID2, gameloadexec, 1);
-
-	//kill firmware check
-	hook_import_bynid((SceModule*)mod, "sceVshCommonUtil", g_offs->vshctrl_patch.ParamGetterNID, fakeParamMinFW, 1);
 }
 
 static void hook_iso_file_io(void)

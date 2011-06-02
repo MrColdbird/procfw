@@ -40,7 +40,7 @@ typedef struct _pspMsPrivateDirent {
 	char l_name[1024];
 } pspMsPrivateDirent;
 
-static int get_ISO_longname(char *l_name, const char *s_name, int size)
+static int get_ISO_longname(char *l_name, const char *s_name, u32 size)
 {
 	const char *p;
 	SceUID fd;
@@ -73,8 +73,8 @@ static int get_ISO_longname(char *l_name, const char *s_name, int size)
 		return -5;
 	}
 
-	strncpy_s(prefix, 512, s_name, MIN(p - s_name, 512));
-	prefix[512-1] = '\0';
+	strncpy(prefix, s_name, MIN(p + 1 - s_name, 512));
+	prefix[MIN(p + 1 - s_name, 512-1)] = '\0';
 	printk("%s: prefix %s\n", __func__, prefix);
 
 	fd = sceIoDopen(prefix);
@@ -91,7 +91,7 @@ static int get_ISO_longname(char *l_name, const char *s_name, int size)
 
 			if (ret >= 0) {
 				if (!strcmp(pri_dirent->s_name, p+1)) {
-					strncpy_s(l_name, size, s_name, p + 1 - s_name);
+					strncpy(l_name, s_name, MIN(p + 1 - s_name, size));
 					l_name[MIN(p + 1 - s_name, size-1)] = '\0';
 					strcat_s(l_name, size, dirent->d_name);
 					printk("%s: final %s\n", __func__, l_name);
@@ -104,7 +104,7 @@ static int get_ISO_longname(char *l_name, const char *s_name, int size)
 
 		sceIoDclose(fd);
 	} else {
-		printk("%s: sceIoDopen cannot open %s returns 0x%08X\n", __func__, prefix, fd);
+		printk("%s: dopen %s -> 0x%08X\n", __func__, prefix, fd);
 
 		return -6;
 	}

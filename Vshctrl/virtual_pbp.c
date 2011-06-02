@@ -891,7 +891,7 @@ typedef struct _pspMsPrivateDirent {
 	char l_name[1024];
 } pspMsPrivateDirent;
 
-static int get_ISO_shortname(char *s_name, const char *l_name)
+static int get_ISO_shortname(char *s_name, u32 size, const char *l_name)
 {
 	const char *p;
 	SceUID fd;
@@ -948,8 +948,8 @@ static int get_ISO_shortname(char *s_name, const char *l_name)
 
 			if (ret >= 0) {
 				if (!strcmp(dirent->d_name, p+1)) {
-					strncpy(s_name, l_name, MIN(p + 1 - l_name, 16));
-					s_name[MIN(p + 1 - l_name, 16)] = '\0';
+					strncpy(s_name, l_name, MIN(p + 1 - l_name, size));
+					s_name[MIN(p + 1 - l_name, size)] = '\0';
 					strcat(s_name, pri_dirent->s_name);
 					printk("%s: final %s\n", __func__, s_name);
 					result = 0;
@@ -995,7 +995,7 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 	sctrlSEGetConfig(&config);
 	
 	if(config.chn_iso) {
-		get_ISO_shortname(vpbp->name, vpbp->name);
+		get_ISO_shortname(vpbp->name, sizeof(vpbp->name), vpbp->name);
 	}
 
 	//set iso file for reboot

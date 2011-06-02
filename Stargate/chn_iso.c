@@ -40,36 +40,37 @@ typedef struct _pspMsPrivateDirent {
 	char l_name[1024];
 } pspMsPrivateDirent;
 
-static void get_ISO_longname(char *l_name, const char *s_name, int size)
+static int get_ISO_longname(char *l_name, const char *s_name, int size)
 {
 	const char *p;
 	SceUID fd;
 	char *prefix;
 	pspMsPrivateDirent *pri_dirent;
 	SceIoDirent *dirent;
+	int result = -7; /* Not found */
 
 	if (s_name == NULL || l_name == NULL)
-		return;
+		return -1;
 
 	p = strrchr(s_name, '/');
 
 	if (p == NULL)
-		return;
+		return -2;
 
 	prefix = oe_malloc(512);
 	pri_dirent = oe_malloc(sizeof(*pri_dirent));
 	dirent = oe_malloc(sizeof(*dirent));
 
 	if(prefix == NULL) {
-		asm("break 0x101");
+		return -3;
 	}
 
 	if(pri_dirent == NULL) {
-		asm("break 0x102");
+		return -4;
 	}
 
 	if(dirent == NULL) {
-		asm("break 0x103");
+		return -5;
 	}
 
 	strncpy_s(prefix, 512, s_name, MIN(p - s_name, 512));
@@ -94,6 +95,7 @@ static void get_ISO_longname(char *l_name, const char *s_name, int size)
 					l_name[MIN(p + 1 - s_name, size-1)] = '\0';
 					strcat_s(l_name, size, dirent->d_name);
 					printk("%s: final %s\n", __func__, l_name);
+					result = 0;
 
 					break;
 				}
@@ -103,11 +105,15 @@ static void get_ISO_longname(char *l_name, const char *s_name, int size)
 		sceIoDclose(fd);
 	} else {
 		printk("%s: sceIoDopen cannot open %s returns 0x%08X\n", __func__, prefix, fd);
+
+		return -6;
 	}
 
 	oe_free(prefix);
 	oe_free(pri_dirent);
 	oe_free(dirent);
+
+	return result;
 }
 
 static char g_filename[256] = "";
@@ -119,11 +125,18 @@ int myIoOpen_kernel_chn(char *file, int flag, int mode)
 	// convert the iso name back to longname
 	if (strlen(file) > sizeof("ms0:") && 0 == strncasecmp(file + sizeof("ms0:") - 1, "/ISO/", sizeof("/ISO/")-1)) {
 		if(g_filename[0] == '\0') {
-			get_ISO_longname(g_filename, file, sizeof(g_filename));
-		}
+			ret = get_ISO_longname(g_filename, file, sizeof(g_filename));
 
-		ret = sceIoOpen(g_filename, flag, mode);
-		printk("%s: %s -> 0x%08X\n", __func__, g_filename, ret);
+			if(ret == 0) {
+				ret = sceIoOpen(g_filename, flag, mode);
+				printk("%s: %s -> 0x%08X\n", __func__, g_filename, ret);
+			} else {
+				printk("%s: get_ISO_longname -> 0x%08X\n", __func__, ret);
+				ret = sceIoOpen(file, flag, mode);
+			}
+		} else {
+			ret = sceIoOpen(g_filename, flag, mode);
+		}
 	} else {
 		ret = sceIoOpen(file, flag, mode);
 	}

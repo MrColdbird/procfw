@@ -960,13 +960,14 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 		return -31;
 	}
 
-	if ( 1 ) {
+	sctrlSEGetConfig(&config);
+	
+	if(config.chn_iso) {
 		get_ISO_shortname(vpbp->name, vpbp->name);
 	}
 
 	//set iso file for reboot
 	sctrlSESetUmdFile(vpbp->name);
-	sctrlSEGetConfig(&config);
 
 	//set iso mode for reboot
 	sctrlSESetBootConfFileIndex(config.umdmode);

@@ -314,6 +314,11 @@ out:
 	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
 }
 
+int fakeParamInexistance(void)
+{
+	return 0x80120005;
+}
+
 static void patch_game_plugin_module(u32 text_addr)
 {
 	//disable executable check for normal homebrew
@@ -371,11 +376,6 @@ static void patch_htmlviewer_plugin_module(u32 text_addr)
 	strcpy(p, "/ISO");
 }
 
-int fakeParamInexistance(void)
-{
-	return 0x80120005;
-}
-
 static void patch_vsh_module(SceModule2 * mod)
 {
 	//enable homebrew boot
@@ -387,7 +387,7 @@ static void patch_vsh_module(SceModule2 * mod)
 	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID2, gameloadexec, 1);
 
 	int i = 0; for(; i < NELEMS(g_offs->vsh_module_patch.PBPFWCheck); i++) {
-		_sw(MAKE_SYSCALL(sctrlKernelQuerySystemCall(fakeParamInexistance)), g_offs->vsh_module_patch.PBPFWCheck[i]);
+		_sw(MAKE_SYSCALL(sctrlKernelQuerySystemCall(fakeParamInexistance)), mod->text_addr + g_offs->vsh_module_patch.PBPFWCheck[i]);
 	}
 }
 

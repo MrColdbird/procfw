@@ -28,6 +28,7 @@ PSP_EXPORT_FUNC(vctrlVSHRegisterVshMenu)
 PSP_EXPORT_FUNC(vctrlVSHExitVSHMenu)
 PSP_EXPORT_FUNC(vctrlVSHUpdateConfig)
 PSP_EXPORT_FUNC(vshDetectDiscType)
+PSP_EXPORT_FUNC(fakeParamInexistance)
 PSP_EXPORT_END
 
 PSP_END_EXPORTS

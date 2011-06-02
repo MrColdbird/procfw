@@ -33,7 +33,8 @@ enum {
 };
 
 #define MAKE_JUMP(f) (0x08000000 | (((u32)(f) >> 2) & 0x03ffffff))
-#define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff)) 
+#define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff))
+#define MAKE_SYSCALL(n) ((n<<6)|12)
 #define NOP 0
 
 #define REDIRECT_FUNCTION(new_func, original) \
@@ -70,12 +71,14 @@ void sync_cache(void);
  */
 int is_cpu_intr_enable(void);
 
-void fill_vram(u32 color);
-
 #ifdef DEBUG
 void hexdump(void *addr, int size);
+void fill_vram(u32 color);
 #else
 static inline void hexdump(void *addr, int size)
+{
+}
+static inline void fill_vram(u32 color)
 {
 }
 #endif

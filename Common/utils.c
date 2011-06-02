@@ -117,6 +117,14 @@ void hexdump(void *addr, int size)
 
 	printk("\n");
 }
+
+void fill_vram(u32 color)
+{
+	u32 *p = (u32*)0x44000000;
+
+	while (p < (u32*)0x44200000)
+		*p++ = color;
+}
 #endif
 
 int is_cpu_intr_enable(void)
@@ -149,14 +157,6 @@ int is_cpu_intr_enable(void)
 			);
 
 	return ret;
-}
-
-void fill_vram(u32 color)
-{
-	u32 *p = (u32*)0x44000000;
-
-	while (p < (u32*)0x44200000) 
-		*p++ = color;
 }
 
 int get_device_name(char *device, int size, const char* path)

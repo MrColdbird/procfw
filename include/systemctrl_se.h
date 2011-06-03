@@ -76,7 +76,7 @@ typedef struct _SEConfig
 	char hide_cfw_dirs;
 	char chn_iso;
 	char msspeed;
-	char msspeed_bufnum;
+	s16 msspeed_bufnum;
 } SEConfig;
 
 /**

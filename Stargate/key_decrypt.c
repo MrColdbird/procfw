@@ -238,7 +238,7 @@ static int _mesgled_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 
 #endif
 		
 		if (ret == 0) {
-			printk("%s: tag=0x%08X type=%d decrypt OK\n", __func__, cipher->tag, cipher->type);
+			printk("%s: tag=0x%08X type=%d decrypt OK\n", __func__, (uint)cipher->tag, (int)cipher->type);
 #ifdef DEBUG
 			fill_vram(0x000000ff);
 #endif
@@ -270,6 +270,6 @@ void patch_sceMesgLed()
 		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame1[psp_model]);
 		_sw(intr, text_addr + g_offs->sceMesgLedDecryptGame2[psp_model]);
 	} else {
-		printk("%s: unknown model 0%dg\n", __func__, psp_model+1);
+		printk("%s: unknown model 0%dg\n", __func__, (int)psp_model+1);
 	}
 }

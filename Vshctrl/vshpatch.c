@@ -269,7 +269,7 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
 
 	if(minor_version != 0) {
-		sprintf(str+strlen(str), "%d", minor_version);
+		sprintf(str+strlen(str), "%d", (uint)minor_version);
 	}
 
 	p = (void*)(text_addr + g_offs->vshctrl_patch.SystemVersionStr);
@@ -295,17 +295,17 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 			tmpsize = load_version_txt(tmpbuf, tmpsize);
 
 			if(tmpsize > 0 && check_valid_version_txt(tmpbuf, tmpsize) == 0) {
-				sprintf(str, "[ Model: 0%dg Fake: %.4s ]", psp_model+1, tmpbuf + sizeof("release:") - 1);
+				sprintf(str, "[ Model: 0%dg Fake: %.4s ]", (int)psp_model+1, tmpbuf + sizeof("release:") - 1);
 			} else {
 out:
-				sprintf(str, "[ Model: 0%dg ]", psp_model+1);
+				sprintf(str, "[ Model: 0%dg ]", (int)psp_model+1);
 			}
 
 			if(tmpbuf != NULL) {
 				oe_free(tmpbuf);
 			}
 		} else {
-			sprintf(str, "[ Model: 0%dg ]", psp_model+1);
+			sprintf(str, "[ Model: 0%dg ]", (int)psp_model+1);
 		}
 		
 		ascii2utf16(p, str);

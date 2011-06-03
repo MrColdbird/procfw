@@ -510,7 +510,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 		pMod = sctrlKernelFindModuleByAddress((u32)szMod);
 
 		if (!pMod) {
-			printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, nid);
+			printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, (uint)nid);
 
 			return 0;
 		}
@@ -543,7 +543,7 @@ u32 sctrlHENFindFunction(char* szMod, char* szLib, u32 nid)
 		i += (entry->len * 4);
 	}
 
-	printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, nid);
+	printk("%s: Cannot find %s_%08X\n", __func__, szLib == NULL ? "syslib" : szLib, (uint)nid);
 	
 	return 0;
 }

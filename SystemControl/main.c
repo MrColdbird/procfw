@@ -47,7 +47,7 @@ int module_start(SceSize args, void* argp)
 	sctrlHENSetMemory(rebootex_conf.p2_size, rebootex_conf.p9_size);
 
 	printk_init(NULL);
-	printk("SystemControl: model 0%dg FW 0x%08X\n", psp_model+1, psp_fw_version);
+	printk("SystemControl: model 0%dg FW 0x%08X\n", (int)psp_model+1, (uint)psp_fw_version);
 	printk("Compiled in %s %s\n", __DATE__, __TIME__);
 
 	oe_mallocinit();

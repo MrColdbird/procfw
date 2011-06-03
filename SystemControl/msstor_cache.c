@@ -161,7 +161,7 @@ void msstor_stat(void)
 	if(read_call != 0) {
 		sprintf(buf, "%s: bufsize: %d\n", __func__, msstor_cache_read_bufsize / 1024);
 		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", 100 * read_hit / read_call, 100 * read_missed / read_call, 100 * read_uncacheable / read_call, read_hit, read_missed, read_uncacheable, read_call);
+		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
 	} else {
 		sprintf(buf, "no msstor cache call yet\n");

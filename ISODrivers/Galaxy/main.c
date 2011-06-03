@@ -153,7 +153,7 @@ int cso_open(SceUID fd)
 	if(*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
-		printk("%s: total block %d\n", __func__, ciso_total_block);
+		printk("%s: total block %d\n", __func__, (int)ciso_total_block);
 
 		if(g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
@@ -553,15 +553,15 @@ int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
 		// 6.30: 0x00003680
 		// 6.20: move to 0x00003624
 		g_func_1200 = pMod->text_addr + g_offs->Func4;
-		printk("g_func_1200 0x%08x\n", g_func_1200); // sub_2f30
+		printk("g_func_1200 0x%08X\n", (uint)g_func_1200); // sub_2f30
 		// 6.30: 0x00004F8C
 		// 6.20: move to 0x00004EAC
 		g_func_1208 = pMod->text_addr + g_offs->Func5;
-		printk("g_func_1208 0x%08x\n", g_func_1208); // sub_4494
+		printk("g_func_1208 0x%08X\n", (uint)g_func_1208); // sub_4494
 		// 6.30: 0x00004FFC
 		// 6.20: move to 0x00004F1C
 		g_func_121C = pMod->text_addr + g_offs->Func6;
-		printk("g_func_121C 0x%08x\n", g_func_121C); // sub_44ec
+		printk("g_func_121C 0x%08X\n", (uint)g_func_121C); // sub_44ec
 
 		clear_cache();
 	}
@@ -579,7 +579,7 @@ int module_start(SceSize args, void* argp)
 	setup_patch_offset_table(psp_fw_version);
 
 	printk_init("ms0:/LOG_GALAXY.TXT");
-	printk("M33GalaxyController started: 0x%08X\n", psp_fw_version);
+	printk("M33GalaxyController started: 0x%08X\n", (uint)psp_fw_version);
 
 	g_iso_fn = sctrlSEGetUmdFile();
 	pMod = (SceModule2*)sceKernelFindModuleByName("sceThreadManager");

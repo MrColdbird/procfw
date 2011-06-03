@@ -105,7 +105,7 @@ int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key)
 	cipher = get_pauth_cipher(tag);
 
 	if (cipher == NULL) {
-		printk("%s: unknown key tag 0x%08x\n", __func__, tag);
+		printk("%s: unknown key tag 0x%08x\n", __func__, (uint)tag);
 		pspSdkSetK1(k1);
 
 		return -1;
@@ -123,7 +123,7 @@ int myPauth_98B83B5D(u8 *p, u32 size, u32 *newsize, u8 *xor_key)
 	
 	sceKernelSignalSema(g_sema, 1);
 
-	printk("%s: tag 0x%08x -> 0x%08x\n", __func__, tag, ret);
+	printk("%s: tag 0x%08x -> 0x%08x\n", __func__, (uint)tag, (uint)ret);
 	pspSdkSetK1(k1);
 
 	return ret;

@@ -256,7 +256,7 @@ static int findFile(const char * file, u32 lba, u32 dir_size, u32 is_dir, Iso966
 		
 #ifdef DEBUG
 		if(rec->len_dr < rec->len_fi + sizeof(*rec)) {
-			printk("%s: Corrupted directory record found in %s, LBA %d\n", __func__, g_filename, lba);
+			printk("%s: Corrupted directory record found in %s, LBA %d\n", __func__, g_filename, (int)lba);
 		}
 #endif
 
@@ -406,7 +406,7 @@ int isoOpen(const char *path)
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
 
 			if (g_ciso_dec_buf == NULL) {
-				printk("oe_malloc -> 0x%08x\n", (u32)g_ciso_dec_buf);
+				printk("oe_malloc -> 0x%08x\n", (uint)g_ciso_dec_buf);
 				ret = -6;
 				goto error;
 			}

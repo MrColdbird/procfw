@@ -195,7 +195,7 @@ void usage(void)
 
 struct InstallList {
 	u8 *buf;
-	u32 *size;
+	uint *size;
 	char *dst;
 };
 
@@ -563,7 +563,7 @@ int main(int argc, char *argv[])
 	}
 #endif
 	
-	printf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
+	printf("Sorry. This program doesn't support your FW(0x%08X).\n", (uint)psp_fw_version);
 	goto exit;
 	
 version_OK:

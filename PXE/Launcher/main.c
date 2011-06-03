@@ -535,7 +535,7 @@ void do_exploit(void)
 	scePowerRegisterCallbackPrivate(0, cbid);
 	power_buf_address = get_power_address(cbid);
 	scePowerUnregisterCallbackPrivate(0);
-	printk("power_buf_address 0x%08X\r\n", power_buf_address);
+	printk("power_buf_address 0x%08X\r\n", (uint)power_buf_address);
 
 #ifdef CONFIG_635
 	if(psp_fw_version == FW_635 && !is_pspgo()) {
@@ -610,7 +610,7 @@ int main(int argc, char * argv[])
 	}
 #endif
 
-	pspDebugScreenPrintf("Sorry. This program doesn't support your FW(0x%08X).\n", psp_fw_version);
+	pspDebugScreenPrintf("Sorry. This program doesn't support your FW(0x%08X).\n", (uint)psp_fw_version);
 	sceKernelDelayThread(5*1000000);
 	goto exit;
 

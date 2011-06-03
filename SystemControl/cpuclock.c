@@ -161,7 +161,7 @@ void SetSpeed(int cpuspd, int busspd)
 		if(fp != 0) {
 			REDIRECT_FUNCTION(g_power_func_redir[i].fp, fp);
 		} else {
-			printk("%s: scePower_%08X not found\n", __func__, g_power_func_redir[i].nid);
+			printk("%s: scePower_%08X not found\n", __func__, (uint)g_power_func_redir[i].nid);
 		}
 	}
 }

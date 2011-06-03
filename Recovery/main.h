@@ -124,7 +124,7 @@ struct MenuEntry {
 };
 
 struct ValueOption {
-	u8 *value;
+	char *value;
 	int limit_start;
 	int limit_end;
 };

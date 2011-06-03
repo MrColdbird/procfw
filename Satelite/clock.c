@@ -55,7 +55,7 @@ int bus2no(int cpu)
 void change_clock(int dir, int flag)
 {
 	int sel;
-	u8 *cpu[2];
+	char *cpu[2];
 
 	if(flag) {
 		cpu[0]=&(cnf.umdisocpuspeed);
@@ -110,7 +110,7 @@ void change_region(int dir, int max)
 void change_plugins(int dir, int flag)
 {
 	int sel;
-	u8 *plugins;
+	char *plugins;
 
 	if(flag == 0) {
 		plugins=&(cnf.plugvsh);

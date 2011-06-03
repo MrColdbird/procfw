@@ -88,7 +88,7 @@ int module_start(SceSize args, void* argp)
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/inferno.txt");
-	printk("Inferno started FW=0x%08X %02dg\n", psp_fw_version, psp_model+1);
+	printk("Inferno started FW=0x%08X %02dg\n", (uint)psp_fw_version, (int)psp_model+1);
 
 	ret = setup_umd_device();
 

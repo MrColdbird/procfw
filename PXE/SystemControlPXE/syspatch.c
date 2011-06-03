@@ -89,7 +89,7 @@ void patch_module(SceModule2 *mod)
 	}
 
 	//log module start
-	printk("Starting %s (%u, %u)!\n", mod->modname, mod->mpid_text, mod->mpid_data);
+	printk("Starting %s (%u, %u)!\n", mod->modname, (uint)mod->mpid_text, (uint)mod->mpid_data);
 }
 
 int on_module_start(SceModule2 *mod)

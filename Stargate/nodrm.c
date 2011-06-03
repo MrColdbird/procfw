@@ -428,7 +428,7 @@ SceOff myNpDrmEdataGetDataSize(SceUID fd)
 	}
 
 exit:
-	printk("%s 0x%08X -> 0x%08X\n", __func__, fd, (u32)end);
+	printk("%s 0x%08X -> 0x%08X\n", __func__, fd, (uint)end);
 
 	return end;
 }

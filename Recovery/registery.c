@@ -34,7 +34,7 @@
 #include "vpl.h"
 #include "main.h"
 
-int get_registry_value(const char *dir, const char *name, unsigned int *val)
+int get_registry_value(const char *dir, const char *name, u32 *val)
 {
     int ret = 0;
     struct RegParam reg;
@@ -70,7 +70,7 @@ int get_registry_value(const char *dir, const char *name, unsigned int *val)
     return ret;
 }
 
-int set_registry_value(const char *dir, const char *name, unsigned int val)
+int set_registry_value(const char *dir, const char *name, u32 val)
 {
     int ret = 0;
     struct RegParam reg;

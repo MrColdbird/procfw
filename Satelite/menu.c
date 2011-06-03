@@ -325,7 +325,7 @@ int menu_setup(void)
 
 	item_str[TMENU_UMD_VIDEO] = umdvideo_path;
 	item_str[TMENU_USB_DEVICE] = bridge;
-	item_str[TMENU_UMD_MODE] = iso[cnf.umdmode];
+	item_str[TMENU_UMD_MODE] = iso[(int)cnf.umdmode];
 	
 	return 0;
 }

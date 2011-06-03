@@ -142,7 +142,7 @@ static int IoInit(PspIoDrvArg* arg)
 // 0x000002E8
 static int IoExit(PspIoDrvArg* arg)
 {
-	u32 timeout = 500000;
+	SceUInt timeout = 500000;
 
 	sceKernelWaitSema(g_umd9660_sema_id, 1, &timeout);
 	SAFE_FREE(g_sector_buf);
@@ -353,7 +353,7 @@ static SceOff IoLseek(PspIoDrvFileArg *arg, SceOff ofs, int whence)
 	ret = g_open_slot[idx].offset;
 
 exit:
-	printk("%s: ofs=0x%08X, whence=%d -> 0x%08X\n", __func__, (u32)ofs, whence, ret);
+	printk("%s: ofs=0x%08X, whence=%d -> 0x%08X\n", __func__, (uint)ofs, whence, ret);
 
 	return ret;
 }

@@ -168,7 +168,7 @@ static int is_ciso(SceUID fd)
 	if(*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		g_ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
-		printk("%s: total block %d\n", __func__, g_ciso_total_block);
+		printk("%s: total block %d\n", __func__, (int)g_ciso_total_block);
 
 		if(g_ciso_dec_buf == NULL) {
 			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);

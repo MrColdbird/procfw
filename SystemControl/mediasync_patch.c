@@ -146,7 +146,7 @@ void patch_sceMediaSync(u32 scemediasync_text_addr)
 	_sw(NOP, scemediasync_text_addr + g_offs->mediasync_patch.DiscIDCheck2);
 
 	if(g_p2_size != 24 || g_p9_size != 24) {
-		printk("%s: p2/p9 %d/%d\n", __func__, g_p2_size, g_p9_size);
+		printk("%s: p2/p9 %d/%d\n", __func__, (int)g_p2_size, (int)g_p9_size);
 
 		if(psp_model != PSP_1000) {
 			patch_partitions();

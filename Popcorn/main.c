@@ -133,7 +133,7 @@ static int myIoRead(int fd, u8 *buf, int size)
 	}
 
 exit:
-	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, fd, pos, size, ret);
+	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, (uint)fd, (uint)pos, (int)size, ret);
 
 	return ret;
 }
@@ -145,7 +145,7 @@ static int myIoReadAsync(int fd, u8 *buf, int size)
 
 	pos = sceIoLseek32(fd, 0, SEEK_CUR);
 	ret = sceIoReadAsync(fd, buf, size);
-	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, pos, size, ret);
+	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, (uint)fd, (uint)pos, size, ret);
 
 	return ret;
 }
@@ -168,7 +168,7 @@ static SceOff myIoLseek(SceUID fd, SceOff offset, int whence)
 		ret = sceIoLseek(fd, offset, whence);
 	}
 
-	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, fd, (u32)offset, whence, (u32)ret);
+	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, (uint)fd, (uint)offset, (uint)whence, (int)ret);
 
 	return ret;
 }
@@ -336,7 +336,7 @@ static int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void
 	}
 
 	if(cmd == 0x04100002) {
-		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(u32*)indata);
+		printk("%s: setting PGD offset: 0x%08X\n", __func__, *(uint*)indata);
 	}
 
 	if (g_is_custom_ps1 || (g_plain_doc_fd >= 0 && g_plain_doc_fd == fd)) {
@@ -522,7 +522,7 @@ static int _scePspNpDrm_driver_9A34AC9F(u8 *rif)
 	int result;
 
 	result = (*scePspNpDrm_driver_9A34AC9F)(rif);
-	printk("%s: 0x%08X -> 0x%08X\n", __func__, (u32)rif, result);
+	printk("%s: 0x%08X -> 0x%08X\n", __func__, (uint)rif, result);
 
 	if (result != 0) {
 		if (g_keys_bin_found || g_is_custom_ps1) {
@@ -737,7 +737,7 @@ int decompress_data(u32 destSize, const u8 *src, u8 *dest)
 	}
 
 	ret = sceKernelDeflateDecompress(dest, destSize, src, 0);
-	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, destSize, (u32)src, (u32)dest, ret);
+	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, (uint)destSize, (uint)src, (uint)dest, ret);
 
 	if (ret == 0x9300) {
 		ret = 0x92FF;
@@ -902,7 +902,7 @@ int module_start(SceSize args, void* argp)
 	memset(&conf, 0, sizeof(conf));
 	sctrlSEGetConfig(&conf);
 	printk_init("ms0:/popcorn.txt");
-	printk("Popcorn: init_file = %s psp_fw_version = 0x%08X psp_model = %d\n", sceKernelInitFileName(), psp_fw_version, psp_model);
+	printk("Popcorn: init_file = %s psp_fw_version = 0x%08X psp_model = %d\n", sceKernelInitFileName(), (uint)psp_fw_version, (int)psp_model);
 
 	get_keypath(keypath, sizeof(keypath));
 	ret = sceIoGetstat(keypath, &stat);

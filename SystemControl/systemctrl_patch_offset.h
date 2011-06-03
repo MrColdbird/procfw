@@ -36,6 +36,7 @@ struct MediaSyncPatch {
 };
 
 struct MemlmdPatch {
+	u32 memlmd_TagPatch;
 	u32 memlmd_unsigner;
 	u32 memlmd_decrypt;
 	u32 sceMemlmdInitializeScrambleKey;

@@ -43,6 +43,7 @@ typedef enum {
 	NP9660_MODE = 2,
 	INFERNO_MODE = 3,
 	VSHUMD_MODE = 4,
+	UPDATERUMD_MODE = 5,
 } PspBootConfMode;
 
 typedef struct _rebootex_config {

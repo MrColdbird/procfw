@@ -50,9 +50,8 @@ int module_start(SceSize args, void* argp)
 
 	if(sctrlSEGetBootConfFileIndex() != MODE_VSHUMD) {
 		sctrlSESetUmdFile("");
+		sctrlSESetBootConfFileIndex(MODE_UMD);
 	}
-
-	sctrlSESetBootConfFileIndex(0);
 
 	return 0;
 }

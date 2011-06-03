@@ -612,6 +612,37 @@ int patch_bootconf_vshumd(char *buffer, int length)
 	return result;
 }
 
+static struct add_module updaterumd_add_mods[] = {
+	{ "/kd/isofs.prx", "/kd/utility.prx", UPDATER_RUNLEVEL },
+	{ PATH_INFERNO+sizeof(PATH_FLASH0)-2, "/kd/chnnlsv.prx", UPDATER_RUNLEVEL },
+};
+
+static struct del_module updaterumd_del_mods[] = {
+	{ "/kd/mediaman.prx", UPDATER_RUNLEVEL },
+	{ "/kd/ata.prx", UPDATER_RUNLEVEL },
+	{ "/kd/umdman.prx", UPDATER_RUNLEVEL },
+	{ "/kd/umd9660.prx", UPDATER_RUNLEVEL },
+};
+
+int patch_bootconf_updaterumd(char *buffer, int length)
+{
+	int newsize, result, ret;
+
+	result = length;
+
+	int i; for(i=0; i<NELEMS(updaterumd_del_mods); ++i) {
+		RemovePrx(buffer, updaterumd_del_mods[i].prxname, updaterumd_del_mods[i].flags);
+	}
+	
+	for(i=0; i<NELEMS(updaterumd_add_mods); ++i) {
+		newsize = MovePrx(buffer, updaterumd_add_mods[i].insertbefore, updaterumd_add_mods[i].prxname, updaterumd_add_mods[i].flags);
+
+		if (newsize > 0) result = newsize;
+	}
+
+	return result;
+}
+
 int is_permanent_mode(void)
 {
 	int ret;
@@ -677,6 +708,11 @@ int _UnpackBootConfig(char **p_buffer, int length)
 			break;
 		case VSHUMD_MODE:
 			newsize = patch_bootconf_vshumd(buffer, length);
+
+			if (newsize > 0) result = newsize;
+			break;
+		case UPDATERUMD_MODE:
+			newsize = patch_bootconf_updaterumd(buffer, length);
 
 			if (newsize > 0) result = newsize;
 			break;

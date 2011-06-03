@@ -226,7 +226,9 @@ int install_cfw(void)
 {
 	int ret, i;
 
-//	sceIoRemove("flash1:/config.se");
+	if(disable_smart) {
+		sceIoRemove("flash1:/config.se");
+	}
 
 	for(i=0; i<NELEMS(g_old_cfw_files); ++i) {
 		sceIoRemove(g_old_cfw_files[i]);

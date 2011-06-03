@@ -76,7 +76,7 @@ typedef struct _SEConfig
 	char chn_iso;
 	char msspeed;
 	char msspeed_bufnum;
-} __attribute__((packed)) SEConfig;
+} SEConfig;
 
 /**
  * Gets the SE/OE version

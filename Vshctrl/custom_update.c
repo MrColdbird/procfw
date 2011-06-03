@@ -33,6 +33,9 @@
 #include "strsafe.h"
 #include "vshctrl_patch_offset.h"
 
+int _sceKernelLoadModuleVSH(const char *path, int flags, SceKernelLMOption *option);
+int (* g_sceKernelLoadModuleVSH)(const char *path, int flags, SceKernelLMOption *option);
+
 void patch_update_plugin_module(u32 text_addr)
 {
 	int version;
@@ -43,9 +46,12 @@ void patch_update_plugin_module(u32 text_addr)
 
 	_sw((version >> 16) | 0x3C050000, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion1);
 	_sw((version & 0xFFFF) | 0x34A40000, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion2);
+
+	//beql -> beq
+	_sw( 0x10400002, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion3);
 }
 
-void patch_SceUpdateDL_Library(u32 text_addr)
+static void patch_SceUpdateDL_Library(u32 text_addr)
 {
 	char *p;
 
@@ -60,4 +66,27 @@ void patch_SceUpdateDL_Library(u32 text_addr)
 	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall2);
 	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall3);
 	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall4);
+}
+
+int _sceKernelLoadModuleVSH(const char *path, int flags, SceKernelLMOption *option)
+{
+	int ret = g_sceKernelLoadModuleVSH(path, flags, option);
+	if(ret >= 0)
+	{
+		int k1 = pspSdkSetK1(0);
+	
+		SceModule2 *mod = sceKernelFindModuleByName("SceUpdateDL_Library");
+		if(mod)
+		{
+			if(sceKernelFindModuleByName("sceVshNpSignin_Module") == NULL && 
+				sceKernelFindModuleByName("npsignup_plugin_module") == NULL )
+			{			
+				patch_SceUpdateDL_Library( mod->text_addr );
+			}
+		}
+
+		pspSdkSetK1(k1);
+	}
+
+	return ret;
 }

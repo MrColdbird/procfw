@@ -24,6 +24,7 @@
 #include <pspctrl.h>
 #include <stdio.h>
 #include <string.h>
+#include <pspumd.h>
 #include "utils.h"
 #include "libs.h"
 #include "systemctrl.h"
@@ -376,6 +377,48 @@ static void patch_htmlviewer_plugin_module(u32 text_addr)
 	strcpy(p, "/ISO");
 }
 
+int umdLoadExec(char * file, struct SceKernelLoadExecVSHParam * param)
+{
+	//result
+	int ret = 0;
+	SEConfig config;
+
+	printk("%s: %s %s\n", __func__, file, param->key);
+	printk("%s: %d %s\n", __func__, (int)sctrlSEGetBootConfFileIndex(), sctrlSEGetUmdFile());
+
+	sctrlSEGetConfig(&config);
+
+	if(sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
+		sctrlSESetBootConfFileIndex(config.umdmode);
+		sctrlSESetDiscType(PSP_UMD_TYPE_GAME);
+	}
+
+	ret = sctrlKernelLoadExecVSHDisc(file, param);
+
+	return ret;
+}
+
+int umdLoadExecUpdater(char * file, struct SceKernelLoadExecVSHParam * param)
+{
+	//result
+	int ret = 0;
+	SEConfig config;
+
+	printk("%s: %s %s\n", __func__, file, param->key);
+	printk("%s: %d %s\n", __func__, (int)sctrlSEGetBootConfFileIndex(), sctrlSEGetUmdFile());
+
+	sctrlSEGetConfig(&config);
+
+	if(sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
+		sctrlSESetBootConfFileIndex(MODE_UPDATERUMD);
+		sctrlSESetDiscType(PSP_UMD_TYPE_GAME);
+	}
+
+	ret = sctrlKernelLoadExecVSHDiscUpdater(file, param);
+
+	return ret;
+}
+
 static void patch_vsh_module(SceModule2 * mod)
 {
 	//enable homebrew boot
@@ -385,6 +428,8 @@ static void patch_vsh_module(SceModule2 * mod)
 
 	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID1, gameloadexec, 1);
 	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecNID2, gameloadexec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecDisc, umdLoadExec, 1);
+	hook_import_bynid((SceModule *)mod, "sceVshBridge", g_offs->vsh_module_patch.loadexecDiscUpdater, umdLoadExecUpdater, 1);
 
 	int i = 0; for(; i < NELEMS(g_offs->vsh_module_patch.PBPFWCheck); i++) {
 		_sw(MAKE_SYSCALL(sctrlKernelQuerySystemCall(fakeParamInexistance)), mod->text_addr + g_offs->vsh_module_patch.PBPFWCheck[i]);

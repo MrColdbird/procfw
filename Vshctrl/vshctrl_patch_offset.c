@@ -69,6 +69,8 @@ PatchOffset g_639_offsets = {
 		},
 		.loadexecNID1 = 0x59BBA567,
 		.loadexecNID2 = 0xD4BA5699,
+		.loadexecDisc = 0xA74228D4,
+		.loadexecDiscUpdater = 0x5CA71F45,
 		.PBPFWCheck = {
 			0x00011940,
 			0x00012124,
@@ -136,6 +138,8 @@ PatchOffset g_635_offsets = {
 		},
 		.loadexecNID1 = 0x59BBA567,
 		.loadexecNID2 = 0xD4BA5699,
+		.loadexecDisc = 0xA74228D4,
+		.loadexecDiscUpdater = 0x5CA71F45,
 		.PBPFWCheck = {
 			0x00011940,
 			0x00012124,
@@ -203,6 +207,8 @@ PatchOffset g_620_offsets = {
 		},
 		.loadexecNID1 = 0x4ECCCDBC,
 		.loadexecNID2 = 0x2D5C9178,
+		.loadexecDisc = 0x2B24AEAC,
+		.loadexecDiscUpdater = 0x8959D61E,
 		.PBPFWCheck = {
 			0x0001136C,
 			0x00011BA0,

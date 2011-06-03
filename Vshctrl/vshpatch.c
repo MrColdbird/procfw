@@ -42,9 +42,6 @@ extern void patch_sceUSB_Driver(void);
 
 extern int (*g_sceCtrlReadBufferPositive) (SceCtrlData *, int);
 
-extern int _sceKernelLoadModuleVSH(const char *path, int flags, SceKernelLMOption *option);
-extern int (* g_sceKernelLoadModuleVSH)(const char *path, int flags, SceKernelLMOption *option);
-
 typedef struct _HookUserFunctions {
 	u32 nid;
 	void *func;
@@ -90,11 +87,6 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
 		patch_Gameboot(mod);
 
-		if( conf.useownupdate ){
-			_sw(MAKE_CALL(_sceKernelLoadModuleVSH), mod->text_addr + g_offs->vshctrl_patch.sceKernelLoadModuleVSHCall);
-			g_sceKernelLoadModuleVSH = (void*)(mod->text_addr + g_offs->vshctrl_patch.sceKernelLoadModuleVSH);
-		}
-
 		if(psp_model == PSP_GO && conf.hibblock) {
 			patch_hibblock(mod);
 		}
@@ -107,16 +99,16 @@ static int vshpatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
-	if(conf.useownupdate && 0 == strcmp(mod->modname, "update_plugin_module")) {
+	if( 0 == strcmp(mod->modname, "update_plugin_module")) {
 		patch_update_plugin_module(text_addr);
 		sync_cache();
 	}
-/*
+
 	if(conf.useownupdate && 0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
 		patch_SceUpdateDL_Library(text_addr);
 		sync_cache();
 	}
-*/
+
 	if(conf.htmlviewer_custom_save_location && 0 == strcmp(mod->modname, "htmlviewer_plugin_module")) {
 		patch_htmlviewer_plugin_module(text_addr);
 		sync_cache();

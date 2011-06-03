@@ -55,7 +55,7 @@ int bus2no(int cpu)
 void change_clock(int dir, int flag)
 {
 	int sel;
-	char *cpu[2];
+	s16 *cpu[2];
 
 	if(flag) {
 		cpu[0]=&(cnf.umdisocpuspeed);

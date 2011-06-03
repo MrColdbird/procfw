@@ -160,6 +160,9 @@ void patch_sceMemlmd(void)
 		patch = &g_offs->memlmd_patch_other;
 	}
 
+	//This patch allow to load packed usermode module.
+	_sh( 0xF005 , memlmd->text_addr + patch->memlmd_TagPatch );
+
 	//patches
 	memlmd_unsigner = (void*)memlmd->text_addr + patch->memlmd_unsigner; // inner function which unsigns a PRX module 
 	sceMemlmdInitializeScrambleKey = (void*)memlmd->text_addr + patch->sceMemlmdInitializeScrambleKey;

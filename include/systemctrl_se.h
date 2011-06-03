@@ -50,10 +50,10 @@ typedef struct _SEConfig
 {
 	int magic;
 	char umdmode;
-	char vshcpuspeed;
-	char vshbusspeed;
-	char umdisocpuspeed;
-	char umdisobusspeed;
+	s16 vshcpuspeed;
+	s16 vshbusspeed;
+	s16 umdisocpuspeed;
+	s16 umdisobusspeed;
 	char fakeregion;
 	char usbdevice;
 	char usbcharge;

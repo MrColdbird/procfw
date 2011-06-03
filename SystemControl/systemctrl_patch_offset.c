@@ -40,6 +40,7 @@ PatchOffset g_639_offsets = {
 		.sceSystemFileGetIndexCall = 0x0000097C,
 	},
 	.memlmd_patch_01g = {
+		.memlmd_TagPatch = 0x00001308,
 		.memlmd_unsigner = 0x00000F88,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x000011D0,
@@ -49,6 +50,7 @@ PatchOffset g_639_offsets = {
 		.memlmd_decrypt_call2 = 0x00000EEC,
 	},
 	.memlmd_patch_other = {
+		.memlmd_TagPatch = 0x00001430,
 		.memlmd_unsigner = 0x00001078,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x000012C0,
@@ -216,6 +218,7 @@ PatchOffset g_635_offsets = {
 		.sceSystemFileGetIndexCall = 0x0000097C,
 	},
 	.memlmd_patch_01g = {
+		.memlmd_TagPatch = 0x00001308,
 		.memlmd_unsigner = 0x00000F88,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x000011D0,
@@ -225,6 +228,7 @@ PatchOffset g_635_offsets = {
 		.memlmd_decrypt_call2 = 0x00000EEC,
 	},
 	.memlmd_patch_other = {
+		.memlmd_TagPatch = 0x00001430,
 		.memlmd_unsigner = 0x00001078,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x000012C0,
@@ -392,6 +396,7 @@ PatchOffset g_620_offsets = {
 		.sceSystemFileGetIndexCall = 0x00000954,
 	},
 	.memlmd_patch_01g = {
+		.memlmd_TagPatch = 0x00001290,
 		.memlmd_unsigner = 0x00000F10,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x00001158,
@@ -401,6 +406,7 @@ PatchOffset g_620_offsets = {
 		.memlmd_decrypt_call2 = 0x00000E74,
 	},
 	.memlmd_patch_other = {
+		.memlmd_TagPatch = 0x00001360,
 		.memlmd_unsigner = 0x00000FA8,
 		.memlmd_decrypt = 0x00000134,
 		.sceMemlmdInitializeScrambleKey = 0x000011F0,

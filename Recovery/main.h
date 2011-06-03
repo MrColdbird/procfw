@@ -60,6 +60,8 @@ enum {
 	BLOCK_ANALOG_INPUT,
 	OLD_PLUGINS_SUPPORT,
 	ALLOW_NON_LATIN1_ISO_FILENAME,
+	MSSPEED_UP,
+	MSSPEED_UP_BUFNUM,
 	CPU_SPEED,
 	XMB_CPU_BUS,
 	GAME_CPU_BUS,
@@ -122,7 +124,7 @@ struct MenuEntry {
 };
 
 struct ValueOption {
-	int *value;
+	u8 *value;
 	int limit_start;
 	int limit_end;
 };

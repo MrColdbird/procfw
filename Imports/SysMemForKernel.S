@@ -29,3 +29,7 @@
 	IMPORT_FUNC	"SysMemForKernel",0xA25BF7A1,sceKernelPartitionMaxFreeMemSize_620
 	IMPORT_FUNC	"SysMemForKernel",0x7BE9653E,sceKernelPartitionTotalFreeMemSize
 	IMPORT_FUNC	"SysMemForKernel",0x35588461,sceKernelPartitionTotalFreeMemSize_620
+	IMPORT_FUNC	"SysMemForKernel",0x52B54B93,sceKernelGetBlockHeadAddr
+	IMPORT_FUNC	"SysMemForKernel",0xFEB5C72B,sceKernelGetBlockHeadAddr620
+	IMPORT_FUNC	"SysMemForKernel",0x4621A9CC,sceKernelAllocPartitionMemory
+	IMPORT_FUNC	"SysMemForKernel",0xE5E18A99,sceKernelAllocPartitionMemory620

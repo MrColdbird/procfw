@@ -34,40 +34,49 @@ enum SEUmdModes
 	MODE_VSHUMD = 4,
 };
 
-typedef struct
+enum MsSpeedFlag
+{
+	MSSPEED_NONE     = 0,
+	MSSPEED_POP      = 1,
+	MSSPEED_GAME     = 2,
+	MSSPEED_VSH      = 3,
+	MSSPEED_POP_GAME = 4,
+	MSSPEED_GAME_VSH = 5,
+	MSSPEED_VSH_POP  = 6,
+	MSSPEED_ALWAYS   = 7,
+};
+
+typedef struct _SEConfig
 {
 	int magic;
-	int reserved[6];
-	int umdmode;
-	int reserved2;
-	int vshcpuspeed;
-	int vshbusspeed;
-	int umdisocpuspeed;
-	int umdisobusspeed;
-	int fakeregion;
-	int reserved3[2];
-	int usbdevice;
-	int reserved4;
-	int usbcharge;
-	int machidden;
-	int reserved_2;
-	int skipgameboot;
-	int hidepic;
-	int plugvsh; 
-	int pluggame;
-	int plugpop;
-	int flashprot;
-	int skiplogo;
-	int useversion;
-	int useownupdate;
-	int usenodrm;
-	int hibblock;
-	int noanalog;
-	int oldplugin;
-	int htmlviewer_custom_save_location;
-	int hide_cfw_dirs;
-	int chn_iso;
-} SEConfig;
+	u8 umdmode;
+	u8 vshcpuspeed;
+	u8 vshbusspeed;
+	u8 umdisocpuspeed;
+	u8 umdisobusspeed;
+	u8 fakeregion;
+	u8 usbdevice;
+	u8 usbcharge;
+	u8 machidden;
+	u8 skipgameboot;
+	u8 hidepic;
+	u8 plugvsh; 
+	u8 pluggame;
+	u8 plugpop;
+	u8 flashprot;
+	u8 skiplogo;
+	u8 useversion;
+	u8 useownupdate;
+	u8 usenodrm;
+	u8 hibblock;
+	u8 noanalog;
+	u8 oldplugin;
+	u8 htmlviewer_custom_save_location;
+	u8 hide_cfw_dirs;
+	u8 chn_iso;
+	u8 msspeed;
+	u8 msspeed_bufnum;
+} __attribute__((packed)) SEConfig;
 
 /**
  * Gets the SE/OE version

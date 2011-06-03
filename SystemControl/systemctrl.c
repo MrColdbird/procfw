@@ -71,6 +71,10 @@ extern SceUID _sceKernelLoadModuleWithApitype2(int apitype, const char *path, in
 extern SceUID sceKernelLoadModuleWithApitype2_620(int apitype, const char *path, int flags, SceKernelLMOption *option);
 extern int sceKernelBootFromGo635(void);
 extern int sceKernelBootFromGo620(void);
+void* sceKernelGetBlockHeadAddr(SceUID blockid);
+SceUID sceKernelAllocPartitionMemory(SceUID partitionid, const char * name, int type, SceSize size, void * addr);
+void* sceKernelGetBlockHeadAddr620(SceUID blockid);
+SceUID sceKernelAllocPartitionMemory620(SceUID partitionid, const char * name, int type, SceSize size, void * addr);
 
 extern int (*g_on_module_start)(SceModule2*);
 
@@ -312,6 +316,66 @@ int sctrlKernelLoadExecVSHMs4(const char *file, struct SceKernelLoadExecVSHParam
 #ifdef CONFIG_620
 		case FW_620:
 			ret = sceKernelLoadExecVSHMs4_620(file, param);
+			break;
+#endif
+	};
+	
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+SceUID sctrlKernelAllocPartitionMemory(SceUID partitionid, const char * name, int type, SceSize size, void * addr)
+{
+	u32 k1;
+	int ret = -1;
+
+	k1 = pspSdkSetK1(0);
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelAllocPartitionMemory(partitionid, name, type, size, addr);
+			break;
+#endif
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelAllocPartitionMemory(partitionid, name, type, size, addr);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelAllocPartitionMemory620(partitionid, name, type, size, addr);
+			break;
+#endif
+	};
+	
+	pspSdkSetK1(k1);
+
+	return ret;
+}
+
+void* sctrlKernelGetBlockHeadAddr(SceUID blockid)
+{
+	u32 k1;
+	void* ret = NULL;
+
+	k1 = pspSdkSetK1(0);
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceKernelGetBlockHeadAddr(blockid);
+			break;
+#endif
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceKernelGetBlockHeadAddr(blockid);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceKernelGetBlockHeadAddr620(blockid);
 			break;
 #endif
 	};

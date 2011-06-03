@@ -185,6 +185,8 @@ void load_default_conf(SEConfig *config)
 	config->htmlviewer_custom_save_location = 1;
 	config->hide_cfw_dirs = 1;
 	config->chn_iso = 1;
+	config->msspeed = MSSPEED_NONE;
+	config->msspeed_bufnum = 16;
 }
 
 void load_config(void)

@@ -84,6 +84,8 @@ const char * g_messages[] = {
 	"Block Analog Input in Game",
 	"Old Plugin Support (PSP-Go only)",
 	"Allow Non-latin1 ISO Filename",
+	"Memory Stick Speedup",
+	"Memory Stick Speedup Buffer Size",
 	"CPU Speed",
 	"XMB CPU/BUS",
 	"Game CPU/BUS",
@@ -386,6 +388,40 @@ static int display_chn_iso(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_msspeed(struct MenuEntry* entry, char *buf, int size)
+{
+	char speedstr[20];
+
+	if(g_config.msspeed == MSSPEED_NONE) {
+		sprintf(speedstr, "None");
+	} else if(g_config.msspeed == MSSPEED_POP) {
+		sprintf(speedstr, "Pop");
+	} else if(g_config.msspeed == MSSPEED_GAME) {
+		sprintf(speedstr, "Game");
+	} else if(g_config.msspeed == MSSPEED_VSH) {
+		sprintf(speedstr, "Vsh");
+	} else if(g_config.msspeed == MSSPEED_POP_GAME) {
+		sprintf(speedstr, "Pop & Game");
+	} else if(g_config.msspeed == MSSPEED_GAME_VSH) {
+		sprintf(speedstr, "Game & Vsh");
+	} else if(g_config.msspeed == MSSPEED_VSH_POP) {
+		sprintf(speedstr, "Vsh & Pop");
+	} else if(g_config.msspeed == MSSPEED_ALWAYS) {
+		sprintf(speedstr, "Always");
+	}
+
+	sprintf(buf, "%-48s %-11s", g_messages[MSSPEED_UP], speedstr);
+
+	return 0;
+}
+
+static int display_msspeed_bufnum(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11d", g_messages[MSSPEED_UP_BUFNUM], g_config.msspeed_bufnum);
+
+	return 0;
+}
+
 static int display_hide_cfw_dirs(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[HIDE_CFW_DIRS], get_bool_name(g_config.hide_cfw_dirs));
@@ -428,6 +464,16 @@ static struct ValueOption g_chn_iso = {
 	0, 2,
 };
 
+static struct ValueOption g_msspeed = {
+	&g_config.msspeed,
+	0, MSSPEED_ALWAYS+1,
+};
+
+static struct ValueOption g_msspeed_bufnum = {
+	&g_config.msspeed_bufnum,
+	6, 128+1,
+};
+
 static struct ValueOption g_hide_cfw_dirs = {
 	&g_config.hide_cfw_dirs,
 	0, 2,
@@ -442,6 +488,8 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
 	{ NULL, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
+	{ NULL, 0, 0, &display_msspeed, &change_option, &change_option_by_enter, &g_msspeed},
+	{ NULL, 0, 0, &display_msspeed_bufnum, &change_option, &change_option_by_enter, &g_msspeed_bufnum},
 };
 
 static struct Menu g_advanced_menu = {
@@ -557,7 +605,7 @@ static int configuration_menu(struct MenuEntry *entry)
 	return 0;
 }
 
-static int g_xmb_clock_number, g_game_clock_number;
+static u8 g_xmb_clock_number, g_game_clock_number;
 
 static int display_xmb(struct MenuEntry* entry, char *buf, int size)
 {

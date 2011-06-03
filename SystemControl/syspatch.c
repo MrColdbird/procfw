@@ -37,14 +37,45 @@ static void patch_sceWlan_Driver(u32 text_addr);
 static void patch_scePower_Service(u32 text_addr);
 static void patch_sceUmdMan_driver(SceModule* mod);
 
-static inline void set_clock(void)
+static int need_msstor_speed(void)
+{
+	int key_config;
+
+	if(conf.msspeed == MSSPEED_NONE)
+		return 0;
+
+	if(conf.msspeed == MSSPEED_ALWAYS) {
+		return 1;
+	}
+
+	key_config = sceKernelApplicationType();
+
+	if(key_config == PSP_INIT_KEYCONFIG_GAME) {
+		if(conf.msspeed == MSSPEED_GAME || conf.msspeed == MSSPEED_POP_GAME) {
+			return 1;
+		}
+	} else if(key_config == PSP_INIT_KEYCONFIG_POPS) {
+		if(conf.msspeed == MSSPEED_POP || conf.msspeed == MSSPEED_POP_GAME) {
+			return 1;
+		}
+	} else if(key_config == PSP_INIT_KEYCONFIG_VSH) {
+		if(conf.msspeed == MSSPEED_VSH || conf.msspeed == MSSPEED_GAME_VSH) {
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static void system_booted_action(void)
 {
 	int key_config, ret;
+	static int booted = 0;
 
 	ret = sctrlKernelGetSystemStatus();
    
 	// status becomes 0x00020000 after init_file loads
-	if (ret != 0x00020000) {
+	if (booted || ret != 0x00020000) {
 		return;
 	}
 	
@@ -58,6 +89,12 @@ static inline void set_clock(void)
 		SetSpeed(conf.vshcpuspeed, conf.vshbusspeed);
 	}
 
+	if(need_msstor_speed()) {
+		msstor_init(conf.msspeed_bufnum);
+		printk("%s: msstor cache enabled\n", __func__);
+	}
+
+	booted = 1;
 	sync_cache();
 }
 
@@ -169,7 +206,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 #endif
 
 	patch_module_for_version_spoof((SceModule*)mod);
-	set_clock();
+	system_booted_action();
 
 	if (previous)
 		return (*previous)(mod);

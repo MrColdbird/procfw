@@ -76,6 +76,7 @@ int load_plugins(void);
 int load_start_module(char *path);
 
 void usb_charge(void);
+int msstor_init(int bufnum);
 
 #define MAX_HIGH_MEMSIZE 55
 
@@ -112,6 +113,8 @@ int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *statu
 int sctrlKernelUnloadModule(SceUID modid);
 SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flags, SceKernelLMOption *option);
 int sceKernelApplicationType(void);
+SceUID sctrlKernelAllocPartitionMemory(SceUID partitionid, const char * name, int type, SceSize size, void * addr);
+void* sctrlKernelGetBlockHeadAddr(SceUID blockid);
 
 extern SEConfig conf;
 

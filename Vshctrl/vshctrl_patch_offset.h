@@ -41,8 +41,6 @@ struct VshctrlPatch {
 	u32 RifNpDRMCheck;
 	u32 sceCtrlReadBufferPositiveNID;
 	u32 htmlviewer_save_location;
-	u32 sceKernelLoadModuleVSH;
-	u32 sceKernelLoadModuleVSHCall;
 };
 
 struct MsVideoMainPatch {

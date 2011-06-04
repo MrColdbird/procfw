@@ -16,6 +16,8 @@ SATELITE = Satelite
 POPCORN = Popcorn
 RECOVERY = Recovery
 PERMANENT = Permanent
+CIPL = CIPL
+CIPL_INSTALLER = CIPL_installer
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -46,6 +48,9 @@ all:
 	@mkdir $(DISTRIBUTE)/FastRecovery || true
 ifeq ($(CONFIG_620), 1)
 	@mkdir $(DISTRIBUTE)/620PRO_Permanent || true
+endif
+ifeq ($(CONFIG_639), 1)
+	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
 endif
 	@rm -f ./Common/*.o
 
@@ -81,6 +86,14 @@ ifeq ($(CONFIG_620), 1)
 	@mv $(PERMANENT)/hen.prx $(DISTRIBUTE)/620PRO_Permanent
 	@mv $(PERMANENT)/kmod.prx $(DISTRIBUTE)/620PRO_Permanent
 endif
+ifeq ($(CONFIG_639), 1)
+	@cd $(CIPL); make $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER); make $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make $(DEBUG_OPTION)
+	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/CIPL_Flasher
+endif
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)
@@ -94,6 +107,11 @@ clean:
 	@cd $(FASTRECOVERY); make clean $(DEBUG_OPTION)
 ifeq ($(CONFIG_620), 1)
 	@cd $(PERMANENT); make clean $(DEBUG_OPTION)
+endif
+ifeq ($(CONFIG_639), 1)
+	@cd $(CIPL); make clean $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER); make clean $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make clean $(DEBUG_OPTION)
 endif
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)

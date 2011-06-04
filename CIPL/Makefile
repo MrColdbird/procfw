@@ -11,4 +11,4 @@ clean:
 	make clean -C payloadex
 	make clean -C mainbinex
 	make clean -C combine
-	rm ipl_block_01g.h ipl_block_large.h
+	@rm -f ipl_block_01g.h ipl_block_large.h

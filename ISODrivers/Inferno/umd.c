@@ -66,7 +66,6 @@ int sceUmdCheckMedium(void)
 	int ret;
 
 	ret = 1;
-	do_umd_notify(g_drive_status);
 //	printk("%s: -> 0x%08X\n", __func__, ret);
 
 	return ret;
@@ -329,6 +328,7 @@ void sceUmdClearDriveStatus(u32 mask)
 	sceKernelClearEventFlag(g_drive_status_evf, mask);
 	g_drive_status &= mask;
 	sceKernelCpuResumeIntr(intr);
+	do_umd_notify(g_drive_status);
 }
 
 int sceUmd9660_driver_63342C0F(void)
@@ -468,7 +468,6 @@ int sceUmdDeactivate(int unit, const char *drive)
 	}
 
 	sceUmdSetDriveStatus(PSP_UMD_PRESENT | PSP_UMD_INITED);
-	do_umd_notify(g_drive_status);
 	pspSdkSetK1(k1);
 
 	return ret;
@@ -526,6 +525,7 @@ void sceUmdSetDriveStatus(int status)
 
 	sceKernelSetEventFlag(g_drive_status_evf, g_drive_status);
 	sceKernelCpuResumeIntr(intr);
+	do_umd_notify(g_drive_status);
 }
 
 int sceUmd_004F4BE5(int orig_error_code)

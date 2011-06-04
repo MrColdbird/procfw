@@ -1,10 +1,9 @@
-
-
 TARGET = flasher
 OBJS = main.o pspIplUpdate.o
 
-
 LIBS = -lpspkubridge
+INCDIR = ../Common/ ../include/
+LIBDIR = ../libs
 
 BUILD_PRX = 1
 PSP_FW_VERSION = 635

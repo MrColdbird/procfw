@@ -210,7 +210,7 @@ int main()
 	mod = sceKernelLoadModule("ipl_update.prx", 0, NULL);
 
 	if (mod < 0) {
-		ErrorExit(5000,"Could not load module!\n");
+		ErrorExit(5000,"Could not load ipl_update.prx!\n");
 	}
 
 	mod = sceKernelStartModule(mod, 0, NULL, NULL, NULL);

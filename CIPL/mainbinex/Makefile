@@ -16,7 +16,7 @@ a.bin:
 	psp-strip -s main.elf
 	psp-objcopy -O binary main.elf $(TARGET).bin
 #	bin2c h.bin rebootex.h rebootex
-	rm -rf *~ *.o *.elf *.s
+	@rm -rf *~ *.o *.elf *.s
 
 clean:
-	rm *.bin
+	@rm -f *.bin

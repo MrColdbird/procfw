@@ -18,7 +18,7 @@ a.bin:
 	psp-strip -s main.elf
 	psp-objcopy -O binary main.elf h.bin
 	bin2c h.bin $(TARGET).h nand_payloadex
-	rm -rf *~ *.o *.elf *.bin *.s
+	@rm -rf *~ *.o *.elf *.bin *.s
 
 clean:
-	rm nand_payloadex_01g.h nand_payloadex_02g.h
+	@rm -f nand_payloadex_01g.h nand_payloadex_02g.h

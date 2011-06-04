@@ -28,6 +28,8 @@
 #include "main.h"
 #include "systemctrl_patch_offset.h"
 
+#define CACHE_TOLERATE_THRESHOLD 8
+
 static int (*msstor_read)(PspIoDrvFileArg *arg, char *data, int len) = NULL;
 static int (*msstor_write)(PspIoDrvFileArg *arg, const char *data, int len) = NULL;
 static SceOff (*msstor_lseek)(PspIoDrvFileArg *arg, SceOff ofs, int whence) = NULL;
@@ -40,6 +42,10 @@ static u32 read_call = 0;
 static u32 read_hit = 0;
 static u32 read_missed = 0;
 static u32 read_uncacheable = 0;
+static u32 read_tolerated = 0;
+static u32 read_untoleratable = 0;
+
+static u32 read_missed_tolerance = 0;
 
 static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 {
@@ -57,17 +63,26 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
 		read_hit++;
 	} else if(len <= msstor_cache_read_bufsize) {
-		ret = (*msstor_read)(arg, msstor_cache_read_buf, msstor_cache_read_bufsize);
+		read_missed_tolerance += len;
 
-		if(ret >= 0) {
-			read_len = MIN(len, ret);
-			memcpy(data, msstor_cache_read_buf, read_len);
-			ret = read_len;
-			msstor_cache_read_pos = pos;
-			(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
+		if(read_missed_tolerance < msstor_cache_read_bufsize / CACHE_TOLERATE_THRESHOLD ) {
+			ret = (*msstor_read)(arg, data, len);
 		} else {
-			printk("%s: read -> 0x%08X\n", __func__, ret);
-			msstor_cache_read_pos = -1; // disable cache
+			ret = (*msstor_read)(arg, msstor_cache_read_buf, msstor_cache_read_bufsize);
+
+			if(ret >= 0) {
+				read_len = MIN(len, ret);
+				memcpy(data, msstor_cache_read_buf, read_len);
+				ret = read_len;
+				msstor_cache_read_pos = pos;
+				(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
+			} else {
+				printk("%s: read -> 0x%08X\n", __func__, ret);
+				msstor_cache_read_pos = -1; // disable cache
+			}
+
+			read_missed_tolerance = 0;
+			read_untoleratable++;
 		}
 
 		read_missed++;
@@ -156,17 +171,21 @@ int msstor_init(int bufnum)
 }
 
 // call @SystemControl:SystemCtrlPrivate,0xD3014719@
-void msstor_stat(void)
+void msstor_stat(int reset)
 {
 	char buf[256];
 
 	if(read_call != 0) {
-		sprintf(buf, "%s: bufsize: %d\n", __func__, msstor_cache_read_bufsize / 1024);
+		sprintf(buf, "%s: bufsize: %d cache miss untoleratable: %d\n", __func__, msstor_cache_read_bufsize / 0x200, (int)read_untoleratable);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
 	} else {
 		sprintf(buf, "no msstor cache call yet\n");
 		sceIoWrite(1, buf, strlen(buf));
+	}
+
+	if(reset) {
+		read_call = read_hit = read_missed = read_uncacheable = read_tolerated = read_untoleratable = 0;
 	}
 }

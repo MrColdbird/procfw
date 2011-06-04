@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 	u8 *input, *output;
 	u32 input_size = 0;
 	FILE *f;
-	int res;
+	int res = 0;
 	char *outfile;
 
 	if (argc < 2 || argc > 6)

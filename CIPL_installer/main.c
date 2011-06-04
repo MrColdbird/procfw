@@ -173,6 +173,8 @@ int main()
 	}
 
 	model = kuKernelGetModel();
+
+	//TODO no ta-88v3 check!
 	if( !( model == 0 || model == 1) )
 	{
 		ErrorExit(5000,"This installer does not support this model.\n");

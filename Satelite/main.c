@@ -205,11 +205,24 @@ int get_umdvideo_num(void)
 
 int TSRThread(SceSize args, void *argp)
 {
+	char *p;
+
 	sceKernelChangeThreadPriority(0, 8);
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
 	umdvideo_num = get_umdvideo_num();
+	kuKernelGetUmdFile(umdvideo_path, sizeof(umdvideo_path));
+
+	p = strrchr(umdvideo_path, '/');
+
+	if (p != NULL) {
+		strcpy(umdvideo_path, p + 1);
+	}
+
+	if(umdvideo_path[0] == '\0') {
+		strcpy(umdvideo_path, "None");
+	}
 
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639)
@@ -255,30 +268,36 @@ int TSRThread(SceSize args, void *argp)
 		char isopath[256];
 		SceIoStat stat;
 
+		if(0 != strcmp(umdvideo_path, "None")) {
 #ifdef CONFIG_639
-		if(psp_fw_version == FW_639)
-			scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+			if(psp_fw_version == FW_639)
+				scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
 #endif
 
 #ifdef CONFIG_635
-		if(psp_fw_version == FW_635)
-			scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+			if(psp_fw_version == FW_635)
+				scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
 #endif
 
 #ifdef CONFIG_620
-		if (psp_fw_version == FW_620)
-			scePaf_sprintf_620(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+			if (psp_fw_version == FW_620)
+				scePaf_sprintf_620(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
 #endif
 
-		if(0 == sceIoGetstat(isopath, &stat)) {
-			int type;
+			if(0 == sceIoGetstat(isopath, &stat)) {
+				int type;
 
-			type = vshDetectDiscType(isopath);
-			printk("%s: detected disc type 0x%02X for %s\n", __func__, type, isopath);
-			type = type >= 0 ? type : PSP_UMD_TYPE_VIDEO;
-			sctrlSESetUmdFile(isopath);
-			sctrlSESetBootConfFileIndex(MODE_VSHUMD);
-			sctrlSESetDiscType(type);
+				type = vshDetectDiscType(isopath);
+				printk("%s: detected disc type 0x%02X for %s\n", __func__, type, isopath);
+				type = type >= 0 ? type : PSP_UMD_TYPE_VIDEO;
+				sctrlSESetUmdFile(isopath);
+				sctrlSESetBootConfFileIndex(MODE_VSHUMD);
+				sctrlSESetDiscType(type);
+				sctrlKernelExitVSH(NULL);
+			}
+		} else {
+			sctrlSESetUmdFile("");
+			sctrlSESetBootConfFileIndex(MODE_UMD);
 			sctrlKernelExitVSH(NULL);
 		}
 	}

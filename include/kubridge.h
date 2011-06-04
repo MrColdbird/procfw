@@ -170,4 +170,6 @@ int kuKernelCall(void *func_addr, struct KernelCallArg *args);
  */
 int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int stack_size);
 
+void kuKernelGetUmdFile(char *umdfile, int size);
+
 #endif

@@ -223,3 +223,8 @@ int kuKernelCallExtendStack(void *func_addr, struct KernelCallArg *args, int sta
 
 	return ret;
 }
+
+void kuKernelGetUmdFile(char *umdfile, int size)
+{
+	strncpy(umdfile, GetUmdFile(), size);
+}

@@ -32,7 +32,7 @@ char freq_buf[3+3+2] = "";
 char freq2_buf[3+3+2] = "";
 char device_buf[13] = "";
 const char str_default[] = "Default";
-char umdvideo_path[256] = "None";
+char umdvideo_path[256] = "";
 
 const char * enable_disable[] ={
 	"Disable",

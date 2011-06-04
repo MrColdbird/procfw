@@ -605,7 +605,7 @@ static int configuration_menu(struct MenuEntry *entry)
 	return 0;
 }
 
-static char g_xmb_clock_number, g_game_clock_number;
+static s16 g_xmb_clock_number, g_game_clock_number;
 
 static int display_xmb(struct MenuEntry* entry, char *buf, int size)
 {

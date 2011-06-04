@@ -110,7 +110,7 @@ void change_region(int dir, int max)
 void change_plugins(int dir, int flag)
 {
 	int sel;
-	char *plugins;
+	s16 *plugins;
 
 	if(flag == 0) {
 		plugins=&(cnf.plugvsh);

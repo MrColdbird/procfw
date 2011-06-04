@@ -105,17 +105,19 @@ int msstor_init(int bufnum)
 	PspIoDrvFuncs *funcs;
 	PspIoDrv *pdrv;
 	SceUID memid;
+	SceUInt size;
 	
 	if(bufnum < 6) {
 		return -1;
 	}
 
-	memid = sctrlKernelAllocPartitionMemory(9, "MsStorCache", PSP_SMEM_High, bufnum * 0x200 + 64, NULL);
+	size = bufnum * 0x200 + 64;
+	memid = sctrlKernelAllocPartitionMemory(9, "MsStorCache", PSP_SMEM_High, size, NULL);
 
 	if(memid < 0) {
 		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
 		printk("%s: retry with p2\n", __func__);
-		memid = sctrlKernelAllocPartitionMemory(2, "MsStorCache", PSP_SMEM_High, bufnum * 0x200, NULL);
+		memid = sctrlKernelAllocPartitionMemory(2, "MsStorCache", PSP_SMEM_High, size, NULL);
 
 		if(memid < 0) {
 			printk("%s: sctrlKernelAllocPartitionMemory #2 -> 0x%08X\n", __func__, memid);
@@ -129,7 +131,7 @@ int msstor_init(int bufnum)
 		return -3;
 	}
 
-	msstor_cache_read_buf = (void*)(((u32)(msstor_cache_read_buf)+64) & ~(64-1));
+	msstor_cache_read_buf = (void*)(((u32)msstor_cache_read_buf & (~(64-1))) + 64);
 	msstor_cache_read_bufsize = bufnum * 0x200;
 	memset(msstor_cache_read_buf, 0, msstor_cache_read_bufsize);
 	

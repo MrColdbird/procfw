@@ -3,7 +3,6 @@
 
 
 *********************************/
-
 #include <pspsdk.h>
 #include <pspkernel.h>
 #include <pspctrl.h>
@@ -23,6 +22,8 @@ PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_VSH);
 #define RED 0x111FFF
 #define WHITE 0xFFFFF1
 #define GREEN 0x0000FF00
+
+u32 sceSysregGetTachyonVersion(void);		// 0xE2A5D1EE
 
 char msg[256];
 int model;
@@ -159,86 +160,107 @@ void flash_ipl(int size)
 
 }
 
+int is_ta88v3(void)
+{
+	u32 model, tachyon;
+
+	tachyon = sceSysregGetTachyonVersion();
+	model = kuKernelGetModel();
+
+	if(model == 1 && tachyon == 0x00600000) {
+		return 1;
+	}
+
+	return 0;
+}
+
 int main() 
 {
-	int devkit;
+	int devkit, size;
+	SceUID kpspident;
+	SceUID mod;
+
+	(void)size_ipl_block_large;
 
 	pspDebugScreenInit();
 	pspDebugScreenSetTextColor(WHITE);
-
 	devkit = sceKernelDevkitVersion();
-	if(devkit != 0x06030910) 
-	{
+
+	if(devkit != 0x06030910) {
 		ErrorExit(5000,"FW ERROR!\n");
+	}
+
+	kpspident = pspSdkLoadStartModule("kpspident.prx", PSP_MEMORY_PARTITION_KERNEL);
+
+	if (kpspident < 0) {
+		ErrorExit(5000, "kpspident.prx loaded failed\n");
 	}
 
 	model = kuKernelGetModel();
 
-	//TODO no ta-88v3 check!
-	if( !( model == 0 || model == 1) )
-	{
+	if(!(model == 0 || model == 1) || is_ta88v3()) {
 		ErrorExit(5000,"This installer does not support this model.\n");
 	}
 
-	if( model == 0 )
-	{
+	if( model == 0 ) {
 		memcpy( ipl_block_large , ipl_block_01g, 0x4000);
 	}
 
-
 	//load module
-	SceUID mod = sceKernelLoadModule("ipl_update.prx", 0, NULL);
-	if (mod < 0)
+	mod = sceKernelLoadModule("ipl_update.prx", 0, NULL);
+
+	if (mod < 0) {
 		ErrorExit(5000,"Could not load module!\n");
+	}
 
 	mod = sceKernelStartModule(mod, 0, NULL, NULL, NULL);
-	if (mod < 0)
-		ErrorExit(5000,"Could not start module!\n");
 
-	int size = pspIplUpdateGetIpl( ipl_block_large + 0x4000 );
-	if(size < 0)
+	if (mod < 0) {
+		ErrorExit(5000,"Could not start module!\n");
+	}
+
+	size = pspIplUpdateGetIpl( ipl_block_large + 0x4000 );
+
+	if(size < 0) {
 		ErrorExit(5000,"Failed to get ipl!\n");
+	}
 
 	printf("\nCustom ipl Flasher for 6.39.\n\n\n");
 
 	int ipl_type = 0;
-	if( size == 0x24000 )
-	{
+
+	if( size == 0x24000 ) {
 		printf("Custom ipl is installed\n");
 		size -= 0x4000;
 		memmove( ipl_block_large + 0x4000 , ipl_block_large + 0x8000 , size);
 		ipl_type = 1;
-	}
-	else if( size == 0x20000 )
-	{
+	} else if( size == 0x20000 ) {
 		printf("Raw ipl \n");
-	}
-	else
-	{
+	} else {
 		printf("ipl size;%08X\n", size);
 //		if(( size = ReadFile("raw_ipl.bin", 0 , ipl_block_large + 0x4000 , 0x30000)) < 0)
 		ErrorExit(5000,"Unknown ipl!\n");
 	}
 
-
 	printf(" Press X to ");
-	if( ipl_type )
+
+	if( ipl_type ) {
 		printf("Re");
+	}
+
 	printf("install CIPL\n");
 
-	if( ipl_type )
+	if( ipl_type ) {
 		printf(" Press O to Erase CIPL and Restore Raw IPL\n");
+	}
 
 	printf(" Press R to cansel\n\n");
     
-	while (1)
-	{
+	while (1) {
         SceCtrlData pad;
         sceCtrlReadBufferPositive(&pad, 1);
 
-		if (pad.Buttons & PSP_CTRL_CROSS)
-		{
-				
+		if (pad.Buttons & PSP_CTRL_CROSS) {
 			flash_ipl( size );
 
 //		if(Assign()<0)
@@ -249,32 +271,27 @@ int main()
 //			FileCopy("satelite.prx" , "flash0:/vsh/module/");
 			
 			break; 
-		}
-		else if ( (pad.Buttons & PSP_CTRL_CIRCLE) && ipl_type )
-		{		
+		} else if ( (pad.Buttons & PSP_CTRL_CIRCLE) && ipl_type ) {		
 			printf("Flashing IPL...");
 
-			if(pspIplUpdateClearIpl() < 0)
+			if(pspIplUpdateClearIpl() < 0) {
 				ErrorExit(5000,"Failed to clear ipl!\n");
+			}
 
-			if (pspIplUpdateSetIpl( ipl_block_large + 0x4000 , size ) < 0)	
+			if (pspIplUpdateSetIpl( ipl_block_large + 0x4000 , size ) < 0) {
 				ErrorExit(5000,"Failed to write ipl!\n");
+			}
 
 			printf("Done.\n");
 			break; 
-		}
-		else if (pad.Buttons & PSP_CTRL_RTRIGGER)
-		{
+		} else if (pad.Buttons & PSP_CTRL_RTRIGGER) {
 			ErrorExit(2000,"Cancelled by user.\n");
 		}
 
-
 		sceKernelDelayThread(10000);
 	}
-		
 
-		ErrorExit(5000,"\nInstall complete. Restarting in 5 seconds...\n");
+	ErrorExit(5000,"\nInstall complete. Restarting in 5 seconds...\n");
 
 	return 0;
 }
-//

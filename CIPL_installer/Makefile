@@ -1,5 +1,5 @@
 TARGET = flasher
-OBJS = main.o pspIplUpdate.o
+OBJS = main.o pspIplUpdate.o kpspident.o
 
 LIBS = -lpspkubridge
 INCDIR = ../Common/ ../include/

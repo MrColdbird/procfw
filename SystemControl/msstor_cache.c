@@ -129,7 +129,7 @@ int msstor_init(int bufnum)
 		return -3;
 	}
 
-	msstor_cache_read_buf = (void*)(((u32)msstor_cache_read_buf) & ~(64-1));
+	msstor_cache_read_buf = (void*)(((u32)(msstor_cache_read_buf)+64) & ~(64-1));
 	msstor_cache_read_bufsize = bufnum * 0x200;
 	memset(msstor_cache_read_buf, 0, msstor_cache_read_bufsize);
 	

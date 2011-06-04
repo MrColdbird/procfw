@@ -36,8 +36,9 @@
 
 extern int sceKernelGetCompiledSdkVersion(void);
 extern int sceKernelCancelEventFlag(SceUID evf, SceUInt new_value, int *num_wait_threads);
+extern void sceUmdSetDriveStatus(int status);
 
-void sceUmdSetDriveStatus(int status);
+static void do_umd_notify(int arg);
 
 // 0x000027AC
 int g_umd_error_status = 0;
@@ -65,6 +66,7 @@ int sceUmdCheckMedium(void)
 	int ret;
 
 	ret = 1;
+	do_umd_notify(g_drive_status);
 //	printk("%s: -> 0x%08X\n", __func__, ret);
 
 	return ret;
@@ -116,7 +118,6 @@ int sceUmdRegisterUMDCallBack(int cbid)
 	intr = sceKernelCpuSuspendIntr();
 	g_umd_cbid = cbid;
 	sceKernelCpuResumeIntr(intr);
-	do_umd_notify(g_drive_status);
 	ret = 0;
 
 exit:

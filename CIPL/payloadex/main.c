@@ -79,7 +79,7 @@ int (* memlmd_3F2AC9C6)(void *a0,void *a1) = NULL;
 
 #if PSP_MODEL == 0
 //fat
-//#include "../recovery_btcnf_01g.h"
+#include "../btcnf/recovery_btcnf_01g.h"
 //#define BTCNF_PATH "pspbtcnf.bin"
 int (* DcacheClear)(void) = (void *)0x88601510;//6.38
 int (* IcacheClear)(void) = (void *)0x88600DBC;//6.38
@@ -89,7 +89,7 @@ int (* sceBootLfatClose)(void) = (void *)0x88604B38;					//6.38
 int (* sceKernelCheckPspConfig)(void *a0 , int size , int flag) = (void *)0x8860A890;//6.38
 #elif PSP_MODEL == 1
 //slim
-//#include "../recovery_btcnf_02g.h"
+#include "../btcnf/recovery_btcnf_02g.h"
 //#define BTCNF_PATH "pspbtcnf_02g.bin"
 int (* DcacheClear)(void) = (void *)0x886015E0;//6.37
 int (* IcacheClear)(void) = (void *)0x88600E8C;//6.37
@@ -318,8 +318,13 @@ int sceKernelCheckPspConfigPatched(u8 *buffer , int size , int flag)
 //	result = btcnf_edit((BtcnfHeader *)buffer , result , flag);
 //	_btcnf_header *header =( _btcnf_header *)buffer;
 
-	result = AddPRX((char *)buffer, "/kd/init.prx", PATH_SYSTEMCTRL+sizeof(PATH_FLASH0)-2, 0x000000EF);
-	result = AddPRX((char *)buffer, "/kd/vshbridge.prx", PATH_VSHCTRL+sizeof(PATH_FLASH0)-2, VSH_RUNLEVEL );
+	if( recovery_flag ){
+		_memcpy( buffer , recovery_btcnf, size_recovery_btcnf);
+		result = size_recovery_btcnf;
+	}else{
+		result = AddPRX((char *)buffer, "/kd/init.prx", PATH_SYSTEMCTRL+sizeof(PATH_FLASH0)-2, 0x000000EF);
+		result = AddPRX((char *)buffer, "/kd/vshbridge.prx", PATH_VSHCTRL+sizeof(PATH_FLASH0)-2, VSH_RUNLEVEL );
+	}
 
 	ClearCaches();
 	return result;

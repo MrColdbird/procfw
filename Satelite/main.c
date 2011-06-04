@@ -295,7 +295,7 @@ int TSRThread(SceSize args, void *argp)
 				sctrlSESetDiscType(type);
 				sctrlKernelExitVSH(NULL);
 			}
-		} else {
+		} else if(sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
 			sctrlSESetUmdFile("");
 			sctrlSESetBootConfFileIndex(MODE_UMD);
 			sctrlKernelExitVSH(NULL);

@@ -785,7 +785,7 @@ int main()
 	int fw_version, ret;
 
 	pspDebugScreenInit();
-	printf("6.20 PRO Permanent Patch By Coldbird & Virtuous Flame\n");
+	printf("6.20 PRO Permanent Patch By Team PRO\n");
 	fw_version = sceKernelDevkitVersion();
 
 	if(fw_version != 0x06020010 || sctrlHENGetMinorVersion() == 0x8002013A) {

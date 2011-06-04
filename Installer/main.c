@@ -190,7 +190,7 @@ void init_flash()
 
 void usage(void)
 {
-	printf(VERSION_STR " by Coldbird & Virtuous Flame\n");
+	printf(VERSION_STR " by Team PRO\n");
 }
 
 struct InstallList {

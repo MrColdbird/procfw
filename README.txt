@@ -1,5 +1,5 @@
 This is the source code of 635PRO.
-Author: Coldbird & VF("忠贞炙烈之炎")
+Author: Team PRO
 
 Detail:
 SystemControl: kernel of CFW

@@ -84,7 +84,7 @@ static struct MsCache *get_oldest_cache(void)
 	// invalid cache first
 	for(i=0; i<NELEMS(g_caches); ++i) {
 		if(g_caches[i].pos == -1) {
-			max  = i;
+			max = i;
 			goto exit;
 		}
 	}

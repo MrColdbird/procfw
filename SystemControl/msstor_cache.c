@@ -28,68 +28,144 @@
 #include "main.h"
 #include "systemctrl_patch_offset.h"
 
-#define CACHE_TOLERATE_THRESHOLD 8
+#define CACHE_NR 2
 
 static int (*msstor_read)(PspIoDrvFileArg *arg, char *data, int len) = NULL;
 static int (*msstor_write)(PspIoDrvFileArg *arg, const char *data, int len) = NULL;
 static SceOff (*msstor_lseek)(PspIoDrvFileArg *arg, SceOff ofs, int whence) = NULL;
 
-static char *msstor_cache_read_buf = NULL;
-static SceOff msstor_cache_read_pos = -1;
-static int msstor_cache_read_bufsize = 0;
-
 static u32 read_call = 0;
 static u32 read_hit = 0;
 static u32 read_missed = 0;
 static u32 read_uncacheable = 0;
-static u32 read_tolerated = 0;
-static u32 read_untoleratable = 0;
 
-static u32 read_missed_tolerance = 0;
+struct MsCache {
+	char *buf;
+	int bufsize;
+	SceOff pos; /* -1 = invalid */
+	int age;
+	int hit;
+};
+
+static struct MsCache g_caches[CACHE_NR];
+
+static struct MsCache *get_hit_cache(SceOff pos, int len)
+{
+	size_t i;
+
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		if(g_caches[i].pos != -1 && pos >= g_caches[i].pos && pos + len <= g_caches[i].pos + g_caches[i].bufsize) {
+			return &g_caches[i];
+		}
+	}
+
+	return NULL;
+}
+
+static void update_cache_age(struct MsCache *cache)
+{
+	size_t i;
+
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		if(&g_caches[i] == cache) {
+			g_caches[i].age++;
+		} else {
+			g_caches[i].age--;
+		}
+	}
+}
+
+static struct MsCache *get_oldest_cache(void)
+{
+	size_t i, min;
+
+	min = 0;
+
+	// invalid cache first
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		if(g_caches[i].pos == -1) {
+			min = i;
+			goto exit;
+		}
+	}
+
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		if(g_caches[i].age < g_caches[min].age) {
+			min = i;
+		}
+	}
+
+exit:
+	return &g_caches[min];
+}
+
+static void disable_cache(struct MsCache *cache)
+{
+	cache->pos = -1;
+	cache->age = 0;
+}
+
+static void disable_caches(SceOff pos, int len)
+{
+	size_t i;
+
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		if(g_caches[i].pos != -1) {
+			if(pos >= g_caches[i].pos && pos < g_caches[i].pos + g_caches[i].bufsize) {
+				disable_cache(&g_caches[i]);
+			}
+
+			if(pos + len >= g_caches[i].pos && pos + len < g_caches[i].pos + g_caches[i].bufsize) {
+				disable_cache(&g_caches[i]);
+			}
+		}
+	}
+}
 
 static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 {
-	int ret;
+	int ret, read_len;
 	SceOff pos;
-	int read_len;
-
+	struct MsCache *cache;
+	
 	pos = (*msstor_lseek)(arg, 0, PSP_SEEK_CUR);
-
+	cache = get_hit_cache(pos, len);
+	
 	// cache hit?
-	if(msstor_cache_read_pos != -1 && pos >= msstor_cache_read_pos && pos + len <= msstor_cache_read_pos + msstor_cache_read_bufsize) {
-		read_len = MIN(len, msstor_cache_read_bufsize - (pos - msstor_cache_read_pos));
-		memcpy(data, msstor_cache_read_buf + pos - msstor_cache_read_pos, read_len);
+	if(cache != NULL) {
+		read_len = MIN(len, cache->bufsize - (pos - cache->pos));
+		memcpy(data, cache->buf + pos - cache->pos, read_len);
 		ret = read_len;
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
+		update_cache_age(cache);
+		cache->hit++;
 		read_hit++;
-	} else if(len <= msstor_cache_read_bufsize) {
-		read_missed_tolerance += len;
+	} else {
+		cache = get_oldest_cache();
 
-		if(read_missed_tolerance < msstor_cache_read_bufsize / CACHE_TOLERATE_THRESHOLD ) {
-			ret = (*msstor_read)(arg, data, len);
-		} else {
-			ret = (*msstor_read)(arg, msstor_cache_read_buf, msstor_cache_read_bufsize);
+		if(len <= cache->bufsize) {
+			disable_cache(cache);
+			ret = (*msstor_read)(arg, cache->buf, cache->bufsize);
 
 			if(ret >= 0) {
 				read_len = MIN(len, ret);
-				memcpy(data, msstor_cache_read_buf, read_len);
+				memcpy(data, cache->buf, read_len);
 				ret = read_len;
-				msstor_cache_read_pos = pos;
+				cache->pos = pos;
 				(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
+				update_cache_age(cache);
 			} else {
 				printk("%s: read -> 0x%08X\n", __func__, ret);
-				msstor_cache_read_pos = -1; // disable cache
+				update_cache_age(NULL);
 			}
 
-			read_missed_tolerance = 0;
-			read_untoleratable++;
+			read_missed++;
+		} else {
+			ret = (*msstor_read)(arg, data, len);
+//			printk("%s: read len %d too large\n", __func__, len);
+			update_cache_age(NULL);
+			read_uncacheable++;
 		}
-
-		read_missed++;
-	} else {
-		ret = (*msstor_read)(arg, data, len);
-//		printk("%s: read len %d too large\n", __func__, len);
-		read_uncacheable++;
 	}
 
 	read_call++;
@@ -103,53 +179,49 @@ static int msstor_cache_write(PspIoDrvFileArg *arg, const char *data, int len)
 	SceOff pos;
 
 	pos = (*msstor_lseek)(arg, 0, PSP_SEEK_CUR);
-
-	if(pos >= msstor_cache_read_pos && pos < msstor_cache_read_pos + msstor_cache_read_bufsize) {
-		msstor_cache_read_pos = -1; // disable cache
-	} else if(pos + len >= msstor_cache_read_pos && pos + len <= msstor_cache_read_pos + msstor_cache_read_bufsize) {
-		msstor_cache_read_pos = -1; // disable cache
-	}
-
+	disable_caches(pos, len);
 	ret = (*msstor_write)(arg, data, len);
 
 	return ret;
 }
 
-int msstor_init(int bufnum)
+int msstor_init(int bufsize)
 {
 	PspIoDrvFuncs *funcs;
 	PspIoDrv *pdrv;
 	SceUID memid;
-	SceUInt size;
-	
-	if(bufnum < 6) {
+	SceUInt size, i;
+
+	if((bufsize / CACHE_NR) % 0x200 != 0) {
 		return -1;
 	}
 
-	size = bufnum * 0x200 + 64;
-	memid = sctrlKernelAllocPartitionMemory(9, "MsStorCache", PSP_SMEM_High, size, NULL);
+	for(i=0; i<NELEMS(g_caches); ++i) {
+		char memname[20];
 
-	if(memid < 0) {
-		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
-		printk("%s: retry with p2\n", __func__);
-		memid = sctrlKernelAllocPartitionMemory(2, "MsStorCache", PSP_SMEM_High, size, NULL);
+		sprintf(memname, "MsStorCache%02d\n", i+1);
+		size = bufsize / CACHE_NR;
+		memid = sceKernelAllocPartitionMemory(1, memname, PSP_SMEM_High, size + 64, NULL);
 
 		if(memid < 0) {
-			printk("%s: sctrlKernelAllocPartitionMemory #2 -> 0x%08X\n", __func__, memid);
+			printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
 			return -2;
 		}
-	}
 
-	msstor_cache_read_buf = sctrlKernelGetBlockHeadAddr(memid);
+		g_caches[i].buf = sceKernelGetBlockHeadAddr(memid);
 
-	if(msstor_cache_read_buf == NULL) {
-		return -3;
-	}
+		if(g_caches[i].buf == NULL) {
+			return -3;
+		}
 
-	msstor_cache_read_buf = (void*)(((u32)msstor_cache_read_buf & (~(64-1))) + 64);
-	msstor_cache_read_bufsize = bufnum * 0x200;
-	memset(msstor_cache_read_buf, 0, msstor_cache_read_bufsize);
-	
+		g_caches[i].buf = (void*)(((u32)g_caches[i].buf & (~(64-1))) + 64);
+		g_caches[i].bufsize = bufsize / CACHE_NR;
+		memset(g_caches[i].buf, 0, g_caches[i].bufsize);
+		g_caches[i].pos = -1;
+		g_caches[i].age = 0;
+		g_caches[i].hit = 0;
+	}	
+
 	if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
 		pdrv = sctrlHENFindDriver("eflash0a0f1p");
 	} else {
@@ -174,18 +246,30 @@ int msstor_init(int bufnum)
 void msstor_stat(int reset)
 {
 	char buf[256];
+	size_t i;
 
 	if(read_call != 0) {
-		sprintf(buf, "%s: bufsize: %d cache miss untoleratable: %d\n", __func__, msstor_cache_read_bufsize / 0x200, (int)read_untoleratable);
+		sprintf(buf, "msstorcache: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, CACHE_NR);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
+		sprintf(buf, "caches stat:\n");
+		sceIoWrite(1, buf, strlen(buf));
+
+		for(i=0; i<NELEMS(g_caches); ++i) {
+			sprintf(buf, "%d: 0x%08X age %02d hit %d\n", i+1, (u32)g_caches[i].pos, g_caches[i].age, g_caches[i].hit);
+			sceIoWrite(1, buf, strlen(buf));
+		}
 	} else {
 		sprintf(buf, "no msstor cache call yet\n");
 		sceIoWrite(1, buf, strlen(buf));
 	}
 
 	if(reset) {
-		read_call = read_hit = read_missed = read_uncacheable = read_tolerated = read_untoleratable = 0;
+		read_call = read_hit = read_missed = read_uncacheable = 0;
+
+		for(i=0; i<NELEMS(g_caches); ++i) {
+			g_caches[i].hit = 0;
+		}
 	}
 }

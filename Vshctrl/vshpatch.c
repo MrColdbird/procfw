@@ -267,12 +267,17 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 
 	text_addr = mod->text_addr;
 	minor_version = sctrlHENGetMinorVersion();
+
 	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
 
 	if(minor_version != 0) {
 		sprintf(str+strlen(str), "%d", (uint)minor_version);
 	}
 
+#ifdef NIGHTLY
+	strcpy(str, "PRO NIGHTLY");
+#endif
+	
 	p = (void*)(text_addr + g_offs->vshctrl_patch.SystemVersionStr);
 	ascii2utf16(p, str);
 
@@ -308,7 +313,11 @@ out:
 		} else {
 			sprintf(str, "[ Model: 0%dg ]", (int)psp_model+1);
 		}
-		
+
+#ifdef NIGHTLY
+		strcpy(str, "FOR TEST PURPOSE ONLY");
+#endif
+
 		ascii2utf16(p, str);
 	}
 

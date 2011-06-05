@@ -68,35 +68,35 @@ static void update_cache_age(struct MsCache *cache)
 
 	for(i=0; i<NELEMS(g_caches); ++i) {
 		if(&g_caches[i] == cache) {
-			g_caches[i].age++;
+			g_caches[i].age=0;
 		} else {
-			g_caches[i].age--;
+			g_caches[i].age++;
 		}
 	}
 }
 
 static struct MsCache *get_oldest_cache(void)
 {
-	size_t i, min;
+	size_t i, max;
 
-	min = 0;
+	max = 0;
 
 	// invalid cache first
 	for(i=0; i<NELEMS(g_caches); ++i) {
 		if(g_caches[i].pos == -1) {
-			min = i;
+			max = i;
 			goto exit;
 		}
 	}
 
 	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].age < g_caches[min].age) {
-			min = i;
+		if(g_caches[i].age > g_caches[max].age) {
+			max = i;
 		}
 	}
 
 exit:
-	return &g_caches[min];
+	return &g_caches[max];
 }
 
 static void disable_cache(struct MsCache *cache)

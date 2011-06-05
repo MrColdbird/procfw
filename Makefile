@@ -41,6 +41,10 @@ ifeq ($(DEBUG), 1)
 DEBUG_OPTION=DEBUG=1
 endif
 
+ifeq ($(NIGHTLY), 1)
+NIGHTLY_OPTION=NIGHTLY=1
+endif
+
 all:
 # Preparing Distribution Folders
 	@mkdir $(DISTRIBUTE) || true
@@ -61,7 +65,7 @@ endif
 # Creating Live-System Components
 	@cd $(RECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@rm -f ./Common/*.o
-	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION) $(NIGHTLY_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(INFERNO); make $(OPT_FLAGS) $(DEBUG_OPTION)

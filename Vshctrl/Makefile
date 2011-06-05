@@ -13,6 +13,10 @@ CFLAGS += -DDEBUG=1
 OBJS += ../Common/printk.o
 endif
 
+ifeq ($(NIGHTLY), 1)
+CFLAGS += -DNIGHTLY=1
+endif
+
 ifeq ($(CONFIG_620), 1)
 CFLAGS += -DCONFIG_620=1
 PSP_FW_VERSION = 620

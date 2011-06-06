@@ -30,6 +30,7 @@
 
 #define CACHE_NR 2
 #define CACHE_BUFSIZE (16 * 1024)
+#define CACHE_BUFSIZE_GO (8 * 1024)
 
 static int (*msstor_read)(PspIoDrvFileArg *arg, char *data, int len) = NULL;
 static int (*msstor_write)(PspIoDrvFileArg *arg, const char *data, int len) = NULL;
@@ -194,7 +195,11 @@ int msstor_init(void)
 	SceUInt size, i;
 	int bufsize;
 
-	bufsize = CACHE_BUFSIZE;
+	if(psp_model == PSP_GO) {
+		bufsize = CACHE_BUFSIZE_GO;
+	} else {
+		bufsize = CACHE_BUFSIZE;
+	}
 
 	if((bufsize / NELEMS(g_caches)) % 0x200 != 0) {
 		printk("%s: alignment error\n", __func__);

@@ -94,7 +94,7 @@ int module_start(SceSize args, void* argp)
 	key_config = sceKernelApplicationType();
 
 	if(psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
-		infernoCacheInit(20 * 1024 * 1024 / 128, 128);
+		infernoCacheInit(0x4000, 1024);
 	}
 
 	ret = setup_umd_device();

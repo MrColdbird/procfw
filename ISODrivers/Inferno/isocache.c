@@ -19,17 +19,16 @@ static u32 cache_on = 0;
 struct ISOCache {
 	char *buf;
 	int bufsize;
-	SceOff pos; /* -1 = invalid */
+	int pos; /* -1 = invalid */
 	int age;
-	int hit;
 };
 
 static struct ISOCache *g_caches = NULL;
-static int g_caches_num = 0;
+static int g_caches_num = 0, g_caches_cap = 0;
 
 static void update_cache_age(struct ISOCache *cache);
 
-static inline int is_within_range(SceOff pos, SceOff start, int len)
+static inline int is_within_range(int pos, int start, int len)
 {
 	if(start != -1 && pos >= start && pos < start + len) {
 		return 1;
@@ -38,7 +37,7 @@ static inline int is_within_range(SceOff pos, SceOff start, int len)
 	return 0;
 }
 
-static struct ISOCache *get_matched_buffer(SceOff pos)
+static struct ISOCache *get_matched_buffer(int pos)
 {
 	size_t i;
 
@@ -51,10 +50,10 @@ static struct ISOCache *get_matched_buffer(SceOff pos)
 	return NULL;
 }
 
-static int get_hit_caches(SceOff pos, int len, char *data)
+static int get_hit_caches(int pos, int len, char *data)
 {
-	SceOff cur;
-	struct ISOCache *cache;
+	int cur;
+	struct ISOCache *cache = NULL;
 	int read_len;
 
 	for(cur = pos; cur < pos + len;) {
@@ -69,7 +68,6 @@ static int get_hit_caches(SceOff pos, int len, char *data)
 		cur += read_len;
 
 		cache->age = 0;
-		cache->hit++;
 	}
 
 	update_cache_age(NULL);
@@ -123,6 +121,30 @@ static void disable_cache(struct ISOCache *cache)
 {
 	cache->pos = -1;
 	cache->age = 0;
+	cache->bufsize = 0;
+}
+
+static inline int has_cache(int pos, int len)
+{
+	int cur;
+	struct ISOCache *cache = NULL;
+	int next_len;
+
+	for(cur = pos; cur < pos + len;) {
+		cache = get_matched_buffer(cur);
+
+		if(cache == NULL) {
+			break;
+		}
+
+		next_len = MIN(len - (cur - pos), cache->pos + cache->bufsize - cur);
+		cur += next_len;
+	}
+
+	if(cache == NULL)
+		return 0;
+
+	return 1;
 }
 
 static int add_cache(struct IoReadArg *arg)
@@ -130,7 +152,7 @@ static int add_cache(struct IoReadArg *arg)
 	int read_len, len, ret;
 	struct IoReadArg cache_arg;
 	struct ISOCache *cache;
-	SceOff pos, cur;
+	int pos, cur, next;
 	char *data;
 
 	len = arg->size;
@@ -138,17 +160,27 @@ static int add_cache(struct IoReadArg *arg)
 	data = (char*)arg->address;
 
 	for(cur = pos; cur < pos + len;) {
+		next = MIN(len - (cur - pos), g_caches_cap);
+
+		// already in cache, goto next block
+		if(has_cache(cur, next)) {
+			cur += next;
+			continue;
+		}
+
+		// replace with oldest cache
 		cache = get_oldest_cache();
 		disable_cache(cache);
 
 		cache_arg.offset = cur;
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = cache->bufsize;
+		cache_arg.size = g_caches_cap;
 		ret = iso_read(&cache_arg);
 
 		if(ret >= 0) {
 			cache->pos = cache_arg.offset;
 			cache->age = 0;
+			cache->bufsize = ret;
 
 			read_len = MIN(len - (cur - pos), ret);
 			memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
@@ -167,7 +199,7 @@ static int add_cache(struct IoReadArg *arg)
 int iso_cache_read(struct IoReadArg *arg)
 {
 	int ret, len;
-	SceOff pos;
+	int pos;
 	char *data;
 
 	if(!cache_on) {
@@ -201,44 +233,45 @@ int infernoCacheInit(int cache_size, int cache_num)
 	SceUID memid;
 	SceUInt i;
 	struct ISOCache *cache;
+	void *pbuf;
 
 	g_caches_num = cache_num;
-	memid = sceKernelAllocPartitionMemory(1, "infernoCacheCtl", PSP_SMEM_High, g_caches_num * sizeof(g_caches[0]), NULL);
+	g_caches_cap = 0x4000;
+
+	if(g_caches_cap % 0x200 != 0) {
+		return -1;
+	}
+	
+	memid = sceKernelAllocPartitionMemory(9, "infernoCacheCtl", PSP_SMEM_High, g_caches_num * sizeof(g_caches[0]), NULL);
 
 	if(memid < 0) {
 		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid); 
-		return -1;
+		return -2;
 	}
 
 	g_caches = sceKernelGetBlockHeadAddr(memid);
 
 	if(g_caches == NULL) {
-		return -2;
+		return -3;
 	}
 
+	memid = sceKernelAllocPartitionMemory(9, "inferoCache", PSP_SMEM_High, g_caches_cap * g_caches_num + 64, NULL);
+
+	if(memid < 0) {
+		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
+		return -4;
+	}
+
+	pbuf = sceKernelGetBlockHeadAddr(memid);
+	pbuf = (void*)(((u32)pbuf & (~(64-1))) + 64);
+
 	for(i=0; i<g_caches_num; ++i) {
-		char memname[20];
-		
 		cache = &g_caches[i];
-		sprintf(memname, "inferoCache%03d\n", i+1);
-		memid = sceKernelAllocPartitionMemory(9, memname, PSP_SMEM_High, cache_size + 64, NULL);
-
-		if(memid < 0) {
-			printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
-			return -3;
-		}
-
-		cache->buf = sceKernelGetBlockHeadAddr(memid);
-
-		if(cache->buf == NULL) {
-			return -4;
-		}
-
-		cache->buf = (void*)(((u32)cache->buf & (~(64-1))) + 64);
-		cache->bufsize = cache_size;
+		cache->buf = pbuf + i * g_caches_cap;
+		cache->bufsize = 0;
 		memset(cache->buf, 0, cache->bufsize);
 		cache->pos = -1;
-		cache->age = cache->hit = 0;
+		cache->age = 0;
 	}
 
 	cache_on = 1;
@@ -264,12 +297,12 @@ void isocache_stat(int reset)
 			}
 
 			if(1) {
-				sprintf(buf, "%d: 0x%08X age %02d hit %d\n", i+1, (uint)g_caches[i].pos, g_caches[i].age, g_caches[i].hit);
+				sprintf(buf, "%d: 0x%08X age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].age);
 				sceIoWrite(1, buf, strlen(buf));
 			}
 		}
 
-		sprintf(buf, "iso cache stat: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, g_caches_num);
+		sprintf(buf, "iso cache stat: %dKB per cache, %d caches\n", g_caches_cap / 1024, g_caches_num);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
@@ -282,9 +315,5 @@ void isocache_stat(int reset)
 
 	if(reset) {
 		read_call = read_hit = read_missed = 0;
-
-		for(i=0; i<g_caches_num; ++i) {
-			g_caches[i].hit = 0;
-		}
 	}
 }

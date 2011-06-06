@@ -37,6 +37,7 @@ PSP_MODULE_INFO("PRO_Inferno_Driver", 0x1000, 1, 1);
 u32 psp_model;
 u32 psp_fw_version;
 
+extern int sceKernelApplicationType(void);
 extern int sceKernelSetQTGP3(void *unk0);
 extern char *GetUmdFile();
 
@@ -82,14 +83,20 @@ int init_inferno(void)
 // 0x00000000
 int module_start(SceSize args, void* argp)
 {
-	int ret;
+	int ret, key_config;
 
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 	printk_init("ms0:/inferno.txt");
 	printk("Inferno started FW=0x%08X %02dg\n", (uint)psp_fw_version, (int)psp_model+1);
-	infernoCacheInit();
+
+	key_config = sceKernelApplicationType();
+
+	if(psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
+		infernoCacheInit(20 * 1024 * 1024 / 128, 128);
+	}
+
 	ret = setup_umd_device();
 
 	if(ret < 0) {

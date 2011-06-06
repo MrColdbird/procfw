@@ -29,6 +29,7 @@
 #include "systemctrl_patch_offset.h"
 
 #define CACHE_NR 2
+#define CACHE_BUFSIZE (16 * 1024)
 
 static int (*msstor_read)(PspIoDrvFileArg *arg, char *data, int len) = NULL;
 static int (*msstor_write)(PspIoDrvFileArg *arg, const char *data, int len) = NULL;
@@ -68,7 +69,7 @@ static void update_cache_age(struct MsCache *cache)
 
 	for(i=0; i<NELEMS(g_caches); ++i) {
 		if(&g_caches[i] == cache) {
-			g_caches[i].age=0;
+			g_caches[i].age = 0;
 		} else {
 			g_caches[i].age++;
 		}
@@ -185,14 +186,19 @@ static int msstor_cache_write(PspIoDrvFileArg *arg, const char *data, int len)
 	return ret;
 }
 
-int msstor_init(int bufsize)
+int msstor_init(void)
 {
 	PspIoDrvFuncs *funcs;
 	PspIoDrv *pdrv;
 	SceUID memid;
 	SceUInt size, i;
+	int bufsize;
 
-	if((bufsize / CACHE_NR) % 0x200 != 0) {
+	bufsize = CACHE_BUFSIZE;
+
+	if((bufsize / NELEMS(g_caches)) % 0x200 != 0) {
+		printk("%s: alignment error\n", __func__);
+
 		return -1;
 	}
 
@@ -200,7 +206,7 @@ int msstor_init(int bufsize)
 		char memname[20];
 
 		sprintf(memname, "MsStorCache%02d\n", i+1);
-		size = bufsize / CACHE_NR;
+		size = bufsize / NELEMS(g_caches);
 		memid = sceKernelAllocPartitionMemory(1, memname, PSP_SMEM_High, size + 64, NULL);
 
 		if(memid < 0) {
@@ -215,7 +221,7 @@ int msstor_init(int bufsize)
 		}
 
 		g_caches[i].buf = (void*)(((u32)g_caches[i].buf & (~(64-1))) + 64);
-		g_caches[i].bufsize = bufsize / CACHE_NR;
+		g_caches[i].bufsize = bufsize / NELEMS(g_caches);
 		memset(g_caches[i].buf, 0, g_caches[i].bufsize);
 		g_caches[i].pos = -1;
 		g_caches[i].age = 0;
@@ -249,7 +255,7 @@ void msstor_stat(int reset)
 	size_t i;
 
 	if(read_call != 0) {
-		sprintf(buf, "msstorcache: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, CACHE_NR);
+		sprintf(buf, "msstorcache: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, NELEMS(g_caches));
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));

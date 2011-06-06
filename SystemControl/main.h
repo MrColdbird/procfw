@@ -76,7 +76,7 @@ int load_plugins(void);
 int load_start_module(char *path);
 
 void usb_charge(void);
-int msstor_init(int bufnum);
+int msstor_init(void);
 
 #define MAX_HIGH_MEMSIZE 55
 

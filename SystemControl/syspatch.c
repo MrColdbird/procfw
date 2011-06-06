@@ -90,7 +90,7 @@ static void system_booted_action(void)
 	}
 
 	if(need_msstor_speed()) {
-		msstor_init(16 * 1024);
+		msstor_init();
 		printk("%s: msstor cache enabled\n", __func__);
 	}
 

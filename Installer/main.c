@@ -41,6 +41,7 @@
 #endif
 
 #include "popcorn.h"
+#include "mscache.h"
 #include "satelite.h"
 #include "stargate.h"
 #include "systemctrl.h"
@@ -208,6 +209,7 @@ struct InstallList g_file_lists[] = {
 	{ inferno, &size_inferno, PATH_INFERNO, },
 	{ usbdevice, &size_usbdevice, PATH_USBDEVICE, },
 	{ popcorn, &size_popcorn, PATH_POPCORN, },
+	{ mscache, &size_mscache, PATH_MSCACHE, },
 	{ satelite, &size_satelite, PATH_SATELITE, },
 	{ recovery, &size_recovery, PATH_RECOVERY, },
 };

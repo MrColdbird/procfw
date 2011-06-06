@@ -61,6 +61,7 @@ typedef struct _rebootex_config {
 	u8 recovery_mode;
 	u8 ofw_mode;
 	u8 iso_disc_type;
+	u8 mscache;
 } rebootex_config;
 
 extern rebootex_config rebootex_conf;

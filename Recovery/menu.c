@@ -85,6 +85,7 @@ const char * g_messages[] = {
 	"Old Plugin Support (PSP-Go only)",
 	"Allow Non-latin1 ISO Filename",
 	"Memory Stick Speedup",
+	"Memory Stick Cache Mode",
 	"CPU Speed",
 	"XMB CPU/BUS",
 	"Game CPU/BUS",
@@ -414,6 +415,13 @@ static int display_msspeed(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_mscache(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[MSCACHE_MODE], get_bool_name(g_config.mscache));
+
+	return 0;
+}
+
 static int display_hide_cfw_dirs(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[HIDE_CFW_DIRS], get_bool_name(g_config.hide_cfw_dirs));
@@ -461,6 +469,11 @@ static struct ValueOption g_msspeed = {
 	0, MSSPEED_ALWAYS+1,
 };
 
+static struct ValueOption g_mscache = {
+	&g_config.mscache,
+	0, 2,
+};
+
 static struct ValueOption g_hide_cfw_dirs = {
 	&g_config.hide_cfw_dirs,
 	0, 2,
@@ -476,6 +489,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 	{ NULL, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
 	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
+	{ NULL, 0, 0, &display_mscache, &change_option, &change_option_by_enter, &g_mscache},
 };
 
 static struct Menu g_advanced_menu = {

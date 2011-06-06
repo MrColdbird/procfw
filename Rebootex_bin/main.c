@@ -491,6 +491,7 @@ static struct del_module np9660_del_mods[] = {
 	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
 	{ "/kd/ata.prx", GAME_RUNLEVEL },
 	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umdcache.prx", GAME_RUNLEVEL },
 	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
 };
 
@@ -524,6 +525,7 @@ static struct del_module march33_del_mods[] = {
 	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
 	{ "/kd/ata.prx", GAME_RUNLEVEL },
 	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umdcache.prx", GAME_RUNLEVEL },
 	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", UMDEMU_RUNLEVEL },
 };
@@ -558,6 +560,7 @@ static struct del_module inferno_del_mods[] = {
 	{ "/kd/mediaman.prx", GAME_RUNLEVEL },
 	{ "/kd/ata.prx", GAME_RUNLEVEL },
 	{ "/kd/umdman.prx", GAME_RUNLEVEL },
+	{ "/kd/umdcache.prx", GAME_RUNLEVEL },
 	{ "/kd/umd9660.prx", GAME_RUNLEVEL },
 	{ "/kd/np9660.prx", UMDEMU_RUNLEVEL },
 };

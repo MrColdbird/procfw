@@ -13,7 +13,6 @@
 static u32 read_call = 0;
 static u32 read_hit = 0;
 static u32 read_missed = 0;
-static u32 read_uncacheable = 0;
 
 static u32 cache_on = 0;
 
@@ -57,7 +56,6 @@ static int get_hit_caches(SceOff pos, int len, char *data)
 	SceOff cur;
 	struct ISOCache *cache;
 	int read_len;
-	u32 tm = sceKernelGetSystemTimeLow();
 
 	for(cur = pos; cur < pos + len;) {
 		cache = get_matched_buffer(cur);
@@ -79,7 +77,7 @@ static int get_hit_caches(SceOff pos, int len, char *data)
 	if(cache == NULL)
 		return -1;
 
-	read_hit += (sceKernelGetSystemTimeLow() - tm) / 1000;
+	read_hit += len;
 
 	return cur - pos;
 }
@@ -127,18 +125,54 @@ static void disable_cache(struct ISOCache *cache)
 	cache->age = 0;
 }
 
+static int add_cache(struct IoReadArg *arg)
+{
+	int read_len, len, ret;
+	struct IoReadArg cache_arg;
+	struct ISOCache *cache;
+	SceOff pos, cur;
+	char *data;
+
+	len = arg->size;
+	pos = arg->offset;
+	data = (char*)arg->address;
+
+	for(cur = pos; cur < pos + len;) {
+		cache = get_oldest_cache();
+		disable_cache(cache);
+
+		cache_arg.offset = cur;
+		cache_arg.address = (u8*)cache->buf;
+		cache_arg.size = cache->bufsize;
+		ret = iso_read(&cache_arg);
+
+		if(ret >= 0) {
+			cache->pos = cache_arg.offset;
+			cache->age = 0;
+
+			read_len = MIN(len - (cur - pos), ret);
+			memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
+			cur += read_len;
+		} else {
+			printk("%s: read -> 0x%08X\n", __func__, ret);
+			return ret;
+		}
+	}
+
+	update_cache_age(NULL);
+
+	return ret;
+}
+
 int iso_cache_read(struct IoReadArg *arg)
 {
-	int ret, read_len, len;
+	int ret, len;
 	SceOff pos;
 	char *data;
-	struct ISOCache *cache;
 
 	if(!cache_on) {
 		return iso_read(arg);
 	}
-
-	u32 tm = sceKernelGetSystemTimeLow();
 
 	data = (char*)arg->address;
 	pos = arg->offset;
@@ -153,38 +187,11 @@ int iso_cache_read(struct IoReadArg *arg)
 			sceIoWrite(1, buf, strlen(buf));
 		}
 
-		cache = get_oldest_cache();
-
-		if(len <= cache->bufsize) {
-			struct IoReadArg cache_arg;
-
-			disable_cache(cache);
-			cache_arg.offset = pos;
-			cache_arg.address = (u8*)cache->buf;
-			cache_arg.size = cache->bufsize;
-			ret = iso_read(&cache_arg);
-
-			if(ret >= 0) {
-				read_len = MIN(len, ret);
-				memcpy(data, cache->buf, read_len);
-				ret = read_len;
-				cache->pos = pos;
-				update_cache_age(cache);
-			} else {
-				printk("%s: read -> 0x%08X\n", __func__, ret);
-				update_cache_age(NULL);
-			}
-
-			read_missed += (sceKernelGetSystemTimeLow() - tm) / 1000;
-		} else {
-			ret = iso_read(arg);
-//			printk("%s: read len %d too large\n", __func__, len);
-			update_cache_age(NULL);
-			read_uncacheable += (sceKernelGetSystemTimeLow() - tm) / 1000;
-		}
+		ret = add_cache(arg);
+		read_missed += len;
 	}
 
-	read_call += (sceKernelGetSystemTimeLow() - tm) / 1000;
+	read_call += len;
 
 	return ret;
 }
@@ -264,7 +271,7 @@ void isocache_stat(int reset)
 
 		sprintf(buf, "iso cache stat: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, g_caches_num);
 		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
+		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "%d caches used(%02d%%)\n", used, 100 * used / g_caches_num);
 		sceIoWrite(1, buf, strlen(buf));
@@ -274,7 +281,7 @@ void isocache_stat(int reset)
 	}
 
 	if(reset) {
-		read_call = read_hit = read_missed = read_uncacheable = 0;
+		read_call = read_hit = read_missed = 0;
 
 		for(i=0; i<g_caches_num; ++i) {
 			g_caches[i].hit = 0;

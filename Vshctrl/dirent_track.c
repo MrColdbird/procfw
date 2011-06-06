@@ -34,7 +34,7 @@ static inline void unlock() {}
 
 static struct IoDirentEntry *g_head = NULL, *g_tail = NULL;
 
-static struct IoDirentEntry *dirent_get_unused(void)
+static struct IoDirentEntry *new_dirent(void)
 {
 	struct IoDirentEntry *entry;
 
@@ -51,7 +51,7 @@ static struct IoDirentEntry *dirent_get_unused(void)
 	return entry;
 }
 
-static int add_magic_dfd(struct IoDirentEntry *slot)
+static int add_dfd(struct IoDirentEntry *slot)
 {
 	lock();
 
@@ -67,7 +67,7 @@ static int add_magic_dfd(struct IoDirentEntry *slot)
 	return 0;
 }
 
-static int remove_magic_dfd(struct IoDirentEntry *slot)
+static int remove_dfd(struct IoDirentEntry *slot)
 {
 	int ret;
 	struct IoDirentEntry *fds, *prev;
@@ -110,7 +110,7 @@ int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
 {
 	struct IoDirentEntry *p;
    
-	p = dirent_get_unused();
+	p = new_dirent();
 
 	if(p == NULL) {
 		return -1;
@@ -119,25 +119,25 @@ int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
 	p->dfd = dfd;
 	p->iso_dfd = iso_dfd;
 	STRCPY_S(p->path, path);
-	add_magic_dfd(p);
+	add_dfd(p);
 
 	return 0;
 }
 
 void dirent_remove(struct IoDirentEntry *p)
 {
-	remove_magic_dfd(p);
+	remove_dfd(p);
 }
 
-struct IoDirentEntry *dirent_search(SceUID magic)
+struct IoDirentEntry *dirent_search(SceUID dfd)
 {
 	struct IoDirentEntry *fds;
 
-	if (magic < 0)
+	if (dfd < 0)
 		return NULL;
 
 	for(fds = g_head; fds != NULL; fds = fds->next) {
-		if(fds->dfd == magic)
+		if(fds->dfd == dfd)
 			break;
 	}
 

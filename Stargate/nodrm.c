@@ -28,9 +28,6 @@
 #include "libs.h"
 #include "utils.h"
 
-#define NODRM_MAGIC_FD 0x9000
-#define MAX_NODRM_FD 10
-
 typedef struct _NoDrmHookEntry {
 	char *libname;
 	u32 nid;
@@ -39,7 +36,6 @@ typedef struct _NoDrmHookEntry {
 
 struct NoDrmFd {
 	SceUID fd;
-	SceUID real_fd;
 	struct NoDrmFd *next;
 };
 
@@ -139,50 +135,29 @@ static inline int is_encrypted_flag(int flag)
 	return 0;
 }
 
-static inline SceUID nodrm2real(SceUID nodrm)
+static inline int is_nodrm_fd(SceUID fd)
 {
 	struct NoDrmFd *fds;
 
-	if (nodrm < 0)
-		return -1;
+	if (fd < 0)
+		return 0;
 
 	for(fds = g_head; fds != NULL; fds = fds->next) {
-		if(fds->fd == nodrm)
+		if(fds->fd == fd)
 			break;
 	}
 
 	if(fds == NULL)
-		return -2;
+		return 0;
 
-	return fds->real_fd;
+	return 1;
 }
 
-static SceUID get_free_fd(void)
-{
-	struct NoDrmFd *fds;
-	SceUID free_fd;
-
-	free_fd = NODRM_MAGIC_FD;
-
-	do {
-		for(fds = g_head; fds != NULL; fds = fds->next) {
-			if(fds->fd == free_fd)
-				break;
-		}
-
-		if(fds != NULL) {
-			free_fd++;
-		}
-	} while(fds != NULL);
-
-	return free_fd;
-}
-
-static int add_nodrm_fd(SceUID real_fd)
+static int add_nodrm_fd(SceUID fd)
 {
 	struct NoDrmFd *slot;
 
-	if (real_fd < 0)
+	if (fd < 0)
 		return -1;
 
 	lock();
@@ -194,8 +169,7 @@ static int add_nodrm_fd(SceUID real_fd)
 		return -2;
 	}
 
-	slot->fd = get_free_fd();
-	slot->real_fd = real_fd;
+	slot->fd = fd;
 	slot->next = NULL;
 	
 	if(g_head == NULL) {
@@ -210,7 +184,7 @@ static int add_nodrm_fd(SceUID real_fd)
 	return slot->fd;
 }
 
-static int remove_nodrm_fd(SceUID real_fd)
+static int remove_nodrm_fd(SceUID fd)
 {
 	int ret;
 	struct NoDrmFd *fds, *prev;
@@ -218,7 +192,7 @@ static int remove_nodrm_fd(SceUID real_fd)
 	lock();
 
 	for(prev = NULL, fds = g_head; fds != NULL; prev = fds, fds = fds->next) {
-		if(real_fd == fds->real_fd) {
+		if(fd == fds->fd) {
 			break;
 		}
 	}
@@ -375,7 +349,6 @@ exit:
 
 int myNpDrmEdataSetupKey(SceUID fd)
 {
-	SceUID real_fd;
 	int ret;
 
 	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
@@ -383,9 +356,7 @@ int myNpDrmEdataSetupKey(SceUID fd)
 		goto exit;
 	}
 
-	real_fd = nodrm2real(fd);
-
-	if (real_fd >= 0) {
+	if (is_nodrm_fd(fd)) {
 		ret = 0;
 	} else {
 		if (_sceNpDrmEdataSetupKey != NULL) {
@@ -404,21 +375,18 @@ exit:
 SceOff myNpDrmEdataGetDataSize(SceUID fd)
 {
 	u64 end;
-	SceUID real_fd;
 
 	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
 		end = 0x8002013A;
 		goto exit;
 	}
 	
-	real_fd = nodrm2real(fd);
-
-	if (real_fd >= 0) {
+	if (is_nodrm_fd(fd)) {
 		u64 off;
 	   
-		off = sceIoLseek(real_fd, 0, PSP_SEEK_CUR);
-		end = sceIoLseek(real_fd, 0, PSP_SEEK_END);
-		sceIoLseek(real_fd, off, PSP_SEEK_SET);
+		off = sceIoLseek(fd, 0, PSP_SEEK_CUR);
+		end = sceIoLseek(fd, 0, PSP_SEEK_END);
+		sceIoLseek(fd, off, PSP_SEEK_SET);
 	} else {
 		if (_sceNpDrmEdataGetDataSize != NULL) {
 			end = (*_sceNpDrmEdataGetDataSize)(fd);
@@ -454,12 +422,9 @@ int myKernelLoadModuleNpDrm(char *fn, int flag, void *opt)
 int myIoIoctl(SceUID fd, unsigned int cmd, void * indata, int inlen, void * outdata, int outlen)
 {
 	int ret;
-	SceUID real_fd;
 
 	if (cmd == 0x04100001 || cmd == 0x04100002) {
-		real_fd = nodrm2real(fd);
-
-		if (real_fd >= 0) {
+		if (is_nodrm_fd(fd)) {
 			ret = 0;
 			goto exit;
 		}
@@ -480,12 +445,9 @@ exit:
 int myIoIoctlAsync(SceUID fd, unsigned int cmd, void * indata, int inlen, void * outdata, int outlen)
 {
 	int ret;
-	SceUID real_fd;
 
 	if (cmd == 0x04100001 || cmd == 0x04100002) {
-		real_fd = nodrm2real(fd);
-
-		if (real_fd >= 0) {
+		if (is_nodrm_fd(fd)) {
 			ret = 0;
 			goto exit;
 		}
@@ -505,16 +467,13 @@ exit:
 
 int myIoClose(SceUID fd)
 {
-	SceUID real_fd;
 	int ret;
 
-	real_fd = nodrm2real(fd);
-
-	if (real_fd >= 0) {
-		ret = sceIoClose(real_fd);
+	if (is_nodrm_fd(fd)) {
+		ret = sceIoClose(fd);
 
 		if (ret == 0) {
-			ret = remove_nodrm_fd(real_fd);
+			ret = remove_nodrm_fd(fd);
 
 			if (ret < 0) {
 				printk("%s: remove_nodrm_fd -> %d\n", __func__, ret);
@@ -522,7 +481,7 @@ int myIoClose(SceUID fd)
 
 			ret = 0;
 		} else {
-			printk("%s: sceIoClose 0x%08X -> 0x%08X\n", __func__, real_fd, ret);
+			printk("%s: sceIoClose 0x%08X -> 0x%08X\n", __func__, fd, ret);
 		}
 		
 	} else {
@@ -534,16 +493,13 @@ int myIoClose(SceUID fd)
 
 int myIoCloseAsync(SceUID fd)
 {
-	SceUID real_fd;
 	int ret;
 
-	real_fd = nodrm2real(fd);
-
-	if (real_fd >= 0) {
-		ret = sceIoCloseAsync(real_fd);
+	if (is_nodrm_fd(fd)) {
+		ret = sceIoCloseAsync(fd);
 
 		if (ret == 0) {
-			ret = remove_nodrm_fd(real_fd);
+			ret = remove_nodrm_fd(fd);
 
 			if (ret < 0) {
 				printk("%s: remove_nodrm_fd -> %d\n", __func__, ret);
@@ -551,7 +507,7 @@ int myIoCloseAsync(SceUID fd)
 
 			ret = 0;
 		} else {
-			printk("%s: sceIoCloseAsync 0x%08X -> 0x%08X\n", __func__, real_fd, ret);
+			printk("%s: sceIoCloseAsync 0x%08X -> 0x%08X\n", __func__, fd, ret);
 		}
 
 //		printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
@@ -562,189 +518,13 @@ int myIoCloseAsync(SceUID fd)
 	return ret;
 }
 
-int myIoRead(SceUID fd, void *data, SceSize size)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoRead(fd, data, size);
-
-	return ret;
-}
-
-int myIoReadAsync(SceUID fd, void *data, SceSize size)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoReadAsync(fd, data, size);
-
-	return ret;
-}
-
-int myIoWrite(SceUID fd, void *data, SceSize size)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoWrite(fd, data, size);
-
-	return ret;
-}
-
-int myIoWriteAsync(SceUID fd, void *data, SceSize size)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoWriteAsync(fd, data, size);
-
-	return ret;
-}
-
-SceOff myIoLseek(SceUID fd, SceOff offset, int whence)
-{
-	SceOff ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoLseek(fd, offset, whence);
-
-	return ret;
-}
-
-SceOff myIoLseekAsync(SceUID fd, SceOff offset, int whence)
-{
-	SceOff ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoLseekAsync(fd, offset, whence);
-
-	return ret;
-}
-
-int myIoLseek32(SceUID fd, int offset, int whence)
-{
-	SceOff ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoLseek32(fd, offset, whence);
-
-	return ret;
-}
-
-int myIoLseek32Async(SceUID fd, int offset, int whence)
-{
-	SceOff ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoLseek32Async(fd, offset, whence);
-
-	return ret;
-}
-
-int myIoWaitAsync(SceUID fd, SceInt64 *res)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoWaitAsync(fd, res);
-
-	return ret;
-}
-
-int myIoWaitAsyncCB(SceUID fd, SceInt64 *res)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoWaitAsyncCB(fd, res);
-
-	return ret;
-}
-
-int myIoPollAsync(SceUID fd, SceInt64 *res)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoPollAsync(fd, res);
-
-	return ret;
-}
-
-int myIoGetAsyncStat(SceUID fd, int poll, SceInt64 *res)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoGetAsyncStat(fd, poll, res);
-
-	return ret;
-}
-
-int myIoCancel(SceUID fd)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoCancel(fd);
-
-	return ret;
-}
-
-int myIoGetDevType(SceUID fd)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoGetDevType(fd);
-
-	return ret;
-}
-
-int myIoChangeAsyncPriority(SceUID fd, int pri)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoChangeAsyncPriority(fd, pri);
-
-	return ret;
-}
-
-int myIoSetAsyncCallback(SceUID fd, SceUID cb, void *argp)
-{
-	int ret;
-
-	fd = (nodrm2real(fd) >= 0) ? nodrm2real(fd) : fd;
-	ret = sceIoSetAsyncCallback(fd, cb, argp);
-
-	return ret;
-}
-
 static NoDrmHookEntry g_nodrm_hook_map[] = {
 	{ "IoFileMgrForUser", 0x109F50BC, &myIoOpen },
 	{ "IoFileMgrForUser", 0x89AA9906, &myIoOpenAsync },
 	{ "IoFileMgrForUser", 0x810C4BC3, &myIoClose },
 	{ "IoFileMgrForUser", 0xFF5940B6, &myIoCloseAsync },
-	{ "IoFileMgrForUser", 0x6A638D83, &myIoRead },
-	{ "IoFileMgrForUser", 0xA0B5A7C2, &myIoReadAsync },
-	{ "IoFileMgrForUser", 0x42EC03AC, &myIoWrite },
-	{ "IoFileMgrForUser", 0x0FACAB19, &myIoWriteAsync },
-	{ "IoFileMgrForUser", 0x27EB27B8, &myIoLseek },
-	{ "IoFileMgrForUser", 0x71B19E77, &myIoLseekAsync },
-	{ "IoFileMgrForUser", 0x68963324, &myIoLseek32 },
-	{ "IoFileMgrForUser", 0x1B385D8F, &myIoLseek32Async },
 	{ "IoFileMgrForUser", 0x63632449, &myIoIoctl },
 	{ "IoFileMgrForUser", 0xE95A012B, &myIoIoctlAsync },
-	{ "IoFileMgrForUser", 0xE23EEC33, &myIoWaitAsync },
-	{ "IoFileMgrForUser", 0x35DBD746, &myIoWaitAsyncCB },
-	{ "IoFileMgrForUser", 0x3251EA56, &myIoPollAsync },
-	{ "IoFileMgrForUser", 0xCB05F8D6, &myIoGetAsyncStat },
-	{ "IoFileMgrForUser", 0xE8BC6571, &myIoCancel },
-	{ "IoFileMgrForUser", 0x08BD7374, &myIoGetDevType },
-	{ "IoFileMgrForUser", 0xB293727F, &myIoChangeAsyncPriority },
-	{ "IoFileMgrForUser", 0xA12A0514, &myIoSetAsyncCallback },
 	{ "scePspNpDrm_user", 0x275987D1, &myNpDrmRenameCheck },
 	{ "scePspNpDrm_user", 0x08D98894, &myNpDrmEdataSetupKey },
 	{ "scePspNpDrm_user", 0x219EF5CC, &myNpDrmEdataGetDataSize },

@@ -30,6 +30,7 @@
 #include "libs.h"
 #include "nid_resolver.h"
 #include "systemctrl_patch_offset.h"
+#include "rebootex_conf.h"
 
 static STMOD_HANDLER previous;
 
@@ -40,6 +41,10 @@ static void patch_sceUmdMan_driver(SceModule* mod);
 static int need_msstor_speed(void)
 {
 	int key_config;
+
+	if(rebootex_conf.mscache) {
+		return 0;
+	}
 
 	if(conf.msspeed == MSSPEED_NONE)
 		return 0;

@@ -50,6 +50,10 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 		rebootex_conf.p9_size = g_p9_size;
 	}
 
+	if(conf.mscache) {
+		rebootex_conf.mscache = 1;
+	}
+
 	memcpy((void*)REBOOTEX_CONFIG, &rebootex_conf, sizeof(rebootex_conf));
 	memset((void*)REBOOTEX_CONFIG_ISO_PATH, 0, 256);
 	strcpy_s((char*)REBOOTEX_CONFIG_ISO_PATH, 256, sctrlSEGetUmdFile());

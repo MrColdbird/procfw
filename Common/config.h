@@ -34,6 +34,7 @@
 #define PATH_MARCH33 PATH_FLASH0 "kd/_march33.prx"
 #define PATH_INFERNO PATH_FLASH0 "kd/_inferno.prx"
 #define PATH_POPCORN PATH_FLASH0 "kd/_popcorn.prx"
+#define PATH_MSCACHE PATH_FLASH0 "kd/_mscache.prx"
 #define PATH_SATELITE PATH_FLASH0 "vsh/module/_satelite.prx"
 #define PATH_RECOVERY PATH_FLASH0 "vsh/module/_recovery.prx"
 

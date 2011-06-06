@@ -17,6 +17,7 @@ POPCORN = Popcorn
 RECOVERY = Recovery
 PERMANENT = Permanent
 CIPL = CIPL
+MSCACHE = MsCache
 CIPL_INSTALLER = CIPL_installer
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
@@ -72,6 +73,7 @@ endif
 	@cd $(STARGATE); make $(OPT_FLAGS) $(DEBUG_OPTION) $(RELEASE_OPTION)
 	@cd $(SATELITE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(POPCORN); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(MSCACHE); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating PXE Executable
 	@cd $(INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -122,6 +124,7 @@ endif
 	@cd $(REBOOTEXPXE); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROLPXE); make clean $(DEBUG_OPTION)
 	@cd $(POPCORN); make clean $(DEBUG_OPTION)
+	@cd $(MSCACHE); make clean $(DEBUG_OPTION)
 	@cd $(RECOVERY); make clean $(DEBUG_OPTION)
 	@rm -rf $(DISTRIBUTE)
 

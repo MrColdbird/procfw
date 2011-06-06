@@ -186,6 +186,7 @@ void load_default_conf(SEConfig *config)
 	config->hide_cfw_dirs = 1;
 	config->chn_iso = 1;
 	config->msspeed = MSSPEED_NONE;
+	config->mscache = 0;
 }
 
 void load_config(void)

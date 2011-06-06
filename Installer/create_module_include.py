@@ -15,6 +15,7 @@ def main():
 			"contrib/usbdevice.prx",
 			"Vshctrl/vshctrl.prx",
 			"Recovery/recovery.prx",
+			"MsCache/mscache.prx",
 	]
 
 	for fn in lists:

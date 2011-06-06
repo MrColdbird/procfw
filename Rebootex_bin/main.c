@@ -61,6 +61,7 @@ u32 psp_fw_version = 0;
 u8 psp_model = 0;
 u8 recovery_mode = 0;
 u8 ofw_mode = 0;
+u8 mscache = 0;
 
 PspBootConfMode iso_mode = 0;
 
@@ -207,6 +208,7 @@ void load_configure(void)
 		psp_model = conf->psp_model;
 		recovery_mode = conf->recovery_mode;
 		ofw_mode = conf->ofw_mode;
+		mscache = conf->mscache;
 	}
 }
 
@@ -643,6 +645,23 @@ int patch_bootconf_updaterumd(char *buffer, int length)
 	return result;
 }
 
+int patch_bootconf_mscache(char *buffer, int length)
+{
+	int newsize, result, ret;
+
+	result = length;
+
+	if(psp_model != PSP_GO) {
+		RemovePrx(buffer, "/kd/umdcache.prx", GAME_RUNLEVEL | VSH_RUNLEVEL | UMDEMU_RUNLEVEL);
+	}
+
+	newsize = AddPRX(buffer, "/kd/mediasync.prx", PATH_MSCACHE+sizeof(PATH_FLASH0)-2, GAME_RUNLEVEL | VSH_RUNLEVEL | UMDEMU_RUNLEVEL);
+
+	if (newsize > 0) result = newsize;
+	
+	return result;
+}
+
 int is_permanent_mode(void)
 {
 	int ret;
@@ -728,6 +747,12 @@ int _UnpackBootConfig(char **p_buffer, int length)
 		newsize = AddPRX(buffer, loadrebootmodulebefore, "/rtm.prx", rebootmoduleflags);
 
 		if(newsize > 0) result = newsize;
+	}
+
+	if(mscache) {
+		newsize = patch_bootconf_mscache(buffer, length);
+
+		if (newsize > 0) result = newsize;
 	}
 
 exit:

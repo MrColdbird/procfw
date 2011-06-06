@@ -445,7 +445,7 @@ int iso_read_with_stack(u32 offset, void *ptr, u32 data_len)
 	g_read_arg.offset = offset;
 	g_read_arg.address = ptr;
 	g_read_arg.size = data_len;
-	retv = sceKernelExtendKernelStack(0x2000, (void*)&iso_read, &g_read_arg);
+	retv = sceKernelExtendKernelStack(0x2000, (void*)&iso_cache_read, &g_read_arg);
 
 	ret = sceKernelSignalSema(g_umd9660_sema_id, 1);
 

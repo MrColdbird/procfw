@@ -268,7 +268,7 @@ void msstor_stat(int reset)
 		sceIoWrite(1, buf, strlen(buf));
 
 		for(i=0; i<NELEMS(g_caches); ++i) {
-			sprintf(buf, "%d: 0x%08X age %02d hit %d\n", i+1, (u32)g_caches[i].pos, g_caches[i].age, g_caches[i].hit);
+			sprintf(buf, "%d: 0x%08X age %02d hit %d\n", i+1, (uint)g_caches[i].pos, g_caches[i].age, g_caches[i].hit);
 			sceIoWrite(1, buf, strlen(buf));
 		}
 	} else {

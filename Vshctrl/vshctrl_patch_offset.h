@@ -28,6 +28,7 @@ struct VshctrlPatch {
 	const char *SystemVersionMessage;
 	u32 SystemVersion;
 	u32 MacAddressStr;
+	u32 SlimColor;
 	u32 HomebrewCheck;
 	u32 PopsCheck;
 	u32 MultiDiscPopsCheck;

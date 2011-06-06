@@ -81,8 +81,10 @@ static int check_file_is_encrypted(int fd)
 		return 1;
 	}
 
+#if 0
 	printk("%s: buf:\n", __func__);
 	hexdump(buf, sizeof(buf));
+#endif
 
 	return 0;
 }
@@ -226,8 +228,11 @@ static int remove_nodrm_fd(SceUID fd)
 int myIoOpen(const char *file, int flag, int mode)
 {
 	int fd;
+	int encrypted;
 
-	if (is_encrypted_flag(flag)) {
+	encrypted = is_encrypted_flag(flag);
+
+	if (encrypted) {
 		fd = sceIoOpen(file, PSP_O_RDONLY, mode);
 
 		if (fd >= 0) {
@@ -254,7 +259,7 @@ int myIoOpen(const char *file, int flag, int mode)
 
 exit:
 #ifdef DEBUG
-	if (is_encrypted_flag(flag)) {
+	if (encrypted) {
 		printk("%s: %s 0x%08X -> 0x%08X\n", __func__, file, flag, fd);
 	}
 #endif
@@ -265,9 +270,11 @@ exit:
 int myIoOpenAsync(const char *file, int flag, int mode)
 {
 	int fd;
-	int is_plain = 0;
+	int is_plain = 0, encrypted;
 
-	if (is_encrypted_flag(flag)) {
+	encrypted = is_encrypted_flag(flag);
+
+	if (encrypted) {
 		fd = sceIoOpen(file, PSP_O_RDONLY, mode);
 
 		if (fd >= 0) {
@@ -300,11 +307,7 @@ int myIoOpenAsync(const char *file, int flag, int mode)
 		fd = sceIoOpenAsync(file, flag, mode);
 	}
 
-#ifdef DEBUG
-	if (is_encrypted_flag(flag)) {
-		printk("%s: %s 0x%08X -> 0x%08X\n", __func__, file, flag, fd);
-	}
-#endif
+	// printk after sceIoOpenAsync would freeze the system
 
 	return fd;
 }

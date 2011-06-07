@@ -14,7 +14,7 @@ OBJS += ../Common/printk.o
 endif
 
 ifeq ($(NIGHTLY), 1)
-CFLAGS += -DNIGHTLY=1
+CFLAGS += -DNIGHTLY=\"$(shell hg summary | grep parent | cut -d " " -f 2)\"
 endif
 
 ifeq ($(CONFIG_620), 1)

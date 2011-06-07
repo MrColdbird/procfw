@@ -493,15 +493,22 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 		ret = 0;
 		goto exit;
 	} else if(cmd == 0x01F100A4) {
+		u32 lba;
+		u32 sector;
+		
 		/* missing cmd in march33, prepare UMD data into cache */
 		if(indata == NULL || inlen < 16) {
 			ret = 0x80010016;
 			goto exit;
 		}
 
+		infernoCacheAdd(lba * ISO_SECTOR_SIZE, sector * ISO_SECTOR_SIZE);
 		ret = 0;
 		goto exit;
 	} else if(cmd == 0x01F300A5) {
+		u32 lba;
+		u32 sector;
+
 		/* missing cmd in march33, prepare UMD data into cache */
 		if(indata == NULL || inlen < 16) {
 			ret = 0x80010016;
@@ -512,6 +519,10 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 			ret = 0x80010016;
 			goto exit;
 		}
+
+		lba = ((u32*)(indata))[1];
+		sector = ((u32*)(indata))[3];
+		infernoCacheAdd(lba * ISO_SECTOR_SIZE, sector * ISO_SECTOR_SIZE);
 
 		_sw(1, (u32)outdata);
 

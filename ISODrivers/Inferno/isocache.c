@@ -17,6 +17,16 @@ static u32 read_missed = 0;
 
 static u32 cache_on = 0;
 
+#define NR_CACHE_REQ 8
+
+struct ISOCacheRequest {
+	int pos;
+	int len;
+};
+
+static struct ISOCacheRequest g_cache_request[NR_CACHE_REQ];
+static int g_cache_request_idx = 0;
+
 struct ISOCache {
 	char *buf;
 	int bufsize;
@@ -254,10 +264,57 @@ static int add_cache(struct IoReadArg *arg)
 		}
 	}
 
-	update_cache_age(NULL);
 	sort_iso_cache();
 
 	return ret;
+}
+
+static void process_request(void)
+{
+	int pos, len, cur, next, ret, read_len;
+	struct ISOCache *cache;
+	struct IoReadArg cache_arg;
+
+	if(g_cache_request_idx <= 0) {
+		return;
+	}
+
+	g_cache_request_idx--;
+	pos = g_cache_request[g_cache_request_idx].pos;
+	len = g_cache_request[g_cache_request_idx].len;
+
+	for(cur = pos; cur < pos + len;) {
+		next = MIN(len - (cur - pos), g_caches_cap);
+
+		// already in cache, goto next block
+		if(has_cache(cur, next)) {
+			cur += next;
+			continue;
+		}
+
+		// replace with oldest cache
+		cache = get_oldest_cache();
+		disable_cache(cache);
+
+		cache_arg.offset = cur;
+		cache_arg.address = (u8*)cache->buf;
+		cache_arg.size = g_caches_cap;
+		ret = iso_read(&cache_arg);
+
+		if(ret >= 0) {
+			cache->pos = cache_arg.offset;
+			cache->age = 0;
+			cache->bufsize = ret;
+
+			read_len = MIN(len - (cur - pos), ret);
+			cur += read_len;
+		} else {
+			printk("%s: read -> 0x%08X\n", __func__, ret);
+			break;
+		}
+	}
+
+	sort_iso_cache();	
 }
 
 int iso_cache_read(struct IoReadArg *arg)
@@ -285,9 +342,11 @@ int iso_cache_read(struct IoReadArg *arg)
 
 		ret = add_cache(arg);
 		read_missed += len;
+		update_cache_age(NULL);
 	}
 
 	read_call += len;
+	process_request();
 
 	return ret;
 }
@@ -341,6 +400,31 @@ int infernoCacheInit(int cache_size, int cache_num)
 	cache_on = 1;
 
 	return 0;
+}
+
+int infernoCacheAdd(int pos, int len)
+{
+	if(!cache_on) {
+		return -1;
+	}
+
+	if(g_cache_request_idx < NELEMS(g_cache_request)) {
+		g_cache_request[g_cache_request_idx].pos = pos;
+		g_cache_request[g_cache_request_idx].len = len;
+		g_cache_request_idx++;
+
+		if(1) {
+			char buf[256];
+
+			sprintf(buf, "%s: 0x%08X <%d> added\n", __func__, pos, len);
+			sceIoWrite(1, buf, strlen(buf));
+		}
+
+		return 0;
+	}
+
+	// TOO BUSY
+	return -2;
 }
 
 // call @PRO_Inferno_Driver:CacheCtrl,0x5CC24481@

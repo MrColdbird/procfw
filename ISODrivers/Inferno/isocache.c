@@ -300,7 +300,7 @@ int infernoCacheInit(int cache_size, int cache_num)
 	void *pbuf;
 
 	g_caches_num = cache_num;
-	g_caches_cap = 0x4000;
+	g_caches_cap = cache_size;
 
 	if(g_caches_cap % 0x200 != 0) {
 		return -1;
@@ -373,7 +373,7 @@ void isocache_stat(int reset)
 		sprintf(buf, "%d caches used(%02d%%)\n", used, 100 * used / g_caches_num);
 		sceIoWrite(1, buf, strlen(buf));
 	} else {
-		sprintf(buf, "no msstor cache call yet\n");
+		sprintf(buf, "no cache call yet\n");
 		sceIoWrite(1, buf, strlen(buf));
 	}
 

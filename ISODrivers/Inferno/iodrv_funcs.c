@@ -502,6 +502,8 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 			goto exit;
 		}
 
+		lba = ((u32*)(indata))[1];
+		sector = ((u32*)(indata))[3];
 		infernoCacheAdd(lba * ISO_SECTOR_SIZE, sector * ISO_SECTOR_SIZE);
 		ret = 0;
 		goto exit;

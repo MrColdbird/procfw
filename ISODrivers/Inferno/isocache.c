@@ -235,7 +235,7 @@ static int add_cache(struct IoReadArg *arg)
 		cache = get_oldest_cache();
 		disable_cache(cache);
 
-		cache_arg.offset = cur;
+		cache_arg.offset = cur & (~(ISO_SECTOR_SIZE-1));
 		cache_arg.address = (u8*)cache->buf;
 		cache_arg.size = g_caches_cap;
 		ret = iso_read(&cache_arg);
@@ -245,7 +245,7 @@ static int add_cache(struct IoReadArg *arg)
 			cache->age = 0;
 			cache->bufsize = ret;
 
-			read_len = MIN(len - (cur - pos), ret);
+			read_len = MIN(len - (cur - pos), ret - cur + cache->pos);
 			memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
 			cur += read_len;
 		} else {

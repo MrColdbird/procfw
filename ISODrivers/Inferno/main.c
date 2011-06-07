@@ -84,6 +84,7 @@ int init_inferno(void)
 int module_start(SceSize args, void* argp)
 {
 	int ret, key_config;
+	SEConfig config;
 
 	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
@@ -92,9 +93,22 @@ int module_start(SceSize args, void* argp)
 	printk("Inferno started FW=0x%08X %02dg\n", (uint)psp_fw_version, (int)psp_model+1);
 
 	key_config = sceKernelApplicationType();
+	sctrlSEGetConfig(&config);
 
-	if(psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
-		infernoCacheInit(81920, 256);
+	if(config.inferno_cache && psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
+		int bufsize;
+
+		bufsize = config.inferno_cache_total_size * 1024 * 1024 / config.inferno_cache_num;
+		
+		if((bufsize % 512) != 0) {
+			bufsize &= ~(512-1);
+		}
+
+		if(bufsize == 0) {
+			bufsize = 512;
+		}
+
+		infernoCacheInit(bufsize, config.inferno_cache_num);
 	}
 
 	ret = setup_umd_device();

@@ -315,7 +315,7 @@ out:
 		}
 
 #ifdef NIGHTLY
-		strcpy(str, "FOR TEST PURPOSE ONLY");
+		strcpy(str, NIGHTLY);
 #endif
 
 		ascii2utf16(p, str);

@@ -186,7 +186,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 static int change_inferno_cache_number_option(struct MenuEntry *entry, int direct)
 {
 	struct ValueOption *c = (struct ValueOption*)entry->arg;
-	s16 cache_sels[] = { 64, 128, 256, 384, 512, 768, 1024, };
+	s16 cache_sels[] = { 64, 128, 256, 384, 512, 768, 1024, 2048, 4096};
 	size_t i;
 
 	for(i=0; i<NELEMS(cache_sels); ++i) {
@@ -195,12 +195,7 @@ static int change_inferno_cache_number_option(struct MenuEntry *entry, int direc
 		}
 	}
 
-	if(i < NELEMS(cache_sels) - 1) {
-		i++;
-	} else {
-		i = 0;
-	}
-
+	i = limit_int(i, direct, NELEMS(cache_sels));
 	*c->value = cache_sels[i];
 
 	return 0;
@@ -444,7 +439,7 @@ static int display_inferno_cache_total_size(struct MenuEntry* entry, char *buf, 
 
 static int display_inferno_cache_number(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "%-48s %-11d", g_messages[INFERNO_CACHE_NUMBER], g_config.inferno_cache_number);
+	sprintf(buf, "%-48s %-11d", g_messages[INFERNO_CACHE_NUMBER], g_config.inferno_cache_num);
 
 	return 0;
 }
@@ -530,9 +525,9 @@ static struct ValueOption g_inferno_cache_total_size = {
 	1, 20+1,
 };
 
-static struct ValueOption g_inferno_cache_total_size = {
-	&g_config.inferno_cache_number,
-	128, 1024+1,
+static struct ValueOption g_inferno_cache_number = {
+	&g_config.inferno_cache_num,
+	64, 4096+1,
 };
 
 static struct ValueOption g_chn_iso = {

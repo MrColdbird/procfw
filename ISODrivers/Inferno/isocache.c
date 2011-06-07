@@ -9,6 +9,7 @@
 #include "printk.h"
 #include "utils.h"
 #include "inferno.h"
+#include "systemctrl_private.h"
 
 static u32 read_call = 0;
 static u32 read_hit = 0;
@@ -37,24 +38,86 @@ static inline int is_within_range(int pos, int start, int len)
 	return 0;
 }
 
-static struct ISOCache *get_matched_buffer(int pos)
+static int binary_search(const struct ISOCache *caches, size_t n, int pos)
 {
-	size_t i;
+	int low, high, mid;
 
-	for(i=0; i<g_caches_num; ++i) {
-		if(is_within_range(pos, g_caches[i].pos, g_caches[i].bufsize)) {
-			return &g_caches[i];
+	low = 0;
+	high = n - 1;
+
+	while (low <= high) {
+		mid = (low + high) / 2;
+
+		if(is_within_range(pos, caches[mid].pos, caches[mid].bufsize)) {
+			return mid;
+		} else if (pos < caches[mid].pos) {
+			high = mid - 1;
+		} else {
+			low = mid + 1;
 		}
 	}
 
-	return NULL;
+	return -1;
+}
+
+static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const void *))
+{
+	int j;
+	void *saved = oe_malloc(s);
+
+	for(j=1; j<n; ++j) {
+		int i = j-1;
+		void *value = base + j*s;
+
+		while(i >= 0 && cmp(base + i*s, value) > 0) {
+			i--;
+		}
+
+		if(++i == j)
+			continue;
+
+		memmove(saved, value, s);
+		memmove(base+(i+1)*s, base+i*s, s*(j-i));
+		memmove(base+i*s, saved, s);
+	}
+
+	oe_free(saved);
+}
+
+static int cmp_cache(const void *a, const void *b)
+{
+	const struct ISOCache *iso_cache_a, *iso_cache_b;
+
+	iso_cache_a = a, iso_cache_b = b;
+
+	if(iso_cache_a->pos < iso_cache_b->pos)
+		return 0;
+
+	return 1;
+}
+
+static void sort_iso_cache(void)
+{
+	insert_sort(g_caches, g_caches_num, sizeof(g_caches[0]), &cmp_cache);
+}
+
+static struct ISOCache *get_matched_buffer(int pos)
+{
+	int cache_pos;
+
+	cache_pos = binary_search(g_caches, g_caches_num, pos);
+
+	if(cache_pos == -1) {
+		return NULL;
+	}
+
+	return &g_caches[cache_pos];
 }
 
 static int get_hit_caches(int pos, int len, char *data)
 {
-	int cur;
+	int cur, read_len;
 	struct ISOCache *cache = NULL;
-	int read_len;
 
 	for(cur = pos; cur < pos + len;) {
 		cache = get_matched_buffer(cur);
@@ -192,6 +255,7 @@ static int add_cache(struct IoReadArg *arg)
 	}
 
 	update_cache_age(NULL);
+	sort_iso_cache();
 
 	return ret;
 }

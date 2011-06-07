@@ -186,6 +186,9 @@ void load_default_conf(SEConfig *config)
 	config->hide_cfw_dirs = 1;
 	config->chn_iso = 1;
 	config->msspeed = MSSPEED_NONE;
+	config->inferno_cache = 0;
+	config->inferno_cache_total_size = 20;
+	config->inferno_cache_num = 128;
 }
 
 void load_config(void)

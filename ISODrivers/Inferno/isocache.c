@@ -73,7 +73,8 @@ static int binary_search(const struct ISOCache *caches, size_t n, int pos)
 static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const void *))
 {
 	int j;
-	void *saved = oe_malloc(s);
+	struct ISOCache cache;
+	void *saved = &cache;
 
 	for(j=1; j<n; ++j) {
 		int i = j-1;
@@ -90,8 +91,6 @@ static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const
 		memmove(base+(i+1)*s, base+i*s, s*(j-i));
 		memmove(base+i*s, saved, s);
 	}
-
-	oe_free(saved);
 }
 
 static int cmp_cache(const void *a, const void *b)

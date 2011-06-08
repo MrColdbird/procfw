@@ -323,15 +323,15 @@ out:
 
 	hook_import_bynid((SceModule*)mod, "IoFileMgrForUser", 0x06A70004, myIoMkdir, 1);
 
-	
-	//slim color patch
-	if( sceKernelGetModel() == 0 && conf.usbcharge ) {
-		u32 patch_addr = g_offs->vshctrl_patch.SlimColor + text_addr;
-		u32 value = *(u32 *)( patch_addr + 4);
-		_sw( 0x24020001 , patch_addr + 4);
-		_sw( value ,  patch_addr );
-	}
+	if(psp_model == PSP_1000 && conf.slimcolor) {
+		u32 patch_addr, value;
 
+		patch_addr = g_offs->vshctrl_patch.SlimColor + text_addr;
+		value = *(u32 *)(patch_addr + 4);
+
+		_sw(0x24020001, patch_addr + 4);
+		_sw(value,  patch_addr);
+	}
 }
 
 int fakeParamInexistance(void)

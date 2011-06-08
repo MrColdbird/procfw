@@ -21,6 +21,13 @@ static u32 cache_on = 0;
 #define NR_CACHE_REQ 8
 #define KIRK_PRNG_CMD 0xE
 
+enum {
+	CACHE_LRU = 0,
+	CACHE_RR = 1,
+};
+
+static u32 cache_policy = CACHE_LRU;
+
 struct ISOCacheRequest {
 	int pos;
 	int len;
@@ -38,8 +45,6 @@ struct ISOCache {
 
 static struct ISOCache *g_caches = NULL;
 static int g_caches_num = 0, g_caches_cap = 0;
-
-static void update_cache_age(struct ISOCache *cache);
 
 static inline int is_within_range(int pos, int start, int len)
 {
@@ -147,11 +152,8 @@ static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_c
 		}
 
 		cur += read_len;
-
 		cache->age = 0;
 	}
-
-	update_cache_age(NULL);
 
 	if(cache == NULL)
 		return -1;
@@ -161,17 +163,20 @@ static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_c
 	return cur - pos;
 }
 
-static void update_cache_age(struct ISOCache *cache)
+static void update_cache_info(void)
 {
 	size_t i;
 
+	// Random Replacement doesn't require any information
+	if(cache_policy == CACHE_RR)
+		return;
+
 	for(i=0; i<g_caches_num; ++i) {
-		if(&g_caches[i] == cache) {
-			g_caches[i].age = 0;
-		} else if (g_caches[i].pos != -1) { // Only valid grows old
+		if (g_caches[i].pos != -1) {
 			g_caches[i].age++;
 		}
 	}
+
 }
 
 static inline u32 get_random(void)
@@ -197,28 +202,16 @@ static struct ISOCache *get_retirng_cache(void)
 		}
 	}
 
-#if 1
-	// LRU
-	for(i=0; i<g_caches_num; ++i) {
-		if(g_caches[i].age > g_caches[retiring].age) {
-			retiring = i;
-		}
-	}
-#endif
 
-#if 0
-	// MRU
-	for(i=0; i<g_caches_num; ++i) {
-		if(g_caches[i].age < g_caches[retiring].age) {
-			retiring = i;
+	if(cache_policy == CACHE_LRU) {
+		for(i=0; i<g_caches_num; ++i) {
+			if(g_caches[i].age > g_caches[retiring].age) {
+				retiring = i;
+			}
 		}
+	} else if(cache_policy = CACHE_RR) {
+		retiring = get_random() % g_caches_num;
 	}
-#endif
-
-#if 0
-	// RR
-	retiring = get_random() % g_caches_num;
-#endif
 
 exit:
 	return &g_caches[retiring];
@@ -229,37 +222,6 @@ static void disable_cache(struct ISOCache *cache)
 	cache->pos = -1;
 	cache->age = 0;
 	cache->bufsize = 0;
-}
-
-static inline int get_suitable_bufsize(int len)
-{
-	if(len < g_caches_cap / 16) {
-		len = g_caches_cap / 16;
-		goto normalize;
-	}
-
-	if(len < g_caches_cap / 8) {
-		len = g_caches_cap / 8;
-		goto normalize;
-	}
-	
-	if(len < g_caches_cap / 4) {
-		len = g_caches_cap / 4;
-		goto normalize;
-	}
-
-	if(len < g_caches_cap / 2) {
-		len = g_caches_cap / 2;
-		goto normalize;
-	}
-	
-	len = g_caches_cap;
-	
-normalize:
-	if(len < 0x200)
-		len = 0x200;
-
-	return len;
 }
 
 static int add_cache(struct IoReadArg *arg, struct ISOCache *last_cache)
@@ -295,7 +257,7 @@ static int add_cache(struct IoReadArg *arg, struct ISOCache *last_cache)
 
 		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = get_suitable_bufsize(len - (cur - pos));;
+		cache_arg.size = g_caches_cap;
 		ret = iso_read(&cache_arg);
 
 		if(ret >= 0) {
@@ -367,11 +329,11 @@ int iso_cache_read(struct IoReadArg *arg)
 
 		ret = add_cache(arg, last_cache);
 		read_missed += len;
-		update_cache_age(NULL);
 	}
 
 	read_call += len;
 	process_request();
+	update_cache_info();
 
 	return ret;
 }
@@ -470,12 +432,12 @@ void isocache_stat(int reset)
 			}
 
 			if(1) {
-				sprintf(buf, "%d: 0x%08X age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].age);
+				sprintf(buf, "%d: 0x%08X size %d age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].bufsize, g_caches[i].age);
 				sceIoWrite(1, buf, strlen(buf));
 			}
 		}
 
-		sprintf(buf, "iso cache stat: %dKB per cache, %d caches\n", g_caches_cap / 1024, g_caches_num);
+		sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, cache_policy);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
@@ -489,4 +451,10 @@ void isocache_stat(int reset)
 	if(reset) {
 		read_call = read_hit = read_missed = 0;
 	}
+}
+
+// call @PRO_Inferno_Driver:CacheCtrl,0x9DB9A8C0@
+void isocache_set_policy(int policy)
+{
+	cache_policy = policy;
 }

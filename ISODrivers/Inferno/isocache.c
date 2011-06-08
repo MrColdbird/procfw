@@ -124,8 +124,7 @@ static void update_cache_info(void)
 {
 	size_t i;
 
-	// Random Replacement doesn't require any information
-	if(cache_policy == CACHE_POLICY_RR)
+	if(cache_policy != CACHE_POLICY_LRU)
 		return;
 
 	for(i=0; i<g_caches_num; ++i) {

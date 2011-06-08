@@ -189,6 +189,7 @@ void load_default_conf(SEConfig *config)
 	config->inferno_cache = 0;
 	config->inferno_cache_total_size = 20;
 	config->inferno_cache_num = 128;
+	config->inferno_cache_policy = CACHE_POLICY_LRU;
 }
 
 void load_config(void)

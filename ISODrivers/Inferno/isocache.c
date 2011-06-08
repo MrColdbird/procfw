@@ -10,6 +10,8 @@
 #include "printk.h"
 #include "utils.h"
 #include "inferno.h"
+#include "systemctrl.h"
+#include "systemctrl_se.h"
 #include "systemctrl_private.h"
 
 static u32 read_call = 0;
@@ -21,12 +23,7 @@ static u32 cache_on = 0;
 #define NR_CACHE_REQ 8
 #define KIRK_PRNG_CMD 0xE
 
-enum {
-	CACHE_LRU = 0,
-	CACHE_RR = 1,
-};
-
-static u32 cache_policy = CACHE_LRU;
+static u32 cache_policy = CACHE_POLICY_LRU;
 
 struct ISOCacheRequest {
 	int pos;
@@ -128,7 +125,7 @@ static void update_cache_info(void)
 	size_t i;
 
 	// Random Replacement doesn't require any information
-	if(cache_policy == CACHE_RR)
+	if(cache_policy == CACHE_POLICY_RR)
 		return;
 
 	for(i=0; i<g_caches_num; ++i) {
@@ -163,13 +160,13 @@ static struct ISOCache *get_retirng_cache(void)
 	}
 
 
-	if(cache_policy == CACHE_LRU) {
+	if(cache_policy == CACHE_POLICY_LRU) {
 		for(i=0; i<g_caches_num; ++i) {
 			if(g_caches[i].age > g_caches[retiring].age) {
 				retiring = i;
 			}
 		}
-	} else if(cache_policy == CACHE_RR) {
+	} else if(cache_policy == CACHE_POLICY_RR) {
 		retiring = get_random() % g_caches_num;
 	}
 
@@ -229,8 +226,10 @@ static int add_cache(struct IoReadArg *arg)
 		}
 
 		if(last_cache != NULL) {
-			if(pos + len <= last_cache->pos + last_cache->bufsize)
+			if(pos + len <= last_cache->pos + last_cache->bufsize) {
+				printk("%s: error pos\n", __func__);
 				asm("break");
+			}
 
 			cur = last_cache->pos + last_cache->bufsize;
 		}
@@ -436,8 +435,8 @@ void isocache_stat(int reset)
 	}
 }
 
-// call @PRO_Inferno_Driver:CacheCtrl,0x9DB9A8C0@
-void isocache_set_policy(int policy)
+// call @PRO_Inferno_Driver:CacheCtrl,0xC0736FD6@
+void infernoCacheSetPolicy(int policy)
 {
 	cache_policy = policy;
 }

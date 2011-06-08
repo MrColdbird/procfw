@@ -108,6 +108,7 @@ int module_start(SceSize args, void* argp)
 			bufsize = 512;
 		}
 
+		infernoCacheSetPolicy(config.inferno_cache_policy);
 		infernoCacheInit(bufsize, config.inferno_cache_num);
 	}
 

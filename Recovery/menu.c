@@ -86,6 +86,7 @@ const char * g_messages[] = {
 	"Inferno Use ISO Cache",
 	"Inferno Cache Size(in MB)",
 	"Inferno Cache Number",
+	"Inferno Cache Policy",
 	"Allow Non-latin1 ISO Filename",
 	"Memory Stick Speedup",
 	"CPU Speed",
@@ -444,6 +445,13 @@ static int display_inferno_cache_number(struct MenuEntry* entry, char *buf, int 
 	return 0;
 }
 
+static int display_inferno_cache_policy(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[INFERNO_CACHE_POLICY], get_cache_policy_name(g_config.inferno_cache_policy));
+
+	return 0;
+}
+
 static int display_chn_iso(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[ALLOW_NON_LATIN1_ISO_FILENAME], get_bool_name(g_config.chn_iso));
@@ -530,6 +538,11 @@ static struct ValueOption g_inferno_cache_number = {
 	64, 4096+1,
 };
 
+static struct ValueOption g_inferno_cache_policy = {
+	&g_config.inferno_cache_policy,
+	0, CACHE_POLICY_RR+1,
+};
+
 static struct ValueOption g_chn_iso = {
 	&g_config.chn_iso,
 	0, 2,
@@ -558,6 +571,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_inferno_cache, &change_option, &change_option_by_enter, &g_inferno_cache},
 	{ NULL, 0, 0, &display_inferno_cache_total_size, &change_option, &change_option_by_enter, &g_inferno_cache_total_size},
 	{ NULL, 0, 0, &display_inferno_cache_number, &change_inferno_cache_number_option, &change_inferno_cache_number_option_by_enter, &g_inferno_cache_number},
+	{ NULL, 0, 0, &display_inferno_cache_policy, &change_option, &change_option_by_enter, &g_inferno_cache_policy},
 };
 
 static struct Menu g_advanced_menu = {

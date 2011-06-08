@@ -62,6 +62,7 @@ enum {
 	INFERNO_CACHE,
 	INFERNO_CACHE_TOTAL_SIZE,
 	INFERNO_CACHE_NUMBER,
+	INFERNO_CACHE_POLICY,
 	ALLOW_NON_LATIN1_ISO_FILENAME,
 	MSSPEED_UP,
 	CPU_SPEED,
@@ -188,6 +189,7 @@ int get_bus_number(int cpu);
 int get_cpu_freq(int number);
 int get_bus_freq(int number);
 const char *get_plugin_name(int type);
+const char* get_cache_policy_name(int policy);
 
 void suspend_vsh_thread(void);
 void resume_vsh_thread(void);

@@ -175,3 +175,15 @@ const char* get_usbdevice_name(int usbdevice)
 
 	return "FIXME";
 }
+
+const char* get_cache_policy_name(int policy)
+{
+	switch(policy) {
+		case CACHE_POLICY_LRU:
+			return "LRU";
+		case CACHE_POLICY_RR:
+			return "Random";
+	}
+
+	return "FIXME";
+}

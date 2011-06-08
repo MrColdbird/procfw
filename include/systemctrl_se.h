@@ -47,6 +47,12 @@ enum MsSpeedFlag
 	MSSPEED_ALWAYS   = 7,
 };
 
+enum InfernoCachePolicy
+{
+	CACHE_POLICY_LRU = 0,
+	CACHE_POLICY_RR = 1,
+};
+
 typedef struct _SEConfig
 {
 	int magic;
@@ -79,6 +85,7 @@ typedef struct _SEConfig
 	s16 inferno_cache;
 	s16 inferno_cache_total_size; // in MB
 	s16 inferno_cache_num;
+	s16 inferno_cache_policy;
 } SEConfig;
 
 /**

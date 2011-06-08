@@ -420,7 +420,7 @@ void isocache_stat(int reset)
 			}
 		}
 
-		sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, cache_policy);
+		sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, (int)cache_policy);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));

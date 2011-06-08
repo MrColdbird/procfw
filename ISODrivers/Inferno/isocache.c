@@ -189,17 +189,22 @@ static void reorder_iso_cache(int idx)
 	struct ISOCache tmp;
 	int i;
 
-	i = idx-1;
-
-	while(i>=0 && g_caches[i].pos < g_caches[idx].pos) {
-		i--;
+	if(idx < 0 && idx >= g_caches_num) {
+		printk("%s: wrong idx\n", __func__);
+		return;
 	}
 
-	if(++i != idx) {
-		memmove(&tmp, &g_caches[i], sizeof(g_caches[i]));
-		memmove(&g_caches[i], &g_caches[idx], sizeof(g_caches[i]));
-		memmove(&g_caches[idx], &tmp, sizeof(g_caches[i]));
+	memmove(&tmp, &g_caches[idx], sizeof(g_caches[idx]));
+	memmove(&g_caches[idx], &g_caches[idx+1], sizeof(g_caches[idx]) * (g_caches_num - idx - 1));
+
+	for(i=0; i<g_caches_num-1; ++i) {
+		if(g_caches[i].pos >= tmp.pos) {
+			break;
+		}
 	}
+
+	memmove(&g_caches[i+1], &g_caches[i], sizeof(g_caches[idx]) * (g_caches_num - i - 1));
+	memmove(&g_caches[i], &tmp, sizeof(tmp));
 }
 
 static int add_cache(struct IoReadArg *arg)

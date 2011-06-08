@@ -77,46 +77,6 @@ static int binary_search(const struct ISOCache *caches, size_t n, int pos)
 	return -1;
 }
 
-static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const void *))
-{
-	int j;
-	struct ISOCache cache;
-	void *saved = &cache;
-
-	for(j=1; j<n; ++j) {
-		int i = j-1;
-		void *value = base + j*s;
-
-		while(i >= 0 && cmp(base + i*s, value) > 0) {
-			i--;
-		}
-
-		if(++i == j)
-			continue;
-
-		memmove(saved, value, s);
-		memmove(base+(i+1)*s, base+i*s, s*(j-i));
-		memmove(base+i*s, saved, s);
-	}
-}
-
-static int cmp_cache(const void *a, const void *b)
-{
-	const struct ISOCache *iso_cache_a, *iso_cache_b;
-
-	iso_cache_a = a, iso_cache_b = b;
-
-	if(iso_cache_a->pos < iso_cache_b->pos)
-		return 0;
-
-	return 1;
-}
-
-static void sort_iso_cache(void)
-{
-	insert_sort(g_caches, g_caches_num, sizeof(g_caches[0]), &cmp_cache);
-}
-
 static struct ISOCache *get_matched_buffer(int pos)
 {
 	int cache_pos;
@@ -209,7 +169,7 @@ static struct ISOCache *get_retirng_cache(void)
 				retiring = i;
 			}
 		}
-	} else if(cache_policy = CACHE_RR) {
+	} else if(cache_policy == CACHE_RR) {
 		retiring = get_random() % g_caches_num;
 	}
 
@@ -224,11 +184,29 @@ static void disable_cache(struct ISOCache *cache)
 	cache->bufsize = 0;
 }
 
-static int add_cache(struct IoReadArg *arg, struct ISOCache *last_cache)
+static void reorder_iso_cache(int idx)
+{
+	struct ISOCache tmp;
+	int i;
+
+	i = idx-1;
+
+	while(i>=0 && g_caches[i].pos < g_caches[idx].pos) {
+		i--;
+	}
+
+	if(++i != idx) {
+		memmove(&tmp, &g_caches[i], sizeof(g_caches[i]));
+		memmove(&g_caches[i], &g_caches[idx], sizeof(g_caches[i]));
+		memmove(&g_caches[idx], &tmp, sizeof(g_caches[i]));
+	}
+}
+
+static int add_cache(struct IoReadArg *arg)
 {
 	int read_len, len, ret;
 	struct IoReadArg cache_arg;
-	struct ISOCache *cache;
+	struct ISOCache *cache, *last_cache;
 	int pos, cur, next;
 	char *data;
 
@@ -272,13 +250,13 @@ static int add_cache(struct IoReadArg *arg, struct ISOCache *last_cache)
 			}
 
 			cur += read_len;
+			reorder_iso_cache(cache - g_caches);
 		} else {
+			reorder_iso_cache(cache - g_caches);
 			printk("%s: read -> 0x%08X\n", __func__, ret);
 			return ret;
 		}
 	}
-
-	sort_iso_cache();
 
 	return cur - pos;
 }
@@ -300,7 +278,7 @@ static void process_request(void)
 	cache_arg.offset = pos;
 	cache_arg.address = NULL;
 
-	add_cache(&cache_arg, NULL);
+	add_cache(&cache_arg);
 }
 
 int iso_cache_read(struct IoReadArg *arg)
@@ -327,7 +305,7 @@ int iso_cache_read(struct IoReadArg *arg)
 			sceIoWrite(1, buf, strlen(buf));
 		}
 
-		ret = add_cache(arg, last_cache);
+		ret = add_cache(arg);
 		read_missed += len;
 	}
 

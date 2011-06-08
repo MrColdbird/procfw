@@ -255,8 +255,12 @@ static int add_cache(struct IoReadArg *arg)
 			cache->age = 0;
 			cache->bufsize = ret;
 
-			read_len = MIN(len - (cur - pos), ret - cur + cache->pos);
-			memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
+			read_len = MIN(len - (cur - pos), cache->pos + cache->bufsize - cur);
+
+			if(data != NULL) {
+				memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
+			}
+
 			cur += read_len;
 		} else {
 			printk("%s: read -> 0x%08X\n", __func__, ret);
@@ -266,13 +270,12 @@ static int add_cache(struct IoReadArg *arg)
 
 	sort_iso_cache();
 
-	return ret;
+	return cur - pos;
 }
 
 static void process_request(void)
 {
-	int pos, len, cur, next, ret, read_len;
-	struct ISOCache *cache;
+	int pos, len;
 	struct IoReadArg cache_arg;
 
 	if(g_cache_request_idx <= 0) {
@@ -283,38 +286,11 @@ static void process_request(void)
 	pos = g_cache_request[g_cache_request_idx].pos;
 	len = g_cache_request[g_cache_request_idx].len;
 
-	for(cur = pos; cur < pos + len;) {
-		next = MIN(len - (cur - pos), g_caches_cap);
+	cache_arg.size = len;
+	cache_arg.offset = pos;
+	cache_arg.address = NULL;
 
-		// already in cache, goto next block
-		if(has_cache(cur, next)) {
-			cur += next;
-			continue;
-		}
-
-		// replace with oldest cache
-		cache = get_oldest_cache();
-		disable_cache(cache);
-
-		cache_arg.offset = cur;
-		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = g_caches_cap;
-		ret = iso_read(&cache_arg);
-
-		if(ret >= 0) {
-			cache->pos = cache_arg.offset;
-			cache->age = 0;
-			cache->bufsize = ret;
-
-			read_len = MIN(len - (cur - pos), ret);
-			cur += read_len;
-		} else {
-			printk("%s: read -> 0x%08X\n", __func__, ret);
-			break;
-		}
-	}
-
-	sort_iso_cache();	
+	add_cache(&cache_arg);
 }
 
 int iso_cache_read(struct IoReadArg *arg)

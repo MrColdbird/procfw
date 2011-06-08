@@ -125,12 +125,15 @@ static struct ISOCache *get_matched_buffer(int pos)
 	return &g_caches[cache_pos];
 }
 
-static int get_hit_caches(int pos, int len, char *data)
+static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_cache)
 {
 	int cur, read_len;
 	struct ISOCache *cache = NULL;
 
+	*last_cache = NULL;
+
 	for(cur = pos; cur < pos + len;) {
+		*last_cache = cache;
 		cache = get_matched_buffer(cur);
 
 		if(cache == NULL) {
@@ -228,7 +231,38 @@ static void disable_cache(struct ISOCache *cache)
 	cache->bufsize = 0;
 }
 
-static int add_cache(struct IoReadArg *arg)
+static inline int get_suitable_bufsize(int len)
+{
+	if(len < g_caches_cap / 16) {
+		len = g_caches_cap / 16;
+		goto normalize;
+	}
+
+	if(len < g_caches_cap / 8) {
+		len = g_caches_cap / 8;
+		goto normalize;
+	}
+	
+	if(len < g_caches_cap / 4) {
+		len = g_caches_cap / 4;
+		goto normalize;
+	}
+
+	if(len < g_caches_cap / 2) {
+		len = g_caches_cap / 2;
+		goto normalize;
+	}
+	
+	len = g_caches_cap;
+	
+normalize:
+	if(len < 0x200)
+		len = 0x200;
+
+	return len;
+}
+
+static int add_cache(struct IoReadArg *arg, struct ISOCache *last_cache)
 {
 	int read_len, len, ret;
 	struct IoReadArg cache_arg;
@@ -241,12 +275,19 @@ static int add_cache(struct IoReadArg *arg)
 	data = (char*)arg->address;
 
 	for(cur = pos; cur < pos + len;) {
-		next = MIN(len - (cur - pos), g_caches_cap);
-		ret = get_hit_caches(cur, next, data + cur - pos);
+		next = len - (cur - pos);
+		ret = get_hit_caches(cur, next, data + cur - pos, &last_cache);
 
 		if(ret >= 0) {
 			cur += ret;
 			continue;
+		}
+
+		if(last_cache != NULL) {
+			if(pos + len <= last_cache->pos + last_cache->bufsize)
+				asm("break");
+
+			cur = last_cache->pos + last_cache->bufsize;
 		}
 
 		cache = get_retirng_cache();
@@ -254,7 +295,7 @@ static int add_cache(struct IoReadArg *arg)
 
 		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = g_caches_cap;
+		cache_arg.size = get_suitable_bufsize(len - (cur - pos));;
 		ret = iso_read(&cache_arg);
 
 		if(ret >= 0) {
@@ -297,7 +338,7 @@ static void process_request(void)
 	cache_arg.offset = pos;
 	cache_arg.address = NULL;
 
-	add_cache(&cache_arg);
+	add_cache(&cache_arg, NULL);
 }
 
 int iso_cache_read(struct IoReadArg *arg)
@@ -305,6 +346,7 @@ int iso_cache_read(struct IoReadArg *arg)
 	int ret, len;
 	int pos;
 	char *data;
+	struct ISOCache *last_cache;
 
 	if(!cache_on) {
 		return iso_read(arg);
@@ -313,7 +355,7 @@ int iso_cache_read(struct IoReadArg *arg)
 	data = (char*)arg->address;
 	pos = arg->offset;
 	len = arg->size;
-	ret = get_hit_caches(pos, len, data);
+	ret = get_hit_caches(pos, len, data, &last_cache);
 	
 	if(ret < 0) {
 		if( 1 ) {
@@ -323,7 +365,7 @@ int iso_cache_read(struct IoReadArg *arg)
 			sceIoWrite(1, buf, strlen(buf));
 		}
 
-		ret = add_cache(arg);
+		ret = add_cache(arg, last_cache);
 		read_missed += len;
 		update_cache_age(NULL);
 	}

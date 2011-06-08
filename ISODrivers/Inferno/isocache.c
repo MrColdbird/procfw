@@ -239,7 +239,8 @@ static int add_cache(struct IoReadArg *arg)
 
 		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = g_caches_cap;
+		cache_arg.size = MIN(g_total_sectors * ISO_SECTOR_SIZE - cur, g_caches_cap);
+
 		ret = iso_read(&cache_arg);
 
 		if(ret >= 0) {

@@ -13,7 +13,7 @@ else
 endif
 
 LDFLAGS = -mno-crt0 -nostartfiles -L. -L ../../libs
-LIBS = -lpspsystemctrl_kernel
+LIBS = -lpspsystemctrl_kernel -lpspsemaphore
 
 ifeq ($(CONFIG_620), 1)
 CFLAGS += -DCONFIG_620=1

@@ -6,6 +6,7 @@
 #include <pspiofilemgr.h>
 #include <stdio.h>
 #include <string.h>
+#include "pspcrypt.h"
 #include "printk.h"
 #include "utils.h"
 #include "inferno.h"
@@ -18,6 +19,7 @@ static u32 read_missed = 0;
 static u32 cache_on = 0;
 
 #define NR_CACHE_REQ 8
+#define KIRK_PRNG_CMD 0xE
 
 struct ISOCacheRequest {
 	int pos;
@@ -136,7 +138,11 @@ static int get_hit_caches(int pos, int len, char *data)
 		}
 
 		read_len = MIN(len - (cur - pos), cache->pos + cache->bufsize - cur);
-		memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
+
+		if(data != NULL) {
+			memcpy(data + cur - pos, cache->buf + cur - cache->pos, read_len);
+		}
+
 		cur += read_len;
 
 		cache->age = 0;
@@ -165,28 +171,54 @@ static void update_cache_age(struct ISOCache *cache)
 	}
 }
 
-static struct ISOCache *get_oldest_cache(void)
+static inline u32 get_random(void)
 {
-	size_t i, max;
+	u32 rand;
 
-	max = 0;
+	sceUtilsBufferCopyWithRange(&rand, sizeof(rand), NULL, 0, KIRK_PRNG_CMD);
+
+	return rand;
+}
+
+static struct ISOCache *get_retirng_cache(void)
+{
+	size_t i, retiring;
+
+	retiring = 0;
 
 	// invalid cache first
 	for(i=0; i<g_caches_num; ++i) {
 		if(g_caches[i].pos == -1) {
-			max = i;
+			retiring = i;
 			goto exit;
 		}
 	}
 
+#if 1
+	// LRU
 	for(i=0; i<g_caches_num; ++i) {
-		if(g_caches[i].age > g_caches[max].age) {
-			max = i;
+		if(g_caches[i].age > g_caches[retiring].age) {
+			retiring = i;
 		}
 	}
+#endif
+
+#if 0
+	// MRU
+	for(i=0; i<g_caches_num; ++i) {
+		if(g_caches[i].age < g_caches[retiring].age) {
+			retiring = i;
+		}
+	}
+#endif
+
+#if 0
+	// RR
+	retiring = get_random() % g_caches_num;
+#endif
 
 exit:
-	return &g_caches[max];
+	return &g_caches[retiring];
 }
 
 static void disable_cache(struct ISOCache *cache)
@@ -194,29 +226,6 @@ static void disable_cache(struct ISOCache *cache)
 	cache->pos = -1;
 	cache->age = 0;
 	cache->bufsize = 0;
-}
-
-static inline int has_cache(int pos, int len)
-{
-	int cur;
-	struct ISOCache *cache = NULL;
-	int next_len;
-
-	for(cur = pos; cur < pos + len;) {
-		cache = get_matched_buffer(cur);
-
-		if(cache == NULL) {
-			break;
-		}
-
-		next_len = MIN(len - (cur - pos), cache->pos + cache->bufsize - cur);
-		cur += next_len;
-	}
-
-	if(cache == NULL)
-		return 0;
-
-	return 1;
 }
 
 static int add_cache(struct IoReadArg *arg)
@@ -233,18 +242,17 @@ static int add_cache(struct IoReadArg *arg)
 
 	for(cur = pos; cur < pos + len;) {
 		next = MIN(len - (cur - pos), g_caches_cap);
+		ret = get_hit_caches(cur, next, data + cur - pos);
 
-		// already in cache, goto next block
-		if(has_cache(cur, next)) {
-			cur += next;
+		if(ret >= 0) {
+			cur += ret;
 			continue;
 		}
 
-		// replace with oldest cache
-		cache = get_oldest_cache();
+		cache = get_retirng_cache();
 		disable_cache(cache);
 
-		cache_arg.offset = cur & (~(ISO_SECTOR_SIZE-1));
+		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
 		cache_arg.size = g_caches_cap;
 		ret = iso_read(&cache_arg);

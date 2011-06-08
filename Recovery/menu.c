@@ -522,7 +522,7 @@ static struct ValueOption g_inferno_cache = {
 
 static struct ValueOption g_inferno_cache_total_size = {
 	&g_config.inferno_cache_total_size,
-	1, 20+1,
+	1, 23+1,
 };
 
 static struct ValueOption g_inferno_cache_number = {

@@ -64,14 +64,12 @@ static struct MsCache *get_hit_cache(SceOff pos, int len)
 	return NULL;
 }
 
-static void update_cache_age(struct MsCache *cache)
+static void update_cache_info(void)
 {
 	size_t i;
 
 	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(&g_caches[i] == cache) {
-			g_caches[i].age = 0;
-		} else {
+		if(g_caches[i].pos != -1) {
 			g_caches[i].age++;
 		}
 	}
@@ -104,7 +102,7 @@ exit:
 static void disable_cache(struct MsCache *cache)
 {
 	cache->pos = -1;
-	cache->age = 0;
+	cache->age = -1;
 }
 
 static void disable_caches(SceOff pos, int len)
@@ -139,7 +137,7 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 		memcpy(data, cache->buf + pos - cache->pos, read_len);
 		ret = read_len;
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
-		update_cache_age(cache);
+		cache->age = -1;
 		cache->hit++;
 		read_hit++;
 	} else {
@@ -154,23 +152,22 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 				memcpy(data, cache->buf, read_len);
 				ret = read_len;
 				cache->pos = pos;
+				cache->age = -1;
 				(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
-				update_cache_age(cache);
 			} else {
 				printk("%s: read -> 0x%08X\n", __func__, ret);
-				update_cache_age(NULL);
 			}
 
 			read_missed++;
 		} else {
 			ret = (*msstor_read)(arg, data, len);
 //			printk("%s: read len %d too large\n", __func__, len);
-			update_cache_age(NULL);
 			read_uncacheable++;
 		}
 	}
 
 	read_call++;
+	update_cache_info();
 
 	return ret;
 }

@@ -109,7 +109,7 @@ static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_c
 		}
 
 		cur += read_len;
-		cache->age = 0;
+		cache->age = -1;
 	}
 
 	if(cache == NULL)
@@ -158,7 +158,6 @@ static struct ISOCache *get_retirng_cache(void)
 		}
 	}
 
-
 	if(cache_policy == CACHE_POLICY_LRU) {
 		for(i=0; i<g_caches_num; ++i) {
 			if(g_caches[i].age > g_caches[retiring].age) {
@@ -176,7 +175,7 @@ exit:
 static void disable_cache(struct ISOCache *cache)
 {
 	cache->pos = -1;
-	cache->age = 0;
+	cache->age = -1;
 	cache->bufsize = 0;
 }
 
@@ -244,7 +243,7 @@ static int add_cache(struct IoReadArg *arg)
 
 		if(ret >= 0) {
 			cache->pos = cache_arg.offset;
-			cache->age = 0;
+			cache->age = -1;
 			cache->bufsize = ret;
 
 			read_len = MIN(len - (cur - pos), cache->pos + cache->bufsize - cur);
@@ -360,10 +359,7 @@ int infernoCacheInit(int cache_size, int cache_num)
 	for(i=0; i<g_caches_num; ++i) {
 		cache = &g_caches[i];
 		cache->buf = pbuf + i * g_caches_cap;
-		cache->bufsize = 0;
-		memset(cache->buf, 0, cache->bufsize);
-		cache->pos = -1;
-		cache->age = 0;
+		disable_cache(cache);
 	}
 
 	cache_on = 1;

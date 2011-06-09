@@ -85,7 +85,7 @@ static void disable_cache_within_range(SceOff pos, int len)
 			disable_cache(&g_cache);
 		}
 
-		if(pos <= g_cache.pos && pos + len >= g_cache.pos + len) {
+		if(pos <= g_cache.pos && pos + len >= g_cache.pos + g_cache.bufsize) {
 			disable_cache(&g_cache);
 		}
 	}

@@ -84,6 +84,10 @@ static void disable_cache_within_range(SceOff pos, int len)
 		if(is_within_range(pos+len, g_cache.pos, g_cache.bufsize)) {
 			disable_cache(&g_cache);
 		}
+
+		if(pos <= g_cache.pos && pos + len >= g_cache.pos + len) {
+			disable_cache(&g_cache);
+		}
 	}
 }
 
@@ -102,7 +106,7 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 		memcpy(data, cache->buf + pos - cache->pos, read_len);
 		ret = read_len;
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
-		read_hit += ret;
+		read_hit += len;
 	} else {
 		if( 1 ) {
 			char buf[256];
@@ -127,11 +131,11 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 				printk("%s: read -> 0x%08X\n", __func__, ret);
 			}
 
-			read_missed += ret;
+			read_missed += len;
 		} else {
 			ret = (*msstor_read)(arg, data, len);
 //			printk("%s: read len %d too large\n", __func__, len);
-			read_uncacheable += ret;
+			read_uncacheable += len;
 		}
 	}
 

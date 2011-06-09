@@ -308,6 +308,12 @@ int iso_cache_read(struct IoReadArg *arg)
 			sceIoWrite(1, buf, strlen(buf));
 		}
 
+		// abandon the caching, because the bufsize is too small
+		// if we cache it then random access performance will be hurt
+		if(arg->size < g_caches_cap / 4) {
+			return iso_read(arg);
+		}
+
 		ret = add_cache(arg);
 		read_missed += len;
 	}

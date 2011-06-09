@@ -22,6 +22,7 @@ static u32 cache_on = 0;
 
 #define NR_CACHE_REQ 8
 #define KIRK_PRNG_CMD 0xE
+#define CACHE_MINIMUM_THRESHOLD (16 * 1024)
 
 static u32 cache_policy = CACHE_POLICY_LRU;
 
@@ -310,7 +311,7 @@ int iso_cache_read(struct IoReadArg *arg)
 
 		// abandon the caching, because the bufsize is too small
 		// if we cache it then random access performance will be hurt
-		if(arg->size < g_caches_cap / 4) {
+		if(arg->size < MIN(CACHE_MINIMUM_THRESHOLD, g_caches_cap)) {
 			return iso_read(arg);
 		}
 

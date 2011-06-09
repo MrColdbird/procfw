@@ -120,6 +120,10 @@ static void disable_caches(SceOff pos, int len)
 			if(pos + len >= g_caches[i].pos && pos + len < g_caches[i].pos + g_caches[i].bufsize) {
 				disable_cache(&g_caches[i]);
 			}
+
+			if(pos <= g_caches[i].pos && pos + len >= g_caches[i].pos + len) {
+				disable_cache(&g_caches[i]);
+			}
 		}
 	}
 }

@@ -186,6 +186,7 @@ void load_default_conf(SEConfig *config)
 	config->hide_cfw_dirs = 1;
 	config->chn_iso = 1;
 	config->msspeed = MSSPEED_NONE;
+	config->slimcolor = 1;
 	config->iso_cache = 0;
 	config->iso_cache_total_size = 20;
 	config->iso_cache_num = 128;

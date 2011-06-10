@@ -129,6 +129,7 @@ PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x0001)
 PSP_EXPORT_FUNC(msstor_stat)
+PSP_EXPORT_FUNC(msstor_disable_cache)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(VersionSpoofer, 0, 0x4001)

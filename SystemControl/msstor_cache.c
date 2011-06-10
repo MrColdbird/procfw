@@ -48,6 +48,7 @@ struct MsCache {
 };
 
 static struct MsCache g_cache;
+static int g_cache_cap = 0;
 
 static inline int is_within_range(int pos, int start, int len)
 {
@@ -72,6 +73,7 @@ static struct MsCache *get_hit_cache(SceOff pos, int len)
 static void disable_cache(struct MsCache *cache)
 {
 	cache->pos = -1;
+	cache->bufsize = 0;
 }
 
 static void disable_cache_within_range(SceOff pos, int len)
@@ -119,15 +121,16 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 		
 		cache = &g_cache;
 
-		if(len <= cache->bufsize) {
+		if(len <= g_cache_cap) {
 			disable_cache(cache);
-			ret = (*msstor_read)(arg, cache->buf, cache->bufsize);
+			ret = (*msstor_read)(arg, cache->buf, g_cache_cap);
 
 			if(ret >= 0) {
 				read_len = MIN(len, ret);
 				memcpy(data, cache->buf, read_len);
-				ret = read_len;
 				cache->pos = pos;
+				cache->bufsize = ret;
+				ret = read_len;
 				(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
 			} else {
 				printk("%s: read -> 0x%08X\n", __func__, ret);
@@ -191,8 +194,8 @@ int msstor_init(void)
 	}
 
 	g_cache.buf = (void*)(((u32)g_cache.buf & (~(64-1))) + 64);
-	g_cache.bufsize = bufsize;
-	g_cache.pos = -1;
+	g_cache_cap =  bufsize;
+	disable_cache(&g_cache);
 
 	if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
 		pdrv = sctrlHENFindDriver("eflash0a0f1p");
@@ -220,7 +223,7 @@ void msstor_stat(int reset)
 	char buf[256];
 
 	if(read_call != 0) {
-		sprintf(buf, "Mstor cache size: %dKB\n", g_cache.bufsize / 1024);
+		sprintf(buf, "Mstor cache size: %dKB\n", g_cache_cap / 1024);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", 
 				(int)(100 * read_hit / read_call), 
@@ -230,11 +233,8 @@ void msstor_stat(int reset)
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "caches stat:\n");
 		sceIoWrite(1, buf, strlen(buf));
-
-		if(1) {
-			sprintf(buf, "Cache Pos: 0x%08X\n", (uint)g_cache.pos);
-			sceIoWrite(1, buf, strlen(buf));
-		}
+		sprintf(buf, "Cache Pos: 0x%08X Bufsize: %d\n", (uint)g_cache.pos, g_cache.bufsize);
+		sceIoWrite(1, buf, strlen(buf));
 	} else {
 		sprintf(buf, "no msstor cache call yet\n");
 		sceIoWrite(1, buf, strlen(buf));

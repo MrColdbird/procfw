@@ -51,7 +51,7 @@ struct MsCache {
 static struct MsCache g_cache;
 static int g_cache_cap = 0;
 
-static inline int is_within_range(int pos, int start, int len)
+static inline int is_within_range(SceOff pos, SceOff start, int len)
 {
 	if(pos >= start && pos < start + len) {
 		return 1;
@@ -108,11 +108,23 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 	
 	// cache hit?
 	if(cache != NULL) {
+#if 1
 		read_len = MIN(len, cache->pos + cache->bufsize - pos);
 		memcpy(data, cache->buf + pos - cache->pos, read_len);
 		ret = read_len;
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
 		read_hit += len;
+#else
+		// Check validate code
+		ret = (*msstor_read)(arg, data, len);
+
+		if(0 != memcmp(data, cache->buf + pos - cache->pos, len)) {
+			char buf[256];
+
+			sprintf(buf, "%s: 0x%08X <%d> cache mismatched!!!\n", __func__, (uint)pos, (int)len);
+			sceIoWrite(1, buf, strlen(buf));
+		}
+#endif
 	} else {
 #if 0
 		{
@@ -258,7 +270,7 @@ void msstor_stat(int reset)
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "caches stat:\n");
 		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "Cache Pos: 0x%08X Bufsize: %d\n", (uint)g_cache.pos, g_cache.bufsize);
+		sprintf(buf, "Cache Pos: 0x%08X Bufsize: %d Buf: 0x%08X\n", (uint)g_cache.pos, g_cache.bufsize, (uint)g_cache.buf);
 		sceIoWrite(1, buf, strlen(buf));
 	} else {
 		sprintf(buf, "no msstor cache call yet\n");
@@ -268,4 +280,10 @@ void msstor_stat(int reset)
 	if(reset) {
 		read_call = read_hit = read_missed = read_uncacheable = 0;
 	}
+}
+
+// call @SystemControl:SystemCtrlPrivate,0xC0E151D0@
+void msstor_disable_cache(void)
+{
+	disable_cache(&g_cache);
 }

@@ -150,7 +150,7 @@ int myIoOpen_kernel_chn(char *file, int flag, int mode)
 
 static char *g_iso_driver_module_name[] = {
 	"pspMarch33_Driver",
-	"M33GalaxyController",
+	"PROGalaxyController",
 	"PRO_Inferno_Driver",
 };
 

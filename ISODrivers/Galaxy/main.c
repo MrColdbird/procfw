@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "galaxy.h"
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "systemctrl_private.h"
@@ -31,15 +32,15 @@
 
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000
-#define SECTOR_SIZE 0x800
 
-PSP_MODULE_INFO("M33GalaxyController", 0x1006, 1, 1);
+PSP_MODULE_INFO("PROGalaxyController", 0x1006, 1, 1);
 
 extern int get_total_block(void);
 extern int clear_cache(void);
 extern int sceKernelSetQTGP3(void *unk0);
 
 u32 psp_fw_version;
+u32 psp_model;
 
 // 0x00000F24
 SceUID g_SceNpUmdMount_thid = -1;
@@ -48,7 +49,7 @@ SceUID g_SceNpUmdMount_thid = -1;
 SceUID g_iso_fd = -1;
 
 // 0x00000F2C
-SceUID g_total_blocks = -1;
+int g_total_blocks = -1;
 
 // 0x00000F40
 int g_iso_opened = 0;
@@ -169,7 +170,7 @@ int cso_open(SceUID fd)
 		}
 
 		if(g_ciso_block_buf == NULL) {
-			g_ciso_block_buf = oe_malloc(SECTOR_SIZE);
+			g_ciso_block_buf = oe_malloc(ISO_SECTOR_SIZE);
 
 			if(g_ciso_block_buf == NULL) {
 				ret = -3;
@@ -350,7 +351,7 @@ int read_cso_sector(u8 *addr, int sector)
 	// is plain?
 	if(g_CISO_idx_cache[n_sector] & 0x80000000) {
 		// loc_968
-		return read_raw_data(addr, SECTOR_SIZE, offset);
+		return read_raw_data(addr, ISO_SECTOR_SIZE, offset);
 	}
 
 	sector++;
@@ -374,8 +375,8 @@ int read_cso_sector(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
-	if(size <= SECTOR_SIZE)
-		size = SECTOR_SIZE;
+	if(size <= ISO_SECTOR_SIZE)
+		size = ISO_SECTOR_SIZE;
 
 	if(offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
 		// loc_93C
@@ -395,15 +396,15 @@ int read_cso_sector(u8 *addr, int sector)
 	}
 
 	// loc_8B8
-	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
+	ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
 
-	return ret < 0 ? ret : SECTOR_SIZE;
+	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }
 
 // 998
 int read_cso_data(u8* addr, u32 size, int offset)
 {
-	u32 cur_block = offset / SECTOR_SIZE;
+	u32 cur_block = offset / ISO_SECTOR_SIZE;
 	int ret;
 	int read_bytes;
 	int pos = offset & 0x7FF;
@@ -412,14 +413,14 @@ int read_cso_data(u8* addr, u32 size, int offset)
 		// loc_A80
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if(ret != SECTOR_SIZE) {
+		if(ret != ISO_SECTOR_SIZE) {
 			ret = -7;
 			printk("%s: -> %d\n", __func__, ret);
 
 			return ret;
 		}
 
-		read_bytes = MIN(size, (SECTOR_SIZE - pos));
+		read_bytes = MIN(size, (ISO_SECTOR_SIZE - pos));
 		memcpy(addr, g_ciso_block_buf + pos, read_bytes);
 		size -= read_bytes;
 		addr += read_bytes;
@@ -430,14 +431,14 @@ int read_cso_data(u8* addr, u32 size, int offset)
 
 	// loc_9E4
 	// more than 1 block left
-	if(size / SECTOR_SIZE > 0) {
+	if(size / ISO_SECTOR_SIZE > 0) {
 		int i;
-		int block_cnt = size / SECTOR_SIZE;
+		int block_cnt = size / ISO_SECTOR_SIZE;
 
 		for(i=0; i<block_cnt; ++i) {
 			ret = read_cso_sector(addr, cur_block);
 
-			if(ret != SECTOR_SIZE) {
+			if(ret != ISO_SECTOR_SIZE) {
 				ret = -8;
 				printk("%s: -> %d\n", __func__, ret);
 
@@ -445,16 +446,16 @@ int read_cso_data(u8* addr, u32 size, int offset)
 			}
 
 			cur_block++;
-			addr += SECTOR_SIZE;
-			read_bytes += SECTOR_SIZE;
-			size -= SECTOR_SIZE;
+			addr += ISO_SECTOR_SIZE;
+			read_bytes += ISO_SECTOR_SIZE;
+			size -= ISO_SECTOR_SIZE;
 		}
 	}
 
 	if(size != 0) {
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
-		if(ret != SECTOR_SIZE) {
+		if(ret != ISO_SECTOR_SIZE) {
 			ret = -9;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -469,17 +470,11 @@ int read_cso_data(u8* addr, u32 size, int offset)
 	return read_bytes;
 }
 
-struct read_data_args {
-	u32 offset; // 0
-	u8 *address; // 4
-	u32 size; // 8
-};
-
 // 0x00001210~0x0000121C
-struct read_data_args args;
+struct IoReadArg args;
 
 // 30C
-int read_data(struct read_data_args *args)
+int iso_read(struct IoReadArg *args)
 {
 	if(g_is_ciso != 0) {
 		// ciso decompess
@@ -501,7 +496,7 @@ int sub_00000054(u32 a0, u8 *a1, u32 a2)
 	args.address = a1;
 	args.size = a2;
 
-	ret = sceKernelExtendKernelStack(0x2000, (void*)&read_data, &args);
+	ret = sceKernelExtendKernelStack(0x2000, (void*)&iso_cache_read, &args);
 
 	(*ptr2)();
 
@@ -573,14 +568,36 @@ int myKernelStartThread(SceUID thid, SceSize arglen, void *argp)
 int module_start(SceSize args, void* argp)
 {
 	SceModule2 *pMod;
-	int fd;
+	int fd, key_config;
+	SEConfig config;
    
+	psp_model = sceKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
 	setup_patch_offset_table(psp_fw_version);
 
 	printk_init("ms0:/LOG_GALAXY.TXT");
-	printk("M33GalaxyController started: 0x%08X\n", (uint)psp_fw_version);
+	printk("PROGalaxyController started: 0x%08X\n", (uint)psp_fw_version);
 
+	key_config = sceKernelApplicationType();
+	sctrlSEGetConfig(&config);
+	
+	if(config.inferno_cache && psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
+		int bufsize;
+
+		bufsize = config.inferno_cache_total_size * 1024 * 1024 / config.inferno_cache_num;
+		
+		if((bufsize % 512) != 0) {
+			bufsize &= ~(512-1);
+		}
+
+		if(bufsize == 0) {
+			bufsize = 512;
+		}
+
+		infernoCacheSetPolicy(config.inferno_cache_policy);
+		infernoCacheInit(bufsize, config.inferno_cache_num);
+	}
+	
 	g_iso_fn = sctrlSEGetUmdFile();
 	pMod = (SceModule2*)sceKernelFindModuleByName("sceThreadManager");
 

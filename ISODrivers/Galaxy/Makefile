@@ -1,8 +1,8 @@
 all:
-	../../contrib/pspgz.py galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx M33GalaxyController 0x1006
+	../../contrib/pspgz.py galaxy.prx ../../contrib/SystemControl.hdr galaxy.prx PROGalaxyController 0x1006
 
 TARGET = galaxy
-OBJS = main.o galaxy_patch_offset.o imports.o
+OBJS = main.o galaxy_patch_offset.o isocache.o imports.o
 OBJS += SystemCtrlForKernel.o
 
 CFLAGS = -Os -G0 -Wall -I. -I../../include -I../../Common
@@ -35,6 +35,7 @@ USE_KERNEL_LIBS=1
 USE_KERNEL_LIBC=1
 
 PRX_EXPORTS = export.exp
+LIBS += -lpspsystemctrl_kernel -lpspsemaphore 
 
 PSPSDK = $(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

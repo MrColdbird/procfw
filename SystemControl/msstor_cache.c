@@ -108,12 +108,14 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
 		read_hit += len;
 	} else {
-		if( 1 ) {
+#if 0
+		{
 			char buf[256];
 
 			sprintf(buf, "%s: 0x%08X <%d>\n", __func__, (uint)pos, (int)len);
 			sceIoWrite(1, buf, strlen(buf));
 		}
+#endif
 		
 		cache = &g_cache;
 

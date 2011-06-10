@@ -302,12 +302,14 @@ int iso_cache_read(struct IoReadArg *arg)
 	ret = get_hit_caches(pos, len, data, &last_cache);
 	
 	if(ret < 0) {
-		if( 1 ) {
+#if 0
+		{
 			char buf[256];
 
 			sprintf(buf, "%s: 0x%08X <%d>\n", __func__, (uint)arg->offset, (int)arg->size);
 			sceIoWrite(1, buf, strlen(buf));
 		}
+#endif
 
 		// abandon the caching, because the bufsize is too small
 		// if we cache it then random access performance will be hurt
@@ -385,12 +387,14 @@ int infernoCacheAdd(int pos, int len)
 		g_cache_request[g_cache_request_idx].len = len;
 		g_cache_request_idx++;
 
-		if(1) {
+#if 0
+		{
 			char buf[256];
 
 			sprintf(buf, "%s: 0x%08X <%d> added\n", __func__, pos, len);
 			sceIoWrite(1, buf, strlen(buf));
 		}
+#endif
 
 		return 0;
 	}
@@ -402,6 +406,7 @@ int infernoCacheAdd(int pos, int len)
 // call @PROGalaxyController:CacheCtrl,0x5CC24481@
 void isocache_stat(int reset)
 {
+#ifdef DEBUG
 	char buf[256];
 	size_t i, used;
 
@@ -436,6 +441,7 @@ void isocache_stat(int reset)
 	if(reset) {
 		read_call = read_hit = read_missed = 0;
 	}
+#endif
 }
 
 // call @PROGalaxyController:CacheCtrl,0xC0736FD6@

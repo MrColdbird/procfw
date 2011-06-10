@@ -406,25 +406,20 @@ int infernoCacheAdd(int pos, int len)
 // call @PROGalaxyController:CacheCtrl,0x5CC24481@
 void isocache_stat(int reset)
 {
-#ifdef DEBUG
 	char buf[256];
 	size_t i, used;
 
 	if(read_call != 0) {
-		if(1) {
-			sprintf(buf, "caches stat:\n");
-			sceIoWrite(1, buf, strlen(buf));
-		}
+		sprintf(buf, "caches stat:\n");
+		sceIoWrite(1, buf, strlen(buf));
 
 		for(i=0, used=0; i<g_caches_num; ++i) {
 			if(g_caches[i].pos != -1) {
 				used++;
 			}
 
-			if(1) {
-				sprintf(buf, "%d: 0x%08X size %d age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].bufsize, g_caches[i].age);
-				sceIoWrite(1, buf, strlen(buf));
-			}
+			sprintf(buf, "%d: 0x%08X size %d age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].bufsize, g_caches[i].age);
+			sceIoWrite(1, buf, strlen(buf));
 		}
 
 		sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, (int)cache_policy);
@@ -441,7 +436,6 @@ void isocache_stat(int reset)
 	if(reset) {
 		read_call = read_hit = read_missed = 0;
 	}
-#endif
 }
 
 // call @PROGalaxyController:CacheCtrl,0xC0736FD6@

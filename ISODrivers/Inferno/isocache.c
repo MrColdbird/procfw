@@ -406,7 +406,6 @@ int infernoCacheAdd(int pos, int len)
 // call @PRO_Inferno_Driver:CacheCtrl,0x5CC24481@
 void isocache_stat(int reset)
 {
-#ifdef DEBUG
 	char buf[256];
 	size_t i, used;
 
@@ -437,7 +436,6 @@ void isocache_stat(int reset)
 	if(reset) {
 		read_call = read_hit = read_missed = 0;
 	}
-#endif
 }
 
 // call @PRO_Inferno_Driver:CacheCtrl,0xC0736FD6@

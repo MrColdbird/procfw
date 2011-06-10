@@ -28,7 +28,6 @@
 #include "main.h"
 #include "systemctrl_patch_offset.h"
 
-#define CACHE_NR 2
 #define CACHE_BUFSIZE (16 * 1024)
 #define CACHE_BUFSIZE_GO (8 * 1024)
 
@@ -46,78 +45,48 @@ struct MsCache {
 	int bufsize;
 	SceOff pos; /* -1 = invalid */
 	int age;
-	int hit;
 };
 
-static struct MsCache g_caches[CACHE_NR];
+static struct MsCache g_cache;
+
+static inline int is_within_range(int pos, int start, int len)
+{
+	if(pos >= start && pos < start + len) {
+		return 1;
+	}
+
+	return 0;
+}
 
 static struct MsCache *get_hit_cache(SceOff pos, int len)
 {
-	size_t i;
-
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].pos != -1 && pos >= g_caches[i].pos && pos + len <= g_caches[i].pos + g_caches[i].bufsize) {
-			return &g_caches[i];
+	if(g_cache.pos != -1) {
+		if(is_within_range(pos, g_cache.pos, g_cache.bufsize) && is_within_range(pos+len, g_cache.pos, g_cache.bufsize)) {
+			return &g_cache;
 		}
 	}
 
 	return NULL;
 }
 
-static void update_cache_info(void)
-{
-	size_t i;
-
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].pos != -1) {
-			g_caches[i].age++;
-		}
-	}
-}
-
-static struct MsCache *get_oldest_cache(void)
-{
-	size_t i, max;
-
-	max = 0;
-
-	// invalid cache first
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].pos == -1) {
-			max = i;
-			goto exit;
-		}
-	}
-
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].age > g_caches[max].age) {
-			max = i;
-		}
-	}
-
-exit:
-	return &g_caches[max];
-}
-
 static void disable_cache(struct MsCache *cache)
 {
 	cache->pos = -1;
-	cache->age = -1;
 }
 
-static void disable_caches(SceOff pos, int len)
+static void disable_cache_within_range(SceOff pos, int len)
 {
-	size_t i;
+	if(g_cache.pos != -1) {
+		if(is_within_range(pos, g_cache.pos, g_cache.bufsize)) {
+			disable_cache(&g_cache);
+		}
 
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		if(g_caches[i].pos != -1) {
-			if(pos >= g_caches[i].pos && pos < g_caches[i].pos + g_caches[i].bufsize) {
-				disable_cache(&g_caches[i]);
-			}
+		if(is_within_range(pos+len, g_cache.pos, g_cache.bufsize)) {
+			disable_cache(&g_cache);
+		}
 
-			if(pos + len >= g_caches[i].pos && pos + len < g_caches[i].pos + g_caches[i].bufsize) {
-				disable_cache(&g_caches[i]);
-			}
+		if(pos <= g_cache.pos && pos + len >= g_cache.pos + g_cache.bufsize) {
+			disable_cache(&g_cache);
 		}
 	}
 }
@@ -133,15 +102,22 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 	
 	// cache hit?
 	if(cache != NULL) {
-		read_len = MIN(len, cache->bufsize - (pos - cache->pos));
+		read_len = MIN(len, cache->pos + cache->bufsize - pos);
 		memcpy(data, cache->buf + pos - cache->pos, read_len);
 		ret = read_len;
 		(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
-		cache->age = -1;
-		cache->hit++;
-		read_hit++;
+		read_hit += len;
 	} else {
-		cache = get_oldest_cache();
+#if 0
+		{
+			char buf[256];
+
+			sprintf(buf, "%s: 0x%08X <%d>\n", __func__, (uint)pos, (int)len);
+			sceIoWrite(1, buf, strlen(buf));
+		}
+#endif
+		
+		cache = &g_cache;
 
 		if(len <= cache->bufsize) {
 			disable_cache(cache);
@@ -152,22 +128,20 @@ static int msstor_cache_read(PspIoDrvFileArg *arg, char *data, int len)
 				memcpy(data, cache->buf, read_len);
 				ret = read_len;
 				cache->pos = pos;
-				cache->age = -1;
 				(*msstor_lseek)(arg, pos + ret, PSP_SEEK_SET);
 			} else {
 				printk("%s: read -> 0x%08X\n", __func__, ret);
 			}
 
-			read_missed++;
+			read_missed += len;
 		} else {
 			ret = (*msstor_read)(arg, data, len);
 //			printk("%s: read len %d too large\n", __func__, len);
-			read_uncacheable++;
+			read_uncacheable += len;
 		}
 	}
 
-	read_call++;
-	update_cache_info();
+	read_call += len;
 
 	return ret;
 }
@@ -178,7 +152,7 @@ static int msstor_cache_write(PspIoDrvFileArg *arg, const char *data, int len)
 	SceOff pos;
 
 	pos = (*msstor_lseek)(arg, 0, PSP_SEEK_CUR);
-	disable_caches(pos, len);
+	disable_cache_within_range(pos, len);
 	ret = (*msstor_write)(arg, data, len);
 
 	return ret;
@@ -189,7 +163,6 @@ int msstor_init(void)
 	PspIoDrvFuncs *funcs;
 	PspIoDrv *pdrv;
 	SceUID memid;
-	SceUInt size, i;
 	int bufsize;
 
 	if(psp_model == PSP_GO) {
@@ -198,37 +171,28 @@ int msstor_init(void)
 		bufsize = CACHE_BUFSIZE;
 	}
 
-	if((bufsize / NELEMS(g_caches)) % 0x200 != 0) {
+	if((bufsize % 0x200) != 0) {
 		printk("%s: alignment error\n", __func__);
 
 		return -1;
 	}
 
-	for(i=0; i<NELEMS(g_caches); ++i) {
-		char memname[20];
+	memid = sceKernelAllocPartitionMemory(1, "MsStorCache", PSP_SMEM_High, bufsize + 64, NULL);
 
-		sprintf(memname, "MsStorCache%02d\n", i+1);
-		size = bufsize / NELEMS(g_caches);
-		memid = sceKernelAllocPartitionMemory(1, memname, PSP_SMEM_High, size + 64, NULL);
+	if(memid < 0) {
+		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
+		return -2;
+	}
 
-		if(memid < 0) {
-			printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
-			return -2;
-		}
+	g_cache.buf = sceKernelGetBlockHeadAddr(memid);
 
-		g_caches[i].buf = sceKernelGetBlockHeadAddr(memid);
+	if(g_cache.buf == NULL) {
+		return -3;
+	}
 
-		if(g_caches[i].buf == NULL) {
-			return -3;
-		}
-
-		g_caches[i].buf = (void*)(((u32)g_caches[i].buf & (~(64-1))) + 64);
-		g_caches[i].bufsize = bufsize / NELEMS(g_caches);
-		memset(g_caches[i].buf, 0, g_caches[i].bufsize);
-		g_caches[i].pos = -1;
-		g_caches[i].age = 0;
-		g_caches[i].hit = 0;
-	}	
+	g_cache.buf = (void*)(((u32)g_cache.buf & (~(64-1))) + 64);
+	g_cache.bufsize = bufsize;
+	g_cache.pos = -1;
 
 	if(psp_model == PSP_GO && sctrlKernelBootFrom() == 0x50) {
 		pdrv = sctrlHENFindDriver("eflash0a0f1p");
@@ -254,18 +218,21 @@ int msstor_init(void)
 void msstor_stat(int reset)
 {
 	char buf[256];
-	size_t i;
 
 	if(read_call != 0) {
-		sprintf(buf, "msstorcache: %dKB per cache, %d caches\n", g_caches[0].bufsize / 1024, NELEMS(g_caches));
+		sprintf(buf, "Mstor cache size: %dKB\n", g_cache.bufsize / 1024);
 		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)(100 * read_uncacheable / read_call), (int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
+		sprintf(buf, "hit percent: %02d%%/%02d%%/%02d%%, [%d/%d/%d/%d]\n", 
+				(int)(100 * read_hit / read_call), 
+				(int)(100 * read_missed / read_call), 
+				(int)(100 * read_uncacheable / read_call), 
+				(int)read_hit, (int)read_missed, (int)read_uncacheable, (int)read_call);
 		sceIoWrite(1, buf, strlen(buf));
 		sprintf(buf, "caches stat:\n");
 		sceIoWrite(1, buf, strlen(buf));
 
-		for(i=0; i<NELEMS(g_caches); ++i) {
-			sprintf(buf, "%d: 0x%08X age %02d hit %d\n", i+1, (uint)g_caches[i].pos, g_caches[i].age, g_caches[i].hit);
+		if(1) {
+			sprintf(buf, "Cache Pos: 0x%08X\n", (uint)g_cache.pos);
 			sceIoWrite(1, buf, strlen(buf));
 		}
 	} else {
@@ -275,9 +242,5 @@ void msstor_stat(int reset)
 
 	if(reset) {
 		read_call = read_hit = read_missed = read_uncacheable = 0;
-
-		for(i=0; i<NELEMS(g_caches); ++i) {
-			g_caches[i].hit = 0;
-		}
 	}
 }

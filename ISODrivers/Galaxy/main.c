@@ -38,6 +38,7 @@ PSP_MODULE_INFO("PROGalaxyController", 0x1006, 1, 1);
 extern int get_total_block(void);
 extern int clear_cache(void);
 extern int sceKernelSetQTGP3(void *unk0);
+extern int sceKernelApplicationType(void);
 
 u32 psp_fw_version;
 u32 psp_model;
@@ -581,10 +582,10 @@ int module_start(SceSize args, void* argp)
 	key_config = sceKernelApplicationType();
 	sctrlSEGetConfig(&config);
 	
-	if(config.inferno_cache && psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
+	if(config.iso_cache && psp_model != PSP_1000 && key_config == PSP_INIT_KEYCONFIG_GAME) {
 		int bufsize;
 
-		bufsize = config.inferno_cache_total_size * 1024 * 1024 / config.inferno_cache_num;
+		bufsize = config.iso_cache_total_size * 1024 * 1024 / config.iso_cache_num;
 		
 		if((bufsize % 512) != 0) {
 			bufsize &= ~(512-1);
@@ -594,8 +595,8 @@ int module_start(SceSize args, void* argp)
 			bufsize = 512;
 		}
 
-		infernoCacheSetPolicy(config.inferno_cache_policy);
-		infernoCacheInit(bufsize, config.inferno_cache_num);
+		infernoCacheSetPolicy(config.iso_cache_policy);
+		infernoCacheInit(bufsize, config.iso_cache_num);
 	}
 	
 	g_iso_fn = sctrlSEGetUmdFile();

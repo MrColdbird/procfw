@@ -82,10 +82,10 @@ typedef struct _SEConfig
 	s16 hide_cfw_dirs;
 	s16 chn_iso;
 	s16 msspeed;
-	s16 inferno_cache;
-	s16 inferno_cache_total_size; // in MB
-	s16 inferno_cache_num;
-	s16 inferno_cache_policy;
+	s16 iso_cache;
+	s16 iso_cache_total_size; // in MB
+	s16 iso_cache_num;
+	s16 iso_cache_policy;
 } SEConfig;
 
 /**

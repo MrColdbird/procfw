@@ -83,10 +83,10 @@ const char * g_messages[] = {
 	"Hide CFW Files from game",
 	"Block Analog Input in Game",
 	"Old Plugin Support (PSP-Go only)",
-	"Inferno Use ISO Cache",
-	"Inferno Cache Size(in MB)",
-	"Inferno Cache Number",
-	"Inferno Cache Policy",
+	"Inferno&NP9660 Use ISO Cache",
+	"Inferno&NP9660 Cache Size(in MB)",
+	"Inferno&NP9660 Cache Number",
+	"Inferno&NP9660 Cache Policy",
 	"Allow Non-latin1 ISO Filename",
 	"Memory Stick Speedup",
 	"CPU Speed",
@@ -184,7 +184,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 	return 0;
 }
 
-static int change_inferno_cache_number_option(struct MenuEntry *entry, int direct)
+static int change_iso_cache_number_option(struct MenuEntry *entry, int direct)
 {
 	struct ValueOption *c = (struct ValueOption*)entry->arg;
 	s16 cache_sels[] = { 64, 128, 256, 384, 512, 768, 1024, 2048, 4096};
@@ -202,11 +202,11 @@ static int change_inferno_cache_number_option(struct MenuEntry *entry, int direc
 	return 0;
 }
 
-static int change_inferno_cache_number_option_by_enter(struct MenuEntry *entry)
+static int change_iso_cache_number_option_by_enter(struct MenuEntry *entry)
 {
 	char buf[256], *p;
 	
-	change_inferno_cache_number_option(entry, 1);
+	change_iso_cache_number_option(entry, 1);
 	strcpy(buf, "> ");
 	p = buf + strlen(buf);
 
@@ -424,30 +424,30 @@ static int display_use_oldplugin(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
-static int display_inferno_cache(struct MenuEntry* entry, char *buf, int size)
+static int display_iso_cache(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "%-48s %-11s", g_messages[INFERNO_CACHE], get_bool_name(g_config.inferno_cache));
+	sprintf(buf, "%-48s %-11s", g_messages[ISO_CACHE], get_bool_name(g_config.iso_cache));
 
 	return 0;
 }
 
-static int display_inferno_cache_total_size(struct MenuEntry* entry, char *buf, int size)
+static int display_iso_cache_total_size(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "%-48s %-11d", g_messages[INFERNO_CACHE_TOTAL_SIZE], g_config.inferno_cache_total_size);
+	sprintf(buf, "%-48s %-11d", g_messages[ISO_CACHE_TOTAL_SIZE], g_config.iso_cache_total_size);
 
 	return 0;
 }
 
-static int display_inferno_cache_number(struct MenuEntry* entry, char *buf, int size)
+static int display_iso_cache_number(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "%-48s %-11d", g_messages[INFERNO_CACHE_NUMBER], g_config.inferno_cache_num);
+	sprintf(buf, "%-48s %-11d", g_messages[ISO_CACHE_NUMBER], g_config.iso_cache_num);
 
 	return 0;
 }
 
-static int display_inferno_cache_policy(struct MenuEntry* entry, char *buf, int size)
+static int display_iso_cache_policy(struct MenuEntry* entry, char *buf, int size)
 {
-	sprintf(buf, "%-48s %-11s", g_messages[INFERNO_CACHE_POLICY], get_cache_policy_name(g_config.inferno_cache_policy));
+	sprintf(buf, "%-48s %-11s", g_messages[ISO_CACHE_POLICY], get_cache_policy_name(g_config.iso_cache_policy));
 
 	return 0;
 }
@@ -523,23 +523,23 @@ static struct ValueOption g_use_oldplugin = {
 	0, 2,
 };
 
-static struct ValueOption g_inferno_cache = {
-	&g_config.inferno_cache,
+static struct ValueOption g_iso_cache = {
+	&g_config.iso_cache,
 	0, 2,
 };
 
-static struct ValueOption g_inferno_cache_total_size = {
-	&g_config.inferno_cache_total_size,
+static struct ValueOption g_iso_cache_total_size = {
+	&g_config.iso_cache_total_size,
 	1, 23+1,
 };
 
-static struct ValueOption g_inferno_cache_number = {
-	&g_config.inferno_cache_num,
+static struct ValueOption g_iso_cache_number = {
+	&g_config.iso_cache_num,
 	64, 4096+1,
 };
 
-static struct ValueOption g_inferno_cache_policy = {
-	&g_config.inferno_cache_policy,
+static struct ValueOption g_iso_cache_policy = {
+	&g_config.iso_cache_policy,
 	0, CACHE_POLICY_RR+1,
 };
 
@@ -568,10 +568,10 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
 	{ NULL, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
 	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
-	{ NULL, 0, 0, &display_inferno_cache, &change_option, &change_option_by_enter, &g_inferno_cache},
-	{ NULL, 0, 0, &display_inferno_cache_total_size, &change_option, &change_option_by_enter, &g_inferno_cache_total_size},
-	{ NULL, 0, 0, &display_inferno_cache_number, &change_inferno_cache_number_option, &change_inferno_cache_number_option_by_enter, &g_inferno_cache_number},
-	{ NULL, 0, 0, &display_inferno_cache_policy, &change_option, &change_option_by_enter, &g_inferno_cache_policy},
+	{ NULL, 0, 0, &display_iso_cache, &change_option, &change_option_by_enter, &g_iso_cache},
+	{ NULL, 0, 0, &display_iso_cache_total_size, &change_option, &change_option_by_enter, &g_iso_cache_total_size},
+	{ NULL, 0, 0, &display_iso_cache_number, &change_iso_cache_number_option, &change_iso_cache_number_option_by_enter, &g_iso_cache_number},
+	{ NULL, 0, 0, &display_iso_cache_policy, &change_option, &change_option_by_enter, &g_iso_cache_policy},
 };
 
 static struct Menu g_advanced_menu = {

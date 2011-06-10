@@ -34,6 +34,7 @@
 static int (*msstor_read)(PspIoDrvFileArg *arg, char *data, int len) = NULL;
 static int (*msstor_write)(PspIoDrvFileArg *arg, const char *data, int len) = NULL;
 static SceOff (*msstor_lseek)(PspIoDrvFileArg *arg, SceOff ofs, int whence) = NULL;
+static int(*msstor_open)(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode) = NULL;
 
 static u32 read_call = 0;
 static u32 read_hit = 0;
@@ -164,6 +165,25 @@ static int msstor_cache_write(PspIoDrvFileArg *arg, const char *data, int len)
 	return ret;
 }
 
+static int msstor_cache_open(PspIoDrvFileArg *arg, char *file, int flags, SceMode mode)
+{
+	int ret;
+
+#if 0
+	{
+		char buf[256];
+
+		sprintf(buf, "%s: %s 0x%08X 0x%08X\n", __func__, file, flags, mode);
+		sceIoWrite(1, buf, strlen(buf));
+	}
+#endif
+
+	disable_cache(&g_cache);
+	ret = (*msstor_open)(arg, file, flags, mode);
+
+	return ret;
+}
+
 int msstor_init(void)
 {
 	PspIoDrvFuncs *funcs;
@@ -214,8 +234,10 @@ int msstor_init(void)
 	msstor_read = funcs->IoRead;
 	msstor_write = funcs->IoWrite;
 	msstor_lseek = funcs->IoLseek;
+	msstor_open = funcs->IoOpen;
 	funcs->IoRead = msstor_cache_read;
 	funcs->IoWrite = msstor_cache_write;
+	funcs->IoOpen= msstor_cache_open;
 
 	return 0;
 }

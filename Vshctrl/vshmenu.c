@@ -163,7 +163,9 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		if (get_thread_id("SceNetDhcpClient") >= 0)
 			goto exit;
 
-		// TODO: Block it properly with Go!-Cam, I don't have one, you LZ?
+		// Block Satellite Menu in Go!cam [Yoti]
+		if (sceKernelFindModuleByName("camera_plugin_module"))
+			goto exit;
 
 		/* filter out fault PSP sending dead keyscan */
 		if ((ctrl->Buttons & ALL_CTRL) != PSP_CTRL_SELECT) {

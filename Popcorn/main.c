@@ -41,7 +41,7 @@ enum {
 	ICON0_CORRUPTED = 2,
 };
 
-PSP_MODULE_INFO("M33PopcornManager", 0x1007, 1, 1);
+PSP_MODULE_INFO("PROPopcornManager", 0x1007, 1, 1);
 
 #define PGD_ID "XX0000-XXXX00000_00-XXXXXXXXXX000XXX"
 #define ACT_DAT "flash2:/act.dat"

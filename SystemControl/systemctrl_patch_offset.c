@@ -113,7 +113,8 @@ PatchOffset g_639_offsets = {
 	},
 	.start_module_patch = {
 		.sceInitBootStartCall = 0x00001DA8,
-		.sceKernelStartModuleBootStartOffset = 0x00001CBC - 0x00001A4C,
+		.sceKernelStartModule = 0x00001CBC,
+		.module_bootstart = 0x00001A4C,
 	},
 	.high_memory_patch = {
 		.get_partition = 0x88003E34,
@@ -291,7 +292,8 @@ PatchOffset g_635_offsets = {
 	},
 	.start_module_patch = {
 		.sceInitBootStartCall = 0x00001DA8,
-		.sceKernelStartModuleBootStartOffset = 0x00001CBC - 0x00001A4C,
+		.sceKernelStartModule = 0x00001CBC,
+		.module_bootstart = 0x00001A4C,
 	},
 	.high_memory_patch = {
 		.get_partition = 0x88003E34,
@@ -469,7 +471,8 @@ PatchOffset g_620_offsets = {
 	},
 	.start_module_patch = {
 		.sceInitBootStartCall = 0x00001DB0,
-		.sceKernelStartModuleBootStartOffset = 0x00001CC4 - 0x00001A4C,
+		.sceKernelStartModule = 0x00001CC4,
+		.module_bootstart = 0x00001A4C,
 	},
 	.high_memory_patch = {
 		.get_partition = 0x88003E2C,

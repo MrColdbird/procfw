@@ -125,6 +125,9 @@ PSP_EXPORT_FUNC(sctrlPatchModule)
 PSP_EXPORT_FUNC(sctrlModuleTextAddr)
 PSP_EXPORT_FUNC(sctrlSESetDiscType)
 PSP_EXPORT_FUNC(sctrlSEGetDiscType)
+PSP_EXPORT_FUNC(sctrlGetInitTextAddr)
+PSP_EXPORT_FUNC_NID(sctrlGetInitTextAddr, 0x72F29A6E)
+PSP_EXPORT_FUNC(sctrlSetCustomStartModule)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x0001)

@@ -94,7 +94,8 @@ struct NidResolverPatch {
 
 struct StartModulePatch {
 	u32 sceInitBootStartCall;
-	u32 sceKernelStartModuleBootStartOffset;
+	u32 sceKernelStartModule;
+	u32 module_bootstart;
 };
 
 struct HighMemoryPatch {

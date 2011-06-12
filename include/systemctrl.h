@@ -6,6 +6,15 @@
 #include <psploadexec_kernel.h>
 #include <pspinit.h>
 
+enum BootLoadFlags
+{
+	BOOTLOAD_VSH = 1,
+	BOOTLOAD_GAME = 2,
+	BOOTLOAD_UPDATER = 4,
+	BOOTLOAD_POPS = 8,
+	BOOTLOAD_UMDEMU = 64, /* for original NP9660 */
+};
+
 /**
  * Restart the vsh.
  *
@@ -312,5 +321,46 @@ int sctrlPatchModule(char *modname, u32 inst, u32 offset);
  * @return text address, or 0 if not found
  */
 u32 sctrlModuleTextAddr(char *modname);
+
+/**
+ * Get sceInit module text address
+ *
+ * @note Only useful before sceInit exits
+ *
+ * @return text address, or 0 if not found
+ */
+u32 sctrlGetInitTextAddr(void);
+
+/**
+ * Set custom start module handler
+ * It can be used to replace a system module
+ *
+ * @note: func returns -1 to ignore the module and load the original module. Or new modid if replace is done.
+ */
+void sctrlSetCustomStartModule(int (*func)(int modid, SceSize argsize, void *argp, int *modstatus, SceKernelSMOption *opt));
+
+/**
+ * Loads a module on next reboot. Only kernel mode.
+ *
+ * @param module_after - The path of the module which is loaded after the module to be loaded.
+   The module passed to this function will be loaded just before that module.
+ * @param buf - The buffer containing the module - Don't deallocate this one. It has to reside in kernel memory.
+ * @param size - The size of the module
+ * @param flags - The modes in which the module should be loaded, one of BootLoadFlags
+ *
+ * @Example:
+ * sctrlHENLoadModuleOnReboot("/kd/usersystemlib.prx", module_buffer, module_size, BOOTLOAD_GAME | BOOTLOAD_POPS | BOOTLOAD_UMDEMU); 
+ *
+ * This will load the module contained in module_buffer just before /kd/usersystemlib.prx in the next reboot, if the mode of next reboot is game, pops or umdemu
+ *
+ * @Remarks: Don't use too early modules in first param like "/kd/init.prx" or "/kd/systemctrl.prx", or your module may not load properly
+ * Only one module will be loaded on reboot with this function. 
+ * If this function is called many times, only the last one will be considered.
+ * By making a module to load itself using this function, and calling 
+ * sctrlHENLoadModuleOnReboot on module_start, a prx can cause itself to be resident in the modes choosen by flags.
+ * If all flags are selected, the module will stay resident until a psp shutdown, or until sctrlHENLoadModuleOnReboot is not called.
+*/
+
+void sctrlHENLoadModuleOnReboot(char *module_after, void *buf, int size, int flags);
 
 #endif

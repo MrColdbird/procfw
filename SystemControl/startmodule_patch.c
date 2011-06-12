@@ -28,6 +28,8 @@
 
 static int plugin_loaded = 0;
 static int opnssmp_loaded = 0;
+static u32 sceInit_text_addr = 0;
+static int (*custom_start_module)(int modid, SceSize argsize, void *argp, int *modstatus, SceKernelSMOption *opt);
 
 static int get_game_tag(const char *path, u32 *tag)
 {
@@ -112,6 +114,14 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 	mod = (SceModule2*) sctrlKernelFindModuleByUID(modid);
 
+	if(custom_start_module != NULL) {
+		ret = custom_start_module(modid, argsize, argp, modstatus, opt);
+
+		if(ret >= 0) {
+			return ret;
+		}
+	}
+
 	if(!plugin_loaded) {
 		mediasync = (SceModule2*)sctrlKernelFindModuleByName("sceMediaSync");
 
@@ -182,9 +192,10 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 {
 	u32 import;
 
-	// patch init's sceKernelStartModule import from its bootstart offset
-	import = ((u32)bootstart)+g_offs->start_module_patch.sceKernelStartModuleBootStartOffset;
+	// patch sceInit with offset between module_bootstart and sceKernelStartModule
+	import = ((u32)bootstart) + g_offs->start_module_patch.sceKernelStartModule - g_offs->start_module_patch.module_bootstart;
 	REDIRECT_FUNCTION(_sceKernelStartModule, import);
+	sceInit_text_addr = ((u32)bootstart) - g_offs->start_module_patch.module_bootstart;
 	sync_cache();
 
 	return (*bootstart)(4, argp);
@@ -192,6 +203,17 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 
 void patch_sceKernelStartModule(u32 loadcore_text_addr)
 {
-	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall);
-	_sw(0x02E02021, loadcore_text_addr+g_offs->start_module_patch.sceInitBootStartCall+4); // move $a0, $s7
+	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr + g_offs->start_module_patch.sceInitBootStartCall);
+	_sw(0x02E02021, loadcore_text_addr + g_offs->start_module_patch.sceInitBootStartCall + 4); // move $a0, $s7
+}
+
+// AKA SystemCtrlForKernel_72F29A6E in 5.00M33
+u32 sctrlGetInitTextAddr(void)
+{
+	return sceInit_text_addr;
+}
+
+void sctrlSetCustomStartModule(int (*func)(int modid, SceSize argsize, void *argp, int *modstatus, SceKernelSMOption *opt))
+{
+	custom_start_module = func;
 }

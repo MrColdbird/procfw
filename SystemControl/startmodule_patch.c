@@ -125,12 +125,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 	if(conf.skiplogo && mod != NULL && 0 == strcmp(mod->modname, "vsh_module")) {
 		u32* vshmain_args = oe_malloc(1024);
-//		u32 error_code = 0;
-/*
-		if(argp != NULL && argsize >= 16) {
-			error_code = ((u32*)argp)[3];
-		}
-*/
+
 		memset(vshmain_args, 0, 1024);
 
 		if(argp != NULL && argsize != 0 ) {
@@ -139,10 +134,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 
 		vshmain_args[0] = 1024;
 		vshmain_args[1] = 0x20;
-//		vshmain_args[3] = error_code;
 		vshmain_args[16] = 1;
-//		vshmain_args[160] = 1;
-//		vshmain_args[161] = 0x50007;
 
 		ret = sctrlKernelStartModule(modid, 1024, vshmain_args, modstatus, opt);
 		oe_free(vshmain_args);

@@ -188,7 +188,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 static int change_iso_cache_number_option(struct MenuEntry *entry, int direct)
 {
 	struct ValueOption *c = (struct ValueOption*)entry->arg;
-	s16 cache_sels[] = { 64, 128, 256, 384, 512, 768, 1024, 2048, 4096};
+	s16 cache_sels[] = { 64, 128, 256, 320, 384, 512, 640, 768, };
 	size_t i;
 
 	for(i=0; i<NELEMS(cache_sels); ++i) {
@@ -549,7 +549,7 @@ static struct ValueOption g_iso_cache_total_size = {
 
 static struct ValueOption g_iso_cache_number = {
 	&g_config.iso_cache_num,
-	64, 4096+1,
+	64, 768+1,
 };
 
 static struct ValueOption g_iso_cache_policy = {

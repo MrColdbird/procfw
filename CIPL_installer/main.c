@@ -254,7 +254,7 @@ int main()
 		printf(" Press O to Erase CIPL and Restore Raw IPL\n");
 	}
 
-	printf(" Press R to cansel\n\n");
+	printf(" Press R to cancel\n\n");
     
 	while (1) {
         SceCtrlData pad;

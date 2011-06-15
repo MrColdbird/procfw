@@ -167,7 +167,7 @@ static inline void ascii2utf16(char *dest, const char *src)
 }
 
 static const char *g_cfw_dirs[] = {
-	"/seplugins",
+	"/SEPLUGINS",
 	"/ISO",
 };
 

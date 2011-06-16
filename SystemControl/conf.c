@@ -60,6 +60,13 @@ int GetConfig(SEConfig *config)
 		return -2;
 	}
 
+	if(config->magic != get_conf_magic()) {
+		sceIoClose(fd);
+		pspSdkSetK1(k1);
+		
+		return -3;
+	}
+
 	sceIoClose(fd);
 	pspSdkSetK1(k1);
 
@@ -143,8 +150,16 @@ int sctrlSEGetConfigEx(SEConfig *config, int size)
 		read = sceIoRead(fd, config, size);
 		sceIoClose(fd);
 		pspSdkSetK1(k1);
+
+		if(read != size) {
+			return -2;
+		}
+
+		if(config->magic != get_conf_magic()) {
+			return -3;
+		}
 		
-		return (read == size) ? 0 : -2;
+		return 0;
 	}
 
 	pspSdkSetK1(k1);

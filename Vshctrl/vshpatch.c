@@ -169,6 +169,7 @@ static inline void ascii2utf16(char *dest, const char *src)
 static const char *g_cfw_dirs[] = {
 	"/SEPLUGINS",
 	"/ISO",
+	"/ISO/VIDEO",
 };
 
 int myIoMkdir(const char *dir, SceMode mode)

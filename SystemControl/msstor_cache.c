@@ -63,7 +63,7 @@ static inline int is_within_range(SceOff pos, SceOff start, int len)
 static struct MsCache *get_hit_cache(SceOff pos, int len)
 {
 	if(g_cache.pos != -1) {
-		if(is_within_range(pos, g_cache.pos, g_cache.bufsize) && is_within_range(pos+len, g_cache.pos, g_cache.bufsize)) {
+		if(is_within_range(pos, g_cache.pos, g_cache.bufsize) && is_within_range(pos+len-1, g_cache.pos, g_cache.bufsize)) {
 			return &g_cache;
 		}
 	}
@@ -85,12 +85,12 @@ static void disable_cache_within_range(SceOff pos, int len)
 			return;
 		}
 
-		if(is_within_range(pos+len, g_cache.pos, g_cache.bufsize)) {
+		if(is_within_range(pos+len-1, g_cache.pos, g_cache.bufsize)) {
 			disable_cache(&g_cache);
 			return;
 		}
 
-		if(pos <= g_cache.pos && pos + len >= g_cache.pos + g_cache.bufsize) {
+		if(pos < g_cache.pos && pos+len-1 >= g_cache.pos + g_cache.bufsize) {
 			disable_cache(&g_cache);
 			return;
 		}

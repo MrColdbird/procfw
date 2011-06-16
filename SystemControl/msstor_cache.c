@@ -215,14 +215,14 @@ int msstor_init(void)
 		return -1;
 	}
 
-	memid = sceKernelAllocPartitionMemory(1, "MsStorCache", PSP_SMEM_High, bufsize + 64, NULL);
+	memid = sctrlKernelAllocPartitionMemory(1, "MsStorCache", PSP_SMEM_High, bufsize + 64, NULL);
 
 	if(memid < 0) {
 		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);
 		return -2;
 	}
 
-	g_cache.buf = sceKernelGetBlockHeadAddr(memid);
+	g_cache.buf = sctrlKernelGetBlockHeadAddr(memid);
 
 	if(g_cache.buf == NULL) {
 		return -3;

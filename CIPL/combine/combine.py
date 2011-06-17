@@ -3,7 +3,7 @@
 import os, sys, getopt
 
 def usage():
-	print ("Usage: %s [-l size ] basefile input output")
+	print ("Usage: %s [-l size ] basefile input output" % (sys.argv[0]))
 
 def write_file(fn, buf):
 	fp = open(fn, "wb")
@@ -47,6 +47,7 @@ def main():
 
 	fp = open(inputfile, "rb")
 	ins = fp.read(0x3000)
+	fp.close()
 	buf = buf[0:0x1000] + ins + buf[0x1000+len(ins):]
 	assert(len(buf) == inputsize)
 	write_file(outputfile, buf)

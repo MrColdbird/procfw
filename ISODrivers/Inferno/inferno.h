@@ -59,6 +59,8 @@ extern int g_total_sectors;
 extern struct IoReadArg g_read_arg;
 extern int g_disc_type;
 
+extern int power_event_handler(int ev_id, char *ev_name, void *param, int *result);
+
 extern int iso_open(void);
 extern int iso_read(struct IoReadArg *args);
 extern int iso_cache_read(struct IoReadArg *args);

@@ -341,7 +341,7 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0xD6E50D7B, 0x1A41E0ED, }, // scePowerRegisterCallback(3.71)
 	{ 0x04B7766E, 0x1A41E0ED, }, // scePowerRegisterCallback(1.50)
 	{ 0x1688935C, 0xBF5BA7FC, }, // scePowerGetBusClockFrequencyInt
-	{ 0x6D2CA84B, UNKNOWNNID, }, // scePowerWlanActivate
+	{ 0x6D2CA84B, 0xA8909AE1, }, // scePowerWlanActivate
 	{ 0x23BB0A60, 0x5D311801, }, // scePowerWlanDeactivate
 	{ 0x2B51FE2F, 0xCE9C5F0E, }, // scePower_driver_2B51FE2F
 	{ 0x442BFBAC, 0x4084E678, }, // scePowerGetBacklightMaximum
@@ -353,7 +353,7 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0xE8E4E204, 0x9E77DDBA, }, // scePower_driver_E8E4E204
 	{ 0xB999184C, 0x8BDEC501, }, // scePowerGetLowBatteryCapacity
 	{ 0x166922EC, 0xA247240B, }, // scePowerBatteryForbidCharging
-	{ 0xDD3D4DAC, UNKNOWNNID, }, // scePowerBatteryPermitCharging
+	{ 0xDD3D4DAC, 0xCA1B6E91, }, // scePowerBatteryPermitCharging
 	{ 0xB4432BC8, 0x5D9E954F, }, // scePowerGetBatteryChargingStatus
 	{ 0x78A1A796, 0x9E09D19B, }, // scePowerIsSuspendRequired
 	{ 0x94F5A53F, 0xB6782EAE, }, // scePowerGetBatteryRemainCapacity
@@ -364,7 +364,7 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0x165CE085, 0x92030113, }, // scePowerGetPowerSwMode
 	{ 0xD6D016EF, 0x534D471F, }, // scePowerLock
 	{ 0xCA3D34C1, 0xD80E403B, }, // scePowerUnlock
-	{ 0x79DB9421, UNKNOWNNID, }, // scePowerRebootStart
+	{ 0x79DB9421, 0x86B475A4, }, // scePowerRebootStart
 	{ 0x7FA406DD, 0xE5C40F85, }, // scePowerIsRequest
 	{ 0xAC32C9CC, 0xC9885394, }, // scePowerRequestSuspend
 	{ 0x2875994B, 0x8AFD31BC, }, // scePower_driver_2875994B
@@ -382,8 +382,8 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0xBD681969, 0xBF5BA7FC, }, // scePowerGetBusClockFrequencyInt
 	{ 0xB1A52C83, 0x4CAE06EF, }, // scePowerGetCpuClockFrequencyFloat
 	{ 0x9BADB3EB, 0x279FD567, }, // scePowerGetBusClockFrequencyFloat
-	{ 0xE0B7A95D, 0x08354E58, }, // scePower_driver_E0B7A95D
-	{ 0xC23AC778, 0xA4ABE2C5, }, // scePower_driver_C23AC778
+	{ 0xE0B7A95D, 0x08354E58, }, // scePowerSetGeEdramRefreshMode
+	{ 0xC23AC778, 0xA4ABE2C5, }, // scePowerGetGeEdramRefreshMode
 	{ 0x23C31FFE, 0x12FFFD34, }, // scePowerVolatileMemLock
 	{ 0xFA97A599, 0x74035D33, }, // scePowerVolatileMemTryLock
 	{ 0xB3EDD801, 0x8E71E273, }, // scePowerVolatileMemUnlock

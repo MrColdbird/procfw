@@ -620,7 +620,7 @@ static int IoDevctl(PspIoDrvFileArg *arg, const char *devname, unsigned int cmd,
 	}
 
 exit:
-	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
+//	printk("%s: cmd 0x%08X -> 0x%08X\n", __func__, cmd, ret);
 
 	return ret;
 }

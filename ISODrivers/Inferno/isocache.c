@@ -133,7 +133,6 @@ static void update_cache_info(void)
 			g_caches[i].age++;
 		}
 	}
-
 }
 
 static inline u32 get_random(void)
@@ -217,7 +216,12 @@ static int add_cache(struct IoReadArg *arg)
 
 	for(cur = pos; cur < pos + len;) {
 		next = len - (cur - pos);
-		ret = get_hit_caches(cur, next, data + cur - pos, &last_cache);
+
+		if(data == NULL) {
+			ret = get_hit_caches(cur, next, NULL, &last_cache);
+		} else {
+			ret = get_hit_caches(cur, next, data + cur - pos, &last_cache);
+		}
 
 		if(ret >= 0) {
 			cur += ret;
@@ -319,11 +323,60 @@ int iso_cache_read(struct IoReadArg *arg)
 
 		ret = add_cache(arg);
 		read_missed += len;
+	} else {
+		// we have to sleep a bit to prevent mystery freeze in KHBBS (from worldmap to location)
+		// it's caused by caching too fast 
+		sceKernelDelayThread(100);
 	}
 
 	read_call += len;
 	process_request();
 	update_cache_info();
+
+#if 0
+	{
+		SceUID memid;
+		struct IoReadArg testarg;
+		int retv;
+
+		memcpy(&testarg, arg, sizeof(testarg));
+
+		// Check validate code
+		memid = sceKernelAllocPartitionMemory(9, "infernoCacheTest", PSP_SMEM_High, testarg.size + 64, NULL);
+
+		if(memid >= 0) {
+			testarg.address = sceKernelGetBlockHeadAddr(memid);
+			testarg.address = (void*)(((u32)testarg.address & (~(64-1))) + 64);
+			
+			retv = iso_read(&testarg);
+
+			if(0 != memcmp(data, testarg.address, testarg.size)) {
+				char buf[256];
+
+				sprintf(buf, "%s: 0x%08X <%d> cache mismatched\n", __func__, (uint)testarg.offset, (int)testarg.size);
+				sceIoWrite(1, buf, strlen(buf));
+
+//				memcpy(data, testarg.address, testarg.size);
+			}
+
+			if(ret != retv) {
+				char buf[256];
+				
+				sprintf(buf, "%s: 0x%08X <%d> return (%d/%d) mismatched\n", __func__, (uint)testarg.offset, (int)testarg.size, ret, retv);
+				sceIoWrite(1, buf, strlen(buf));
+
+//				ret = retv;
+			}
+
+			sceKernelFreePartitionMemory(memid);
+		} else {
+			char buf[256];
+
+			sprintf(buf, "%s: 0x%08X <%d> cache too large to verify\n", __func__, (uint)testarg.offset, (int)testarg.size);
+			sceIoWrite(1, buf, strlen(buf));
+		}
+	}
+#endif
 
 	return ret;
 }

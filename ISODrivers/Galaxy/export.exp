@@ -1,0 +1,14 @@
+# Define the exports for the prx
+PSP_BEGIN_EXPORTS
+
+PSP_EXPORT_START(syslib, 0, 0x8000)
+PSP_EXPORT_FUNC_HASH(module_start)
+PSP_EXPORT_VAR_HASH(module_info)
+PSP_EXPORT_END
+
+PSP_EXPORT_START(CacheCtrl, 0x0011, 0x0001)
+PSP_EXPORT_FUNC(isocache_stat)
+PSP_EXPORT_FUNC(infernoCacheSetPolicy)
+PSP_EXPORT_END
+
+PSP_END_EXPORTS

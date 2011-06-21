@@ -271,12 +271,12 @@ int gamedclose(SceUID fd)
 		return result;
 	}
 	
-	entry=dirent_search(fd);
+	entry = dirent_search(fd);
 
 	if(entry != NULL) {
 		if(entry->iso_dfd == fd) {
 			k1 = pspSdkSetK1(0);
-			vpbp_dclose(entry->iso_dfd);
+			vpbp_dclose(fd);
 			pspSdkSetK1(k1);
 
 			result = 0;

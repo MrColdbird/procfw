@@ -789,7 +789,6 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 	return size - remaining;
 }
 
-
 int vpbp_close(SceUID fd)
 {
 	VirtualPBP *vpbp;

@@ -40,13 +40,13 @@ typedef struct _CISOHeader {
 } __attribute__ ((packed)) CISOHeader;
 
 static void *g_ciso_dec_buf = NULL;
-static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4];
+static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
 static int g_ciso_dec_buf_offset = -1;
 static CISOHeader g_ciso_h;
 static int g_CISO_cur_idx = -1;
 
 static const char * g_filename = NULL;
-static char g_sector_buffer[SECTOR_SIZE] __attribute__((aligned(64)));;
+static char g_sector_buffer[SECTOR_SIZE] __attribute__((aligned(64)));
 static SceUID g_isofd = -1;
 static u32 g_total_sectors = 0;
 static u32 g_is_compressed = 0;

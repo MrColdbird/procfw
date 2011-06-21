@@ -510,6 +510,138 @@ static VirtualPBP *vpbp_realloc(VirtualPBP *vpbp, int size)
 	return v;
 }
 
+static int get_header_section(VirtualPBP *vpbp, u32 remaining, void *data)
+{
+	int re;
+
+	re = MIN(remaining, vpbp->header[2] - vpbp->file_pointer);
+	memcpy(data, vpbp->header+vpbp->file_pointer, re);
+
+	return re;
+}
+
+static int get_sfo_section(VirtualPBP *vpbp, u32 remaining, void *data)
+{
+	int re, ret;
+	void *buf, *buf_64;
+	char sfotitle[64];
+	char disc_id[12];
+	u32 parental_level = 1;
+
+	buf = oe_malloc(SECTOR_SIZE+64);
+
+	if (buf == NULL) {
+		printk("%s: buf cannot allocate\n", __func__);
+
+		return -13;
+	}
+
+	buf_64 = PTR_ALIGN_64(buf);
+	ret = isoRead(buf_64, vpbp->sects[0].lba, 0, SECTOR_SIZE);
+
+	if (ret < 0) {
+		printk("%s: isoRead -> 0x%08X\n", __func__, ret);
+		oe_free(buf);
+
+		return -37;
+	}
+
+	ret = get_sfo_string(buf_64, "TITLE", sfotitle, sizeof(sfotitle));
+
+	if (ret < 0) {
+		oe_free(buf);
+
+		return ret;
+	}
+
+	ret = get_sfo_string(buf_64, "DISC_ID", disc_id, sizeof(disc_id));
+
+	if (ret < 0) {
+		oe_free(buf);
+
+		return ret;
+	}
+
+	get_sfo_u32(buf_64, "PARENTAL_LEVEL", &parental_level);
+
+	oe_free(buf);
+	memcpy(virtualsfo+0x118, sfotitle, 64);
+	memcpy(virtualsfo+0xf0, disc_id, 12);
+	memcpy(virtualsfo+0x108, &parental_level, sizeof(parental_level));
+	re = MIN(remaining, sizeof(virtualsfo) - (vpbp->file_pointer - vpbp->header[2]));
+	memcpy(data, virtualsfo+vpbp->file_pointer-vpbp->header[2], re);
+
+	return re;
+}
+
+static int get_pbp_section(VirtualPBP *vpbp, u32 remaining, int idx, void *data)
+{
+	void *buf, *buf_64;
+	int rest, pos_section, re, total_re, buf_size = 8 * SECTOR_SIZE;
+	int pos;
+
+	total_re = re = 0;
+	pos = vpbp->file_pointer;
+
+	if(remaining == 0) {
+		goto out;
+	}
+
+	if(!pbp_entries[idx].enabled) {
+		goto out;
+	}
+
+	if (pos < vpbp->header[2]) {
+		return get_header_section(vpbp, remaining, data);
+	}
+
+	if (pos >= vpbp->header[2] && pos < vpbp->header[3]) {
+		return get_sfo_section(vpbp, remaining, data);
+	}
+
+	if(!(pos >= vpbp->header[2+idx] && pos < vpbp->header[2+1+idx])) {
+		goto out;
+	}
+
+	buf = oe_malloc(buf_size + 64);
+
+	if(buf == NULL) {
+		printk("%s: buf(2) cannot allocate\n", __func__);
+
+		return -5;
+	}
+
+	pos_section = pos - vpbp->header[2+idx];
+	rest = MIN(remaining, vpbp->sects[idx].size - pos_section);
+	buf_64 = PTR_ALIGN_64(buf);
+
+	while (rest > 0) {
+		int ret;
+
+		re = MIN(rest, buf_size);
+		ret = isoRead(buf_64, vpbp->sects[idx].lba, pos_section, re);
+
+		if (ret < 0) {
+			printk("%s: isoRead -> 0x%08X\n", __func__, ret);
+
+			return -38;
+		}
+
+		memcpy(data, buf_64, re);
+		rest -= re;
+		pos_section += re;
+		data += re;
+		remaining -= re;
+		total_re += re;
+		pos += re;
+	}
+
+	oe_free(buf);
+
+out:
+	return total_re;
+}
+
 int vpbp_init(void)
 {
 	if (g_sema >= 0) {
@@ -619,6 +751,7 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 {
 	VirtualPBP *vpbp;
 	u32 remaining;
+	int ret, idx;
 	
 	lock();
 	vpbp = get_vpbp_by_fd(fd);
@@ -633,119 +766,17 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 	remaining = size;
 
 	while(remaining > 0) {
-		if (vpbp->file_pointer < vpbp->header[2]) {
-			u32 re;
+		for(idx=0; idx<NELEMS(pbp_entries)-2; ++idx) {
+			ret = get_pbp_section(vpbp, remaining, idx, data);
 
-			re = MIN(remaining, vpbp->header[2] - vpbp->file_pointer);
-			memcpy(data, vpbp->header+vpbp->file_pointer, re);
-			vpbp->file_pointer += re;
-			data += re;
-			remaining -= re;
-		}
-
-		if (vpbp->file_pointer >= vpbp->header[2] && vpbp->file_pointer < vpbp->header[3]) {
-			// use own custom sfo
-			int re;
-			void *buf, *buf_64;
-			char sfotitle[64];
-			char disc_id[12];
-			u32 parental_level = 1;
-
-			buf = oe_malloc(SECTOR_SIZE+64);
-
-			if (buf != NULL) {
-				int ret;
-
-				buf_64 = PTR_ALIGN_64(buf);
-				ret = isoRead(buf_64, vpbp->sects[0].lba, 0, SECTOR_SIZE);
-
-				if (ret < 0) {
-					printk("%s: isoRead -> 0x%08X\n", __func__, ret);
-					oe_free(buf);
-					unlock();
-
-					return -37;
-				}
-
-				ret = get_sfo_string(buf_64, "TITLE", sfotitle, sizeof(sfotitle));
-				if (ret < 0) {
-					oe_free(buf);
-					unlock();
-
-					return ret;
-				}
-
-				ret = get_sfo_string(buf_64, "DISC_ID", disc_id, sizeof(disc_id));
-				if (ret < 0) {
-					oe_free(buf);
-					unlock();
-
-					return ret;
-				}
-
-				get_sfo_u32(buf_64, "PARENTAL_LEVEL", &parental_level);
-
-				oe_free(buf);
-				memcpy(virtualsfo+0x118, sfotitle, 64);
-				memcpy(virtualsfo+0xf0, disc_id, 12);
-				memcpy(virtualsfo+0x108, &parental_level, sizeof(parental_level));
-				re = MIN(remaining, sizeof(virtualsfo) - (vpbp->file_pointer - vpbp->header[2]));
-				memcpy(data, virtualsfo+vpbp->file_pointer-vpbp->header[2], re);
-				vpbp->file_pointer += re;
-				data += re;
-				remaining -= re;
+			if(ret >= 0) {
+				data += ret;
+				vpbp->file_pointer += ret;
+				remaining -= ret;
 			} else {
-				printk("%s: buf cannot allocate\n", __func__);
 				unlock();
 
-				return -13;
-			}
-		}
-
-		// ignore last two sections
-		int i; for(i=1; i<NELEMS(pbp_entries)-2; ++i) {
-			if (pbp_entries[i].enabled && 
-					vpbp->file_pointer >= vpbp->header[2+i] && 
-					vpbp->file_pointer < vpbp->header[2+1+i]) {
-				void *buf, *buf_64;
-
-				buf = oe_malloc(8*SECTOR_SIZE+64);
-
-				if (buf != NULL) {
-					int rest, pos, re, total;
-
-					pos = vpbp->file_pointer - vpbp->header[2+i];
-					rest = total = MIN(remaining, vpbp->sects[i].size - pos);
-					buf_64 = PTR_ALIGN_64(buf);
-
-					while (rest > 0) {
-						int ret;
-
-						re = MIN(rest, 8*SECTOR_SIZE);
-						ret = isoRead(buf_64, vpbp->sects[i].lba, pos, re);
-
-						if (ret < 0) {
-							printk("%s: isoRead -> 0x%08X\n", __func__, ret);
-							unlock();
-
-							return -38;
-						}
-
-						memcpy(data, buf_64, re);
-						rest -= re;
-						pos += re;
-						vpbp->file_pointer += re;
-						data += re;
-						remaining -= re;
-					}
-
-					oe_free(buf);
-				} else {
-					printk("%s: buf(2) cannot allocate\n", __func__);
-					unlock();
-
-					return -5;
-				}
+				return ret;
 			}
 		}
 
@@ -754,8 +785,10 @@ int vpbp_read(SceUID fd, void * data, SceSize size)
 	}
 
 	unlock();
+
 	return size - remaining;
 }
+
 
 int vpbp_close(SceUID fd)
 {

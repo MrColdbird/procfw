@@ -25,6 +25,7 @@ typedef struct _PatchOffset {
 	u32 sceMesgLedDecryptGame1[9];
 	u32 sceMesgLedDecryptGame2[9];
 	u32 mesgled_decrypt;
+	u32 LoadExecForUser_362A956B_fix;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

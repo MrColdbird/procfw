@@ -176,6 +176,12 @@ static inline int is_homebrews_runlevel(void)
 	return 0;
 }
 
+// This fixes the mysterious idol master SP genuine check. 
+static void patch_sceLoadExec(void)
+{
+	sctrlPatchModule("sceLoadExec", NOP, g_offs->LoadExecForUser_362A956B_fix);
+}
+
 int module_start(SceSize args, void *argp)
 {
 	if(is_homebrews_runlevel()) {
@@ -189,6 +195,7 @@ int module_start(SceSize args, void *argp)
 	printk("stargate started\n");
 	sctrlSEGetConfig(&conf);
 	patch_sceMesgLed();
+	patch_sceLoadExec();
 
 	if(conf.chn_iso) {
 		patch_IsoDrivers();

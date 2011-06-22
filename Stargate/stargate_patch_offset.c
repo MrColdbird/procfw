@@ -48,6 +48,7 @@ PatchOffset g_639_offsets = {
 		0x000035D0, // 09g
 	},
 	.mesgled_decrypt = 0x000000E0,
+	.LoadExecForUser_362A956B_fix = 0x000009B4,
 };
 #endif
 
@@ -77,6 +78,7 @@ PatchOffset g_635_offsets = {
 		0x00003540, // 09g
 	},
 	.mesgled_decrypt = 0x000000E0,
+	.LoadExecForUser_362A956B_fix = 0x000009B4,
 };
 #endif
 
@@ -106,6 +108,7 @@ PatchOffset g_620_offsets = {
 		0xDEADBEEF, // 09g
 	},
 	.mesgled_decrypt = 0x000000E0,
+	.LoadExecForUser_362A956B_fix = 0x000009B4,
 };
 #endif
 

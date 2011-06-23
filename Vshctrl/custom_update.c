@@ -53,11 +53,14 @@ void patch_update_plugin_module(SceModule *mod_)
 	_sw( 0x10400002, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion3);
 
 	// substitute all /UPDATE with /PRO_FW
-	for(i = 0; i < text_size; i += 4) {
+	for(i = 0; i < text_size;) {
 		u32 addr = text_addr + i;
 
 		if(0 == strncmp((char *)addr, "/UPDATE", 7)) {
 			memcpy((char *)addr, "/PRO_FW", 7);
+			i += 7;
+		} else {
+			i++;
 		}
 	}
 }

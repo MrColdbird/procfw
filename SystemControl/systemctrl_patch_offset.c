@@ -191,8 +191,8 @@ PatchOffset g_639_offsets = {
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
 	},
 	.impose_patch = {
-		6,
-		0x000005EC,
+		2,
+		0x000005FC,
 	},
 	.usb_patch = {
 		.scePowerBatteryDisableUsbChargingStub = 0x00009050,
@@ -370,8 +370,8 @@ PatchOffset g_635_offsets = {
 		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
 	},
 	.impose_patch = {
-		6,
-		0x000005EC,
+		2,
+		0x000005FC,
 	},
 	.usb_patch = {
 		.scePowerBatteryDisableUsbChargingStub = 0x00009050,
@@ -549,8 +549,8 @@ PatchOffset g_620_offsets = {
 		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
 	},
 	.impose_patch = {
-		5,
-		0x000005D0,
+		2,
+		0x000005DC,
 	},
 	.usb_patch = {
 		.scePowerBatteryDisableUsbChargingStub = 0x00008FE8,

@@ -101,7 +101,7 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	}
 
 	if( 0 == strcmp(mod->modname, "update_plugin_module")) {
-		patch_update_plugin_module(text_addr);
+		patch_update_plugin_module((SceModule*)mod);
 		sync_cache();
 	}
 
@@ -374,6 +374,7 @@ static void patch_game_plugin_module(u32 text_addr)
 
 static void patch_msvideo_main_plugin_module(u32 text_addr)
 {
+	/* Patch resolution limit to (130560) pixels (480x272) */
 	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[0]);
 	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[1]);
 	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[2]);
@@ -383,6 +384,7 @@ static void patch_msvideo_main_plugin_module(u32 text_addr)
 	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[5]);
 	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[6]);
 
+	/* Patch bitrate limit (increase to 16384+2) */
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[7]);
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[8]);
 	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[9]);

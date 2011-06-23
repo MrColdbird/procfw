@@ -33,10 +33,15 @@
 #include "strsafe.h"
 #include "vshctrl_patch_offset.h"
 
-void patch_update_plugin_module(u32 text_addr)
+void patch_update_plugin_module(SceModule *mod_)
 {
 	int version;
+	int i;
+	u32 text_addr, text_size;
+	SceModule2 *mod = (SceModule2*)mod_;
 
+	text_addr = mod->text_addr;
+	text_size = mod->text_size;
 	// ImageVersion
 	// If it's lower than the one in updatelist.txt then the FW will update
 	version = (sctrlHENGetVersion() << 16) | sctrlHENGetMinorVersion();
@@ -46,6 +51,15 @@ void patch_update_plugin_module(u32 text_addr)
 
 	//beql -> beq
 	_sw( 0x10400002, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion3);
+
+	// substitute all /UPDATE with /PRO_FW
+	for(i = 0; i < text_size; i += 4) {
+		u32 addr = text_addr + i;
+
+		if(0 == strncmp((char *)addr, "/UPDATE", 7)) {
+			memcpy((char *)addr, "/PRO_FW", 7);
+		}
+	}
 }
 
 void patch_SceUpdateDL_Library(u32 text_addr)

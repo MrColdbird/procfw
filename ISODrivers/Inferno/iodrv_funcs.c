@@ -23,6 +23,7 @@
 #include <systemctrl_se.h>
 #include <pspsysmem_kernel.h>
 #include <psprtc.h>
+#include <pspumd.h>
 #include <psputilsforkernel.h>
 #include <pspthreadman_kernel.h>
 #include "utils.h"
@@ -87,11 +88,47 @@ static const char *g_umd_ids[] = {
 // 0x00002480
 int g_game_fix_type = 0;
 
+int inferno_mount(SceSize args, void *arg)
+{
+	int i;
+
+	while(0 == g_iso_opened) {
+		iso_open();
+		sceKernelDelayThread(20000);
+	}
+
+	g_read_arg.offset = 0x8000;
+	g_read_arg.address = g_sector_buf;
+	g_read_arg.size = ISO_SECTOR_SIZE;
+	iso_read(&g_read_arg);
+
+	for(i=0; i<NELEMS(g_umd_ids); ++i) {
+		if(0 == memcmp(g_read_arg.address + 0x00000373, g_umd_ids[i], 10)) {
+			g_game_fix_type = 1;
+			goto out;
+		}
+	}
+
+	if(g_game_fix_type) {
+		goto out;
+	}
+
+	// NPUG-80086: FLOW -Life Could be Simple-
+	if(0 == memcmp(g_read_arg.address + 0x00000373, "NPUG-80086", 10)) {
+		g_game_fix_type = 2;
+	}
+
+out:
+	sceUmdSetDriveStatus(PSP_UMD_PRESENT | PSP_UMD_INITED);
+	sceKernelExitDeleteThread(0);
+	return 0;
+}
+
 // 0x00000CB0
 static int IoInit(PspIoDrvArg* arg)
 {
 	void *p;
-	int i;
+	SceUID thid;
 
 	p = oe_malloc(ISO_SECTOR_SIZE);
 
@@ -107,34 +144,15 @@ static int IoInit(PspIoDrvArg* arg)
 		return g_umd9660_sema_id;
 	}
 
-	while(0 == g_iso_opened) {
-		iso_open();
-		sceKernelDelayThread(20000);
-	}
-
 	memset(g_open_slot, 0, sizeof(g_open_slot));
 
-	g_read_arg.offset = 0x8000;
-	g_read_arg.address = g_sector_buf;
-	g_read_arg.size = ISO_SECTOR_SIZE;
-	iso_read(&g_read_arg);
+	thid = sceKernelCreateThread("infernoMount", &inferno_mount, 0x18, 0x800, 0, NULL);
 
-	for(i=0; i<NELEMS(g_umd_ids); ++i) {
-		if(0 == memcmp(g_read_arg.address + 0x00000373, g_umd_ids[i], 10)) {
-			g_game_fix_type = 1;
-
-			return 0;
-		}
+	if(thid < 0) {
+		return thid;
 	}
 
-	if(g_game_fix_type) {
-		return 0;
-	}
-
-	// NPUG-80086: FLOW -Life Could be Simple-
-	if(0 == memcmp(g_read_arg.address + 0x00000373, "NPUG-80086", 10)) {
-		g_game_fix_type = 2;
-	}
+	sceKernelStartThread(thid, 0, NULL);
 
 	return 0;
 }

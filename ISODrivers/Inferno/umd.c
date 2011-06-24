@@ -36,7 +36,6 @@
 
 extern int sceKernelGetCompiledSdkVersion(void);
 extern int sceKernelCancelEventFlag(SceUID evf, SceUInt new_value, int *num_wait_threads);
-extern void sceUmdSetDriveStatus(int status);
 
 static void do_umd_notify(int arg);
 
@@ -64,6 +63,10 @@ extern int sceKernelCancelSema(SceUID semaid, int newcount, int *num_wait_thread
 int sceUmdCheckMedium(void)
 {
 	int ret;
+
+	while(!g_iso_opened) {
+		sceKernelDelayThread(10000);
+	}
 
 	ret = 1;
 //	printk("%s: -> 0x%08X\n", __func__, ret);
@@ -413,6 +416,10 @@ int sceUmdActivate(int unit, const char* drive)
 {
 	u32 k1;
 	int value;
+
+	if(!g_iso_opened) {
+		return 0x80010016;
+	}
 
 	if(drive == NULL || !check_memory(drive, strlen(drive) + 1)) {
 		return 0x80010016;

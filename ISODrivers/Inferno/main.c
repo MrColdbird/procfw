@@ -83,7 +83,7 @@ int setup_umd_device(void)
 // 00001514
 int init_inferno(void)
 {
-	g_drive_status = 50;
+	g_drive_status = PSP_UMD_INITING;
 	g_umd_cbid = -1;
 	g_umd_error_status = 0;
 	g_drive_status_evf = sceKernelCreateEventFlag("SceMediaManUser", 0x201, 0, NULL);

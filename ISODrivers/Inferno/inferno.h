@@ -59,6 +59,8 @@ extern int g_total_sectors;
 extern struct IoReadArg g_read_arg;
 extern int g_disc_type;
 
+extern void sceUmdSetDriveStatus(int status);
+
 extern int power_event_handler(int ev_id, char *ev_name, void *param, int *result);
 
 extern int iso_open(void);

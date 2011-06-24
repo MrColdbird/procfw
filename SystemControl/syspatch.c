@@ -133,15 +133,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
-		SceModule * impose;
-
 		patch_sceMediaSync(mod->text_addr);
-		impose = sctrlKernelFindModuleByName("sceImpose_Driver");
-
-		if(impose) {
-			disable_PauseGame(impose->text_addr);
-		}
-
 		sync_cache();
 	}
 
@@ -187,6 +179,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
 		patch_sceChkreg();
+		disable_PauseGame(mod->text_addr);
 		usb_charge();
 		sync_cache();
 	} 

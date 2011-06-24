@@ -228,13 +228,15 @@ void patch_partitions(void)
 
 void disable_PauseGame(u32 text_addr)
 {
-	int i;
+	int i, apitype;
 
 	if(psp_model != PSP_GO) {
 		return;
 	}
 
-	if(g_high_memory_enabled) {
+	apitype = sceKernelInitApitype();
+
+	if(g_high_memory_enabled || (conf.iso_cache && apitype == 0x125)) {
 		for(i=0; i<g_offs->impose_patch.nr_nop; i++) {
 			_sw(NOP, text_addr + g_offs->impose_patch.offset + i * 4);
 		}

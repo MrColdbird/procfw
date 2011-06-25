@@ -171,6 +171,7 @@ PatchOffset g_639_offsets = {
 		.LoaderCoreUndo2Call2 = 0x00005CA4,
 		.memlmd_323366CA_NID = 0x3F2AC9C6,
 		.memlmd_7CF1CD3E_NID = 0xE42AFE2E,
+		.pops_version_check = 0x00006EE4,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
@@ -350,6 +351,7 @@ PatchOffset g_635_offsets = {
 		.LoaderCoreUndo2Call2 = 0x00005CA4,
 		.memlmd_323366CA_NID = 0x3F2AC9C6,
 		.memlmd_7CF1CD3E_NID = 0xE42AFE2E,
+		.pops_version_check = 0x00006EE4,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
@@ -529,6 +531,7 @@ PatchOffset g_620_offsets = {
 		.LoaderCoreUndo2Call2 = 0x000068F0,
 		.memlmd_323366CA_NID = 0x2E208358,
 		.memlmd_7CF1CD3E_NID = 0xCA560AA6,
+		.pops_version_check = 0x00007684,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,

@@ -374,7 +374,10 @@ void patch_sceLoaderCore(void)
 	//undo check #3
 	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3); //beqzl
 	_sw(0, loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreCheck3 + 4); //lui (likely branch instruction)
-	
+
+	// pops version check
+	_sw(0x1000FFCB, loadcore->text_addr + g_offs->loadercore_patch.pops_version_check); // b loc_000075B4
+
 	//undo rebootex patches
 	void * memlmd_323366CA = (void*)sctrlHENFindFunction("sceMemlmd", "memlmd", g_offs->loadercore_patch.memlmd_323366CA_NID);
 	_sw(MAKE_CALL(memlmd_323366CA), loadcore->text_addr + g_offs->loadercore_patch.LoaderCoreUndo1Call1);

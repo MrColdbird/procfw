@@ -149,6 +149,7 @@ struct sceLoaderCorePatch {
 	u32 LoaderCoreUndo2Call2;
 	u32 memlmd_323366CA_NID;
 	u32 memlmd_7CF1CD3E_NID;
+	u32 pops_version_check;
 };
 
 struct sceLoadExecPatch {

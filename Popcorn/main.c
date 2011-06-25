@@ -613,7 +613,7 @@ static void patch_scePops_Manager(void)
 {
 	SceModule2 *mod;
 	u32 text_addr;
-	size-t i;
+	size_t i;
 
 	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
 	text_addr = mod->text_addr;

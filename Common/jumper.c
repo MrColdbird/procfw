@@ -34,9 +34,6 @@ u32 * jumper_table_user = NULL;
 //dumper syscall number
 u32 syscallnum = 0;
 
-//sony syscall api
-unsigned int sctrlKernelQuerySystemCall(void * func);
-
 //init user memory
 int initUserTraceMemory(void)
 {

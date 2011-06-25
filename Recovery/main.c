@@ -37,20 +37,6 @@ PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 PSP_HEAP_SIZE_KB(0);
 
-#define CUR_SEL_COLOR 0xFF
-#define MAX_SCREEN_X 68
-#define MAX_SCREEN_Y 33
-#define BUF_WIDTH (512)
-#define SCR_WIDTH (480)
-#define SCR_HEIGHT (272)
-#define PIXEL_SIZE (4)
-#define FRAME_SIZE (BUF_WIDTH * SCR_HEIGHT * PIXEL_SIZE)
-
-#define DRAW_BUF (void*)(0x44000000)
-#define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
-
-#define printf pspDebugScreenPrintf
-
 int g_ctrl_OK;
 int g_ctrl_CANCEL;
 

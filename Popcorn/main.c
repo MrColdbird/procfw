@@ -72,6 +72,9 @@ static int myIoRead(int fd, u8 *buf, int size)
 {
 	int ret;
 	u32 pos;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
 
 	if(fd != RIF_MAGIC_FD && fd != ACT_DAT_FD) {
 		pos = sceIoLseek32(fd, 0, SEEK_CUR);
@@ -138,6 +141,7 @@ static int myIoRead(int fd, u8 *buf, int size)
 	}
 
 exit:
+	pspSdkSetK1(k1);
 	printk("%s: fd=0x%08X pos=0x%08X size=%d -> 0x%08X\n", __func__, (uint)fd, (uint)pos, (int)size, ret);
 
 	return ret;
@@ -147,10 +151,13 @@ static int myIoReadAsync(int fd, u8 *buf, int size)
 {
 	int ret;
 	u32 pos;
+	u32 k1;
 
+	k1 = pspSdkSetK1(0);
 	pos = sceIoLseek32(fd, 0, SEEK_CUR);
 	ret = sceIoReadAsync(fd, buf, size);
 	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, (uint)fd, (uint)pos, size, ret);
+	pspSdkSetK1(k1);
 
 	return ret;
 }
@@ -158,6 +165,9 @@ static int myIoReadAsync(int fd, u8 *buf, int size)
 static SceOff myIoLseek(SceUID fd, SceOff offset, int whence)
 {
 	SceOff ret;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
 
 	if(g_keys_bin_found || g_is_custom_ps1) {
 		if (fd == RIF_MAGIC_FD) {
@@ -173,6 +183,7 @@ static SceOff myIoLseek(SceUID fd, SceOff offset, int whence)
 		ret = sceIoLseek(fd, offset, whence);
 	}
 
+	pspSdkSetK1(k1);
 	printk("%s: 0x%08X 0x%08X 0x%08X -> 0x%08X\n", __func__, (uint)fd, (uint)offset, (uint)whence, (int)ret);
 
 	return ret;
@@ -181,6 +192,9 @@ static SceOff myIoLseek(SceUID fd, SceOff offset, int whence)
 static int myIoClose(SceUID fd)
 {
 	int ret;
+	u32 k1;
+
+	k1 = pspSdkSetK1(0);
 
 	if(g_keys_bin_found || g_is_custom_ps1) {
 		if (fd == RIF_MAGIC_FD) {
@@ -200,6 +214,7 @@ static int myIoClose(SceUID fd)
 		g_plain_doc_fd = -1;
 	}
 
+	pspSdkSetK1(k1);
 	printk("%s: 0x%08X -> 0x%08X\n", __func__, fd, ret);
 
 	return ret;

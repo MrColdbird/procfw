@@ -9,7 +9,7 @@ Davee for his v1 register leak address discovery used in Power-Argument-Patching
 victor.rds for the cool animated Fast Recovery Icon. (http://wololo.net/talk/viewtopic.php?f=17&t=3716#p42091)
 Takka and Plum for their idea of preventing hibernation deletetion.
 kgsws for his idea of faking vshmain module as permanent patch
-bbtgp for his PrxEncrypter source code to produce the signed fake vshmain module for permanent patch
+bbtgp and Draan for their PrxEncrypter source code to produce the signed fake vshmain module for permanent patch
 neur0n for his syscall execution in kernel mode, and CIPL allowing hackable PSPs to have CFW installed permanently, and several bug fixes
 jas0nuk for his PSPident source to detect if it is a TA-88v3 unit
 ardi for his umd4homebrew to enable UMD in homebrews

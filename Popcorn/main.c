@@ -31,6 +31,11 @@
 #include "libs.h"
 #include "popcorn_patch_offset.h"
 
+struct Hooks {
+	u32 nid;
+	void *fp;
+};
+
 extern void patch_analog_imports(SceModule *mod);
 
 SEConfig conf;
@@ -569,44 +574,65 @@ static int _sceDrmBBMacFinal2(void *mkey, u8 *out, u8 *vkey)
 	return 0;
 }
 
+static struct Hooks g_io_hooks[] = {
+	{ 0x109F50BC, &myIoOpen, },
+	{ 0x27EB27B8, &myIoLseek, },
+	{ 0x63632449, &myIoIoctl, },
+	{ 0x6A638D83, &myIoRead, },
+	{ 0xA0B5A7C2, &myIoReadAsync, },
+	{ 0xACE946E8, &myIoGetstat, },
+	{ 0x810C4BC3, &myIoClose, },
+};
+
+static struct Hooks g_amctrl_hooks[] = {
+	{ 0x1CCB66D2, &_sceDrmBBCipherInit, },
+	{ 0x0785C974, &_sceDrmBBCipherUpdate, },
+	{ 0x9951C50F, &_sceDrmBBCipherFinal, },
+	{ 0x525B8218, &_sceDrmBBMacInit, },
+	{ 0x58163FBE, &_sceDrmBBMacUpdate, },
+	{ 0xEF95A213, &_sceDrmBBMacFinal, },
+	{ 0xF5186D8E, &_sceDrmBBMacFinal2, },
+};
+
 static void patch_scePops_Manager(void)
 {
 	SceModule2 *mod;
 	u32 text_addr;
+	size-t i;
 
 	mod = (SceModule2*) sceKernelFindModuleByName("scePops_Manager");
 	text_addr = mod->text_addr;
 
-	REDIRECT_FUNCTION(myIoOpen, text_addr + g_offs->popsman_patch.sceIoOpenImport);
-	REDIRECT_FUNCTION(myIoLseek, text_addr + g_offs->popsman_patch.sceIoLseekImport);
-	REDIRECT_FUNCTION(myIoIoctl, text_addr + g_offs->popsman_patch.sceIoIoctlImport);
-	REDIRECT_FUNCTION(myIoRead, text_addr + g_offs->popsman_patch.sceIoReadImport);
-	REDIRECT_FUNCTION(myIoReadAsync, text_addr + g_offs->popsman_patch.sceIoReadAsyncImport);
-	REDIRECT_FUNCTION(myIoGetstat, text_addr + g_offs->popsman_patch.sceIoGetstatImport);
-	REDIRECT_FUNCTION(myIoClose, text_addr + g_offs->popsman_patch.sceIoCloseImport);
+	for(i=0; i<NELEMS(g_io_hooks); ++i) {
+		hook_import_bynid((SceModule*)mod, "IoFileMgrForKernel", g_io_hooks[i].nid, g_io_hooks[i].fp, 0);
+	}
 
-	_get_rif_path = (void*)(text_addr + g_offs->popsman_patch.get_rif_path);
-	_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call1);
-	_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call2);
+	if(g_offs->popsman_patch.get_rif_path != 0xDEADBEEF) {
+		_get_rif_path = (void*)(text_addr + g_offs->popsman_patch.get_rif_path);
+		_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call1);
+		_sw(MAKE_CALL(&get_rif_path), text_addr + g_offs->popsman_patch.get_rif_path_call2);
+	}
 
 	sceNpDrmGetVersionKey = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_driver", 0x0F9547E6);
 	scePspNpDrm_driver_9A34AC9F = (void*)sctrlHENFindFunction("scePspNpDrm_Driver", "scePspNpDrm_driver", 0x9A34AC9F);
 
-	_sw(MAKE_CALL(_sceNpDrmGetVersionKey), text_addr + g_offs->popsman_patch.sceNpDrmGetVersionKeyCall);
-	_sw(MAKE_CALL(_scePspNpDrm_driver_9A34AC9F), text_addr + g_offs->popsman_patch.scePspNpDrm_driver_9A34AC9F_Call);
+	if(g_offs->popsman_patch.sceNpDrmGetVersionKeyCall != 0xDEADBEEF) {
+		_sw(MAKE_CALL(_sceNpDrmGetVersionKey), text_addr + g_offs->popsman_patch.sceNpDrmGetVersionKeyCall);
+	}
+
+	if(g_offs->popsman_patch.scePspNpDrm_driver_9A34AC9F_Call != 0xDEADBEEF) {
+		_sw(MAKE_CALL(_scePspNpDrm_driver_9A34AC9F), text_addr + g_offs->popsman_patch.scePspNpDrm_driver_9A34AC9F_Call);
+	}
 
 	// remove the check in scePopsManLoadModule that only allows loading module below the FW 3.XX
-	_sw(NOP, text_addr + g_offs->popsman_patch.scePopsManLoadModuleCheck);
+	if(g_offs->popsman_patch.scePopsManLoadModuleCheck != 0xDEADBEEF) {
+		_sw(NOP, text_addr + g_offs->popsman_patch.scePopsManLoadModuleCheck);
+	}
 
 	if (g_is_custom_ps1) {
-		REDIRECT_FUNCTION(_sceDrmBBCipherInit, text_addr + g_offs->popsman_patch.sceDrmBBCipherInitImport);
-		REDIRECT_FUNCTION(_sceDrmBBCipherUpdate, text_addr + g_offs->popsman_patch.sceDrmBBCipherUpdateImport);
-		REDIRECT_FUNCTION(_sceDrmBBCipherFinal, text_addr + g_offs->popsman_patch.sceDrmBBCipherFinalImport);
-
-		REDIRECT_FUNCTION(_sceDrmBBMacInit, text_addr + g_offs->popsman_patch.sceDrmBBMacInitImport);
-		REDIRECT_FUNCTION(_sceDrmBBMacUpdate, text_addr + g_offs->popsman_patch.sceDrmBBMacUpdateImport);
-		REDIRECT_FUNCTION(_sceDrmBBMacFinal, text_addr + g_offs->popsman_patch.sceDrmBBMacFinalImport);
-		REDIRECT_FUNCTION(_sceDrmBBMacFinal2, text_addr + g_offs->popsman_patch.sceDrmBBMacFinal2Import);
+		for(i=0; i<NELEMS(g_amctrl_hooks); ++i) {
+			hook_import_bynid((SceModule*)mod, "sceAmctrl_driver", g_amctrl_hooks[i].nid, g_amctrl_hooks[i].fp, 0);
+		}
 	}
 }
 

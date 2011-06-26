@@ -201,6 +201,16 @@ void installJALTrace(u32 address)
 	}
 }
 
+void installMemoryJALTrace(u32 start, u32 size)
+{
+	//iterate instructions
+	u32 pos = start; for(; pos < start + size; pos += 4)
+	{
+		//check instruction and install trace
+		installJALTrace(pos);
+	}
+}
+
 //module trace install
 void installModuleJALTrace(SceModule2 * module)
 {

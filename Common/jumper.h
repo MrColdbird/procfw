@@ -35,6 +35,8 @@ void installJALTrace(u32 address);
 //module trace install
 void installModuleJALTrace(SceModule2 * module);
 
+void installMemoryJALTrace(u32 start, u32 size);
+
 //clear tracing table
 void clearTraceTable(void);
 

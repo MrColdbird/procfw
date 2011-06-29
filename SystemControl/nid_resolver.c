@@ -57,7 +57,7 @@ resolver_config* get_nid_resolver(const char *libname)
 	int i;
 
 	for(i=0; i<nid_fix_size; ++i) {
-		if (!strcmp(libname, nid_fix[i].name)) {
+		if (nid_fix[i].enabled && !strcmp(libname, nid_fix[i].name)) {
 			return &nid_fix[i];
 		}
 	}
@@ -391,6 +391,7 @@ static void sort_nid_table(resolver_config *table, u32 size)
 void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
+	u32 i;
 
 	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
 	loadcore = (SceModule2*)sctrlKernelFindModuleByName("sceLoaderCore");
@@ -423,6 +424,10 @@ void setup_nid_resolver(void)
 	}
 
 	sort_nid_table(nid_fix, nid_fix_size);
+
+	for(i=0; i<nid_fix_size; ++i) {
+		nid_fix[i].enabled = 1;
+	}
 }
 
 void resolve_syscon_driver(SceModule *mod)
@@ -435,4 +440,25 @@ void resolve_syscon_driver(SceModule *mod)
 		return;
 
 	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + g_offs->nid_resolver_patch.sceSysconPowerStandby);
+}
+
+int sctrlKernelSetNidResolver(char *libname, u32 enabled)
+{
+	u32 i;
+	u32 old;
+
+	if(!check_memory(libname, strlen(libname) + 1)) {
+		return 0x800200D3;
+	}
+
+	for(i=0; i<nid_fix_size; ++i) {
+		if (0 == strcmp(libname, nid_fix[i].name)) {
+			old = nid_fix[i].enabled;
+			nid_fix[i].enabled = enabled;
+
+			return old;
+		}
+	}
+
+	return -1;
 }

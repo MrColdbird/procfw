@@ -27,6 +27,7 @@ typedef struct _resolver_config {
 	char *name;
 	u32 nidcount;
 	nid_entry *nidtable;
+	u32 enabled;
 } resolver_config;
 
 extern resolver_config *nid_fix;

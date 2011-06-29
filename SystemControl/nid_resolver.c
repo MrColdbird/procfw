@@ -295,11 +295,8 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	u32 stubcount;
 	struct SceLibraryStubTable *stub;
 	resolver_config *resolver;
-	u32 key_config;
 
-	key_config = sceKernelApplicationType();
-
-	if(key_config == PSP_INIT_KEYCONFIG_POPS || module_can_skip_nid_resolve(buf)) {
+	if(module_can_skip_nid_resolve(buf)) {
 		return (*sceKernelLinkLibraryEntriesForUser)(unk0, buf, size);
 	}
 

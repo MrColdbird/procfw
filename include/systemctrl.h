@@ -363,4 +363,17 @@ void sctrlSetCustomStartModule(int (*func)(int modid, SceSize argsize, void *arg
 
 void sctrlHENLoadModuleOnReboot(char *module_after, void *buf, int size, int flags);
 
+/**
+ * Enable/disable NID Resolver on particular library
+ *
+ * @param libname the name of the library to be enabled/disabled
+ * @param enabled 0 - disabled, != 0 - enabled
+ *
+ * @Example:
+ * sctrlKernelSetNidResolver("sceImpose_driver", 0); // disable sceImpose_driver resolving
+ *
+ * @return previous value if set, < 0 on error
+ */
+int sctrlKernelSetNidResolver(char *libname, u32 enabled);
+
 #endif

@@ -30,8 +30,23 @@ typedef unsigned int uint;
 #define FW_503 0x05000310
 #define FW_501 0x05000110
 #define FW_500 0x05000010
-#define FW_400 0x04000010
-#define FW_373 0x03070310
+#define FW_401 0x04000110
+#define FW_396 0x03090610
+#define FW_395 0x03090510
+#define FW_393 0x03090310
+#define FW_390 0x03090010
+#define FW_380 0x03080010
+#define FW_372 0x03070210
+#define FW_371 0x03070110
+#define FW_352 0x03050210
+#define FW_351 0x03050110
+#define FW_350 0x03050010
+#define FW_340 0x03040010
+#define FW_330 0x03030010
+#define FW_311 0x03010110
+#define FW_310 0x03010010
+#define FW_303 0x03000310
+#define FW_302 0x03000210
 
 enum {
 	PSP_1000 = 0,

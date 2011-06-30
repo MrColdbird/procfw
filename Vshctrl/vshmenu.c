@@ -119,6 +119,11 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 			}
 		}
 	} else {
+		/* filter out fault PSP sending dead keyscan */
+		if ((ctrl->Buttons & ALL_CTRL) != PSP_CTRL_SELECT) {
+			goto exit;
+		}
+		
 		// Block Satellite Menu in OSK
 		if (sceKernelFindModuleByName("sceVshOSK_Module"))
 			goto exit;
@@ -166,11 +171,6 @@ int _sceCtrlReadBufferPositive(SceCtrlData *ctrl, int count)
 		// Block Satellite Menu in Go!cam [Yoti]
 		if (sceKernelFindModuleByName("camera_plugin_module"))
 			goto exit;
-
-		/* filter out fault PSP sending dead keyscan */
-		if ((ctrl->Buttons & ALL_CTRL) != PSP_CTRL_SELECT) {
-			goto exit;
-		}
 
 		printk("%s: loading satelite\n", __func__);
 		modid = load_satelite();

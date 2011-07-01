@@ -18,6 +18,7 @@ RECOVERY = Recovery
 PERMANENT = Permanent
 CIPL = CIPL
 CIPL_INSTALLER = CIPL_installer
+USBDEVICE=usbdevice
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -66,6 +67,7 @@ endif
 	@cd $(RECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@rm -f ./Common/*.o
 	@cd $(VSHCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION) $(NIGHTLY_OPTION)
+	@cd $(USBDEVICE); make $(OPT_FLAGS) $(DEBUG_OPTION) $(NIGHTLY_OPTION)
 	@cd $(SYSTEMCONTROL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(INFERNO); make $(OPT_FLAGS) $(DEBUG_OPTION)
@@ -104,6 +106,7 @@ clean:
 	@cd $(REBOOTEX); make clean $(DEBUG_OPTION)
 	@cd $(INSTALLER); make clean $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make clean $(DEBUG_OPTION)
+	@cd $(USBDEVICE); make clean $(DEBUG_OPTION)
 	@cd $(SYSTEMCONTROL); make clean $(DEBUG_OPTION)
 	@cd $(GALAXYDRIVER); make clean $(DEBUG_OPTION)
 	@cd $(INFERNO); make clean $(DEBUG_OPTION)

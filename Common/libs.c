@@ -108,22 +108,27 @@ int hook_import_bynid(SceModule *pMod, char *library, unsigned int nid, void *fu
 				if(pImp->fnids[j] == nid) {
 					void *addr = (void*)(&pImp->funcs[j*2]);
 
-					if(syscall) {
-						u32 syscall_num;
-
-						syscall_num = sctrlKernelQuerySystemCall(func);
-
-						if(syscall_num == (u32)-1) {
-							printk("%s: cannot find syscall in %s_%08X\n", __func__, library, nid);
-
-							return -1;
-						}
-
+					if(func == NULL) {
 						_sw(0x03E00008, (u32)addr);
-						_sw(MAKE_SYSCALL(syscall_num), (u32)(addr + 4));
-					} else {
-						_sw(MAKE_JUMP(func), (u32)addr);
 						_sw(NOP, (u32)(addr + 4));
+					} else {
+						if(syscall) {
+							u32 syscall_num;
+
+							syscall_num = sctrlKernelQuerySystemCall(func);
+
+							if(syscall_num == (u32)-1) {
+								printk("%s: cannot find syscall in %s_%08X\n", __func__, library, nid);
+
+								return -1;
+							}
+
+							_sw(0x03E00008, (u32)addr);
+							_sw(MAKE_SYSCALL(syscall_num), (u32)(addr + 4));
+						} else {
+							_sw(MAKE_JUMP(func), (u32)addr);
+							_sw(NOP, (u32)(addr + 4));
+						}
 					}
 
 					sceKernelDcacheWritebackInvalidateRange(addr, 8);

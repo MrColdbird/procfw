@@ -10,6 +10,7 @@ victor.rds for the cool animated Fast Recovery Icon. (http://wololo.net/talk/vie
 Takka and Plum for their idea of preventing hibernation deletetion.
 kgsws for his idea of faking vshmain module as permanent patch
 bbtgp and Draan for their PrxEncrypter source code to produce the signed fake vshmain module for permanent patch
+bbtgp, Dark_AleX, Noobz, Team C+D, M33 Team, and coyotebean for their new psardumper source to get the OFW binary
 neur0n for his syscall execution in kernel mode, and CIPL allowing hackable PSPs to have CFW installed permanently, and several bug fixes
 jas0nuk for his PSPident source to detect if it is a TA-88v3 unit
 ardi for his umd4homebrew to enable UMD in homebrews

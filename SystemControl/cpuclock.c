@@ -152,8 +152,10 @@ void SetSpeed(int cpuspd, int busspd)
 	_scePowerSetClockFrequency = (void*)fp;
 	_scePowerSetClockFrequency(cpuspd, cpuspd, busspd);
 
-	if (sceKernelApplicationType() == PSP_INIT_KEYCONFIG_VSH)
+	if (sceKernelApplicationType() == PSP_INIT_KEYCONFIG_VSH) {
+		hook_import_bynid(sctrlKernelFindModuleByName("vsh_module"), "scePower", 0x469989AD, NULL, 1);
 		return;
+	}
 
 	for(i=0; i<NELEMS(g_power_func_redir); ++i) {
 		fp = find_power_function(g_power_func_redir[i].nid);

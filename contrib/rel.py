@@ -56,14 +56,16 @@ def make_archive(fn):
 	copy_sdk()
 	ext = os.path.splitext(fn)[-1].lower()
 
+	os.chdir("dist");
+
 	if ext == ".rar":
-		os.system("cd dist; rar a -r ../%s ." % (fn))
+		os.system("rar a -r ../%s ." % (fn))
 	elif ext == ".gz":
-		os.system("cd dist; tar -zcvf ../%s ." % (fn))
+		os.system("tar -zcvf ../%s ." % (fn))
 	elif ext == ".bz2":
-		os.system("cd dist; tar -jcvf ../%s ." % (fn))
+		os.system("tar -jcvf ../%s ." % (fn))
 	elif ext == ".zip":
-		os.system("cd dist; zip -r ../%s ." % (fn))
+		os.system("zip -r ../%s ." % (fn))
 
 def main():
 	os.chdir(os.path.join(os.path.dirname(sys.argv[0]), ".."))

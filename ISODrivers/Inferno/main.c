@@ -140,7 +140,7 @@ int module_stop(SceSize args, void *argp)
 {
 	sceIoDelDrv("umd");
 	sceKernelDeleteEventFlag(g_drive_status_evf);
-	sceKernelRegisterSysEventHandler(&g_power_event);
+	sceKernelUnregisterSysEventHandler(&g_power_event);
 
 	return 0;
 }

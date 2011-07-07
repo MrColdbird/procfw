@@ -51,10 +51,18 @@ def copy_sdk():
 	shutil.copy("libs/libpspsystemctrl_kernel.a", "dist/sdk/lib")
 	shutil.copy("libs/libpspsystemctrl_user.a", "dist/sdk/lib")
 
+def restore_chdir():
+	os.chdir(os.path.join(os.path.dirname(sys.argv[0]), ".."))
+
 def make_archive(fn):
 	shutil.copy("credit.txt", "dist")
 	copy_sdk()
 	ext = os.path.splitext(fn)[-1].lower()
+
+	try:
+		os.remove(fn)
+	except OSError:
+		pass
 
 	os.chdir("dist");
 
@@ -67,8 +75,10 @@ def make_archive(fn):
 	elif ext == ".zip":
 		os.system("zip -r ../%s ." % (fn))
 
+	restore_chdir()
+
 def main():
-	os.chdir(os.path.join(os.path.dirname(sys.argv[0]), ".."))
+	restore_chdir()
 	
 	for conf in PRO_BUILD:
 		build_pro(conf["config"])

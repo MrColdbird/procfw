@@ -388,7 +388,6 @@ static void sort_nid_table(resolver_config *table, u32 size)
 void setup_nid_resolver(void)
 {
 	SceModule2 *modmgr, *loadcore;
-	u32 i;
 
 	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
 	loadcore = (SceModule2*)sctrlKernelFindModuleByName("sceLoaderCore");
@@ -421,10 +420,6 @@ void setup_nid_resolver(void)
 	}
 
 	sort_nid_table(nid_fix, nid_fix_size);
-
-	for(i=0; i<nid_fix_size; ++i) {
-		nid_fix[i].enabled = 1;
-	}
 }
 
 void resolve_syscon_driver(SceModule *mod)

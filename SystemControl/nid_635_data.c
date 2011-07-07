@@ -1178,7 +1178,7 @@ static nid_entry scePaf_nid[] = {
 
 resolver_config nid_635_fix[] = {
 #define NID_ENTRY(libname) \
-	{ #libname, NELEMS(libname##_nid), libname##_nid, }
+	{ #libname, NELEMS(libname##_nid), libname##_nid, 1, }
 	NID_ENTRY(SysMemForKernel),
 	NID_ENTRY(KDebugForKernel),
 	NID_ENTRY(LoadCoreForKernel),

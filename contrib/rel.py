@@ -64,6 +64,7 @@ def make_archive(fn):
 	except OSError:
 		pass
 
+	path = os.getcwd()
 	os.chdir("dist");
 
 	if ext == ".rar":
@@ -75,7 +76,7 @@ def make_archive(fn):
 	elif ext == ".zip":
 		os.system("zip -r ../%s ." % (fn))
 
-	restore_chdir()
+	os.chdir(path)
 
 def main():
 	restore_chdir()

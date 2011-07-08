@@ -56,6 +56,7 @@ static int g_mp3_loaded = 0;
 
 #ifdef CONFIG_620
 static int (*ModuleMgrForKernel_E3CCC6EA)(char *path, void *a0, void *a1) = NULL;
+static int libmp3_redirected = 0;
 
 int _ModuleMgrForKernel_E3CCC6EA(char *path, void *a0, void *a1)
 {
@@ -64,6 +65,7 @@ int _ModuleMgrForKernel_E3CCC6EA(char *path, void *a0, void *a1)
 
 	if(0 == strcmp(path, "flash0:/kd/libmp3.prx") && 0 == sceIoGetstat(LIBMP3_PATH, &stat)) {
 		path = LIBMP3_PATH;
+		libmp3_redirected = 1;
 	}
 
 	ret = ModuleMgrForKernel_E3CCC6EA(path, a0, a1);
@@ -81,7 +83,7 @@ int myUtilityLoadModule(int id)
 	// In FW 6.20, libmp3.prx load/unload code is buggy
 	// It cannot load/unload again once got loaded
 	// Doing so will result in user memory corrupted (in DBTVS)
-	if(psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
+	if(!libmp3_redirected && psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
 		ret = 0;
 		printk("%s: [FAKE] 0x%04X -> %d\n", __func__, id, ret);
 
@@ -92,7 +94,7 @@ int myUtilityLoadModule(int id)
 	ret = (*_sceUtilityLoadModule)(id);
 
 #ifdef CONFIG_620
-	if(psp_fw_version == FW_620 && id == 0x304 && ret == 0) {
+	if(!libmp3_redirected && psp_fw_version == FW_620 && id == 0x304 && ret == 0) {
 		g_mp3_loaded = 1;
 	}
 #endif
@@ -113,7 +115,7 @@ int myUtilityUnloadModule(int id)
 	int ret;
 
 #ifdef CONFIG_620
-	if(psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
+	if(!libmp3_redirected && psp_fw_version == FW_620 && id == 0x304 && g_mp3_loaded) {
 		ret = 0;
 		printk("%s: [FAKE] 0x%04X -> %d\n", __func__, id, ret);
 

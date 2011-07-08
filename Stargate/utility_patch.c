@@ -55,10 +55,10 @@ static int g_mp3_loaded = 0;
 #define LIBMP3_PATH "ms0:/PSP/GAME/PROUPDATE/libmp3.prx"
 
 #ifdef CONFIG_620
-static int (*ModuleMgrForKernel_E3CCC6EA)(char *path, void *a0, void *a1) = NULL;
+static int (*ModuleMgrForKernel_07290699)(char *path, void *a1, void *a2, void *a3, void *t0) = NULL;
 static int libmp3_redirected = 0;
 
-int _ModuleMgrForKernel_E3CCC6EA(char *path, void *a0, void *a1)
+int _ModuleMgrForKernel_07290699(char *path, void *a1, void *a2, void *a3, void *t0)
 {
 	int ret;
 	SceIoStat stat;
@@ -68,7 +68,7 @@ int _ModuleMgrForKernel_E3CCC6EA(char *path, void *a0, void *a1)
 		libmp3_redirected = 1;
 	}
 
-	ret = ModuleMgrForKernel_E3CCC6EA(path, a0, a1);
+	ret = ModuleMgrForKernel_07290699(path, a1, a2, a3, t0);
 	printk("%s: %s -> 0x%08X\n", __func__, path, ret);
 
 	return ret;
@@ -145,8 +145,9 @@ void patch_utility(SceModule *mod)
 	int i;
 
 #ifdef CONFIG_620
-	ModuleMgrForKernel_E3CCC6EA = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForKernel", 0xE3CCC6EA);
-	hook_import_bynid(sceKernelFindModuleByName("sceUtility_Driver"), "ModuleMgrForKernel", 0xE3CCC6EA, _ModuleMgrForKernel_E3CCC6EA, 0);
+	sctrlPatchModule("sceModuleManager", 0x24020000, 0x00003824);
+	ModuleMgrForKernel_07290699 = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForKernel", 0x07290699);
+	hook_import_bynid(sceKernelFindModuleByName("sceUtility_Driver"), "ModuleMgrForKernel", 0x07290699, _ModuleMgrForKernel_07290699, 0);
 #endif
 
 	_sceUtilityLoadModule = (void*)sctrlHENFindFunction("sceUtility_Driver", "sceUtility", 0x2A2B3DE0);

@@ -64,14 +64,16 @@ static struct Menu g_plugins_menu = {
 	0xFF,
 };
 
-static char read_buf[80];
+#define READ_BUF_SIZE 1024
+
+static char *read_buf = NULL;
 static char *read_ptr = NULL;
 static int read_cnt = 0;
 
 static int buf_read(SceUID fd, char *p)
 {
 	if(read_cnt <= 0) {
-		read_cnt = sceIoRead(fd, read_buf, sizeof(read_buf));
+		read_cnt = sceIoRead(fd, read_buf, READ_BUF_SIZE);
 
 		if(read_cnt < 0) {
 			return read_cnt;
@@ -146,12 +148,22 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 	int len, enabled;
 	char *q;
 	struct Plugin *plug;
+	char *read_alloc_buf;
 
 	fd = sceIoOpen(config_path, PSP_O_RDONLY, 0777);
 
 	if(fd < 0) {
 		return fd;
 	}
+
+	read_alloc_buf = oe_malloc(READ_BUF_SIZE + 64);
+
+	if(read_alloc_buf == NULL) {
+		sceIoClose(fd);
+		return;
+	}
+
+	read_buf = (void*)(((u32)read_alloc_buf & (~(64-1))) + 64);
 
 	do {
 		p = get_line(fd, linebuf, sizeof(linebuf));
@@ -214,6 +226,7 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 	} while (1);
 
 	sceIoClose(fd);
+	oe_free(read_alloc_buf);
 
 	return 0;
 }

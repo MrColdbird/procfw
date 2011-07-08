@@ -34,6 +34,7 @@
 #include "vpl.h"
 #include "main.h"
 #include "strsafe.h"
+#include "vpl.h"
 
 struct Plugin {
 	struct Plugin *next;
@@ -156,11 +157,11 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 		return fd;
 	}
 
-	read_alloc_buf = oe_malloc(READ_BUF_SIZE + 64);
+	read_alloc_buf = vpl_alloc(READ_BUF_SIZE + 64);
 
 	if(read_alloc_buf == NULL) {
 		sceIoClose(fd);
-		return;
+		return -1;
 	}
 
 	read_buf = (void*)(((u32)read_alloc_buf & (~(64-1))) + 64);
@@ -226,7 +227,7 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 	} while (1);
 
 	sceIoClose(fd);
-	oe_free(read_alloc_buf);
+	vpl_free(read_alloc_buf);
 
 	return 0;
 }

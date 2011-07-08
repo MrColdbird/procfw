@@ -64,6 +64,32 @@ static struct Menu g_plugins_menu = {
 	0xFF,
 };
 
+static char read_buf[80];
+static char *read_ptr = NULL;
+static int read_cnt = 0;
+
+static int buf_read(SceUID fd, char *p)
+{
+	if(read_cnt <= 0) {
+		read_cnt = sceIoRead(fd, read_buf, sizeof(read_buf));
+
+		if(read_cnt < 0) {
+			return read_cnt;
+		}
+
+		if(read_cnt == 0) {
+			return read_cnt;
+		}
+
+		read_ptr = read_buf;
+	}
+
+	read_cnt--;
+	*p = *read_ptr++;
+
+	return 1;
+}
+
 static char *get_line(int fd, char *linebuf, int bufsiz)
 {
 	int i, ret;
@@ -77,7 +103,7 @@ static char *get_line(int fd, char *linebuf, int bufsiz)
 	while (i < bufsiz - 1) {
 		char c;
 
-		ret = sceIoRead(fd, &c, 1);
+		ret = buf_read(fd, &c);
 
 		if (ret < 0 || (ret == 0 && i == 0))
 			return NULL;

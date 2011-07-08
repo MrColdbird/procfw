@@ -52,27 +52,6 @@ static int (*_sceUtilityUnloadModule)(int id);
 static int g_mp3_loaded = 0;
 #endif
 
-#define LIBMP3_PATH "ms0:/PSP/GAME/PROUPDATE/libmp3.prx"
-
-#ifdef CONFIG_620
-static int (*ModuleMgrForKernel_E3CCC6EA)(char *path, void *a0, void *a1) = NULL;
-
-int _ModuleMgrForKernel_E3CCC6EA(char *path, void *a0, void *a1)
-{
-	int ret;
-	SceIoStat stat;
-
-	if(0 == strcmp(path, "flash0:/kd/libmp3.prx") && 0 == sceIoGetstat(LIBMP3_PATH, &stat)) {
-		path = LIBMP3_PATH;
-	}
-
-	ret = ModuleMgrForKernel_E3CCC6EA(path, a0, a1);
-	printk("%s: %s -> 0x%08X\n", __func__, path, ret);
-
-	return ret;
-}
-#endif
-
 int myUtilityLoadModule(int id)
 {
 	int ret;
@@ -141,11 +120,6 @@ static UtilityHookEntry g_utility_hook_map[] = {
 void patch_utility(SceModule *mod)
 {
 	int i;
-
-#ifdef CONFIG_620
-	ModuleMgrForKernel_E3CCC6EA = (void*)sctrlHENFindFunction("sceModuleManager", "ModuleMgrForKernel", 0xE3CCC6EA);
-	hook_import_bynid(sceKernelFindModuleByName("sceUtility_Driver"), "ModuleMgrForKernel", 0xE3CCC6EA, _ModuleMgrForKernel_E3CCC6EA, 0);
-#endif
 
 	_sceUtilityLoadModule = (void*)sctrlHENFindFunction("sceUtility_Driver", "sceUtility", 0x2A2B3DE0);
 	_sceUtilityUnloadModule = (void*)sctrlHENFindFunction("sceUtility_Driver", "sceUtility", 0xE49BFE92);

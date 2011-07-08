@@ -340,36 +340,30 @@ int _sceKernelLinkLibraryEntriesForUser(u32 unk0, void *buf, int size)
 	return ret;
 }
 
-static void insert_sort(void *base, int n, int s, int (*cmp)(const void *, const void *))
+static void insert_sort(nid_entry *base, int n, int (*cmp)(const nid_entry*, const nid_entry*))
 {
 	int j;
-	void *saved = oe_malloc(s);
+	nid_entry saved;
 
 	for(j=1; j<n; ++j) {
 		int i = j-1;
-		void *value = base + j*s;
+		nid_entry *value = &base[j];
 
-		while(i >= 0 && cmp(base + i*s, value) > 0) {
+		while(i >= 0 && cmp(&base[i], value) > 0) {
 			i--;
 		}
 
 		if(++i == j)
 			continue;
 
-		memmove(saved, value, s);
-		memmove(base+(i+1)*s, base+i*s, s*(j-i));
-		memmove(base+i*s, saved, s);
+		memmove(&saved, value, sizeof(saved));
+		memmove(&base[i+1], &base[i], sizeof(saved)*(j-i));
+		memmove(&base[i], &saved, sizeof(saved));
 	}
-
-	oe_free(saved);
 }
 
-static int cmp_nid(const void *a, const void *b)
+static int cmp_nid(const nid_entry *nid_a, const nid_entry *nid_b)
 {
-	const nid_entry *nid_a, *nid_b;
-
-	nid_a = a, nid_b = b;
-
 	if(nid_a->old < nid_b->old)
 		return 0;
 
@@ -381,7 +375,7 @@ static void sort_nid_table(resolver_config *table, u32 size)
 	u32 i;
 
 	for(i=0; i<size; ++i) {
-		insert_sort(table[i].nidtable, table[i].nidcount, sizeof(table[i].nidtable[0]), &cmp_nid);
+		insert_sort(table[i].nidtable, table[i].nidcount, &cmp_nid);
 	}
 }
 

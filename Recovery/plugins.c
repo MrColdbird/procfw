@@ -48,9 +48,9 @@ enum {
 	ON_EF0,
 };
 
-static struct Plugin *g_vsh_list_head, *g_vsh_list_tail;
-static struct Plugin *g_game_list_head, *g_game_list_tail;
-static struct Plugin *g_pops_list_head, *g_pops_list_tail;
+static struct Plugin g_vsh_list_head, *g_vsh_list_tail;
+static struct Plugin g_game_list_head, *g_game_list_tail;
+static struct Plugin g_pops_list_head, *g_pops_list_tail;
 
 static int plugins_ef0_menu(struct MenuEntry *entry);
 static int plugins_ms0_menu(struct MenuEntry *entry);
@@ -93,35 +93,50 @@ static int buf_read(SceUID fd, char *p)
 	return 1;
 }
 
-static char *get_line(int fd, char *linebuf, int bufsiz)
+static int read_lines(SceUID fd, char *lines, size_t linebuf_size)
 {
-	int i, ret;
+	char *p;
+	int ret;
+	size_t re;
 
-	if (linebuf == NULL || bufsiz < 2)
-		return NULL;
+	if(linebuf_size == 0) {
+		return -1;
+	}
 
-	i = 0;
-	memset(linebuf, 0, bufsiz);
+	p = lines;
+	re = linebuf_size;
 
-	while (i < bufsiz - 1) {
-		char c;
+	while(re -- != 0) {
+		ret = buf_read(fd, p);
 
-		ret = buf_read(fd, &c);
-
-		if (ret < 0 || (ret == 0 && i == 0))
-			return NULL;
-
-		if (ret == 0 || c == '\n' || c == '\r') {
-			linebuf[i] = '\0';
+		if(ret < 0) {
 			break;
 		}
 
-		linebuf[i++] = c;
+		if(ret == 0) {
+			if(p == lines) {
+				ret = -1;
+			}
+
+			break;
+		}
+
+		if(*p == '\r') {
+			continue;
+		}
+
+		if(*p == '\n') {
+			break;
+		}
+
+		p++;
 	}
 
-	linebuf[bufsiz-1] = '\0';
+	if(p < lines + linebuf_size) {
+		*p = '\0';
+	}
 
-	return linebuf;
+	return ret >= 0 ? p - lines : ret;
 }
 
 static struct Plugin* new_plugin(const char *name, int enabled, int type)
@@ -142,13 +157,48 @@ static struct Plugin* new_plugin(const char *name, int enabled, int type)
 	return plug;
 }
 
-static int load_plugins(const char *config_path, struct Plugin **head, struct Plugin **tail, int type)
+static void add_plugin(struct Plugin **tail, struct Plugin *plugin)
+{
+	(*tail)->next = plugin;
+	plugin->next = NULL;
+	*tail = plugin;
+}
+
+void parse_plugin(struct Plugin **tail, char *linebuf, int type)
+{
+	char *p;
+	int enabled = 1;
+	struct Plugin *plugin;
+
+	for(p=linebuf; *p != '\0'; p++) {
+		if(isspace(*p)) {
+			*p++ = '\0';
+			enabled = 0;
+
+			while(*p != '\0' && isspace(*p)) {
+				p++;
+			}
+
+			if(*p == '1') {
+				enabled = 1;
+				break;
+			}
+
+			break;
+		}
+	}
+
+	plugin = new_plugin(linebuf, enabled, type);
+
+	if(plugin != NULL) {
+		add_plugin(tail, plugin);
+	}
+}
+
+static int load_plugins(const char *config_path, struct Plugin **tail, int type)
 {
 	SceUID fd;
-	char linebuf[256], *p;
-	int len, enabled;
-	char *q;
-	struct Plugin *plug;
+	char linebuf[256];
 	char *read_alloc_buf;
 
 	fd = sceIoOpen(config_path, PSP_O_RDONLY, 0777);
@@ -165,66 +215,11 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 	}
 
 	read_buf = (void*)(((u32)read_alloc_buf & (~(64-1))) + 64);
+	linebuf[sizeof(linebuf)-1] = '\0';
 
-	do {
-		p = get_line(fd, linebuf, sizeof(linebuf));
-
-		if(p == NULL)
-			break;
-
-		len = strlen(p);
-
-		if(len == 0) {
-			continue;
-		}
-
-		for(q=p; *q != ' ' && *q != '\t' && *q != '\0'; ++q) {
-		}
-
-		if (*q == '\0') {
-			plug = new_plugin(p, 0, type);
-
-			if(plug == NULL) {
-				break;
-			}
-
-			if(*head == NULL) {
-				*head = *tail = plug;
-			} else {
-				(*tail)->next = plug;
-				(*tail) = plug;
-			}
-
-			continue;
-		}
-
-		while(len >= 1) {
-			if(p[len-1] == ' ' || p[len-1] == '\t')
-				len--;
-			else
-				break;
-		}
-
-		if (p[len-1] == '1') {
-			enabled = 1;
-		} else {
-			enabled = 0;
-		}
-
-		*q = '\0';
-		plug = new_plugin(p, enabled, type);
-
-		if(plug == NULL) {
-			break;
-		}
-
-		if(*head == NULL) {
-			*head = *tail = plug;
-		} else {
-			(*tail)->next = plug;
-			(*tail) = plug;
-		}
-	} while (1);
+	while(read_lines(fd, linebuf, sizeof(linebuf)-1) >= 0) {
+		parse_plugin(tail, linebuf, type);
+	}
 
 	sceIoClose(fd);
 	vpl_free(read_alloc_buf);
@@ -232,20 +227,19 @@ static int load_plugins(const char *config_path, struct Plugin **head, struct Pl
 	return 0;
 }
 
-static int save_plugin(const char *path, struct Plugin *plugin)
+static int save_plugin(const char *path, struct Plugin *head)
 {
 	SceUID fd;
 	char linebuf[256];
-
-	if(plugin == NULL) {
-		return -1;
-	}
+	struct Plugin *plugin;
 
 	fd = sceIoOpen(path, PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
 
 	if(fd < 0) {
 		return -2;
 	}
+
+	plugin = head->next;
 
 	while(plugin != NULL) {
 		sprintf(linebuf, "%s %d\r\n", plugin->name, plugin->enabled);
@@ -261,13 +255,13 @@ static int save_plugin(const char *path, struct Plugin *plugin)
 static int save_plugins(void)
 {
 	if(g_type == ON_MS0) {
-		save_plugin("ms0:/seplugins/vsh.txt", g_vsh_list_head);
-		save_plugin("ms0:/seplugins/game.txt", g_game_list_head);
-		save_plugin("ms0:/seplugins/pops.txt", g_pops_list_head);
+		save_plugin("ms0:/seplugins/vsh.txt", &g_vsh_list_head);
+		save_plugin("ms0:/seplugins/game.txt", &g_game_list_head);
+		save_plugin("ms0:/seplugins/pops.txt", &g_pops_list_head);
 	} else if(g_type == ON_EF0) {
-		save_plugin("ef0:/seplugins/vsh.txt", g_vsh_list_head);
-		save_plugin("ef0:/seplugins/game.txt", g_game_list_head);
-		save_plugin("ef0:/seplugins/pops.txt", g_pops_list_head);
+		save_plugin("ef0:/seplugins/vsh.txt", &g_vsh_list_head);
+		save_plugin("ef0:/seplugins/game.txt", &g_game_list_head);
+		save_plugin("ef0:/seplugins/pops.txt", &g_pops_list_head);
 	}
 
 	return 0;
@@ -319,8 +313,12 @@ static int display_callback(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
-static void create_submenu(struct MenuEntry *entry, struct Plugin *plugin)
+static void create_submenu(struct MenuEntry *entry, struct Plugin *head)
 {
+	struct Plugin *plugin;
+
+	plugin = head->next;
+
 	while(plugin != NULL) {
 		entry->display_callback = &display_callback;
 		entry->change_value_callback = &change_value_callback;
@@ -342,11 +340,13 @@ static void free_submenu(struct Menu *menu)
 	menu->submenu_size = 0;
 }
 
-static int get_plugin_list_count(struct Plugin *plugin)
+static int get_plugin_list_count(struct Plugin *head)
 {
 	int cnt;
+	struct Plugin *plugin;
 
 	cnt = 0;
+	plugin = head->next;
 
 	while(plugin != NULL) {
 		cnt++;
@@ -362,9 +362,9 @@ static void create_submenus(struct Menu *menu)
 	int total;
 	int vsh_cnt, game_cnt, pops_cnt;
 
-	vsh_cnt = get_plugin_list_count(g_vsh_list_head);
-	game_cnt = get_plugin_list_count(g_game_list_head);
-	pops_cnt = get_plugin_list_count(g_pops_list_head);
+	vsh_cnt = get_plugin_list_count(&g_vsh_list_head);
+	game_cnt = get_plugin_list_count(&g_game_list_head);
+	pops_cnt = get_plugin_list_count(&g_pops_list_head);
 
 	total = vsh_cnt + game_cnt + pops_cnt;
 	entry = vpl_alloc(total * sizeof(entry[0]));
@@ -374,9 +374,9 @@ static void create_submenus(struct Menu *menu)
 	}
 
 	memset(entry, 0, total * sizeof(entry[0]));
-	create_submenu(entry, g_vsh_list_head);
-	create_submenu(entry+vsh_cnt, g_game_list_head);
-	create_submenu(entry+vsh_cnt+game_cnt, g_pops_list_head);
+	create_submenu(entry, &g_vsh_list_head);
+	create_submenu(entry+vsh_cnt, &g_game_list_head);
+	create_submenu(entry+vsh_cnt+game_cnt, &g_pops_list_head);
 
 	menu->submenu = entry;
 	menu->submenu_size = total;
@@ -389,29 +389,36 @@ static struct MenuEntry g_plugins_pspgo[] = {
 
 int init_plugin_list(void)
 {
-	g_vsh_list_head = g_vsh_list_tail = NULL;
-	g_game_list_head = g_game_list_tail = NULL;
-	g_pops_list_head = g_pops_list_tail = NULL;
+	g_vsh_list_head.next = NULL;
+	g_game_list_head.next = NULL;
+	g_pops_list_head.next =  NULL;
+
+	g_vsh_list_tail = &g_vsh_list_head;
+	g_game_list_tail = &g_game_list_head;
+	g_pops_list_tail = &g_pops_list_head;
 
 	return 0;
 }
 
-static void free_plugin_list(struct Plugin ** head, struct Plugin ** tail)
+static void free_plugin_list(struct Plugin * head, struct Plugin ** tail)
 {
-	struct Plugin *p;
+	struct Plugin *p, *next;
 
-	while((*head) != NULL) {
-		p = (*head)->next;
+	p = head->next;
 
-		if((*head)->name) {
-			vpl_free((*head)->name);
+	while(p != NULL) {
+		next = p->next;
+
+		if(p->name) {
+			vpl_free(p->name);
 		}
 
-		vpl_free(*head);
-		*head = p;
+		vpl_free(p);
+		p = next;
 	}
 
-	*tail = *head;
+	head->next = NULL;
+	*tail = head;
 }
 
 static void free_plugin_lists(void)
@@ -443,11 +450,11 @@ static int plugins_menu_on_device(struct MenuEntry *entry, struct Menu *menu, co
 
 	init_plugin_list();
 	sprintf(path, "%s/seplugins/vsh.txt", devicename);
-	load_plugins(path, &g_vsh_list_head, &g_vsh_list_tail, TYPE_VSH);
+	load_plugins(path, &g_vsh_list_tail, TYPE_VSH);
 	sprintf(path, "%s/seplugins/game.txt", devicename);
-	load_plugins(path, &g_game_list_head, &g_game_list_tail, TYPE_GAME);
+	load_plugins(path, &g_game_list_tail, TYPE_GAME);
 	sprintf(path, "%s/seplugins/pops.txt", devicename);
-	load_plugins(path, &g_pops_list_head, &g_pops_list_tail, TYPE_POPS);
+	load_plugins(path, &g_pops_list_tail, TYPE_POPS);
 
 	create_submenus(menu);
 

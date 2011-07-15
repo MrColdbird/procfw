@@ -129,41 +129,91 @@ static int buf_read(SceUID fd, char *p)
 	return 1;
 }
 
-static char *get_line(int fd, char *linebuf, int bufsiz)
+static int read_lines(SceUID fd, char *lines, size_t linebuf_size)
 {
-	int i, ret;
+	char *p;
+	int ret;
+	size_t re;
 
-	if (linebuf == NULL || bufsiz < 2)
-		return NULL;
+	if(linebuf_size == 0) {
+		return -1;
+	}
 
-	i = 0;
-	memset(linebuf, 0, bufsiz);
+	p = lines;
+	re = linebuf_size;
 
-	while (i < bufsiz - 1) {
-		char c;
+	while(re -- != 0) {
+		ret = buf_read(fd, p);
 
-		ret = buf_read(fd, &c);
-
-		if (ret < 0 || (ret == 0 && i == 0))
-			return NULL;
-
-		if (ret == 0 || c == '\n' || c == '\r') {
-			linebuf[i] = '\0';
+		if(ret < 0) {
 			break;
 		}
 
-		linebuf[i++] = c;
+		if(ret == 0) {
+			if(p == lines) {
+				ret = -1;
+			}
+
+			break;
+		}
+
+		if(*p == '\r') {
+			continue;
+		}
+
+		if(*p == '\n') {
+			break;
+		}
+
+		p++;
 	}
 
-	linebuf[bufsiz-1] = '\0';
+	if(p < lines + linebuf_size) {
+		*p = '\0';
+	}
 
-	return linebuf;
+	return ret >= 0 ? p - lines : ret;
+}
+
+static inline int ourisspace(char ch)
+{
+	if(ch == '\t' || ch == ' ')
+		return 1;
+
+	return 0;
+}
+
+static void parse_plugin(char *linebuf)
+{
+	char *p;
+	int enabled = 1;
+
+	for(p=linebuf; *p != '\0'; p++) {
+		if(ourisspace(*p)) {
+			*p++ = '\0';
+			enabled = 0;
+
+			while(*p != '\0' && ourisspace(*p)) {
+				p++;
+			}
+
+			if(*p == '1') {
+				enabled = 1;
+			}
+
+			break;
+		}
+	}
+
+	if(enabled) {
+		load_start_module(linebuf);
+	}
 }
 
 static void load_plugin(char * path, int wait)
 {
-	char linebuf[256], *p, *q;
-	int fd, len;
+	char linebuf[256];
+	int fd;
 	char *read_alloc_buf;
 
 	if (path == NULL)
@@ -189,39 +239,11 @@ static void load_plugin(char * path, int wait)
 	}
 
 	read_buf = (void*)(((u32)read_alloc_buf & (~(64-1))) + 64);
+	linebuf[sizeof(linebuf)-1] = '\0';
 
-	do {
-		p = get_line(fd, linebuf, sizeof(linebuf));
-
-		if(p == NULL)
-			break;
-
-		len = strlen(p);
-
-		if(len == 0) {
-			continue;
-		}
-
-		for(q=p; *q != ' ' && *q != '\t' && *q != '\0'; ++q) {
-		}
-
-		if (*q == '\0') {
-			continue;
-		}
-
-		while(len >= 1) {
-			if(p[len-1] == ' ' || p[len-1] == '\t')
-				len--;
-			else
-				break;
-		}
-
-		if(p[len-1] == '1') {
-			*q = '\0';
-			printk("%s module path: %s\n", __func__, p);
-			load_start_module(p);
-		}
-	} while (p != NULL);
+	while(read_lines(fd, linebuf, sizeof(linebuf)-1) >= 0) {
+		parse_plugin(linebuf);
+	}
 
 	sceIoClose(fd);
 	oe_free(read_alloc_buf);

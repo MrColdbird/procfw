@@ -19,7 +19,7 @@
 #define DIRENT_TRACK_H
 
 struct IoDirentEntry {
-	char path[128];
+	char *path;
 	SceUID dfd, iso_dfd;
 	struct IoDirentEntry *next;
 };

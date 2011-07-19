@@ -152,6 +152,7 @@ static int get_nsector(void)
 static int is_ciso(SceUID fd)
 {
 	int ret;
+	u32 *magic;
 
 	g_CISO_hdr.magic[0] = '\0';
 	g_ciso_dec_buf_offset = 0x7FFFFFFF;
@@ -165,7 +166,9 @@ static int is_ciso(SceUID fd)
 		goto exit;
 	}
 
-	if(*(u32*)g_CISO_hdr.magic == 0x4F534943) { // CISO
+	magic = (u32*)g_CISO_hdr.magic;
+
+	if(*magic == 0x4F534943) { // CISO
 		g_CISO_cur_idx = -1;
 		g_ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
 		printk("%s: total block %d\n", __func__, (int)g_ciso_total_block);

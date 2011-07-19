@@ -36,6 +36,7 @@ static int get_game_tag(const char *path, u32 *tag)
 	SceUID fd;
 	char buf[0x150];
 	int ret;
+	u32 *magic;
 
 	*tag = (u32)-1;
 
@@ -56,7 +57,9 @@ static int get_game_tag(const char *path, u32 *tag)
 		goto exit;
 	}
 
-	if(*(u32*)buf != 0x5053507E) /* ~PSP */ {
+	magic = (u32*)buf;
+
+	if(*magic != 0x5053507E) /* ~PSP */ {
 		ret = -3;
 		goto exit;
 	}

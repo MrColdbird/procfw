@@ -39,7 +39,7 @@ struct NoDrmFd {
 	struct NoDrmFd *next;
 };
 
-static struct NoDrmFd *g_head = NULL, *g_tail = NULL;
+static struct NoDrmFd g_head, *g_tail = &g_head;
 
 // found in KHBBS
 static u8 g_drm_magic_1[8] = {
@@ -144,7 +144,7 @@ static inline int is_nodrm_fd(SceUID fd)
 	if (fd < 0)
 		return 0;
 
-	for(fds = g_head; fds != NULL; fds = fds->next) {
+	for(fds = g_head.next; fds != NULL; fds = fds->next) {
 		if(fds->fd == fd)
 			break;
 	}
@@ -172,14 +172,10 @@ static int add_nodrm_fd(SceUID fd)
 	}
 
 	slot->fd = fd;
-	slot->next = NULL;
 	
-	if(g_head == NULL) {
-		g_head = g_tail = slot;
-	} else {
-		g_tail->next = slot;
-		g_tail = slot;
-	}
+	g_tail->next = slot;
+	g_tail = slot;
+	slot->next = NULL;
 
 	unlock();
 
@@ -193,25 +189,17 @@ static int remove_nodrm_fd(SceUID fd)
 
 	lock();
 
-	for(prev = NULL, fds = g_head; fds != NULL; prev = fds, fds = fds->next) {
+	for(prev = &g_head, fds = g_head.next; fds != NULL; prev = fds, fds = fds->next) {
 		if(fd == fds->fd) {
 			break;
 		}
 	}
 
 	if(fds != NULL) {
-		if(prev == NULL) {
-			g_head = fds->next;
+		prev->next = fds->next;
 
-			if(g_head == NULL) {
-				g_tail = NULL;
-			}
-		} else {
-			prev->next = fds->next;
-
-			if(g_tail == fds) {
-				g_tail = prev;
-			}
+		if(g_tail == fds) {
+			g_tail = prev;
 		}
 
 		oe_free(fds);
@@ -556,6 +544,9 @@ int nodrm_init(void)
 #else
 	g_nodrm_sema = sceKernelCreateSema("", 0, 1, 1, NULL);
 #endif
+
+	g_head.next = NULL;
+	g_tail = &g_head;
 
 	return 0;
 }

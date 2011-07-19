@@ -32,67 +32,49 @@
 static inline void lock() {}
 static inline void unlock() {}
 
-static struct IoDirentEntry *g_head = NULL, *g_tail = NULL;
+static struct IoDirentEntry g_head = { "", -1, -1, NULL }, *g_tail = &g_head;
 
-static struct IoDirentEntry *new_dirent(void)
+int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
 {
-	struct IoDirentEntry *entry;
+	struct IoDirentEntry *p;
+   
+	p = oe_malloc(sizeof(*p));
 
-	entry = oe_malloc(sizeof(*entry));
-
-	if(entry == NULL) {
-		return entry;
+	if(p == NULL) {
+		return -1;
 	}
 
-	memset(entry->path, 0, sizeof(entry->path));
-	entry->dfd = entry->iso_dfd = -1;
-	entry->next = NULL;
+	p->dfd = dfd;
+	p->iso_dfd = iso_dfd;
+	STRCPY_S(p->path, path);
 
-	return entry;
-}
-
-static int add_dfd(struct IoDirentEntry *slot)
-{
 	lock();
-
-	if(g_head == NULL) {
-		g_head = g_tail = slot;
-	} else {
-		g_tail->next = slot;
-		g_tail = slot;
-	}
-
+	g_tail->next = p;
+	g_tail = p;
+	g_tail->next = NULL;
 	unlock();
 
 	return 0;
 }
 
-static int remove_dfd(struct IoDirentEntry *slot)
+int dirent_remove(struct IoDirentEntry *p)
 {
 	int ret;
 	struct IoDirentEntry *fds, *prev;
 
 	lock();
 
-	for(prev = NULL, fds = g_head; fds != NULL; prev = fds, fds = fds->next) {
-		if(slot == fds) {
+	for(prev = &g_head, fds = g_head.next; fds != NULL; prev = fds, fds = fds->next) {
+		if(p == fds) {
 			break;
 		}
 	}
 
 	if(fds != NULL) {
-		if(prev == NULL) {
-			g_head = fds->next;
+		prev->next = fds->next;
 
-			if(g_head == NULL) {
-				g_tail = NULL;
-			}
-		} else {
-			prev->next = fds->next;
-
-			if(g_tail == fds) {
-				g_tail = prev;
-			}
+		if(g_tail == fds) {
+			g_tail = prev;
 		}
 
 		oe_free(fds);
@@ -106,29 +88,6 @@ static int remove_dfd(struct IoDirentEntry *slot)
 	return ret;
 }
 
-int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
-{
-	struct IoDirentEntry *p;
-   
-	p = new_dirent();
-
-	if(p == NULL) {
-		return -1;
-	}
-
-	p->dfd = dfd;
-	p->iso_dfd = iso_dfd;
-	STRCPY_S(p->path, path);
-	add_dfd(p);
-
-	return 0;
-}
-
-void dirent_remove(struct IoDirentEntry *p)
-{
-	remove_dfd(p);
-}
-
 struct IoDirentEntry *dirent_search(SceUID dfd)
 {
 	struct IoDirentEntry *fds;
@@ -136,7 +95,7 @@ struct IoDirentEntry *dirent_search(SceUID dfd)
 	if (dfd < 0)
 		return NULL;
 
-	for(fds = g_head; fds != NULL; fds = fds->next) {
+	for(fds = g_head.next; fds != NULL; fds = fds->next) {
 		if(fds->dfd == dfd)
 			break;
 	}

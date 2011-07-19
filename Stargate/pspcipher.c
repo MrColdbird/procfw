@@ -363,10 +363,15 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	}
 
 	if (pBlock->type < 2 || pBlock->type > 7) {
+		u32 *p;
+
 		memcpy(buf4, buf2 + 0x4, 0x14);
-		*((u32*)buf2) = 0x14c;
+		p = (u32*)buf2;
+		*p = 0x14c;
 		memcpy(buf2 + 4, buf3, 0x14);
 	} else {
+		u32 *p;
+
 		memcpy(buf4, buf2 + 0x6c, 0x14);
 
 		if (pBlock->type == 4) {
@@ -388,7 +393,8 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		}
 
 		memcpy(buf2+0x04, buf2, 0x04);
-		*((u32*)buf2) = 0x014C;
+		p = (u32*)buf2;
+		*p = 0x14C;
 		memcpy(buf2+0x08, buf3, 0x10);	
 	}
 

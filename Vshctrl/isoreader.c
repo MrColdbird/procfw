@@ -370,6 +370,7 @@ static int findPath(const char *path, Iso9660DirectoryRecord *result_record)
 int isoOpen(const char *path)
 {
 	int ret;
+	u32 *magic;
 
 	if (g_isofd >= 0) {
 		isoClose();
@@ -392,7 +393,9 @@ int isoOpen(const char *path)
 		goto error;
 	}
 
-	if (*(u32*)g_ciso_h.magic == 0x4F534943 && g_ciso_h.block_size == SECTOR_SIZE) {
+	magic = (u32*)g_ciso_h.magic;
+
+	if (*magic == 0x4F534943 && g_ciso_h.block_size == SECTOR_SIZE) {
 		g_is_compressed = 1;
 	} else {
 		g_is_compressed = 0;

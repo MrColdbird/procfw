@@ -25,6 +25,7 @@
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <psputility.h>
+#include <ctype.h>
 
 #include "kubridge.h"
 #include "systemctrl.h"

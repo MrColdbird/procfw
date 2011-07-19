@@ -282,7 +282,7 @@ static int findFile(const char * file, u32 lba, u32 dir_size, u32 is_dir, Iso966
 
 			if (0 == strcmp(name, file)) {
 				if (is_dir) {
-					if(!rec->fileFlags & ISO9660_FILEFLAGS_DIR) {
+					if(!(rec->fileFlags & ISO9660_FILEFLAGS_DIR)) {
 						return -14;
 					}
 				}

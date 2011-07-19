@@ -48,14 +48,22 @@ int vshDetectDiscType(const char *path)
 		pspSdkSetK1(k1);
 		return result;
 	}
+
+	result = 0;
 	
 	if(has_file("/PSP_GAME/SYSDIR/EBOOT.BIN")) {
-		result = PSP_UMD_TYPE_GAME;
-	} else if(has_file("/UMD_VIDEO/PLAYLIST.UMD")) {
-		result = PSP_UMD_TYPE_VIDEO;
-	} else if(has_file("/UMD_AUDIO/PLAYLIST.UMD")) {
-		result = PSP_UMD_TYPE_AUDIO;
-	} else {
+		result |= PSP_UMD_TYPE_GAME;
+	} 
+
+	if(has_file("/UMD_VIDEO/PLAYLIST.UMD")) {
+		result |= PSP_UMD_TYPE_VIDEO;
+	} 
+
+	if(has_file("/UMD_AUDIO/PLAYLIST.UMD")) {
+		result |= PSP_UMD_TYPE_AUDIO;
+	}
+
+	if(result == 0) {
 		result = -2;
 	}
 

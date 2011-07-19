@@ -79,22 +79,13 @@ int confirm_usage_right(void)
 	return !is_trusted_user(shabuf);
 }
 
-static inline u32 get_random(void)
-{
-	u32 rand;
-
-	sceUtilsBufferCopyWithRange(&rand, sizeof(rand), NULL, 0, KIRK_PRNG_CMD);
-
-	return rand;
-}
-
 static int crash_thread(SceSize args, void *argp)
 {
 	while (1) {
 		u32 ret;
 		int i;
 
-		ret = (0x88000000 + (get_random() % 0x400000)) & 0xFFFFFFF0;
+		ret = (0x88000000 + (sctrlKernelRand() % 0x400000)) & 0xFFFFFFF0;
 		printk("%s: 0x%08X\n", __func__, ret);
 
 		for(i=0; i<16; ++i) {

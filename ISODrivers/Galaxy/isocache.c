@@ -21,7 +21,6 @@ static u32 read_missed = 0;
 static u32 cache_on = 0;
 
 #define NR_CACHE_REQ 8
-#define KIRK_PRNG_CMD 0xE
 #define CACHE_MINIMUM_THRESHOLD (16 * 1024)
 
 static u32 cache_policy = CACHE_POLICY_LRU;
@@ -135,15 +134,6 @@ static void update_cache_info(void)
 	}
 }
 
-static inline u32 get_random(void)
-{
-	u32 rand;
-
-	sceUtilsBufferCopyWithRange(&rand, sizeof(rand), NULL, 0, KIRK_PRNG_CMD);
-
-	return rand;
-}
-
 static struct ISOCache *get_retirng_cache(void)
 {
 	size_t i, retiring;
@@ -165,7 +155,7 @@ static struct ISOCache *get_retirng_cache(void)
 			}
 		}
 	} else if(cache_policy == CACHE_POLICY_RR) {
-		retiring = get_random() % g_caches_num;
+		retiring = sctrlKernelRand() % g_caches_num;
 	}
 
 exit:

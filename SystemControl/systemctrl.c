@@ -22,6 +22,7 @@
 #include <pspsysevent.h>
 #include <pspiofilemgr.h>
 #include <pspsysmem_kernel.h>
+#include <pspcrypt.h>
 #include <stdio.h>
 #include <string.h>
 #include "main.h"
@@ -1208,4 +1209,31 @@ void sctrlSESetDiscType(int type)
 int sctrlSEGetDiscType(void)
 {
 	return rebootex_conf.iso_disc_type;
+}
+
+u32 sctrlKernelRand(void)
+{
+	u32 k1, result;
+	u8 *alloc, *ptr;
+
+	enum {
+		KIRK_PRNG_CMD=0xE,
+	};
+
+	k1 = pspSdkSetK1(0);
+
+	alloc = oe_malloc(20 + 4);
+
+	if(alloc == NULL) {
+		asm("break");
+	}
+
+	/* output ptr has to be 4 bytes aligned */
+	ptr = (void*)(((u32)alloc & (~(4-1))) + 4);
+	sceUtilsBufferCopyWithRange(ptr, 20, NULL, 0, KIRK_PRNG_CMD);
+	result = *(u32*)ptr;
+	oe_free(alloc);
+	pspSdkSetK1(k1);
+
+	return result;
 }

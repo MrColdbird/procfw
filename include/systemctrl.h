@@ -376,4 +376,9 @@ void sctrlHENLoadModuleOnReboot(char *module_after, void *buf, int size, int fla
  */
 int sctrlKernelSetNidResolver(char *libname, u32 enabled);
 
+/**
+ * Get a random u32 key from PSP Kirk PRNG
+ */
+u32 sctrlKernelRand(void);
+
 #endif

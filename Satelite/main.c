@@ -176,6 +176,15 @@ int load_start_module(char *path)
 	return ret;
 }
 
+const char *get_umdvideo_iso_path(void)
+{
+	if(psp_model == PSP_GO) {
+		return "ef0:/ISO/VIDEO";
+	}
+	
+	return "ms0:/ISO/VIDEO";
+}
+
 int get_umdvideo_num(void)
 {
 	SceIoDirent dir;
@@ -183,7 +192,7 @@ int get_umdvideo_num(void)
 
 	memset(&dir, 0, sizeof(dir));
 
-	dfd = sceIoDopen("ms0:/ISO/VIDEO");
+	dfd = sceIoDopen(get_umdvideo_iso_path());
 
 	while (sceIoDread(dfd, &dir) > 0) {
 		const char *p;
@@ -271,17 +280,17 @@ int TSRThread(SceSize args, void *argp)
 		if(0 != strcmp(umdvideo_path, "None")) {
 #ifdef CONFIG_639
 			if(psp_fw_version == FW_639)
-				scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+				scePaf_sprintf(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
 #endif
 
 #ifdef CONFIG_635
 			if(psp_fw_version == FW_635)
-				scePaf_sprintf(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+				scePaf_sprintf(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
 #endif
 
 #ifdef CONFIG_620
 			if (psp_fw_version == FW_620)
-				scePaf_sprintf_620(isopath, "%s/%s", "ms0:/ISO/VIDEO", umdvideo_path);
+				scePaf_sprintf_620(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
 #endif
 
 			if(0 == sceIoGetstat(isopath, &stat)) {

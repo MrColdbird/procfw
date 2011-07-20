@@ -78,6 +78,11 @@ PatchOffset g_639_offsets = {
 			0x00012B08,
 			0x000131EC,
 		},
+		.vshbridge_get_model_call = {
+			0x0000670C,
+			0x00020674,
+			0x0002D1B4,
+		},
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
@@ -148,6 +153,11 @@ PatchOffset g_635_offsets = {
 			0x00012B08,
 			0x000131EC,
 		},
+		.vshbridge_get_model_call = {
+			0x0000670C,
+			0x00020674,
+			0x0002D1B4,
+		},
 	},
 	.custom_update_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
@@ -217,6 +227,11 @@ PatchOffset g_620_offsets = {
 			0x00011BA0,
 			0x0001256C,
 			0x00012D8C,
+		},
+		.vshbridge_get_model_call = {
+			0x000065A0,
+			0x0001FEC0,
+			0x0002C944,
 		},
 	},
 	.custom_update_patch = {

@@ -111,7 +111,7 @@ int get_umdvideo_path(int n, char *path, int len)
 	if(n <= 0 || n > umdvideo_num)
 		return -1;
 
-	dfd = sceIoDopen("ms0:/ISO/VIDEO");
+	dfd = sceIoDopen(get_umdvideo_iso_path());
 
 	if(dfd < 0) {
 		return -2;
@@ -168,10 +168,6 @@ int menu_draw(void)
 	blit_string(pointer[0], pointer[1], "PRO VSH MENU");
 
 	for(max_menu=0;max_menu<TMENU_MAX;max_menu++) {
-		if(psp_model == PSP_GO && max_menu == TMENU_UMD_VIDEO) {
-			continue;
-		}
-
 		fc = 0xffffff;
 		bc = (max_menu==menu_sel) ? 0xff8080 : 0xc00000ff;
 		blit_set_color(fc,bc);
@@ -204,22 +200,12 @@ int menu_draw(void)
 			}
 
 			cur_menu = max_menu;
-
-			if(psp_model == PSP_GO && max_menu > TMENU_UMD_VIDEO) {
-				cur_menu--;
-			} 
-
 			blit_string(xPointer, (pointer[5] + cur_menu)*8, msg);
 			msg = item_str[max_menu];
 
 			if(msg) {
 				blit_set_color(item_fcolor[max_menu],bc);
-
-				if(psp_model == PSP_GO) {
-					blit_string( (pointer[6] * 8) + 128, (pointer[5] + cur_menu)*8, msg);
-				} else {
-					blit_string( (pointer[6] * 8) + 128, (pointer[5] + cur_menu)*8, msg);
-				}
+				blit_string( (pointer[6] * 8) + 128, (pointer[5] + cur_menu)*8, msg);
 			}
 		}
 	}
@@ -347,10 +333,6 @@ int menu_ctrl(u32 button_on)
 	if(button_on & PSP_CTRL_UP) direction--;
 
 	menu_sel = limit(menu_sel+direction, 0, TMENU_MAX-1);
-
-	if(psp_model == PSP_GO && menu_sel == TMENU_UMD_VIDEO) {
-		menu_sel = limit(menu_sel+direction, 0, TMENU_MAX-1);
-	}
 
 	// LEFT & RIGHT
 	direction = -2;

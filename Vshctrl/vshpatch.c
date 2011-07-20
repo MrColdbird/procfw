@@ -441,6 +441,26 @@ int umdLoadExecUpdater(char * file, struct SceKernelLoadExecVSHParam * param)
 	return ret;
 }
 
+static void patch_vsh_module_for_pspgo_umdvideo(SceModule2 *mod)
+{
+	u32 text_addr = mod->text_addr, prev, i;
+
+	/*
+	 * vshbridge_get_model_call:
+	 *  6.35: sceVshBridge_AD90BEE5
+	 *  6.20: sceVshBridge_63E40313
+	 */
+
+	for(i=0; i<NELEMS(g_offs->vsh_module_patch.vshbridge_get_model_call); ++i) {
+		u32 offset;
+
+		offset = g_offs->vsh_module_patch.vshbridge_get_model_call[i];
+		prev = _lw(text_addr + offset + 4);
+		_sw(prev, text_addr + offset);
+		_sw(0x24020000 | PSP_4000, text_addr + offset + 4);
+	}
+}
+
 static void patch_vsh_module(SceModule2 * mod)
 {
 	//enable homebrew boot
@@ -455,6 +475,10 @@ static void patch_vsh_module(SceModule2 * mod)
 
 	int i = 0; for(; i < NELEMS(g_offs->vsh_module_patch.PBPFWCheck); i++) {
 		_sw(MAKE_SYSCALL(sctrlKernelQuerySystemCall(fakeParamInexistance)), mod->text_addr + g_offs->vsh_module_patch.PBPFWCheck[i]);
+	}
+
+	if(psp_model == PSP_GO && sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
+		patch_vsh_module_for_pspgo_umdvideo(mod);
 	}
 }
 

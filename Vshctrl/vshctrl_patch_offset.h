@@ -55,6 +55,7 @@ struct VshModulePatch {
 	u32 loadexecDisc;
 	u32 loadexecDiscUpdater;
 	u32 PBPFWCheck[4];
+	u32 vshbridge_get_model_call[3];
 };
 
 struct CustomUpdatePatch {

@@ -77,6 +77,8 @@ int scePaf_snprintf_620(char *buffer,int c , const char *format, ...);
 int scePaf_memcpy_620(void *path , void *name , int size);
 int scePaf_strcpy_620(char *path , const char *name);
 
+const char *get_umdvideo_iso_path(void);
+
 extern u32 psp_fw_version;
 
 #endif

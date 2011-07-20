@@ -37,7 +37,6 @@
 
 extern u32 psp_model;
 extern int umdvideo_idx;
-extern int umdvideo_num;
 
 int menu_draw(void);
 int menu_setup(void);
@@ -77,8 +76,24 @@ int scePaf_snprintf_620(char *buffer,int c , const char *format, ...);
 int scePaf_memcpy_620(void *path , void *name , int size);
 int scePaf_strcpy_620(char *path , const char *name);
 
-const char *get_umdvideo_iso_path(void);
+typedef struct _UmdVideoEntry {
+	char *path;
+	struct _UmdVideoEntry *next;
+} UmdVideoEntry;
+
+typedef struct _UmdVideoList {
+	UmdVideoEntry head, *tail;
+	size_t count;
+} UmdVideoList;
+
+int umdvideolist_add(UmdVideoList *list, const char *path);
+char *umdvideolist_get(UmdVideoList *list, size_t n);
+size_t umdvideolist_count(UmdVideoList *list);
+void umdvideolist_clear(UmdVideoList *list);
+int umdvideolist_find(UmdVideoList *list, const char *search);
+void umdvideolist_init(UmdVideoList *list);
 
 extern u32 psp_fw_version;
+extern UmdVideoList g_umdlist;
 
 #endif

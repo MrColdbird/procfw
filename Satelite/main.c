@@ -30,6 +30,7 @@
 #include "systemctrl.h"
 #include "systemctrl_se.h"
 #include "kubridge.h"
+#include "vpl.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -59,12 +60,15 @@ static SEConfig cnf_old;
 u32 psp_fw_version;
 u32 psp_model;
 
+UmdVideoList g_umdlist;
+
 int module_start(int argc, char *argv[])
 {
 	int	thid;
 
 	psp_model = kuKernelGetModel();
 	psp_fw_version = sceKernelDevkitVersion();
+	vpl_init();
 	thid = sceKernelCreateThread("VshMenu_Thread", TSRThread, 16 , 0x1000 ,0 ,0);
 
 	thread_id=thid;
@@ -176,23 +180,18 @@ int load_start_module(char *path)
 	return ret;
 }
 
-const char *get_umdvideo_iso_path(void)
-{
-	if(psp_model == PSP_GO) {
-		return "ef0:/ISO/VIDEO";
-	}
-	
-	return "ms0:/ISO/VIDEO";
-}
-
-int get_umdvideo_num(void)
+static int get_umdvideo(UmdVideoList *list, char *path)
 {
 	SceIoDirent dir;
 	int result = 0, dfd;
+	char fullpath[256];
 
 	memset(&dir, 0, sizeof(dir));
+	dfd = sceIoDopen(path);
 
-	dfd = sceIoDopen(get_umdvideo_iso_path());
+	if(dfd < 0) {
+		return dfd;
+	}
 
 	while (sceIoDread(dfd, &dir) > 0) {
 		const char *p;
@@ -203,7 +202,22 @@ int get_umdvideo_num(void)
 			p = dir.d_name;
 
 		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso")) {
-			result++;
+#ifdef CONFIG_639
+			if(psp_fw_version == FW_639)
+				scePaf_sprintf(fullpath, "%s/%s", path, dir.d_name);
+#endif
+
+#ifdef CONFIG_635
+			if(psp_fw_version == FW_635)
+				scePaf_sprintf(fullpath, "%s/%s", path, dir.d_name);
+#endif
+
+#ifdef CONFIG_620
+			if (psp_fw_version == FW_620)
+				scePaf_sprintf_620(fullpath, "%s/%s", path, dir.d_name);
+#endif
+
+			umdvideolist_add(list, fullpath);
 		}
 	}
 
@@ -212,25 +226,68 @@ int get_umdvideo_num(void)
 	return result;
 }
 
+static void launch_umdvideo_mount(void)
+{
+	SceIoStat stat;
+	char *path;
+	int type;
+
+	if(0 == umdvideo_idx) {
+		if(sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
+			// cancel mount
+			sctrlSESetUmdFile("");
+			sctrlSESetBootConfFileIndex(MODE_UMD);
+			sctrlKernelExitVSH(NULL);
+		}
+
+		return;
+	}
+
+	path = umdvideolist_get(&g_umdlist, (size_t)(umdvideo_idx-1));
+
+	if(path == NULL) {
+		return;
+	}
+
+	if(sceIoGetstat(path, &stat) < 0) {
+		return;
+	}
+
+	type = vshDetectDiscType(path);
+	printk("%s: detected disc type 0x%02X for %s\n", __func__, type, path);
+
+	if(type < 0) {
+		return;
+	}
+
+	sctrlSESetUmdFile(path);
+	sctrlSESetBootConfFileIndex(MODE_VSHUMD);
+	sctrlSESetDiscType(type);
+	sctrlKernelExitVSH(NULL);
+}
+
 int TSRThread(SceSize args, void *argp)
 {
-	char *p;
-
 	sceKernelChangeThreadPriority(0, 8);
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
-	umdvideo_num = get_umdvideo_num();
+	umdvideolist_init(&g_umdlist);
+	umdvideolist_clear(&g_umdlist);
+	get_umdvideo(&g_umdlist, "ms0:/ISO/VIDEO");
+	get_umdvideo(&g_umdlist, "ef0:/ISO/VIDEO");
 	kuKernelGetUmdFile(umdvideo_path, sizeof(umdvideo_path));
 
-	p = strrchr(umdvideo_path, '/');
-
-	if (p != NULL) {
-		strcpy(umdvideo_path, p + 1);
-	}
-
 	if(umdvideo_path[0] == '\0') {
-		strcpy(umdvideo_path, "None");
+		umdvideo_idx = 0;
+	} else {
+		umdvideo_idx = umdvideolist_find(&g_umdlist, umdvideo_path);
+
+		if(umdvideo_idx >= 0) {
+			umdvideo_idx++;
+		} else {
+			umdvideo_idx = 0;
+		}
 	}
 
 #ifdef CONFIG_639
@@ -253,8 +310,8 @@ int TSRThread(SceSize args, void *argp)
 			break; // end of VSH ?
 
 		if(menu_mode > 0) {
-			menu_draw();
 			menu_setup();
+			menu_draw();
 		}
 
 		button_func();
@@ -274,42 +331,11 @@ int TSRThread(SceSize args, void *argp)
 	} else if (stop_flag == 6) {
 		load_start_module("flash0:/vsh/module/_recovery.prx");
 	} else if (stop_flag == 7) {
-		char isopath[256];
-		SceIoStat stat;
-
-		if(0 != strcmp(umdvideo_path, "None")) {
-#ifdef CONFIG_639
-			if(psp_fw_version == FW_639)
-				scePaf_sprintf(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
-#endif
-
-#ifdef CONFIG_635
-			if(psp_fw_version == FW_635)
-				scePaf_sprintf(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
-#endif
-
-#ifdef CONFIG_620
-			if (psp_fw_version == FW_620)
-				scePaf_sprintf_620(isopath, "%s/%s", get_umdvideo_iso_path(), umdvideo_path);
-#endif
-
-			if(0 == sceIoGetstat(isopath, &stat)) {
-				int type;
-
-				type = vshDetectDiscType(isopath);
-				printk("%s: detected disc type 0x%02X for %s\n", __func__, type, isopath);
-				type = type >= 0 ? type : PSP_UMD_TYPE_VIDEO;
-				sctrlSESetUmdFile(isopath);
-				sctrlSESetBootConfFileIndex(MODE_VSHUMD);
-				sctrlSESetDiscType(type);
-				sctrlKernelExitVSH(NULL);
-			}
-		} else if(sctrlSEGetBootConfFileIndex() == MODE_VSHUMD) {
-			sctrlSESetUmdFile("");
-			sctrlSESetBootConfFileIndex(MODE_UMD);
-			sctrlKernelExitVSH(NULL);
-		}
+		launch_umdvideo_mount();
 	}
+
+	umdvideolist_clear(&g_umdlist);
+	vpl_finish();
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);
 

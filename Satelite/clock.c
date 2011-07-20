@@ -25,8 +25,9 @@ extern SEConfig cnf;
 
 const int cpu_list[]={0, 20, 75, 100, 133, 222, 266, 300, 333};
 const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
+
+/** 0 - None, 1~count - umdvideo entry */
 int umdvideo_idx = 0;
-int umdvideo_num = 0;
 
 int cpu2no(int cpu)
 {
@@ -95,7 +96,7 @@ void change_umd_mode(int dir)
 
 void change_umd_mount_idx(int dir)
 {
-	umdvideo_idx = limit(umdvideo_idx+dir, 0, umdvideo_num);
+	umdvideo_idx = limit(umdvideo_idx+dir, 0, umdvideolist_count(&g_umdlist));
 }
 
 void change_region(int dir, int max)

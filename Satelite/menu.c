@@ -102,50 +102,6 @@ static int menu_sel = TMENU_XMB_CLOCK;
 const int xyPoint[] ={0x98, 0x30, 0xC0, 0xA0, 0x70, 0x08, 0x0E, 0xA8};//data243C=
 const int xyPoint2[] ={0xB0, 0x30, 0xD8, 0xB8, 0x88, 0x08, 0x11, 0xC0};//data2458=
 
-int get_umdvideo_path(int n, char *path, int len)
-{
-	SceUID dfd;
-	SceIoDirent dir;
-	int ret;
-
-	if(n <= 0 || n > umdvideo_num)
-		return -1;
-
-	dfd = sceIoDopen(get_umdvideo_iso_path());
-
-	if(dfd < 0) {
-		return -2;
-	}
-
-	memset(&dir, 0, sizeof(dir));
-
-	while((ret = sceIoDread(dfd, &dir)) > 0) {
-		const char *p;
-
-		p = strrchr(dir.d_name, '.');
-
-		if(p == NULL)
-			p = dir.d_name;
-
-		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso")) {
-			if(--n == 0) {
-				break;
-			}
-		}
-	}
-
-	sceIoDclose(dfd);
-
-	if(ret <= 0) {
-		return -3;
-	}
-
-	strncpy(path, dir.d_name, len);
-	path[len-1] = '\0';
-
-	return 0;
-}
-
 int menu_draw(void)
 {
 	u32 fc,bc;
@@ -224,6 +180,7 @@ int menu_setup(void)
 {
 	int i;
 	const char *bridge;
+	const char *umdvideo_disp;
 
 	// preset
 	for(i=0;i<TMENU_MAX;i++) {
@@ -309,7 +266,15 @@ int menu_setup(void)
 		bridge = device;
 	}
 
-	item_str[TMENU_UMD_VIDEO] = umdvideo_path;
+	umdvideo_disp = strrchr(umdvideo_path, '/');
+
+	if(umdvideo_disp == NULL) {
+		umdvideo_disp = umdvideo_path;
+	} else {
+		umdvideo_disp++;
+	}
+
+	item_str[TMENU_UMD_VIDEO] = umdvideo_disp;
 	item_str[TMENU_USB_DEVICE] = bridge;
 	item_str[TMENU_UMD_MODE] = iso[(int)cnf.umdmode];
 	
@@ -362,7 +327,19 @@ int menu_ctrl(u32 button_on)
 			if(direction) {
 			   	change_umd_mount_idx(direction);
 
-				if (0 != get_umdvideo_path(umdvideo_idx, umdvideo_path, sizeof(umdvideo_path))) {
+				if(umdvideo_idx != 0) {
+					char *umdpath;
+
+					umdpath = umdvideolist_get(&g_umdlist, umdvideo_idx-1);
+
+					if(umdpath != NULL) {
+						strncpy(umdvideo_path, umdpath, sizeof(umdvideo_path));
+						umdvideo_path[sizeof(umdvideo_path)-1] = '\0';
+					} else {
+						goto none;
+					}
+				} else {
+none:
 					strcpy(umdvideo_path, "None");
 				}
 			} else {

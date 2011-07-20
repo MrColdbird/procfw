@@ -91,6 +91,12 @@ void *vpl_realloc(void *ptr, size_t size)
 {
 	void *p;
 
+	if(size == 0 && ptr != NULL) {
+		vpl_free(ptr);
+
+		return NULL;
+	}
+
 	p = vpl_alloc(size);
 
 	if(p == NULL) {

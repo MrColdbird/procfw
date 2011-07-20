@@ -34,6 +34,23 @@ static inline void unlock() {}
 
 static struct IoDirentEntry g_head = { "", -1, -1, NULL }, *g_tail = &g_head;
 
+static char *oe_strdup(const char *str)
+{
+	int len;
+	char *p;
+
+	len = strlen(str) + 1;
+	p = oe_malloc(len);
+
+	if(p == NULL) {
+		return p;
+	}
+
+	strcpy(p, str);
+
+	return p;
+}
+
 int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
 {
 	struct IoDirentEntry *p;
@@ -46,7 +63,13 @@ int dirent_add(SceUID dfd, SceUID iso_dfd, const char *path)
 
 	p->dfd = dfd;
 	p->iso_dfd = iso_dfd;
-	STRCPY_S(p->path, path);
+	p->path = oe_strdup(path);
+
+	if(p->path == NULL) {
+		oe_free(p);
+
+		return -2;
+	}
 
 	lock();
 	g_tail->next = p;
@@ -77,6 +100,7 @@ int dirent_remove(struct IoDirentEntry *p)
 			g_tail = prev;
 		}
 
+		oe_free(fds->path);
 		oe_free(fds);
 		ret = 0;
 	} else {

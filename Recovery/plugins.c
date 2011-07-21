@@ -172,11 +172,11 @@ void parse_plugin(struct Plugin **tail, char *linebuf, int type)
 	struct Plugin *plugin;
 
 	for(p=linebuf; *p != '\0'; p++) {
-		if(isspace(*p)) {
+		if(isspace((int)*p)) {
 			*p++ = '\0';
 			enabled = 0;
 
-			while(*p != '\0' && isspace(*p)) {
+			while(*p != '\0' && isspace((int)*p)) {
 				p++;
 			}
 

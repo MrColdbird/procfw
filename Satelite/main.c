@@ -280,6 +280,7 @@ int TSRThread(SceSize args, void *argp)
 
 	if(umdvideo_path[0] == '\0') {
 		umdvideo_idx = 0;
+		strcpy(umdvideo_path, "None");
 	} else {
 		umdvideo_idx = umdvideolist_find(&g_umdlist, umdvideo_path);
 
@@ -287,6 +288,7 @@ int TSRThread(SceSize args, void *argp)
 			umdvideo_idx++;
 		} else {
 			umdvideo_idx = 0;
+			strcpy(umdvideo_path, "None");
 		}
 	}
 

@@ -527,6 +527,7 @@ static nid_entry sceDisplay_driver_nid[] = {
 	{ 0xA83EF139, 0x575B0CC5, }, // sceDisplayAdjustAccumulatedHcount
 	{ 0x21038913, 0x4E6526A4, }, // sceDisplayIsVsync
 	{ 0x92C8F8B7, 0x823F72B2, }, // sceDisplayIsPseudoField
+	{ 0xAE0E8972, 0x8930B3A9, }, // sceDisplaySetPseudoVsync
 
 	{ 0x643F3841, 0xDF998667, },
 	{ 0x820C6038, 0xCCEEA6BB, },

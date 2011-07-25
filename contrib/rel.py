@@ -5,7 +5,7 @@
 import os, shutil, sys
 
 NIGHTLY=0
-VERSION="B8"
+VERSION="B9"
 
 PRO_BUILD = [
 			{ "fn": "620PRO-%s.rar", "config": "make CONFIG_620=1" },

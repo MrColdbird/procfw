@@ -154,6 +154,8 @@ static int stargate_module_chain(SceModule2 *mod)
 		hide_cfw_folder((SceModule*)mod);
 	}
 
+	module_blacklist((SceModule*)mod);
+
 #ifdef PSID_CHECK
 	if(g_crash) {
 		crash_me();
@@ -180,6 +182,46 @@ static inline int is_homebrews_runlevel(void)
 static void patch_sceLoadExec(void)
 {
 	sctrlPatchModule("sceLoadExec", NOP, g_offs->LoadExecForUser_362A956B_fix);
+}
+
+static int start_module_handler(int modid, SceSize argsize, void *argp, int *modstatus, SceKernelSMOption *opt)
+{
+	SceModule *mod;
+	PspModuleImport *import;
+	int patched = 0;
+
+	mod = sceKernelFindModuleByUID(modid);
+
+	if(mod == NULL) {
+		return -1;
+	}
+
+	import = find_import_lib(mod, "Kernel_LibrarZ");
+
+	if(import != NULL) {
+		strcpy((char*)import->name, "Kernel_Library");
+		patched = 1;
+	}
+
+	import = find_import_lib(mod, "Kernel_Librar0");
+
+	if(import != NULL) {
+		strcpy((char*)import->name, "Kernel_Library");
+		patched = 1;
+	}
+
+	import = find_import_lib(mod, "sceUtilitO");
+
+	if(import != NULL) {
+		strcpy((char*)import->name, "sceUtility");
+		patched = 1;
+	}
+
+	if(patched) {
+		printk("%s: patched imported library name\n", __func__);
+	}
+
+	return -1;
 }
 
 int module_start(SceSize args, void *argp)
@@ -227,6 +269,7 @@ int module_start(SceSize args, void *argp)
 #endif
 	
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
+	sctrlSetCustomStartModule(&start_module_handler);
 
 #ifdef PSID_CHECK
 	g_crash = confirm_usage_right();

@@ -254,7 +254,7 @@ int _PartitionCheck(unsigned int * st0, unsigned int * check)
 	if(fd < 0) return PartitionCheck(st0, check);
 
 	//get file position
-	int pos = sceIoLseek(fd, 0, PSP_SEEK_CUR);
+	SceOff pos = sceIoLseek(fd, 0, PSP_SEEK_CUR);
 
 	//invalid file position
 	if(pos < 0) return PartitionCheck(st0, check);

@@ -18,6 +18,9 @@
 #ifndef NID_RESOLVER_H
 #define NID_RESOLVER_H
 
+#define NID_ENTRY(libname) \
+	{ #libname, NELEMS(libname##_nid), libname##_nid, 1, }
+
 typedef struct _nid_entry {
 	u32 old;
 	u32 new;

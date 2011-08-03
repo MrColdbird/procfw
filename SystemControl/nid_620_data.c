@@ -1177,8 +1177,6 @@ static nid_entry scePaf_nid[] = {
 };
 
 resolver_config nid_620_fix[] = {
-#define NID_ENTRY(libname) \
-	{ #libname, NELEMS(libname##_nid), libname##_nid, 1, }
 	NID_ENTRY(SysMemForKernel),
 	NID_ENTRY(KDebugForKernel),
 	NID_ENTRY(LoadCoreForKernel),
@@ -1214,7 +1212,6 @@ resolver_config nid_620_fix[] = {
 	NID_ENTRY(sceClockgen_driver),
 	NID_ENTRY(sceCodec_driver),
 	NID_ENTRY(scePaf),
-#undef NID_ENTRY
 };
 
 u32 nid_620_fix_size = NELEMS(nid_620_fix);

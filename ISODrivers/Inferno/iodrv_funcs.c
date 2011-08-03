@@ -65,7 +65,7 @@ struct IsoOpenSlot {
 };
 
 struct IoIoctlSeekCmd {
-	u64 offset;
+	SceOff offset;
 	u32 unk;
 	u32 whence;
 };

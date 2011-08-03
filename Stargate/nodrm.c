@@ -365,7 +365,7 @@ exit:
 
 SceOff myNpDrmEdataGetDataSize(SceUID fd)
 {
-	u64 end;
+	SceOff end;
 
 	if (sceKernelFindModuleByName("scePspNpDrm_Driver") == NULL) {
 		end = 0x8002013A;
@@ -373,7 +373,7 @@ SceOff myNpDrmEdataGetDataSize(SceUID fd)
 	}
 	
 	if (is_nodrm_fd(fd)) {
-		u64 off;
+		SceOff off;
 	   
 		off = sceIoLseek(fd, 0, PSP_SEEK_CUR);
 		end = sceIoLseek(fd, 0, PSP_SEEK_END);

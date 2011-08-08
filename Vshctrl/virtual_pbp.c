@@ -1066,13 +1066,13 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 			apitype = 0x123;
 		}
 
+		param->key = "umdemu";
 		loadexec_file = vpbp->name;
 	} else {
+		param->key = "game";
 		apitype = 0x120;
 		loadexec_file = param->argp;
 	}
-
-	param->key = "umdemu";
 
 	//start game image
 	return sctrlKernelLoadExecVSHWithApitype(apitype, loadexec_file, param);

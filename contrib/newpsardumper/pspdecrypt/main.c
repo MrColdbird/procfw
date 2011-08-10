@@ -682,7 +682,7 @@ typedef struct
 
 static TAG_INFO2 g_tagInfo2[] =
 {
-	{ 0x4C9494F0, keys660_1k, 0x43, 3},
+	{ 0x4C9494F0, keys660_1k, 0x43},
 
 	{ 0x4C948AF0, keys636_1k, 0x43, 3},
 	{ 0x4C948BF0, keys636_2k, 0x43, 3},

@@ -137,28 +137,56 @@ static void prx_xor_key_single(u8 *buf, u32 size, u8 *xor_key)
 	return prx_xor_key(buf, size, xor_key, NULL);
 }
 
-static u8 buf1[0x150];
-static u8 buf2[0x150];
-static u8 buf3[0x90];
-static u8 buf4[0xb4];
-static u8 buf5[0x20];
+/*
+ * 6.39/01g: 412
+ * 6.60/01g: 424
+ */
+static u8 buf1[0x150] __attribute__((aligned(64)));
+
+/*
+ * 6.39/01g: 896
+ * 6.60/01g: 960
+ */
+static u8 buf2[0x150] __attribute__((aligned(64)));
+
+/*
+ * 6.39/01g: 748
+ * 6.60/01g: 760
+ */
+static u8 buf3[0x90] __attribute__((aligned(64)));
+
+/**
+ * 6.39/01g: 1280
+ * 6.60/01g: 1344
+ */
+static u8 buf4[0xb4] __attribute__((aligned(64)));
+
+/**
+ * 6.39/01g: 1536
+ */
+static u8 buf5[0x20] __attribute__((aligned(64)));
 
 int _uprx_decrypt(user_decryptor *pBlock)
 {
-	if (pBlock == NULL)
+	if (pBlock == NULL) {
 		return -1;
+	}
 
-	if (pBlock->prx == NULL || pBlock->newsize == NULL)
+	if (pBlock->prx == NULL || pBlock->newsize == NULL) {
 		return -2;
+	}
 
-	if (pBlock->size < 0x160)
+	if (pBlock->size < 0x160) {
 		return -202;
+	}
 
-	if ((u32)pBlock->prx & 0x3f)
+	if ((u32)pBlock->prx & 0x3f) {
 		return -203;
+	}
 
-	if (((0x00220202 >> (((u32)pBlock->prx >> 27) & 0x001F)) & 0x0001) == 0x0000)
+	if (((0x00220202 >> (((u32)pBlock->prx >> 27) & 0x001F)) & 0x0001) == 0x0000) {
 		return -204;
+	}
 
 	u32 b_0xd4 = 0;
 
@@ -171,8 +199,9 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	memcpy(buf1, pBlock->prx, 0x150);
 
 	/** tag mismatched */
-	if (memcmp(buf1 + 0xd0, pBlock->tag, 4))
+	if (memcmp(buf1 + 0xd0, pBlock->tag, 4)) {
 		return -45;
+	}
 
 	int ret = -1;
 
@@ -185,8 +214,9 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			p = buf1 + cnt;
 		}
 
-		if (p[0xd4] != 0)
+		if (p[0xd4] != 0) {
 			return -17;
+		}
 	} else if (pBlock->type == 2) {
 		u8 *p = buf1;
 		u32 cnt = 0;
@@ -196,8 +226,9 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			p = buf1 + cnt;
 		}
 
-		if (p[0xd4] != 0)
+		if (p[0xd4] != 0) {
 			return -12;
+		}
 	} else if (pBlock->type == 5) {
 		u8 *p = buf1 + 1;
 		u32 cnt = 1;
@@ -207,8 +238,9 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			p = buf1 + cnt;
 		}
 
-		if (p[0xd4] != 0)
+		if (p[0xd4] != 0) {
 			return -13;
+		}
 
 		b_0xd4 = buf1[0xd4];
 	} else if (pBlock->type == 6) {
@@ -220,8 +252,9 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			p = buf1 + cnt;
 		}
 
-		if (p[0xd4] != 0)
+		if (p[0xd4] != 0) {
 			return -302;
+		}
 	} else if (pBlock->type == 7) {
 		u8 *p = buf1 + 1;
 		u32 cnt = 1;
@@ -231,30 +264,32 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			p = buf1 + cnt;
 		}
 
-		if (p[0xd4] != 0)
+		if (p[0xd4] != 0) {
 			return -302;
+		}
 	}
 
 //label38:
 	if (pBlock->blacklist != NULL && pBlock->blacklistsize != 0) {
 		ret = check_blacklist(buf1, pBlock->blacklist, pBlock->blacklistsize);
 
-		if (ret == 1)
+		if (ret == 1) {
 			return -305;
+		}
 	}
 
 	u32 elf_size_comp =  *(u32*)(buf1+0xb0);
 //	printf("elf_size_comp: %d\n", elf_size_comp);
 	*pBlock->newsize = elf_size_comp;
 
-	if (pBlock->size - 50 < elf_size_comp)
+	if (pBlock->size - 50 < elf_size_comp) {
 		return -206;
+	}
 
 	if (pBlock->type >= 2 && pBlock->type <= 7) {
 		int i;
 
-		for (i=0; i<9; i++)
-		{
+		for (i=0; i<9; i++) {
 			memcpy(buf2 + 0x14 + (i << 4), pBlock->key, 0x10);
 			buf2[0x14+ (i<<4)] = i;
 		}
@@ -336,8 +371,7 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	}
 
 //label159:
-	if (pBlock->type == 1)
-	{
+	if (pBlock->type == 1) {
 		memcpy(buf4 + 0x14, buf2 + 0x10, 0xa0);
 		ret = kirk7(buf4, 0xa0, pBlock->code, pBlock->use_polling);
 
@@ -408,8 +442,7 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		return -6;
 	}
 
-	if (memcmp(buf2, buf4, 0x14))
-	{
+	if (memcmp(buf2, buf4, 0x14)) {
 		return -8;
 	}
 
@@ -447,20 +480,19 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	}
 
 	if (b_0xd4 == 0x80) {
-		if (((u8*)pBlock->prx)[1424])
+		if (((u8*)pBlock->prx)[1424]) {
 			return -302;
+		}
 
 		((u8*)pBlock->prx)[1424] |= 0x80;
 	}
 
 	// The real decryption
-	if (sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, 0x1) != 0)
-	{
+	if (sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, 0x1) != 0) {
 		return -9;
 	}
 
-	if (elf_size_comp < 0x150)
-	{
+	if (elf_size_comp < 0x150) {
 		// Fill with 0
 		memset(pBlock->prx+elf_size_comp, 0, 0x150-elf_size_comp);		
 	}
@@ -488,8 +520,9 @@ int uprx_decrypt(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u
 
 	ret = _uprx_decrypt(&block);
 
-	if (ret < 0)
+	if (ret < 0) {
 		ret = -301;
+	}
 
 	return ret;
 }

@@ -53,19 +53,24 @@
 #include "pspcipher.h"
 #include "printk.h"
 
-static u8 g_28672[40] = {
+#define KIRK_CMD_DECRYPT_PRIVATE 0x1
+#define KIRK_CMD_DECRYPT_IV_0 0x7
+#define KIRK_CMD_SHA1_HASH 0xB 
+#define KIRK_ECDSA_VERIFY_SIGNATURE 0x11
+
+static u8 g_pubkey_28672[40] = {
 	0x77, 0x3F, 0x4B, 0xE1, 0x4C, 0x0A, 0xB4, 0x52, 0x67, 0x2B, 0x67, 0x56, 0x82, 0x4C, 0xCF, 0x42, 
 	0xAA, 0x37, 0xFF, 0xC0, 0x89, 0x41, 0xE5, 0x63, 0x5E, 0x84, 0xE9, 0xFB, 0x53, 0xDA, 0x94, 0x9E, 
 	0x9B, 0xB7, 0xC2, 0xA4, 0x22, 0x9F, 0xDF, 0x1F
 };
 
-static u8 g_28712[40] = {
+static u8 g_pubkey_28712[40] = {
 	0x25, 0xDC, 0xFD, 0xE2, 0x12, 0x79, 0x89, 0x54, 0x79, 0x37, 0x13, 0x24, 0xEC, 0x25, 0x08, 0x81, 
 	0x57, 0xAA, 0xF1, 0xD0, 0xA4, 0x64, 0x8C, 0x15, 0x42, 0x25, 0xF6, 0x90, 0x3F, 0x44, 0xE3, 0x6A, 
 	0xE6, 0x64, 0x12, 0xFC, 0x80, 0x68, 0xBD, 0xC1
 };
 
-static u8 g_28752[40] = {
+static u8 g_pubkey_28752[40] = {
 	0xE3, 0x5E, 0x4E, 0x7E, 0x2F, 0xA3, 0x20, 0x96, 0x75, 0x43, 0x94, 0xA9, 0x92, 0x01, 0x83, 0xA7, 
 	0x85, 0xBD, 0xF6, 0x19, 0x1F, 0x44, 0x8F, 0x95, 0xE0, 0x43, 0x35, 0xA3, 0xF5, 0xE5, 0x05, 0x65, 
 	0x5E, 0xD7, 0x59, 0x3F, 0xC6, 0xDB, 0xAF, 0x39
@@ -104,9 +109,9 @@ static int kirk7(u8* prx, u32 size, u32 scramble_code, u32 use_polling)
 	((u32 *) prx)[4] = size;
 
 	if (!use_polling) {
-		ret = sceUtilsBufferCopyWithRange (prx, size + 20, prx, size + 20, 7);
+		ret = sceUtilsBufferCopyWithRange(prx, size + 20, prx, size + 20, KIRK_CMD_DECRYPT_IV_0);
 	} else {
-		ret = sceUtilsBufferCopyByPollingWithRange (prx, size + 20, prx, size + 20, 7);
+		ret = sceUtilsBufferCopyByPollingWithRange(prx, size + 20, prx, size + 20, KIRK_CMD_DECRYPT_IV_0);
 	}
 
 	return ret;
@@ -177,6 +182,10 @@ static u8 buf5[0x20] __attribute__((aligned(64)));
  * 6.60/01g: 1632
  */
 static u8 buf6[0x28] __attribute__((aligned(32)));
+
+static u8 sig[0x28] __attribute__((aligned(16)));
+
+static u8 sha1buf[0x14] __attribute__((aligned(16)));
 
 int _uprx_decrypt(user_decryptor *pBlock)
 {
@@ -367,21 +376,18 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	memcpy(buf3, buf2, 0x90);
 
 	if (pBlock->type == 9 || pBlock->type == 10) {
-		u8 tmp_buf[sizeof(buf6)];
-		u8 tmp_buf2[0x14];
-
 		// loc_000003C4
 		memcpy(buf6, pBlock->prx+0x104, sizeof(buf6));
 		memset(pBlock->prx+0x104, 0, sizeof(buf6));
-		memcpy(tmp_buf, buf6, sizeof(buf6));
+		memcpy(sig, buf6, sizeof(sig));
 
-		*(u32*)pBlock->prx = pBlock->size - 4;
+		*(u32*)pBlock->prx = pBlock->size-4;
 
 		if(pBlock->use_polling) {
-			ret = sceUtilsBufferCopyByPollingWithRange(pBlock->prx, pBlock->size, pBlock->prx, pBlock->size, 11);
+			ret = sceUtilsBufferCopyByPollingWithRange(pBlock->prx, pBlock->size, pBlock->prx, pBlock->size, KIRK_CMD_SHA1_HASH);
 		} else {
 			// loc_000017C0
-			ret = sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx, pBlock->size, 11);
+			ret = sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx, pBlock->size, KIRK_CMD_SHA1_HASH);
 		}
 
 		// loc_0000045C
@@ -389,29 +395,32 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			return -105;
 		}
 
-		memcpy(tmp_buf2, pBlock->prx, sizeof(tmp_buf2));
+		// loc_00000468
+		memcpy(sha1buf, pBlock->prx, sizeof(sha1buf));
+		// loc_00000490
 		memcpy(pBlock->prx, buf1, 0x20);
 
-		if (22 == ((u8*)(pBlock->tag))[2]) {
+		if (0x16 == ((u8*)(pBlock->tag))[2]) {
 			// loc_00001790
-			memcpy(buf4, g_28752, sizeof(g_28752));
-		} else if (94 == ((u8*)(pBlock->tag))[2]) {
+			memcpy(buf4, g_pubkey_28752, sizeof(g_pubkey_28752));
+		} else if (0x5E == ((u8*)(pBlock->tag))[2]) {
 			// loc_00001764
-			memcpy(buf4, g_28712, sizeof(g_28712));
+			memcpy(buf4, g_pubkey_28712, sizeof(g_pubkey_28712));
 		} else {
 			// loc_000004D4
-			memcpy(buf4, g_28672, sizeof(g_28672));
+			memcpy(buf4, g_pubkey_28672, sizeof(g_pubkey_28672));
 		}
 
 		// loc_000004F4
-		memcpy(buf4+0x28, tmp_buf2, sizeof(tmp_buf2));
-		memcpy(buf4+0x28+sizeof(tmp_buf2), tmp_buf, sizeof(tmp_buf));
+		memcpy(buf4+0x28, sha1buf, sizeof(sha1buf));
+		// loc_0000051C
+		memcpy(buf4+0x28+sizeof(sha1buf), sig, sizeof(sig));
 
 		if (pBlock->use_polling) {
-			ret = sceUtilsBufferCopyByPollingWithRange(NULL, 0, buf4, 100, 17);
+			ret = sceUtilsBufferCopyByPollingWithRange(NULL, 0, buf4, 100, KIRK_ECDSA_VERIFY_SIGNATURE);
 		} else {
 			// loc_00001744
-			ret = sceUtilsBufferCopyWithRange(NULL, 0, buf4, 100, 17);
+			ret = sceUtilsBufferCopyWithRange(NULL, 0, buf4, 100, KIRK_ECDSA_VERIFY_SIGNATURE);
 		}
 
 		// loc_0000055C
@@ -565,23 +574,23 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		memcpy(buf2+0xd0, buf1, 0x80);
 	}
 
-#pragma TODO below
 	// loc_00000710
 	if (pBlock->type == 1) {
 		// loc_00000FF8
-		memcpy(buf4 + 0x14, buf2 + 0x10, 0xa0);
+		memcpy(buf4+0x14, buf2+0x10, 0xa0);
 		ret = kirk7(buf4, 0xa0, pBlock->code, pBlock->use_polling);
 
 		if (ret != 0) {
 			return -15;
 		}
 
-		memcpy(buf2 + 0x10, buf4, 0xa0);
+		// loc_0000105C
+		memcpy(buf2+0x10, buf4, 0xa0);
 	} else if ((pBlock->type >= 2 && pBlock->type <= 7) || pBlock->type == 9 || pBlock->type == 10) {
 		// loc_00000F0C
-		memcpy(buf4 + 0x14, buf2 + 0x5c, 0x60);
+		memcpy(buf4+0x14, buf2+0x5c, 0x60);
 
-		if (pBlock->type == 3 || pBlock->type == 5 || pBlock->type == 7 || pBlock->type == 9) {
+		if (pBlock->type == 3 || pBlock->type == 5 || pBlock->type == 7 || pBlock->type == 10) {
 			// loc_00000F70
 			prx_xor_key_round(buf4+0x14, 0x60, pBlock->xor_key1, NULL);
 		}
@@ -593,7 +602,8 @@ int _uprx_decrypt(user_decryptor *pBlock)
 			return -5;
 		}
 
-		memcpy(buf2 + 0x5c, buf4, 0x60);
+		// loc_00000FD4
+		memcpy(buf2+0x5c, buf4, 0x60);
 	}
 
 	// loc_0000073C
@@ -601,28 +611,35 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		u32 *p;
 
 		// loc_00000D44
-		memcpy(buf4, buf2 + 0x6c, 0x14);
+		memcpy(buf4, buf2+0x6c, 0x14);
 
 		if (pBlock->type == 4) {
 			// loc_00000EE0
-			memmove(buf2 + 0x18, buf2, 0x67);
+			memmove(buf2+0x18, buf2, 0x67);
 		} else {
+			// loc_00000D84
 			memcpy(buf2+0x70, buf2+0x5C, 0x10);
 
 			if (pBlock->type == 6 || pBlock->type == 7) {
-				memcpy(buf5, buf2+60, 0x20);
-				memcpy(buf2+80, buf5, 0x20);
-				memset(buf2+24, 0, 0x38);
+				// loc_00000DC8
+				memcpy(buf5, buf2+0x3c, 0x20);
+				// loc_00000DF8
+				memcpy(buf2+0x50, buf5, 0x20);
+				// loc_00000E20
+				memset(buf2+0x18, 0, 0x38);
 			} else {
 				// loc_00000EC4
 				memset(buf2+0x18, 0, 0x58);
 			}
 
+			// loc_00000E38
 			if (b_0xd4 == 0x80 ) {
+				// loc_00000EB8
 				buf2[0x18] = 0x80;
 			}
 		}
 
+		// loc_00000E48
 		memcpy(buf2+0x04, buf2, 4);
 		p = (u32*)buf2;
 		*p = 0x14C;
@@ -632,18 +649,18 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		u32 *p;
 		
 		// loc_00000770
-		memcpy(buf4, buf2 + 0x4, 0x14);
+		memcpy(buf4, buf2+0x4, 0x14);
 		p = (u32*)buf2;
 		*p = 0x14c;
 		// loc_000007B4
-		memcpy(buf2 + 4, buf3, 0x14);
+		memcpy(buf2+4, buf3, 0x14);
 	}
 
 	// loc_000007D0
 	if (pBlock->use_polling) {
-		ret = sceUtilsBufferCopyByPollingWithRange(buf2, 0x150, buf2, 0x150, 11);
+		ret = sceUtilsBufferCopyByPollingWithRange(buf2, 0x150, buf2, 0x150, KIRK_CMD_SHA1_HASH);
 	} else {
-		ret = sceUtilsBufferCopyWithRange(buf2, 0x150, buf2, 0x150, 11);
+		ret = sceUtilsBufferCopyWithRange(buf2, 0x150, buf2, 0x150, KIRK_CMD_SHA1_HASH);
 	}
 
 	if (ret != 0) {
@@ -651,7 +668,7 @@ int _uprx_decrypt(user_decryptor *pBlock)
 	}
 
 	// loc_00000914
-	if (memcmp(buf2, buf4, 0x14)) {
+	if (0 != memcmp(buf2, buf4, 0x14)) {
 		return -8;
 	}
 
@@ -666,31 +683,31 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		}
 
 		// loc_00000B9C
-		prx_xor_key_mix(pBlock->prx + 64, 0x40, buf2 + 108, buf3 + 80);
+		prx_xor_key_mix(pBlock->prx+0x40, 0x40, buf2+0x6c, buf3+0x50);
 
 		if (pBlock->type == 6 || pBlock->type == 7) {
 			// loc_00000BE0
-			memcpy(pBlock->prx+128, buf5, 0x20);
+			memcpy(pBlock->prx+0x80, buf5, 0x20);
 			// loc_00000C00
-			memset(pBlock->prx+160, 0, 0x10);
-			((u8*)pBlock->prx)[164] = 1;
-			((u8*)pBlock->prx)[160] = 1;
+			memset(pBlock->prx+0xA0, 0, 0x10);
+			((u8*)pBlock->prx)[0xA4] = 1;
+			((u8*)pBlock->prx)[0xA0] = 1;
 		} else {
 			// loc_00000C90
-			memset(pBlock->prx+128, 0, 0x30);
-			((u8*)pBlock->prx)[160] = 1;
+			memset(pBlock->prx+0x80, 0, 0x30);
+			((u8*)pBlock->prx)[0xA0] = 1;
 		}
 
 		// loc_00000C2C
-		memcpy(pBlock->prx+176, buf2+0xc0, 0x10);
+		memcpy(pBlock->prx+0xB0, buf2+0xc0, 0x10);
 		// loc_00000C4C
-		memset(pBlock->prx+192, 0, 0x10);
+		memset(pBlock->prx+0xC0, 0, 0x10);
 		// loc_00000C6C
-		memcpy(pBlock->prx+208, buf2+0xd0, 0x80);
+		memcpy(pBlock->prx+0xD0, buf2+0xD0, 0x80);
 	} else {
 		// loc_00000970
 		prx_xor_key_mix(buf2+0x40, 0x70, buf2+0x40, buf3+0x14);
-		ret = kirk7(buf2 + 0x2c, 0x70, pBlock->code, pBlock->use_polling);
+		ret = kirk7(buf2+0x2c, 0x70, pBlock->code, pBlock->use_polling);
 
 		// loc_000009B8
 		if (ret != 0) {
@@ -698,13 +715,13 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		}
 
 		// loc_000009CC
-		prx_xor_key_mix(pBlock->prx+64, 0x70, buf2+44, buf3+32);
+		prx_xor_key_mix(pBlock->prx+0x40, 0x70, buf2+0x2C, buf3+0x20);
 		// loc_00000A10
-		memcpy(pBlock->prx+176, buf2 + 0xb0, 0xa0);
+		memcpy(pBlock->prx+0xB0, buf2+0xB0, 0xA0);
 
 		if (pBlock->type == 8) {
 			// loc_00000B1C
-			if (1 != ((u8*)pBlock->prx)[164]) {
+			if (1 != ((u8*)pBlock->prx)[0xA4]) {
 				return -303;
 			}
 		}
@@ -712,18 +729,18 @@ int _uprx_decrypt(user_decryptor *pBlock)
 
 	// loc_00000A38
 	if (b_0xd4 == 0x80) {
-		if (((u8*)pBlock->prx)[1424]) {
+		if (((u8*)pBlock->prx)[0x590]) {
 			return -302;
 		}
 
-		((u8*)pBlock->prx)[1424] |= 0x80;
+		((u8*)pBlock->prx)[0x590] |= 0x80;
 	}
 
 	// loc_00000A44: The real decryption
 	if(pBlock->use_polling) {
-		ret = sceUtilsBufferCopyByPollingWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, 0x1);
+		ret = sceUtilsBufferCopyByPollingWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, KIRK_CMD_DECRYPT_PRIVATE);
 	} else {
-		ret = sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, 0x1);
+		ret = sceUtilsBufferCopyWithRange(pBlock->prx, pBlock->size, pBlock->prx+0x40, pBlock->size-0x40, KIRK_CMD_DECRYPT_PRIVATE);
 	}
 
 	// loc_00000A60

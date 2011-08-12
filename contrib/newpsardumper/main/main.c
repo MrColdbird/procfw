@@ -47,8 +47,6 @@ static u8 g_dataOut[3000000] __attribute__((aligned(0x40)));
 //u8 g_dataOut2[3000000] __attribute__((aligned(0x40)));
 static u8 *g_dataOut2;   
 
-static const u8 loading_from_ms0_updater = 1;
-
 void ErrorExit(int milisecs, char *fmt, ...)
 {
 	va_list list;
@@ -151,6 +149,9 @@ static int _10gtable_size;
 
 static char _11g_table[0x4000];
 static int _11gtable_size;
+
+static char _12g_table[0x4000];
+static int _12gtable_size;
 
 enum
 {
@@ -393,18 +394,13 @@ int main(void)
 
 	printf("Loading psar...\n");
 
-	if (loading_from_ms0_updater) {
-		if (ReadFile("ms0:/EBOOT.PBP", 0, pbp_header, sizeof(pbp_header)) != sizeof(pbp_header)) {
-			ErrorExit(5000, "Cannot find EBOOT.PBP at root.\n");
-		}
-
-		psar_offs = *(u32 *)&pbp_header[0x24];
-		fd = sceIoOpen("ms0:/EBOOT.PBP", PSP_O_RDONLY, 0);
-	} else {
-		// loading from disc updater (unpack it with unpack-pbp)
-		psar_offs = 0;
-		fd = sceIoOpen("ms0:/DATA.BIN", PSP_O_RDONLY, 0);
+	if (ReadFile("ms0:/EBOOT.PBP", 0, pbp_header, sizeof(pbp_header)) != sizeof(pbp_header))
+	{
+		ErrorExit(5000, "Cannot find EBOOT.PBP at root.\n");
 	}
+
+	psar_offs = *(u32 *)&pbp_header[0x24];
+	fd = sceIoOpen("ms0:/EBOOT.PBP", PSP_O_RDONLY, 0);
 	
 	int cbFile = sceIoLseek32(fd, 0, PSP_SEEK_END) - psar_offs;
 	sceIoLseek32(fd, psar_offs, PSP_SEEK_SET);
@@ -450,7 +446,7 @@ int main(void)
 	}
     else if ((memcmp(version, "6.", 2) == 0) && (psarVersion == 5))
 	{
-		table_mode = 5;
+		table_mode = 4;
 	}
     else if (memcmp(version, "6.", 2) == 0)
 	{
@@ -516,8 +512,7 @@ int main(void)
 		if (is5Dnum(name))
 		{
 			if (   strcmp(name, "00001") != 0 && strcmp(name, "00002") != 0 && strcmp(name, "00003") != 0 && strcmp(name, "00004") != 0 && strcmp(name, "00005") != 0
-                && strcmp(name, "00006") != 0 && strcmp(name, "00007") != 0 && strcmp(name, "00008") != 0 && strcmp(name, "00009") != 0 && strcmp(name, "00010") != 0
-				&& strcmp(name, "00011") != 0)
+                && strcmp(name, "00006") != 0 && strcmp(name, "00007") != 0 && strcmp(name, "00008") != 0 && strcmp(name, "00009") != 0 && strcmp(name, "00010") != 0 && strcmp(name, "00011") != 0 && strcmp(name, "00012") != 0)
 			{
 				int found = 0;
 				
@@ -565,20 +560,25 @@ int main(void)
 				{
 					found = FindTablePath(_9g_table, _9gtable_size, name, name);
 				}
-
+				
 				if (!found && _10gtable_size > 0)
 				{
 					found = FindTablePath(_10g_table, _10gtable_size, name, name);
 				}
-
+				
 				if (!found && _11gtable_size > 0)
 				{
 					found = FindTablePath(_11g_table, _11gtable_size, name, name);
 				}
+				if (!found && _12gtable_size > 0)
+				{
+					found = FindTablePath(_12g_table, _12gtable_size, name, name);
+				}
 
 				if (!found)
 				{
-					printf("Warning: cannot find path of %s\n", name);
+					ErrorExit(5000, "Part 1 Error: cannot find path of %s.\n", name);
+					//printf("Warning: first cannot find path of %s\n", name);
 					//sceKernelDelayThread(2*1000*1000);
 					error = 0;
 					continue;
@@ -590,7 +590,8 @@ int main(void)
 		{
 			if (!FindTablePath(com_table, comtable_size, name+4, name))
 			{
-				printf("Warning: cannot find path of %s\n", name);
+				ErrorExit(5000, "Part 2 Error: cannot find path of %s.\n", name);
+				//printf("Warning: second cannot find path of %s\n", name);
 				//sceKernelDelayThread(2*1000*1000);
 				error = 0;
 				continue;
@@ -602,7 +603,7 @@ int main(void)
 		{
 			if (!FindTablePath(_1g_table, _1gtable_size, name+4, name))
 			{
-				ErrorExit(5000, "Error: cannot find path of %s.\n", name);
+				ErrorExit(5000, "Error: 01g cannot find path of %s.\n", name);
 			}
 		}
 
@@ -610,7 +611,7 @@ int main(void)
 		{
 			if (!FindTablePath(_2g_table, _2gtable_size, name+4, name))
 			{
-				ErrorExit(5000, "Error: cannot find path of %s.\n", name);
+				ErrorExit(5000, "Error: 01g cannot find path of %s.\n", name);
 			}
 		}
 
@@ -865,6 +866,25 @@ int main(void)
 				memcpy(_11g_table, g_dataOut2, _11gtable_size);						
 				strcpy(szDataPath, "ms0:/F0/PSARDUMPER/11000_files_table.bin");
 			}
+			else if (!strcmp(name, "00012"))
+			{
+				_12gtable_size = pspDecryptTable(g_dataOut2, g_dataOut, cbExpanded, table_mode);
+							
+				if (_12gtable_size <= 0)
+				{
+					printf("Cannot decrypt 12g table %08X.\n", _12gtable_size);
+					error = 0;
+					continue;
+				}
+
+				if (_12gtable_size > sizeof(_12g_table))
+				{
+					ErrorExit(5000, "12g table buffer too small. Recompile with bigger buffer.\n");
+				}
+
+				memcpy(_12g_table, g_dataOut2, _12gtable_size);						
+				strcpy(szDataPath, "ms0:/F0/PSARDUMPER/12000_files_table.bin");
+			}
 
 			else
 			{
@@ -885,7 +905,8 @@ int main(void)
 				&& (strcmp(name, "flash0:/kd/loadexec_08g.prx") != 0)
 				&& (strcmp(name, "flash0:/kd/loadexec_09g.prx") != 0)
 				&& (strcmp(name, "flash0:/kd/loadexec_10g.prx") != 0)
-				&& (strcmp(name, "flash0:/kd/loadexec_11g.prx") != 0))
+				&& (strcmp(name, "flash0:/kd/loadexec_11g.prx") != 0)
+				&& (strcmp(name, "flash0:/kd/loadexec_12g.prx") != 0))
 			{
 				pspSignCheck(g_dataOut2);
 			}
@@ -919,6 +940,7 @@ int main(void)
 			if ((memcmp(g_dataOut2, "~PSP", 4) == 0) &&
 				(mode == MODE_DECRYPT))
 			{
+				memset(g_dataOut2+0x104,0,0x28);
 				int cbDecrypted = pspDecryptPRX(g_dataOut2, g_dataOut, cbExpanded);
 
 				// output goes back to main buffer
@@ -1005,6 +1027,7 @@ int main(void)
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_09g.prx", "ms0:/F0/reboot_09g.bin", "reboot_09g.bin");
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_10g.prx", "ms0:/F0/reboot_10g.bin", "reboot_10g.bin");
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_11g.prx", "ms0:/F0/reboot_11g.bin", "reboot_11g.bin");
+	ExtractReboot(mode, "ms0:/F0/kd/loadexec_12g.prx", "ms0:/F0/reboot_12g.bin", "reboot_12g.bin");
 
     scePowerTick(0);	
 	ErrorExit(10000, "Done.\n");

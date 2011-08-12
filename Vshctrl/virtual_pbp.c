@@ -1069,7 +1069,12 @@ int vpbp_loadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 		param->key = "umdemu";
 		loadexec_file = vpbp->name;
 	} else {
-		param->key = "game";
+		if(config.umdmode == MODE_MARCH33) {
+			param->key = "game";
+		} else {
+			param->key = "umdemu";
+		}
+
 		apitype = 0x120;
 		loadexec_file = param->argp;
 	}

@@ -146,6 +146,12 @@ static int _8gtable_size;
 static char _9g_table[0x4000];
 static int _9gtable_size;
 
+static char _10g_table[0x4000];
+static int _10gtable_size;
+
+static char _11g_table[0x4000];
+static int _11gtable_size;
+
 enum
 {
 	MODE_ENCRYPT_SIGCHECK,
@@ -510,7 +516,8 @@ int main(void)
 		if (is5Dnum(name))
 		{
 			if (   strcmp(name, "00001") != 0 && strcmp(name, "00002") != 0 && strcmp(name, "00003") != 0 && strcmp(name, "00004") != 0 && strcmp(name, "00005") != 0
-                && strcmp(name, "00006") != 0 && strcmp(name, "00007") != 0 && strcmp(name, "00008") != 0 && strcmp(name, "00009") != 0)
+                && strcmp(name, "00006") != 0 && strcmp(name, "00007") != 0 && strcmp(name, "00008") != 0 && strcmp(name, "00009") != 0 && strcmp(name, "00010") != 0
+				&& strcmp(name, "00011") != 0)
 			{
 				int found = 0;
 				
@@ -557,6 +564,16 @@ int main(void)
 				if (!found && _9gtable_size > 0)
 				{
 					found = FindTablePath(_9g_table, _9gtable_size, name, name);
+				}
+
+				if (!found && _10gtable_size > 0)
+				{
+					found = FindTablePath(_10g_table, _10gtable_size, name, name);
+				}
+
+				if (!found && _11gtable_size > 0)
+				{
+					found = FindTablePath(_11g_table, _11gtable_size, name, name);
 				}
 
 				if (!found)
@@ -810,6 +827,44 @@ int main(void)
 				memcpy(_9g_table, g_dataOut2, _9gtable_size);						
 				strcpy(szDataPath, "ms0:/F0/PSARDUMPER/9000_files_table.bin");
 			}
+			else if (!strcmp(name, "00010"))
+			{
+				_10gtable_size = pspDecryptTable(g_dataOut2, g_dataOut, cbExpanded, table_mode);
+							
+				if (_10gtable_size <= 0)
+				{
+					printf("Cannot decrypt 10g table %08X.\n", _10gtable_size);
+					error = 0;
+					continue;
+				}
+
+				if (_10gtable_size > sizeof(_10g_table))
+				{
+					ErrorExit(5000, "10g table buffer too small. Recompile with bigger buffer.\n");
+				}
+
+				memcpy(_10g_table, g_dataOut2, _10gtable_size);						
+				strcpy(szDataPath, "ms0:/F0/PSARDUMPER/10000_files_table.bin");
+			}
+			else if (!strcmp(name, "00011"))
+			{
+				_11gtable_size = pspDecryptTable(g_dataOut2, g_dataOut, cbExpanded, table_mode);
+							
+				if (_11gtable_size <= 0)
+				{
+					printf("Cannot decrypt 11g table %08X.\n", _11gtable_size);
+					error = 0;
+					continue;
+				}
+
+				if (_11gtable_size > sizeof(_11g_table))
+				{
+					ErrorExit(5000, "11g table buffer too small. Recompile with bigger buffer.\n");
+				}
+
+				memcpy(_11g_table, g_dataOut2, _11gtable_size);						
+				strcpy(szDataPath, "ms0:/F0/PSARDUMPER/11000_files_table.bin");
+			}
 
 			else
 			{
@@ -828,7 +883,9 @@ int main(void)
 				&& (strcmp(name, "flash0:/kd/loadexec_06g.prx") != 0)
 				&& (strcmp(name, "flash0:/kd/loadexec_07g.prx") != 0)
 				&& (strcmp(name, "flash0:/kd/loadexec_08g.prx") != 0)
-				&& (strcmp(name, "flash0:/kd/loadexec_09g.prx") != 0))
+				&& (strcmp(name, "flash0:/kd/loadexec_09g.prx") != 0)
+				&& (strcmp(name, "flash0:/kd/loadexec_10g.prx") != 0)
+				&& (strcmp(name, "flash0:/kd/loadexec_11g.prx") != 0))
 			{
 				pspSignCheck(g_dataOut2);
 			}
@@ -946,6 +1003,8 @@ int main(void)
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_07g.prx", "ms0:/F0/reboot_07g.bin", "reboot_07g.bin");
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_08g.prx", "ms0:/F0/reboot_08g.bin", "reboot_08g.bin");
 	ExtractReboot(mode, "ms0:/F0/kd/loadexec_09g.prx", "ms0:/F0/reboot_09g.bin", "reboot_09g.bin");
+	ExtractReboot(mode, "ms0:/F0/kd/loadexec_10g.prx", "ms0:/F0/reboot_10g.bin", "reboot_10g.bin");
+	ExtractReboot(mode, "ms0:/F0/kd/loadexec_11g.prx", "ms0:/F0/reboot_11g.bin", "reboot_11g.bin");
 
     scePowerTick(0);	
 	ErrorExit(10000, "Done.\n");

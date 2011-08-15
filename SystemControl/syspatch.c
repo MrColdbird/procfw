@@ -189,6 +189,10 @@ static int syspatch_module_chain(SceModule2 *mod)
 		sync_cache();
 	}
 
+	if(conf.usbversion && 0 == strcmp(mod->modname, "sceUSB_Stor_Ms_Driver")) {
+		patch_sceUSB_Stor_Ms_Driver((SceModule*)mod);
+	}
+
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
 		printk_sync();

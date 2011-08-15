@@ -92,6 +92,8 @@ void patch_module_for_version_spoof(SceModule *mod);
 
 void patch_sceChkreg(void);
 
+void patch_sceUSB_Stor_Ms_Driver(SceModule* mod);
+
 // Have to use these functions to support both 6.2/6.3 kernel
 u32 sctrlKernelGetModel(void);
 u32 sctrlKernelDevkitVersion(void);

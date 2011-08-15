@@ -87,6 +87,7 @@ typedef struct _SEConfig
 	s16 iso_cache_total_size; // in MB
 	s16 iso_cache_num;
 	s16 iso_cache_policy;
+	s16 usbversion;
 } SEConfig;
 
 /**

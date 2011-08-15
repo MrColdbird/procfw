@@ -133,7 +133,7 @@ static int _sceKernelStartModule(int modid, SceSize argsize, void *argp, int *mo
 		}
 
 		load_plugins();
-		plugin_loaded = 1;	
+		plugin_loaded = 1;
 	}
 
 	if(conf.skiplogo && mod != NULL && 0 == strcmp(mod->modname, "vsh_module")) {

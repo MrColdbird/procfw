@@ -13,6 +13,7 @@ OBJS = main.o \
 	   mediasync_patch.o \
 	   sysmem_patch.o \
 	   version_spoof.o \
+	   usbversionfake.o \
 	   march33_patch.o \
 	   nid_resolver.o \
 	   elf.o \

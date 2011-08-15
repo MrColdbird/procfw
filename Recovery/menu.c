@@ -74,6 +74,7 @@ const char * g_messages[] = {
 	"Hide PIC0.PNG and PIC1.PNG in game menu",
 	"Protect flash in USB device mount",
 	"Use version.txt in /seplugins",
+	"Use usbversion.txt in /seplugins",
 	"Use Custom Update Server",
 	"Prevent Hibernation Deletion (PSP-Go only)",
 	"Advanced",
@@ -265,6 +266,11 @@ static struct ValueOption g_use_version_option = {
 	0, 2,
 };
 
+static struct ValueOption g_use_usbversion_option = {
+	&g_config.usbversion,
+	0, 2,
+};
+
 static struct ValueOption g_use_ownupdate_option = {
 	&g_config.useownupdate,
 	0, 2,
@@ -357,6 +363,13 @@ static int display_use_version(struct MenuEntry* entry, char *buf, int size)
 	return 0;
 }
 
+static int display_use_usbversion(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[USE_USBVERSION_TXT], get_bool_name(g_config.usbversion));
+
+	return 0;
+}
+
 static int display_use_ownupdate(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USE_CUSTOM_UPDATE_SERVER], get_bool_name(g_config.useownupdate));
@@ -383,6 +396,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_htmlviewer_custom_save_location, &change_option, &change_option_by_enter, &g_htmlviewer_custom_save_location_option },
 	{ NULL, 0, 0, &display_slim_color, &change_option, &change_option_by_enter, &g_slim_color_option },
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
+	{ NULL, 0, 0, &display_use_usbversion, &change_option, &change_option_by_enter, &g_use_usbversion_option},
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },

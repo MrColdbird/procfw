@@ -80,7 +80,7 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x6D6200DD, UNKNOWNNID, }, // sceKernelSysMemDumpBlock
 	{ 0x621037F5, UNKNOWNNID, }, // sceKernelSysMemDumpTail
 	{ 0xA089ECA4, UNKNOWNNID, }, // sceKernelMemset
-	{ 0x2F808748, 0x8D34BBDA, }, // sceKernelMemset32
+	{ 0x2F808748, 0x18D7F644, }, // sceKernelMemset32
 	{ 0x1C4B1713, 0x08F96A1B, }, // sceKernelMemmove
 	{ 0xE400FDB0, UNKNOWNNID, }, // sceKernelSysMemInit
 	{ 0x1890BE9C, 0xF4C96DB4, }, // sceKernelSysMemMemSize

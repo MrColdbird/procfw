@@ -41,7 +41,7 @@ static u8 g_p8_size = 4;
 
 static inline u32 *get_partition(int pid)
 {
-	u32 * (*get_memory_partition)(int pid) = (void *)(g_offs->sysmem_patch.get_partition);
+	u32 * (*get_memory_partition)(int pid) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.get_partition);
 
 	return (*get_memory_partition)(pid);
 }

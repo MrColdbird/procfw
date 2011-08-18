@@ -57,6 +57,7 @@ enum {
 	PSP_GO   = 4,
 	PSP_7000 = 6,
 	PSP_9000 = 8,
+	PSP_11000 = 10,
 };
 
 #define SYSMEM_TEXT_ADDR 0x88000000

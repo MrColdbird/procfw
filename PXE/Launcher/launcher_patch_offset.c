@@ -18,8 +18,34 @@
 #include <pspsdk.h>
 #include "launcher_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#endif
+
+#ifdef CONFIG_660
+PatchOffset g_660_offsets = {
+	.fw_version = FW_660,
+	.sysmem_patch = {
+		.sceKernelIcacheInvalidateAll = 0x00000E98,
+		.sceKernelDcacheWritebackInvalidateAll = 0x00000744,
+		.sceKernelGetModel = 0x0000A0B0,
+		.sceKernelPowerLockForUser = 0x0000CBB8,
+		.sceKernelPowerLockForUser_data_offset = 0xDEADBEEF,
+	},
+	.sceKernelFindModuleByName = 0x88017000 + 0x00006F98,
+	.loadexec_patch_05g = {
+		.LoadReboot = 0x00000000,
+		.LoadRebootCall = 0x00002FA8,
+		.RebootJump = 0x00002FF4,
+	},
+	.loadexec_patch_other= {
+		.LoadReboot = 0x00000000,
+		.LoadRebootCall = 0x00002D5C,
+		.RebootJump = 0x00002DA8,
+	},
+	.patchRangeStart = 0xDEADBEEF,
+	.patchRangeEnd = 0xDEADBEEF,
+};
 #endif
 
 #ifdef CONFIG_639
@@ -104,6 +130,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_660_offsets.fw_version) {
+		g_offs = &g_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_639_offsets.fw_version) {
 		g_offs = &g_639_offsets;

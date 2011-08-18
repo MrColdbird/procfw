@@ -34,6 +34,10 @@ ifeq ($(CONFIG_639), 1)
 OPT_FLAGS+=CONFIG_639=1
 endif
 
+ifeq ($(CONFIG_660), 1)
+OPT_FLAGS+=CONFIG_660=1
+endif
+
 ifeq ($(PSID_CHECK), 1)
 RELEASE_OPTION=PSID_CHECK=1
 endif

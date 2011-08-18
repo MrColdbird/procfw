@@ -18,8 +18,42 @@
 #include <pspsdk.h>
 #include "stargate_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#endif
+
+#ifdef CONFIG_660
+PatchOffset g_660_offsets = {
+	.fw_version = FW_660,
+	.sceMesgLedDecryptGame1 = {
+		0x00003160, // 01g
+		0x000034F8, // 02g
+		0x00003804, // 03g
+		0x00003804, // 04g
+		0x00003B28, // 05g
+		0xDEADBEEF, // 06g
+		0x00003804, // 07g
+		0xDEADBEEF, // 08g
+		0x00003804, // 09g
+		0xDEADBEEF, // unused
+		0x00003804, // 11G
+	},
+	.sceMesgLedDecryptGame2 = {
+		0x000033F8, // 01g
+		0x000037D8, // 02g
+		0x00003B78, // 03g
+		0x00003B78, // 04g
+		0x00003EE4, // 05g
+		0xDEADBEEF, // 06g
+		0x00003B78, // 07g
+		0xDEADBEEF, // 08g
+		0x00003B78, // 09g
+		0xDEADBEEF, // unused
+		0x00003B78, // 11G
+	},
+	.mesgled_decrypt = 0x000000E0,
+	.LoadExecForUser_362A956B_fix = 0x000009B4,
+};
 #endif
 
 #ifdef CONFIG_639
@@ -128,6 +162,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_660_offsets.fw_version) {
+		g_offs = &g_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_639_offsets.fw_version) {
 		g_offs = &g_639_offsets;

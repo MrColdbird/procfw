@@ -18,8 +18,91 @@
 #include <pspsdk.h>
 #include "vshctrl_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#endif
+
+#ifdef CONFIG_660
+PatchOffset g_660_offsets = {
+	.fw_version = FW_660,
+	.vshbridge_patch = {
+		.sceDisplaySetHoldMode = 0xDEADBEEF,
+		.sceDisplaySetHoldModeCall = 0xDEADBEEF,
+		.HibBlockCheck = 0x000051C8,
+		.sceCtrlReadBufferPositiveNID = 0xDEADBEEF,
+	},
+	.sysconf_plugin_patch = {
+		.SystemVersionStr = 0x0002A62C,
+		.SystemVersionMessage = "6.60 PRO-%c",
+		.SystemVersion = 0x000192E0,
+		.MacAddressStr = 0x0002E9A0,
+		.SlimColor = 0x000076EC,
+	},
+	.game_plugin_patch = {
+		.HomebrewCheck = 0x00020528,
+		.PopsCheck = 0x00020E6C,
+		.MultiDiscPopsCheck = 0x00014850,
+		.HidePicCheck1 = 0x0001D858,
+		.HidePicCheck2 = 0x0001D864,
+		.SkipGameBootSubroute = 0x000194B0,
+		.SkipGameBoot = 0x00019130,
+		.RifFileCheck = 0x0002062C,
+		.RifCompareCheck = 0x00020654,
+		.RifTypeCheck = 0x00020668,
+		.RifNpDRMCheck = 0xDEADBEEF,
+	},
+	.htmlviewer_plugin_patch = {
+		.htmlviewer_save_location = 0xDEADBEEF,
+	},
+	.msvideo_main_plugin_patch = {
+		.checks = {
+			0xDEADBEEF,
+			0xDEADBEEF,		
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+			0xDEADBEEF,
+		},
+	},
+	.vsh_module_patch = {
+		.checks = {
+			0x000122B0,
+			0x00012058,
+			0x00012060,
+		},
+		.loadexecNID1 = 0xDEADBEEF,
+		.loadexecNID2 = 0xDEADBEEF,
+		.loadexecDisc = 0xDEADBEEF,
+		.loadexecDiscUpdater = 0xDEADBEEF,
+		.PBPFWCheck = {
+			0x000119C0,
+			0x000121A4,
+			0x00012BA4,
+			0x00013288,
+		},
+		.vshbridge_get_model_call = {
+			0x0000670C,
+			0x0002068C,
+			0x0002D240,
+		},
+	},
+	.update_plugin_patch = {
+		.UpdatePluginImageVersion1 = 0x000082A4,
+		.UpdatePluginImageVersion2 = 0x000082AC,
+		.UpdatePluginImageVersion3 = 0x000082A0,
+	},
+	.SceUpdateDL_library_patch = {
+		.SceUpdateDL_UpdateListStr = 0x000032BC,
+		.SceUpdateDL_UpdateListCall1 = 0x00002044,
+		.SceUpdateDL_UpdateListCall2 = 0x00002054,
+		.SceUpdateDL_UpdateListCall3 = 0x00002080,
+		.SceUpdateDL_UpdateListCall4 = 0x0000209C,
+	},
+};
 #endif
 
 #ifdef CONFIG_639
@@ -275,6 +358,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_660_offsets.fw_version) {
+		g_offs = &g_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_639_offsets.fw_version) {
 		g_offs = &g_639_offsets;

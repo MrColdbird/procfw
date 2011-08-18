@@ -18,8 +18,17 @@
 #include <pspsdk.h>
 #include "systemctrl_pxe_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#endif
+
+#ifdef CONFIG_660
+PXEPatchOffset g_pxe_660_offsets = {
+	.fw_version = FW_660,
+	.vsh_module_patch = {
+		.module_start = 0x0000F5F0,
+	},
+};
 #endif
 
 #ifdef CONFIG_639
@@ -53,6 +62,12 @@ PXEPatchOffset *g_pxe_offs = NULL;
 
 void setup_pxe_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_pxe_660_offsets.fw_version) {
+		g_pxe_offs = &g_pxe_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_pxe_639_offsets.fw_version) {
 		g_pxe_offs = &g_pxe_639_offsets;

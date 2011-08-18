@@ -25,10 +25,14 @@
 #ifdef CONFIG_639
 PatchOffset g_639_offsets = {
 	.fw_version = FW_639,
-	.sceKernelIcacheInvalidateAll = 0x88000E98,
-	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
+	.sysmem_patch = {
+		.sceKernelIcacheInvalidateAll = 0x00000E98,
+		.sceKernelDcacheWritebackInvalidateAll = 0x00000744,
+		.sceKernelGetModel = 0x0000A13C,
+		.sceKernelPowerLockForUser = 0x0000CC34,
+		.sceKernelPowerLockForUser_data_offset = 0x000040F4,
+	},
 	.sceKernelFindModuleByName = 0x88017000 + 0x000072D8,
-	.sceKernelGetModel = 0x8800A13C,
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002FA8,
@@ -41,18 +45,20 @@ PatchOffset g_639_offsets = {
 	},
 	.patchRangeStart = 0xDEADBEEF,
 	.patchRangeEnd = 0xDEADBEEF,
-	.sceKernelPowerLockForUser = 0x8800CC34,
-	.sceKernelPowerLockForUser_data_offset = 0x000040F4,
 };
 #endif
 
 #ifdef CONFIG_635
 PatchOffset g_635_offsets = {
 	.fw_version = FW_635,
-	.sceKernelIcacheInvalidateAll = 0x88000E98,
-	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
+	.sysmem_patch = {
+		.sceKernelIcacheInvalidateAll = 0x00000E98,
+		.sceKernelDcacheWritebackInvalidateAll = 0x00000744,
+		.sceKernelGetModel = 0x0000A13C,
+		.sceKernelPowerLockForUser = 0x0000CC34,
+		.sceKernelPowerLockForUser_data_offset = 0x000040F4,
+	},
 	.sceKernelFindModuleByName = 0x88017000 + 0x000072D8,
-	.sceKernelGetModel = 0x8800A13C,
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002F90,
@@ -65,18 +71,20 @@ PatchOffset g_635_offsets = {
 	},
 	.patchRangeStart = 0x0000A110,
 	.patchRangeEnd = 0x0000A1F0,
-	.sceKernelPowerLockForUser = 0x8800CC34,
-	.sceKernelPowerLockForUser_data_offset = 0x000040F4,
 };
 #endif
 
 #ifdef CONFIG_620
 PatchOffset g_620_offsets = {
 	.fw_version = FW_620,
-	.sceKernelIcacheInvalidateAll = 0x88000E98,
-	.sceKernelDcacheWritebackInvalidateAll = 0x88000744,
+	.sysmem_patch = {
+		.sceKernelIcacheInvalidateAll = 0x00000E98,
+		.sceKernelDcacheWritebackInvalidateAll = 0x00000744,
+		.sceKernelGetModel = 0x0000A1C4,
+		.sceKernelPowerLockForUser = 0x0000CCBC,
+		.sceKernelPowerLockForUser_data_offset = 0x00004234,
+	},
 	.sceKernelFindModuleByName = 0x8801EB78,
-	.sceKernelGetModel = 0x8800A1C4,
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
 		.LoadRebootCall = 0x00002F28,
@@ -89,8 +97,6 @@ PatchOffset g_620_offsets = {
 	},
 	.patchRangeStart = 0x0000CCB0,
 	.patchRangeEnd = 0x0000CCC0,
-	.sceKernelPowerLockForUser = 0x8800CCBC,
-	.sceKernelPowerLockForUser_data_offset = 0x00004234,
 };
 #endif
 

@@ -237,7 +237,7 @@ void recovery_sysmem_635(void)
 #ifdef CONFIG_639
 void recovery_sysmem_639()
 {
-	_sw(0x3C058801, g_offs->sceKernelPowerLockForUser); // lui $a1, 0x8801
+	_sw(0x3C058801, SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser); // lui $a1, 0x8801
 }
 #endif
 
@@ -247,8 +247,8 @@ int kernel_permission_call(void)
 	struct sceLoadExecPatch *patch;
 
 	//cache invalidation functions
-	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)g_offs->sceKernelIcacheInvalidateAll;
-	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)g_offs->sceKernelDcacheWritebackInvalidateAll;
+	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelIcacheInvalidateAll);
+	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelDcacheWritebackInvalidateAll);
 
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639) {
@@ -279,7 +279,7 @@ int kernel_permission_call(void)
 	SceModule2 * loadexec = _sceKernelFindModuleByName("sceLoadExec");
 
 	//SysMemForKernel_458A70B5
-	int (* _sceKernelGetModel)(void) = (void *)g_offs->sceKernelGetModel;
+	int (* _sceKernelGetModel)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelGetModel);
 
 	psp_model = _sceKernelGetModel();
 

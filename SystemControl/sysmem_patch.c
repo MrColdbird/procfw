@@ -39,10 +39,10 @@ void patch_sceSystemMemoryManager(void)
 		return;
 
 	// allow invalid complied sdk version
-	for(i=0; i<NELEMS(g_offs->sysmemforuser_patch); ++i) {
-		if(g_offs->sysmemforuser_patch[i].offset == 0xFFFF)
+	for(i=0; i<NELEMS(g_offs->sysmem_patch.sysmemforuser_patch); ++i) {
+		if(g_offs->sysmem_patch.sysmemforuser_patch[i].offset == 0xFFFF)
 			continue;
 
-		_sw(g_offs->sysmemforuser_patch[i].value | 0x10000000, mod->text_addr+g_offs->sysmemforuser_patch[i].offset);
+		_sw(g_offs->sysmem_patch.sysmemforuser_patch[i].value | 0x10000000, mod->text_addr+g_offs->sysmem_patch.sysmemforuser_patch[i].offset);
 	}
 }

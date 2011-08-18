@@ -29,6 +29,31 @@ PatchOffset g_639_offsets = {
 		.InvalidSyscallCheck1 = 0x00000DE8,
 		.InvalidSyscallCheck2 = 0x00000E94,
 	},
+	.modulemgr_patch = {
+		.sctrlKernelSetUMDEmuFile = 0x000099A0 + 0x00000008,   /* See 0x00005C28 */
+		.sctrlKernelSetInitFileName = 0x000099A0 + 0x00000004, /* See 0x00004F54 */
+		.ProbeExec3 = 0x00008860,
+		.ProbeExec3Call = 0x00007C68,
+		.sceKernelCheckExecFileImport = 0x000087E0,
+		.PartitionCheck = 0x00007FDC,
+		.PartitionCheckCall1 = 0x00006528,
+		.PartitionCheckCall2 = 0x000068A4,
+		.DeviceCheck1 = 0x00000760,
+		.DeviceCheck2 = 0x000007C0,
+		.DeviceCheck3 = 0x000030B0,
+		.DeviceCheck4 = 0x0000310C,
+		.DeviceCheck5 = 0x00003138,
+		.DeviceCheck6 = 0x00003444,
+		.DeviceCheck7 = 0x0000349C,
+		.DeviceCheck8 = 0x000034C8,
+		.PrologueModule = 0x00008130,
+		.PrologueModuleCall = 0x00007054,
+		.StartModule = 0x00007000,
+		.StartModuleCall = 0x00000290,
+	},
+	.threadmgr_patch = {
+		.sctrlKernelSetUserLevel = 0x00019E80,
+	},
 	.mediasync_patch = {
 		.sceSystemFileGetIndex = 0x00000F40,
 		.MsCheckMediaCheck = 0x00000744,
@@ -74,18 +99,22 @@ PatchOffset g_639_offsets = {
 		},
 		.mesgled_decrypt = 0x000000E0,
 	},
-	.systemctrl_export_patch = {
-		.sctrlKernelLoadExecVSHWithApitype = 0x00002384,
-		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025D8,
-		.sctrlKernelSetUserLevel = 0x00019E80,
+	.sysmem_patch = {
 		.sctrlKernelSetDevkitVersion = 0x88011998,
-		.sctrlHENFindDriver = 0x00002A44,
-		.sctrlKernelSetUMDEmuFile = 0x000099A0 + 0x00000008,   /* See 0x00005C28 */
-		.sctrlKernelSetInitFileName = 0x000099A0 + 0x00000004, /* See 0x00004F54 */
+		.sysmemforuser_patch = {
+			{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
+			{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
+			{ 0x00009BE4, 0x18 }, // SysMemUserForUser_315AD3A0
+			{ 0x00009C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
+			{ 0x00009D68, 0x15 }, // SysMemUserForUser_057E7380
+			{ 0x00009E0C, 0x15 }, // SysMemUserForUser_91DE343C
+			{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
+			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
+			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
+		},
 	},
-	.validate_stub_patch = {
-		.StartModule = 0x00007000,
-		.StartModuleCall = 0x00000290,
+	.iofilemgr_patch = {
+		.sctrlHENFindDriver = 0x00002A44,
 	},
 	.march33_patch = {
 		.MsMediaInsertedCheck = 0x000009E8,
@@ -120,35 +149,6 @@ PatchOffset g_639_offsets = {
 		.get_partition = 0x88003E34,
 		.umd_cache_module_start = 0x000009C8,
 	},
-	.sysmemforuser_patch = {
-		{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
-		{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
-		{ 0x00009BE4, 0x18 }, // SysMemUserForUser_315AD3A0
-		{ 0x00009C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
-		{ 0x00009D68, 0x15 }, // SysMemUserForUser_057E7380
-		{ 0x00009E0C, 0x15 }, // SysMemUserForUser_91DE343C
-		{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
-		{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
-		{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
-	},
-	.module_handler_patch = {
-		.ProbeExec3 = 0x00008860,
-		.ProbeExec3Call = 0x00007C68,
-		.sceKernelCheckExecFileImport = 0x000087E0,
-		.PartitionCheck = 0x00007FDC,
-		.PartitionCheckCall1 = 0x00006528,
-		.PartitionCheckCall2 = 0x000068A4,
-		.DeviceCheck1 = 0x00000760,
-		.DeviceCheck2 = 0x000007C0,
-		.DeviceCheck3 = 0x000030B0,
-		.DeviceCheck4 = 0x0000310C,
-		.DeviceCheck5 = 0x00003138,
-		.DeviceCheck6 = 0x00003444,
-		.DeviceCheck7 = 0x0000349C,
-		.DeviceCheck8 = 0x000034C8,
-		.PrologueModule = 0x00008130,
-		.PrologueModuleCall = 0x00007054,
-	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x00007DC0,
 		.sceKernelCheckExecFileCall1 = 0x00001570,
@@ -181,6 +181,7 @@ PatchOffset g_639_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002414,
 		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
+		.sctrlKernelLoadExecVSHWithApitype = 0x00002384,
 	},
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
@@ -190,6 +191,7 @@ PatchOffset g_639_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002668,
 		.sceKernelExitVSHVSHCheck1 = 0x000016A4,
 		.sceKernelExitVSHVSHCheck2 = 0x000016D8,
+		.sctrlKernelLoadExecVSHWithApitype = 0x000025D8,
 	},
 	.impose_patch = {
 		2,
@@ -208,6 +210,31 @@ PatchOffset g_635_offsets = {
 	.interruptman_patch = {
 		.InvalidSyscallCheck1 = 0x00000DE8,
 		.InvalidSyscallCheck2 = 0x00000E94,
+	},
+	.modulemgr_patch = {
+		.sctrlKernelSetUMDEmuFile = 0x000099B0 + 0x00000008,   /* See 0x00005C2C */
+		.sctrlKernelSetInitFileName = 0x000099B0 + 0x00000004, /* See 0x00004F58 */
+		.ProbeExec3 = 0x00008864,
+		.ProbeExec3Call = 0x00007C6C,
+		.sceKernelCheckExecFileImport = 0x000087E4,
+		.PartitionCheck = 0x00007FE0,
+		.PartitionCheckCall1 = 0x0000652C,
+		.PartitionCheckCall2 = 0x000068A8,
+		.DeviceCheck1 = 0x00000760,
+		.DeviceCheck2 = 0x000007C0,
+		.DeviceCheck3 = 0x000030B0,
+		.DeviceCheck4 = 0x0000310C,
+		.DeviceCheck5 = 0x00003138,
+		.DeviceCheck6 = 0x00003444,
+		.DeviceCheck7 = 0x0000349C,
+		.DeviceCheck8 = 0x000034C8,
+		.PrologueModule = 0x00008134,
+		.PrologueModuleCall = 0x00007058,
+		.StartModule = 0x00007004,
+		.StartModuleCall = 0x00000290,
+	},
+	.threadmgr_patch = {
+		.sctrlKernelSetUserLevel = 0x00019E80,
 	},
 	.mediasync_patch = {
 		.sceSystemFileGetIndex = 0x00000F40,
@@ -254,18 +281,22 @@ PatchOffset g_635_offsets = {
 		},
 		.mesgled_decrypt = 0x000000E0,
 	},
-	.systemctrl_export_patch = {
-		.sctrlKernelLoadExecVSHWithApitype = 0x0000236C,
-		.sctrlKernelLoadExecVSHWithApitype_05g = 0x000025C0,
-		.sctrlKernelSetUserLevel = 0x00019E80,
+	.sysmem_patch = {
 		.sctrlKernelSetDevkitVersion = 0x88011998,
-		.sctrlHENFindDriver = 0x00002A44,
-		.sctrlKernelSetUMDEmuFile = 0x000099B0 + 0x00000008,   /* See 0x00005C2C */
-		.sctrlKernelSetInitFileName = 0x000099B0 + 0x00000004, /* See 0x00004F58 */
+		.sysmemforuser_patch = {
+			{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
+			{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
+			{ 0x00009BE4, 0x18 }, // SysMemUserForUser_315AD3A0
+			{ 0x00009C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
+			{ 0x00009D68, 0x15 }, // SysMemUserForUser_057E7380
+			{ 0x00009E0C, 0x15 }, // SysMemUserForUser_91DE343C
+			{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
+			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
+			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
+		},
 	},
-	.validate_stub_patch = {
-		.StartModule = 0x00007004,
-		.StartModuleCall = 0x00000290,
+	.iofilemgr_patch = {
+		.sctrlHENFindDriver = 0x00002A44,
 	},
 	.march33_patch = {
 		.MsMediaInsertedCheck = 0x000009E8,
@@ -300,35 +331,6 @@ PatchOffset g_635_offsets = {
 		.get_partition = 0x88003E34,
 		.umd_cache_module_start = 0x000009C8,
 	},
-	.sysmemforuser_patch = {
-		{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
-		{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
-		{ 0x00009BE4, 0x18 }, // SysMemUserForUser_315AD3A0
-		{ 0x00009C94, 0x1C }, // SysMemUserForUser_EBD5C3E6
-		{ 0x00009D68, 0x15 }, // SysMemUserForUser_057E7380
-		{ 0x00009E0C, 0x15 }, // SysMemUserForUser_91DE343C
-		{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
-		{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
-		{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
-	},
-	.module_handler_patch = {
-		.ProbeExec3 = 0x00008864,
-		.ProbeExec3Call = 0x00007C6C,
-		.sceKernelCheckExecFileImport = 0x000087E4,
-		.PartitionCheck = 0x00007FE0,
-		.PartitionCheckCall1 = 0x0000652C,
-		.PartitionCheckCall2 = 0x000068A8,
-		.DeviceCheck1 = 0x00000760,
-		.DeviceCheck2 = 0x000007C0,
-		.DeviceCheck3 = 0x000030B0,
-		.DeviceCheck4 = 0x0000310C,
-		.DeviceCheck5 = 0x00003138,
-		.DeviceCheck6 = 0x00003444,
-		.DeviceCheck7 = 0x0000349C,
-		.DeviceCheck8 = 0x000034C8,
-		.PrologueModule = 0x00008134,
-		.PrologueModuleCall = 0x00007058,
-	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x00007DC0,
 		.sceKernelCheckExecFileCall1 = 0x00001570,
@@ -361,6 +363,7 @@ PatchOffset g_635_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x000023FC,
 		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
 		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
+		.sctrlKernelLoadExecVSHWithApitype = 0x0000236C,
 	},
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
@@ -370,6 +373,7 @@ PatchOffset g_635_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002650,
 		.sceKernelExitVSHVSHCheck1 = 0x0000168C,
 		.sceKernelExitVSHVSHCheck2 = 0x000016C0,
+		.sctrlKernelLoadExecVSHWithApitype = 0x000025C0,
 	},
 	.impose_patch = {
 		2,
@@ -388,6 +392,31 @@ PatchOffset g_620_offsets = {
 	.interruptman_patch = {
 		.InvalidSyscallCheck1 = 0x00000DE8,
 		.InvalidSyscallCheck2 = 0x00000E94,
+	},
+	.modulemgr_patch = {
+		.sctrlKernelSetUMDEmuFile = 0x00009990 + 0x00000008,   /* See 0x00005BFC */
+		.sctrlKernelSetInitFileName = 0x00009990 + 0x00000004, /* See 0x00004F28 */
+		.ProbeExec3 = 0x0000885C,
+		.ProbeExec3Call = 0x00007C3C,
+		.sceKernelCheckExecFileImport = 0x00008854,
+		.PartitionCheck = 0x00007FC0,
+		.PartitionCheckCall1 = 0x000064FC,
+		.PartitionCheckCall2 = 0x00006878,
+		.DeviceCheck1 = 0x00000760,
+		.DeviceCheck2 = 0x000007C0,
+		.DeviceCheck3 = 0x000030B0,
+		.DeviceCheck4 = 0x0000310C,
+		.DeviceCheck5 = 0x00003138,
+		.DeviceCheck6 = 0x00003444,
+		.DeviceCheck7 = 0x0000349C,
+		.DeviceCheck8 = 0x000034C8,
+		.PrologueModule = 0x00008114,
+		.PrologueModuleCall = 0x00007028,
+		.StartModule = 0x00006FD4,
+		.StartModuleCall = 0x00000290,
+	},
+	.threadmgr_patch = {
+		.sctrlKernelSetUserLevel = 0x00019E80,
 	},
 	.mediasync_patch = {
 		.sceSystemFileGetIndex = 0x00000F00,
@@ -434,18 +463,22 @@ PatchOffset g_620_offsets = {
 		},
 		.mesgled_decrypt = 0x000000E0,
 	},
-	.systemctrl_export_patch = {
-		.sctrlKernelLoadExecVSHWithApitype = 0x00002304,
-		.sctrlKernelLoadExecVSHWithApitype_05g = 0x00002558,
-		.sctrlKernelSetUserLevel = 0x00019E80,
+	.sysmem_patch = {
 		.sctrlKernelSetDevkitVersion = 0x88011AAC,
-		.sctrlHENFindDriver = 0x00002A38,
-		.sctrlKernelSetUMDEmuFile = 0x00009990 + 0x00000008,   /* See 0x00005BFC */
-		.sctrlKernelSetInitFileName = 0x00009990 + 0x00000004, /* See 0x00004F28 */
+		.sysmemforuser_patch = {
+			{ 0x00009B4C, 0x1F }, // sceKernelSetCompiledSdkVersion
+			{ 0x00009C6C, 0x12 }, // SysMemUserForUser_342061E5
+			{ 0x00009D04, 0x18 }, // SysMemUserForUser_315AD3A0
+			{ 0x00009DB4, 0x1C }, // SysMemUserForUser_EBD5C3E6
+			{ 0x00009E88, 0x15 }, // SysMemUserForUser_057E7380
+			{ 0x00009F2C, 0x15 }, // SysMemUserForUser_91DE343C
+			{ 0x00009FD0, 0x12 }, // SysMemUserForUser_7893F79A
+			{ 0x0000A068, 0x18 }, // SysMemUserForUser_35669D4C
+			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC Missing in 6.20
+		},
 	},
-	.validate_stub_patch = {
-		.StartModule = 0x00006FD4,
-		.StartModuleCall = 0x00000290,
+	.iofilemgr_patch = {
+		.sctrlHENFindDriver = 0x00002A38,
 	},
 	.march33_patch = {
 		.MsMediaInsertedCheck = 0x000009E8,
@@ -480,35 +513,6 @@ PatchOffset g_620_offsets = {
 		.get_partition = 0x88003E2C,
 		.umd_cache_module_start = 0x000009C8,
 	},
-	.sysmemforuser_patch = {
-		{ 0x00009B4C, 0x1F }, // sceKernelSetCompiledSdkVersion
-		{ 0x00009C6C, 0x12 }, // SysMemUserForUser_342061E5
-		{ 0x00009D04, 0x18 }, // SysMemUserForUser_315AD3A0
-		{ 0x00009DB4, 0x1C }, // SysMemUserForUser_EBD5C3E6
-		{ 0x00009E88, 0x15 }, // SysMemUserForUser_057E7380
-		{ 0x00009F2C, 0x15 }, // SysMemUserForUser_91DE343C
-		{ 0x00009FD0, 0x12 }, // SysMemUserForUser_7893F79A
-		{ 0x0000A068, 0x18 }, // SysMemUserForUser_35669D4C
-		{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC Missing in 6.20
-	},
-	.module_handler_patch = {
-		.ProbeExec3 = 0x0000885C,
-		.ProbeExec3Call = 0x00007C3C,
-		.sceKernelCheckExecFileImport = 0x00008854,
-		.PartitionCheck = 0x00007FC0,
-		.PartitionCheckCall1 = 0x000064FC,
-		.PartitionCheckCall2 = 0x00006878,
-		.DeviceCheck1 = 0x00000760,
-		.DeviceCheck2 = 0x000007C0,
-		.DeviceCheck3 = 0x000030B0,
-		.DeviceCheck4 = 0x0000310C,
-		.DeviceCheck5 = 0x00003138,
-		.DeviceCheck6 = 0x00003444,
-		.DeviceCheck7 = 0x0000349C,
-		.DeviceCheck8 = 0x000034C8,
-		.PrologueModule = 0x00008114,
-		.PrologueModuleCall = 0x00007028,
-	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x000086B4,
 		.sceKernelCheckExecFileCall1 = 0x00001578,
@@ -541,6 +545,7 @@ PatchOffset g_620_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x00002394,
 		.sceKernelExitVSHVSHCheck1 = 0x00001674,
 		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
+		.sctrlKernelLoadExecVSHWithApitype = 0x00002304,
 	},
 	.loadexec_patch_05g = {
 		.LoadReboot = 0x00000000,
@@ -550,6 +555,7 @@ PatchOffset g_620_offsets = {
 		.sceKernelLoadExecWithApiTypeCheck2 = 0x000025E8,
 		.sceKernelExitVSHVSHCheck1 = 0x00001674,
 		.sceKernelExitVSHVSHCheck2 = 0x000016A8,
+		.sctrlKernelLoadExecVSHWithApitype = 0x00002558,
 	},
 	.impose_patch = {
 		2,

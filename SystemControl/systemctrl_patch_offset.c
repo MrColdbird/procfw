@@ -50,6 +50,8 @@ PatchOffset g_639_offsets = {
 		.PrologueModuleCall = 0x00007054,
 		.StartModule = 0x00007000,
 		.StartModuleCall = 0x00000290,
+		.sceKernelLinkLibraryEntriesCall = 0x00008448,
+		.sceKernelLinkLibraryEntriesForUserCall = 0x00008194,
 	},
 	.threadmgr_patch = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
@@ -112,6 +114,7 @@ PatchOffset g_639_offsets = {
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 		},
+		.get_partition = 0x88003E34,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A44,
@@ -132,22 +135,15 @@ PatchOffset g_639_offsets = {
 	.power_service_patch = {
 		.scePowerGetBacklightMaximumCheck = 0x00000E20,
 	},
-	.nid_resolver_patch = {
-		.sceKernelLinkLibraryEntries = 0x000011D4,
-		.sceKernelLinkLibraryEntriesCall = 0x00008448,
-		.sceKernelLinkLibraryEntriesForUser = 0x00002924,
-		.sceKernelLinkLibraryEntriesForUserCall = 0x00008194,
-		.sceKernelIcacheClearAll = 0x000077CC,
+	.syscon_patch = {
 		.sceSysconPowerStandby = 0x00002C6C,
 	},
-	.start_module_patch = {
-		.sceInitBootStartCall = 0x00001DA8,
-		.sceKernelStartModule = 0x00001CBC,
+	.init_patch = {
+		.sceKernelStartModuleImport = 0x00001CBC,
 		.module_bootstart = 0x00001A4C,
 	},
-	.high_memory_patch = {
-		.get_partition = 0x88003E34,
-		.umd_cache_module_start = 0x000009C8,
+	.umdcache_patch = {
+		.module_start = 0x000009C8,
 	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x00007DC0,
@@ -172,6 +168,10 @@ PatchOffset g_639_offsets = {
 		.memlmd_323366CA_NID = 0x3F2AC9C6,
 		.memlmd_7CF1CD3E_NID = 0xE42AFE2E,
 		.pops_version_check = 0x00006EE4,
+		.sceInitBootStartCall = 0x00001DA8,
+		.sceKernelLinkLibraryEntries = 0x000011D4,
+		.sceKernelLinkLibraryEntriesForUser = 0x00002924,
+		.sceKernelIcacheClearAll = 0x000077CC,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
@@ -232,6 +232,8 @@ PatchOffset g_635_offsets = {
 		.PrologueModuleCall = 0x00007058,
 		.StartModule = 0x00007004,
 		.StartModuleCall = 0x00000290,
+		.sceKernelLinkLibraryEntriesCall = 0x0000844C,
+		.sceKernelLinkLibraryEntriesForUserCall = 0x00008198,
 	},
 	.threadmgr_patch = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
@@ -294,6 +296,7 @@ PatchOffset g_635_offsets = {
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 		},
+		.get_partition = 0x88003E34,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A44,
@@ -314,22 +317,15 @@ PatchOffset g_635_offsets = {
 	.power_service_patch = {
 		.scePowerGetBacklightMaximumCheck = 0x00000E10,
 	},
-	.nid_resolver_patch = {
-		.sceKernelLinkLibraryEntries = 0x000011D4,
-		.sceKernelLinkLibraryEntriesCall = 0x0000844C,
-		.sceKernelLinkLibraryEntriesForUser = 0x00002924,
-		.sceKernelLinkLibraryEntriesForUserCall = 0x00008198,
-		.sceKernelIcacheClearAll = 0x000077CC,
+	.syscon_patch = {
 		.sceSysconPowerStandby = 0x00002C6C,
 	},
-	.start_module_patch = {
-		.sceInitBootStartCall = 0x00001DA8,
-		.sceKernelStartModule = 0x00001CBC,
+	.init_patch = {
+		.sceKernelStartModuleImport = 0x00001CBC,
 		.module_bootstart = 0x00001A4C,
 	},
-	.high_memory_patch = {
-		.get_partition = 0x88003E34,
-		.umd_cache_module_start = 0x000009C8,
+	.umdcache_patch = {
+		.module_start = 0x000009C8,
 	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x00007DC0,
@@ -354,6 +350,10 @@ PatchOffset g_635_offsets = {
 		.memlmd_323366CA_NID = 0x3F2AC9C6,
 		.memlmd_7CF1CD3E_NID = 0xE42AFE2E,
 		.pops_version_check = 0x00006EE4,
+		.sceInitBootStartCall = 0x00001DA8,
+		.sceKernelLinkLibraryEntries = 0x000011D4,
+		.sceKernelLinkLibraryEntriesForUser = 0x00002924,
+		.sceKernelIcacheClearAll = 0x000077CC,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,
@@ -414,6 +414,8 @@ PatchOffset g_620_offsets = {
 		.PrologueModuleCall = 0x00007028,
 		.StartModule = 0x00006FD4,
 		.StartModuleCall = 0x00000290,
+		.sceKernelLinkLibraryEntriesCall = 0x0000842C,
+		.sceKernelLinkLibraryEntriesForUserCall = 0x00008178,
 	},
 	.threadmgr_patch = {
 		.sctrlKernelSetUserLevel = 0x00019E80,
@@ -476,6 +478,7 @@ PatchOffset g_620_offsets = {
 			{ 0x0000A068, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC Missing in 6.20
 		},
+		.get_partition = 0x88003E2C,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A38,
@@ -496,22 +499,15 @@ PatchOffset g_620_offsets = {
 	.power_service_patch = {
 		.scePowerGetBacklightMaximumCheck = 0x00000CC8,
 	},
-	.nid_resolver_patch = {
-		.sceKernelLinkLibraryEntries = 0x000011DC,
-		.sceKernelLinkLibraryEntriesCall = 0x0000842C,
-		.sceKernelLinkLibraryEntriesForUser = 0x0000292C,
-		.sceKernelLinkLibraryEntriesForUserCall = 0x00008178,
-		.sceKernelIcacheClearAll = 0x00007F6C,
+	.syscon_patch = {
 		.sceSysconPowerStandby = 0x00002C64,
 	},
-	.start_module_patch = {
-		.sceInitBootStartCall = 0x00001DB0,
-		.sceKernelStartModule = 0x00001CC4,
+	.init_patch = {
+		.sceKernelStartModuleImport = 0x00001CC4,
 		.module_bootstart = 0x00001A4C,
 	},
-	.high_memory_patch = {
-		.get_partition = 0x88003E2C,
-		.umd_cache_module_start = 0x000009C8,
+	.umdcache_patch = {
+		.module_start = 0x000009C8,
 	},
 	.loadercore_patch = {
 		.sceKernelCheckExecFile = 0x000086B4,
@@ -536,6 +532,10 @@ PatchOffset g_620_offsets = {
 		.memlmd_323366CA_NID = 0x2E208358,
 		.memlmd_7CF1CD3E_NID = 0xCA560AA6,
 		.pops_version_check = 0x00007684,
+		.sceInitBootStartCall = 0x00001DB0,
+		.sceKernelLinkLibraryEntries = 0x000011DC,
+		.sceKernelLinkLibraryEntriesForUser = 0x0000292C,
+		.sceKernelIcacheClearAll = 0x00007F6C,
 	},
 	.loadexec_patch_other = {
 		.LoadReboot = 0x00000000,

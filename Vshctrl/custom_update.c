@@ -46,11 +46,11 @@ void patch_update_plugin_module(SceModule *mod_)
 	// If it's lower than the one in updatelist.txt then the FW will update
 	version = (sctrlHENGetVersion() << 16) | sctrlHENGetMinorVersion();
 
-	_sw((version >> 16) | 0x3C050000, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion1);
-	_sw((version & 0xFFFF) | 0x34A40000, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion2);
+	_sw((version >> 16) | 0x3C050000, text_addr + g_offs->update_plugin_patch.UpdatePluginImageVersion1);
+	_sw((version & 0xFFFF) | 0x34A40000, text_addr + g_offs->update_plugin_patch.UpdatePluginImageVersion2);
 
 	//beql -> beq
-	_sw( 0x10400002, text_addr + g_offs->custom_update_patch.UpdatePluginImageVersion3);
+	_sw( 0x10400002, text_addr + g_offs->update_plugin_patch.UpdatePluginImageVersion3);
 
 	// substitute all /UPDATE with /PRO_FW
 	for(i = 0; i < text_size;) {
@@ -73,11 +73,11 @@ void patch_SceUpdateDL_Library(u32 text_addr)
 		return;
 	}
 	
-	p = (char*)(text_addr + g_offs->custom_update_patch. SceUpdateDL_UpdateListStr);
+	p = (char*)(text_addr + g_offs->SceUpdateDL_library_patch. SceUpdateDL_UpdateListStr);
 	sprintf(p, "http://pro.coldbird.uk.to/psp-updatelist.txt?fw=0x%08X&model=0%dg", (uint)psp_fw_version, (int)psp_model + 1);
 
-	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall1);
-	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall2);
-	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall3);
-	_sw(NOP, text_addr + g_offs->custom_update_patch.SceUpdateDL_UpdateListCall4);
+	_sw(NOP, text_addr + g_offs->SceUpdateDL_library_patch.SceUpdateDL_UpdateListCall1);
+	_sw(NOP, text_addr + g_offs->SceUpdateDL_library_patch.SceUpdateDL_UpdateListCall2);
+	_sw(NOP, text_addr + g_offs->SceUpdateDL_library_patch.SceUpdateDL_UpdateListCall3);
+	_sw(NOP, text_addr + g_offs->SceUpdateDL_library_patch.SceUpdateDL_UpdateListCall4);
 }

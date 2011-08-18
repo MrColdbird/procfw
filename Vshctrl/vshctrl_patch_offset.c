@@ -25,15 +25,20 @@
 #ifdef CONFIG_639
 PatchOffset g_639_offsets = {
 	.fw_version = FW_639,
-	.vshctrl_patch = {
+	.vshbridge_patch = {
 		.sceDisplaySetHoldMode = 0x00005618,
 		.sceDisplaySetHoldModeCall = 0x00001A14,
 		.HibBlockCheck = 0x000051A8,
+		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
+	},
+	.sysconf_plugin_patch = {
 		.SystemVersionStr = 0x0002A1FC,
 		.SystemVersionMessage = "6.39 PRO-%c",
 		.SystemVersion = 0x00018F3C,
 		.MacAddressStr = 0x0002E4D8,
 		.SlimColor = 0x00007660,
+	},
+	.game_plugin_patch = {
 		.HomebrewCheck = 0x000202A8,
 		.PopsCheck = 0x00020BC8,
 		.MultiDiscPopsCheck = 0x00014634,
@@ -45,10 +50,11 @@ PatchOffset g_639_offsets = {
 		.RifCompareCheck = 0x000203D4,
 		.RifTypeCheck = 0x000203E8,
 		.RifNpDRMCheck = 0x0002042C,
-		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
+	},
+	.htmlviewer_plugin_patch = {
 		.htmlviewer_save_location = 0x0001C7FC,
 	},
-	.msvideo_main_patch = {
+	.msvideo_main_plugin_patch = {
 		.checks = {
 			0x0003AED4,
 			0x0003AF5C,		
@@ -84,10 +90,12 @@ PatchOffset g_639_offsets = {
 			0x0002D1B4,
 		},
 	},
-	.custom_update_patch = {
+	.update_plugin_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
 		.UpdatePluginImageVersion2 = 0x000081BC,
 		.UpdatePluginImageVersion3 = 0x000081B0,
+	},
+	.SceUpdateDL_library_patch = {
 		.SceUpdateDL_UpdateListStr = 0x000032BC,
 		.SceUpdateDL_UpdateListCall1 = 0x00002044,
 		.SceUpdateDL_UpdateListCall2 = 0x00002054,
@@ -100,15 +108,20 @@ PatchOffset g_639_offsets = {
 #ifdef CONFIG_635
 PatchOffset g_635_offsets = {
 	.fw_version = FW_635,
-	.vshctrl_patch = {
+	.vshbridge_patch = {
 		.sceDisplaySetHoldMode = 0x00005618,
 		.sceDisplaySetHoldModeCall = 0x00001A14,
 		.HibBlockCheck = 0x000051A8,
+		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
+	},
+	.sysconf_plugin_patch = {
 		.SystemVersionStr = 0x0002A1FC,
 		.SystemVersionMessage = "6.35 PRO-%c",
 		.SystemVersion = 0x00018F3C,
 		.MacAddressStr = 0x0002E4D8,
 		.SlimColor = 0x00007660,
+	},
+	.game_plugin_patch = {
 		.HomebrewCheck = 0x000202A8,
 		.PopsCheck = 0x00020BC8,
 		.MultiDiscPopsCheck = 0x00014634,
@@ -120,10 +133,11 @@ PatchOffset g_635_offsets = {
 		.RifCompareCheck = 0x000203D4,
 		.RifTypeCheck = 0x000203E8,
 		.RifNpDRMCheck = 0x0002042C,
-		.sceCtrlReadBufferPositiveNID = 0x9F3038AC,
+	},
+	.htmlviewer_plugin_patch = {
 		.htmlviewer_save_location = 0x0001C7FC,
 	},
-	.msvideo_main_patch = {
+	.msvideo_main_plugin_patch = {
 		.checks = {
 			0x0003AED4,
 			0x0003AF5C,		
@@ -159,10 +173,12 @@ PatchOffset g_635_offsets = {
 			0x0002D1B4,
 		},
 	},
-	.custom_update_patch = {
+	.update_plugin_patch = {
 		.UpdatePluginImageVersion1 = 0x000081B4,
 		.UpdatePluginImageVersion2 = 0x000081BC,
 		.UpdatePluginImageVersion3 = 0x000081B0,
+	},
+	.SceUpdateDL_library_patch = {
 		.SceUpdateDL_UpdateListStr = 0x000032BC,
 		.SceUpdateDL_UpdateListCall1 = 0x00002044,
 		.SceUpdateDL_UpdateListCall2 = 0x00002054,
@@ -175,16 +191,21 @@ PatchOffset g_635_offsets = {
 #ifdef CONFIG_620
 PatchOffset g_620_offsets = {
 	.fw_version = FW_620,
-	.vshctrl_patch = {
+	.vshbridge_patch = {
 		.sceDisplaySetHoldMode = 0x00005570,
 		.sceDisplaySetHoldModeCall = 0x00001A14,
 		.HibBlockCheck = 0x000050F8,
+		.sceCtrlReadBufferPositiveNID = 0xD073ECA4,
+	},
+	.sysconf_plugin_patch = {
 		.SystemVersionStr = 0x000298AC,
 		.SystemVersionMessage = "6.20 PRO-%c",
 		.SystemVersion = 0x00018920,
 		.MacAddressStr = 0x0002DB90,
-		.HomebrewCheck = 0x0001EB08,
 		.SlimColor = 0x00007494,
+	},
+	.game_plugin_patch = {
+		.HomebrewCheck = 0x0001EB08,
 		.PopsCheck = 0x0001F41C,
 		.MultiDiscPopsCheck = 0x00013850,
 		.HidePicCheck1 = 0x0001C098,
@@ -195,10 +216,11 @@ PatchOffset g_620_offsets = {
 		.RifCompareCheck = 0x0001EC34,
 		.RifTypeCheck = 0x0001EC48,
 		.RifNpDRMCheck = 0x0001EC8C,
-		.sceCtrlReadBufferPositiveNID = 0xD073ECA4,
+	},
+	.htmlviewer_plugin_patch = {
 		.htmlviewer_save_location = 0x0001C7C0,
 	},
-	.msvideo_main_patch = {
+	.msvideo_main_plugin_patch = {
 		.checks = {
 			0x0003AB2C,
 			0x0003ABB4,
@@ -234,10 +256,12 @@ PatchOffset g_620_offsets = {
 			0x0002C944,
 		},
 	},
-	.custom_update_patch = {
+	.update_plugin_patch = {
 		.UpdatePluginImageVersion1 = 0x0000819C,
 		.UpdatePluginImageVersion2 = 0x000081A4,
 		.UpdatePluginImageVersion3 = 0x00008198,
+	},
+	.SceUpdateDL_library_patch = {
 		.SceUpdateDL_UpdateListStr = 0x000032BC,
 		.SceUpdateDL_UpdateListCall1 = 0x00002044,
 		.SceUpdateDL_UpdateListCall2 = 0x00002054,

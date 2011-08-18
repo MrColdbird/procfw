@@ -386,11 +386,11 @@ void setup_nid_resolver(void)
 	modmgr = (SceModule2*)sctrlKernelFindModuleByName("sceModuleManager");
 	loadcore = (SceModule2*)sctrlKernelFindModuleByName("sceLoaderCore");
 
-	missing_LoadCoreForKernel_entries[0].fp = (loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelIcacheClearAll);
-	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntries);
-	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUser);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesCall);
-	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->nid_resolver_patch.sceKernelLinkLibraryEntriesForUserCall);
+	missing_LoadCoreForKernel_entries[0].fp = (loadcore->text_addr + g_offs->loadercore_patch.sceKernelIcacheClearAll);
+	sceKernelLinkLibraryEntries = (void*)(loadcore->text_addr + g_offs->loadercore_patch.sceKernelLinkLibraryEntries);
+	sceKernelLinkLibraryEntriesForUser = (void*)(loadcore->text_addr + g_offs->loadercore_patch.sceKernelLinkLibraryEntriesForUser);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntries), modmgr->text_addr + g_offs->modulemgr_patch.sceKernelLinkLibraryEntriesCall);
+	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->modulemgr_patch.sceKernelLinkLibraryEntriesForUserCall);
 
 	switch(psp_fw_version) {
 #ifdef CONFIG_639
@@ -425,7 +425,7 @@ void resolve_syscon_driver(SceModule *mod)
 	if(syscon == NULL)
 		return;
 
-	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + g_offs->nid_resolver_patch.sceSysconPowerStandby);
+	 missing_sceSyscon_driver_entries[0].fp = (syscon->text_addr + g_offs->syscon_patch.sceSysconPowerStandby);
 }
 
 int sctrlKernelSetNidResolver(char *libname, u32 enabled)

@@ -77,24 +77,17 @@ struct scePowerServicePatch {
 	u32 scePowerGetBacklightMaximumCheck;
 };
 
-struct NidResolverPatch {
-	u32 sceKernelLinkLibraryEntries;
-	u32 sceKernelLinkLibraryEntriesCall;
-	u32 sceKernelLinkLibraryEntriesForUser;
-	u32 sceKernelLinkLibraryEntriesForUserCall;
-	u32 sceKernelIcacheClearAll;
+struct SysconPatch {
 	u32 sceSysconPowerStandby;
 };
 
-struct StartModulePatch {
-	u32 sceInitBootStartCall;
-	u32 sceKernelStartModule;
+struct InitPatch {
+	u32 sceKernelStartModuleImport;
 	u32 module_bootstart;
 };
 
-struct HighMemoryPatch {
-	u32 get_partition;
-	u32 umd_cache_module_start;
+struct UmdCachePatch {
+	u32 module_start;
 };
 
 struct SysMemForUserPatch {
@@ -105,6 +98,7 @@ struct SysMemForUserPatch {
 struct SysMemPatch {
 	struct SysMemForUserPatch sysmemforuser_patch[9];
 	u32 sctrlKernelSetDevkitVersion;
+	u32 get_partition;
 };
 
 struct sceLoaderCorePatch {
@@ -130,6 +124,10 @@ struct sceLoaderCorePatch {
 	u32 memlmd_323366CA_NID;
 	u32 memlmd_7CF1CD3E_NID;
 	u32 pops_version_check;
+	u32 sceInitBootStartCall;
+	u32 sceKernelLinkLibraryEntries;
+	u32 sceKernelLinkLibraryEntriesForUser;
+	u32 sceKernelIcacheClearAll;
 };
 
 struct sceLoadExecPatch {
@@ -174,6 +172,8 @@ struct ModuleMgrPatch {
 	u32 PrologueModuleCall;
 	u32 StartModule;
 	u32 StartModuleCall;
+	u32 sceKernelLinkLibraryEntriesCall;
+	u32 sceKernelLinkLibraryEntriesForUserCall;
 };
 
 typedef struct _PatchOffset {
@@ -191,9 +191,9 @@ typedef struct _PatchOffset {
 	struct PsnFixPatch psnfix_patch;
 	struct sceWlanDriverPatch wlan_driver_patch;
 	struct scePowerServicePatch power_service_patch;
-	struct NidResolverPatch nid_resolver_patch;
-	struct StartModulePatch start_module_patch;
-	struct HighMemoryPatch high_memory_patch;
+	struct SysconPatch syscon_patch;
+	struct InitPatch init_patch;
+	struct UmdCachePatch umdcache_patch;
 	struct sceLoaderCorePatch loadercore_patch;
 	struct sceLoadExecPatch loadexec_patch_other;
 	struct sceLoadExecPatch loadexec_patch_05g;

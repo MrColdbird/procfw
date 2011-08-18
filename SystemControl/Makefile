@@ -33,7 +33,8 @@ OBJS = main.o \
 	   systemctrl_patch_offset.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
-	   ../Common/strsafe.o
+	   ../Common/strsafe.o \
+	   setlongjmp.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \

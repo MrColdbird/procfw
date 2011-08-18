@@ -45,7 +45,7 @@ struct MemlmdPatch {
 };
 
 struct MesgledPatch {
-	u32 mesg_decrypt_call[9][5];
+	u32 mesg_decrypt_call[PSP_11000+1][5];
 	u32 mesgled_decrypt;
 };
 

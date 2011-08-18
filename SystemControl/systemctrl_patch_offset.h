@@ -45,22 +45,16 @@ struct MemlmdPatch {
 };
 
 struct MesgledPatch {
-	u32 mesg_decrypt_call[9][5];
+	u32 mesg_decrypt_call[PSP_11000+1][5];
 	u32 mesgled_decrypt;
 };
 
-struct SystemCtrlExportPatch {
-	u32 sctrlKernelLoadExecVSHWithApitype, sctrlKernelLoadExecVSHWithApitype_05g;
+struct ThreadMgrPatch {
 	u32 sctrlKernelSetUserLevel;
-	u32 sctrlKernelSetDevkitVersion;
-	u32 sctrlHENFindDriver;
-	u32 sctrlKernelSetUMDEmuFile;
-	u32 sctrlKernelSetInitFileName;
 };
 
-struct ValidateStubPatch {
-	u32 StartModule;
-	u32 StartModuleCall;
+struct IOFileMgrPatch {
+	u32 sctrlHENFindDriver;
 };
 
 struct March33Patch {
@@ -83,24 +77,17 @@ struct scePowerServicePatch {
 	u32 scePowerGetBacklightMaximumCheck;
 };
 
-struct NidResolverPatch {
-	u32 sceKernelLinkLibraryEntries;
-	u32 sceKernelLinkLibraryEntriesCall;
-	u32 sceKernelLinkLibraryEntriesForUser;
-	u32 sceKernelLinkLibraryEntriesForUserCall;
-	u32 sceKernelIcacheClearAll;
+struct SysconPatch {
 	u32 sceSysconPowerStandby;
 };
 
-struct StartModulePatch {
-	u32 sceInitBootStartCall;
-	u32 sceKernelStartModule;
+struct InitPatch {
+	u32 sceKernelStartModuleImport;
 	u32 module_bootstart;
 };
 
-struct HighMemoryPatch {
-	u32 get_partition;
-	u32 umd_cache_module_start;
+struct UmdCachePatch {
+	u32 module_start;
 };
 
 struct SysMemForUserPatch {
@@ -108,23 +95,10 @@ struct SysMemForUserPatch {
 	u8 value;
 };
 
-struct ModuleHandlerPatch {
-	u32 ProbeExec3;
-	u32 ProbeExec3Call;
-	u32 sceKernelCheckExecFileImport;
-	u32 PartitionCheck;
-	u32 PartitionCheckCall1;
-	u32 PartitionCheckCall2;
-	u32 DeviceCheck1;
-	u32 DeviceCheck2;
-	u32 DeviceCheck3;
-	u32 DeviceCheck4;
-	u32 DeviceCheck5;
-	u32 DeviceCheck6;
-	u32 DeviceCheck7;
-	u32 DeviceCheck8;
-	u32 PrologueModule;
-	u32 PrologueModuleCall;
+struct SysMemPatch {
+	struct SysMemForUserPatch sysmemforuser_patch[9];
+	u32 sctrlKernelSetDevkitVersion;
+	u32 get_partition;
 };
 
 struct sceLoaderCorePatch {
@@ -150,6 +124,10 @@ struct sceLoaderCorePatch {
 	u32 memlmd_323366CA_NID;
 	u32 memlmd_7CF1CD3E_NID;
 	u32 pops_version_check;
+	u32 sceInitBootStartCall;
+	u32 sceKernelLinkLibraryEntries;
+	u32 sceKernelLinkLibraryEntriesForUser;
+	u32 sceKernelIcacheClearAll;
 };
 
 struct sceLoadExecPatch {
@@ -160,6 +138,7 @@ struct sceLoadExecPatch {
 	u32 sceKernelLoadExecWithApiTypeCheck2;
 	u32 sceKernelExitVSHVSHCheck1;
 	u32 sceKernelExitVSHVSHCheck2;
+	u32 sctrlKernelLoadExecVSHWithApitype;
 };
 
 struct sceImposeDriverPatch {
@@ -172,24 +151,49 @@ struct sceUSBDriverPatch {
 	u32 scePowerBatteryEnableUsbChargingStub;
 };
 
+struct ModuleMgrPatch {
+	u32 sctrlKernelSetUMDEmuFile;
+	u32 sctrlKernelSetInitFileName;
+	u32 ProbeExec3;
+	u32 ProbeExec3Call;
+	u32 sceKernelCheckExecFileImport;
+	u32 PartitionCheck;
+	u32 PartitionCheckCall1;
+	u32 PartitionCheckCall2;
+	u32 DeviceCheck1;
+	u32 DeviceCheck2;
+	u32 DeviceCheck3;
+	u32 DeviceCheck4;
+	u32 DeviceCheck5;
+	u32 DeviceCheck6;
+	u32 DeviceCheck7;
+	u32 DeviceCheck8;
+	u32 PrologueModule;
+	u32 PrologueModuleCall;
+	u32 StartModule;
+	u32 StartModuleCall;
+	u32 sceKernelLinkLibraryEntriesCall;
+	u32 sceKernelLinkLibraryEntriesForUserCall;
+};
+
 typedef struct _PatchOffset {
 	u32 fw_version;
 	struct InterruptManPatch interruptman_patch;
+	struct ModuleMgrPatch modulemgr_patch;
+	struct ThreadMgrPatch threadmgr_patch;
 	struct MediaSyncPatch mediasync_patch;
 	struct MemlmdPatch memlmd_patch_01g;
 	struct MemlmdPatch memlmd_patch_other;
 	struct MesgledPatch mesgled_patch;
-	struct SystemCtrlExportPatch systemctrl_export_patch;
-	struct ValidateStubPatch validate_stub_patch;
+	struct SysMemPatch sysmem_patch;
+	struct IOFileMgrPatch iofilemgr_patch;
 	struct March33Patch march33_patch;
 	struct PsnFixPatch psnfix_patch;
 	struct sceWlanDriverPatch wlan_driver_patch;
 	struct scePowerServicePatch power_service_patch;
-	struct NidResolverPatch nid_resolver_patch;
-	struct StartModulePatch start_module_patch;
-	struct HighMemoryPatch high_memory_patch;
-	struct SysMemForUserPatch sysmemforuser_patch[9];
-	struct ModuleHandlerPatch module_handler_patch;
+	struct SysconPatch syscon_patch;
+	struct InitPatch init_patch;
+	struct UmdCachePatch umdcache_patch;
 	struct sceLoaderCorePatch loadercore_patch;
 	struct sceLoadExecPatch loadexec_patch_other;
 	struct sceLoadExecPatch loadexec_patch_05g;

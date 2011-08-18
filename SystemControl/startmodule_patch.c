@@ -196,9 +196,9 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 	u32 import;
 
 	// patch sceInit with offset between module_bootstart and sceKernelStartModule
-	import = ((u32)bootstart) + g_offs->start_module_patch.sceKernelStartModule - g_offs->start_module_patch.module_bootstart;
+	import = ((u32)bootstart) + g_offs->init_patch.sceKernelStartModuleImport - g_offs->init_patch.module_bootstart;
 	REDIRECT_FUNCTION(_sceKernelStartModule, import);
-	sceInit_text_addr = ((u32)bootstart) - g_offs->start_module_patch.module_bootstart;
+	sceInit_text_addr = ((u32)bootstart) - g_offs->init_patch.module_bootstart;
 	sync_cache();
 
 	return (*bootstart)(4, argp);
@@ -206,8 +206,8 @@ static int patch_sceKernelStartModule_in_bootstart(int (*bootstart)(SceSize, voi
 
 void patch_sceKernelStartModule(u32 loadcore_text_addr)
 {
-	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr + g_offs->start_module_patch.sceInitBootStartCall);
-	_sw(0x02E02021, loadcore_text_addr + g_offs->start_module_patch.sceInitBootStartCall + 4); // move $a0, $s7
+	_sw(MAKE_CALL(patch_sceKernelStartModule_in_bootstart), loadcore_text_addr + g_offs->loadercore_patch.sceInitBootStartCall);
+	_sw(0x02E02021, loadcore_text_addr + g_offs->loadercore_patch.sceInitBootStartCall + 4); // move $a0, $s7
 }
 
 // AKA SystemCtrlForKernel_72F29A6E in 5.00M33

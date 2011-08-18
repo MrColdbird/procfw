@@ -41,7 +41,7 @@ static u8 g_p8_size = 4;
 
 static inline u32 *get_partition(int pid)
 {
-	u32 * (*get_memory_partition)(int pid) = (void *)(g_offs->high_memory_patch.get_partition);
+	u32 * (*get_memory_partition)(int pid) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.get_partition);
 
 	return (*get_memory_partition)(pid);
 }
@@ -62,7 +62,7 @@ void patch_umdcache(u32 text_addr)
 		return;
 	
 	//kill module start
-	MAKE_DUMMY_FUNCTION_RETURN_1(text_addr + g_offs->high_memory_patch.umd_cache_module_start);
+	MAKE_DUMMY_FUNCTION_RETURN_1(text_addr + g_offs->umdcache_patch.module_start);
 }
 
 void unlock_high_memory(u32 forced)

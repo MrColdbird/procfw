@@ -57,7 +57,10 @@ enum {
 	PSP_GO   = 4,
 	PSP_7000 = 6,
 	PSP_9000 = 8,
+	PSP_11000 = 10,
 };
+
+#define SYSMEM_TEXT_ADDR 0x88000000
 
 #define MAKE_JUMP(f) (0x08000000 | (((u32)(f) >> 2) & 0x03ffffff))
 #define MAKE_CALL(f) (0x0C000000 | (((u32)(f) >> 2) & 0x03ffffff))

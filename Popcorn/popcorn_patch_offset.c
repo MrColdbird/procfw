@@ -44,6 +44,8 @@ PatchOffset g_639_offsets = {
 			{ 0x000D670C, 0x0000DC04 }, // 07G
 			{ 0x00000000, 0x00000000 }, // unused
 			{ 0x000D670C, 0x0000DC04 }, // 09G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // 11G
 		},
 		.ICON0SizeOffset = {
 			0x00036F54, // 01G
@@ -55,6 +57,8 @@ PatchOffset g_639_offsets = {
 			0x00037F90, // 07G
 			0xDEADBEEF, // unused
 			0x00037F90, // 09G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.manualNameCheck = {
 			0x0002541C, // 01G
@@ -66,6 +70,8 @@ PatchOffset g_639_offsets = {
 			0x00025928, // 07G
 			0xDEADBEEF, // unused
 			0x00025928, // 09G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.sceMeAudio_67CD7972_NID = 0x67CD7972,
 	},
@@ -94,6 +100,8 @@ PatchOffset g_635_offsets = {
 			{ 0x000D64FC, 0x0000DB00 }, // 07G
 			{ 0x00000000, 0x00000000 }, // unused
 			{ 0x000D64FC, 0x0000DB00 }, // 09G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // 11G
 		},
 		.ICON0SizeOffset = {
 			0x00036CF8, // 01G
@@ -105,6 +113,8 @@ PatchOffset g_635_offsets = {
 			0x00037D74, // 07G
 			0xDEADBEEF, // unused
 			0x00037D74, // 09G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.manualNameCheck = {
 			0x000251C0, // 01G
@@ -116,6 +126,8 @@ PatchOffset g_635_offsets = {
 			0x0002570C, // 07G
 			0xDEADBEEF, // unused
 			0x0002570C, // 09G
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.sceMeAudio_67CD7972_NID = 0x67CD7972,
 	},
@@ -144,6 +156,8 @@ PatchOffset g_620_offsets = {
 			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
 			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
 			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0xDEADBEEF, 0xDEADBEEF }, // 11G
 		},
 		.ICON0SizeOffset = {
 			0x0003BCD0, // 01G
@@ -155,6 +169,8 @@ PatchOffset g_620_offsets = {
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.manualNameCheck = {
 			0x00029710, // 01G
@@ -166,6 +182,8 @@ PatchOffset g_620_offsets = {
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused
 			0xDEADBEEF, // unused
+			0xDEADBEEF, // unused
+			0xDEADBEEF, // 11G
 		},
 		.sceMeAudio_67CD7972_NID = 0xF43E573A,
 	},

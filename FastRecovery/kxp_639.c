@@ -48,13 +48,13 @@ void do_exploit_639(void)
 
 	sceHttpStorageOpen(-612, 0, 0);
 	sync_cache();
-	sceHttpStorageOpen((g_offs->sceKernelPowerLockForUser>>2), 0, 0); // scePowerLock override
+	sceHttpStorageOpen(((SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser)>>2), 0, 0); // scePowerLock override
 	sync_cache();
 
 	interrupts = pspSdkDisableInterrupts();
 	kernel_entry = (u32) &kernel_permission_call;
 	entry_addr = ((u32) &kernel_entry) - 16;
-	sceKernelPowerLock(0, ((u32) &entry_addr) - g_offs->sceKernelPowerLockForUser_data_offset);
+	sceKernelPowerLock(0, ((u32) &entry_addr) - g_offs->sysmem_patch.sceKernelPowerLockForUser_data_offset);
 	pspSdkEnableInterrupts(interrupts);
 
 	for(i=6; i>=1; --i) {

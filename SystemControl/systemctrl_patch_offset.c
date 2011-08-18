@@ -102,7 +102,7 @@ PatchOffset g_639_offsets = {
 		.mesgled_decrypt = 0x000000E0,
 	},
 	.sysmem_patch = {
-		.sctrlKernelSetDevkitVersion = 0x88011998,
+		.sctrlKernelSetDevkitVersion = 0x00011998,
 		.sysmemforuser_patch = {
 			{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
 			{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
@@ -114,7 +114,7 @@ PatchOffset g_639_offsets = {
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 		},
-		.get_partition = 0x88003E34,
+		.get_partition = 0x00003E34,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A44,
@@ -284,7 +284,7 @@ PatchOffset g_635_offsets = {
 		.mesgled_decrypt = 0x000000E0,
 	},
 	.sysmem_patch = {
-		.sctrlKernelSetDevkitVersion = 0x88011998,
+		.sctrlKernelSetDevkitVersion = 0x00011998,
 		.sysmemforuser_patch = {
 			{ 0x00009A2C, 0x1F }, // sceKernelSetCompiledSdkVersion
 			{ 0x00009B4C, 0x12 }, // SysMemUserForUser_342061E5
@@ -296,7 +296,7 @@ PatchOffset g_635_offsets = {
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
 		},
-		.get_partition = 0x88003E34,
+		.get_partition = 0x00003E34,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A44,
@@ -466,7 +466,7 @@ PatchOffset g_620_offsets = {
 		.mesgled_decrypt = 0x000000E0,
 	},
 	.sysmem_patch = {
-		.sctrlKernelSetDevkitVersion = 0x88011AAC,
+		.sctrlKernelSetDevkitVersion = 0x00011AAC,
 		.sysmemforuser_patch = {
 			{ 0x00009B4C, 0x1F }, // sceKernelSetCompiledSdkVersion
 			{ 0x00009C6C, 0x12 }, // SysMemUserForUser_342061E5
@@ -478,7 +478,7 @@ PatchOffset g_620_offsets = {
 			{ 0x0000A068, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC Missing in 6.20
 		},
-		.get_partition = 0x88003E2C,
+		.get_partition = 0x00003E2C,
 	},
 	.iofilemgr_patch = {
 		.sctrlHENFindDriver = 0x00002A38,

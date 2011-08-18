@@ -438,8 +438,8 @@ int sctrlKernelSetDevkitVersion(int version)
 	k1 = pspSdkSetK1(0);
 	ret = sceKernelDevkitVersion();
 
-	_sh((version>>16), g_offs->sysmem_patch.sctrlKernelSetDevkitVersion); // 0x88011AAC in 6.20
-	_sh((version&0xFFFF), g_offs->sysmem_patch.sctrlKernelSetDevkitVersion+8); // 0x88011AB4 in 6.20
+	_sh((version>>16), SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sctrlKernelSetDevkitVersion); // 0x88011AAC in 6.20
+	_sh((version&0xFFFF), SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sctrlKernelSetDevkitVersion + 8); // 0x88011AB4 in 6.20
 
 	sync_cache();
 	pspSdkSetK1(k1);

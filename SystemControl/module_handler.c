@@ -58,26 +58,26 @@ void setup_module_handler(void)
 	if (mod == NULL)
 		return;
 	
-	ProbeExec3 = (void*)mod->text_addr + g_offs->module_handler_patch.ProbeExec3;
-	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + g_offs->module_handler_patch.ProbeExec3Call);
-	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr + g_offs->module_handler_patch.sceKernelCheckExecFileImport);
+	ProbeExec3 = (void*)mod->text_addr + g_offs->modulemgr_patch.ProbeExec3;
+	_sw(MAKE_CALL(_ProbeExec3), mod->text_addr + g_offs->modulemgr_patch.ProbeExec3Call);
+	_sw(MAKE_JUMP(_sceKernelCheckExecFile), mod->text_addr + g_offs->modulemgr_patch.sceKernelCheckExecFileImport);
 
-	PartitionCheck = (void*)mod->text_addr + g_offs->module_handler_patch.PartitionCheck;
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall1);
-	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->module_handler_patch.PartitionCheckCall2);
+	PartitionCheck = (void*)mod->text_addr + g_offs->modulemgr_patch.PartitionCheck;
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->modulemgr_patch.PartitionCheckCall1);
+	_sw(MAKE_CALL(_PartitionCheck), mod->text_addr + g_offs->modulemgr_patch.PartitionCheckCall2);
 
 	//no device check patches
-	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck1);
-	_sw(0x24020000, mod->text_addr + g_offs->module_handler_patch.DeviceCheck2);
-	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck3);
-	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck4);
-	_sw(0x10000009, mod->text_addr + g_offs->module_handler_patch.DeviceCheck5);
-	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck6);
-	_sw(NOP, mod->text_addr + g_offs->module_handler_patch.DeviceCheck7);
-	_sw(0x10000010, mod->text_addr + g_offs->module_handler_patch.DeviceCheck8);
+	_sw(NOP, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck1);
+	_sw(0x24020000, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck2);
+	_sw(NOP, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck3);
+	_sw(NOP, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck4);
+	_sw(0x10000009, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck5);
+	_sw(NOP, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck6);
+	_sw(NOP, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck7);
+	_sw(0x10000010, mod->text_addr + g_offs->modulemgr_patch.DeviceCheck8);
 
-	_prologue_module = (void*)(mod->text_addr + g_offs->module_handler_patch.PrologueModule);
-	_sw(MAKE_CALL(prologue_module), mod->text_addr + g_offs->module_handler_patch.PrologueModuleCall);
+	_prologue_module = (void*)(mod->text_addr + g_offs->modulemgr_patch.PrologueModule);
+	_sw(MAKE_CALL(prologue_module), mod->text_addr + g_offs->modulemgr_patch.PrologueModuleCall);
 
 #ifdef DEBUG
 	setup_validate_stub((SceModule*)mod);

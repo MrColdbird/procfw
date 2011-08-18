@@ -35,6 +35,8 @@ PatchOffset g_639_offsets = {
 		0x00003338, // 07g
 		0xDEADBEEF, // 08g
 		0x00003338, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.sceMesgLedDecryptGame2 = {
 		0x00002E50, // 01g
@@ -46,6 +48,8 @@ PatchOffset g_639_offsets = {
 		0x000035D0, // 07g
 		0xDEADBEEF, // 08g
 		0x000035D0, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.mesgled_decrypt = 0x000000E0,
 	.LoadExecForUser_362A956B_fix = 0x000009B4,
@@ -65,6 +69,8 @@ PatchOffset g_635_offsets = {
 		0x000032A8, // 07g
 		0xDEADBEEF, // 08g
 		0x000032A8, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.sceMesgLedDecryptGame2 = {
 		0x00002DC0, // 01g
@@ -76,6 +82,8 @@ PatchOffset g_635_offsets = {
 		0x00003540, // 07g
 		0xDEADBEEF, // 08g
 		0x00003540, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.mesgled_decrypt = 0x000000E0,
 	.LoadExecForUser_362A956B_fix = 0x000009B4,
@@ -95,6 +103,8 @@ PatchOffset g_620_offsets = {
 		0xDEADBEEF, // 07g
 		0xDEADBEEF, // 08g
 		0xDEADBEEF, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.sceMesgLedDecryptGame2 = {
 		0x00002CA0, // 01g
@@ -106,6 +116,8 @@ PatchOffset g_620_offsets = {
 		0xDEADBEEF, // 07g
 		0xDEADBEEF, // 08g
 		0xDEADBEEF, // 09g
+		0xDEADBEEF, // unused
+		0xDEADBEEF, // 11G
 	},
 	.mesgled_decrypt = 0x000000E0,
 	.LoadExecForUser_362A956B_fix = 0x000009B4,

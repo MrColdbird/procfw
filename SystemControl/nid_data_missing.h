@@ -18,14 +18,17 @@
 #ifndef NID_DATA_MISSING_H
 #define NID_DATA_MISSING_H
 
+extern int ownsetjmp();
+extern void ownlongjmp();
+
 MissingNIDEntry missing_SysclibForKernel_entries[] = {
 	{ 0x89B79CB1, (u32)ownstrcspn,  },
 	{ 0x62AE052F, (u32)ownstrspn,   },
 	{ 0x87F8D2DA, (u32)ownstrtok,   },
 	{ 0x1AB53A58, (u32)ownstrtok_r, },
 	{ 0xD3D1A3B9, (u32)strncat,     },
-	{ 0x909C228B, (u32)0x88002E88,  },
-	{ 0x18FE80DB, (u32)0x88002EC4,  },
+	{ 0x909C228B, (u32)&ownsetjmp,  }, // setjmp
+	{ 0x18FE80DB, (u32)&ownlongjmp,  }, // longjmp
 };
 
 MissingNIDResolver missing_SysclibForKernel = {

@@ -20,15 +20,22 @@
 
 #include "utils.h"
 
-struct VshctrlPatch {
+struct VshBridgePatch {
 	u32 sceDisplaySetHoldMode;
 	u32 sceDisplaySetHoldModeCall;
 	u32 HibBlockCheck;
+	u32 sceCtrlReadBufferPositiveNID;
+};
+
+struct SysConfPluginPatch {
 	u32 SystemVersionStr;
 	const char *SystemVersionMessage;
 	u32 SystemVersion;
 	u32 MacAddressStr;
 	u32 SlimColor;
+};
+
+struct GamePluginPatch {
 	u32 HomebrewCheck;
 	u32 PopsCheck;
 	u32 MultiDiscPopsCheck;
@@ -40,11 +47,13 @@ struct VshctrlPatch {
 	u32 RifCompareCheck;
 	u32 RifTypeCheck;
 	u32 RifNpDRMCheck;
-	u32 sceCtrlReadBufferPositiveNID;
+};
+
+struct HtmlViewerPluginPatch {
 	u32 htmlviewer_save_location;
 };
 
-struct MsVideoMainPatch {
+struct MsVideoMainPluginPatch {
 	u32 checks[10];
 };
 
@@ -58,10 +67,13 @@ struct VshModulePatch {
 	u32 vshbridge_get_model_call[3];
 };
 
-struct CustomUpdatePatch {
+struct UpdatePluginPatch {
 	u32 UpdatePluginImageVersion1;
 	u32 UpdatePluginImageVersion2;
 	u32 UpdatePluginImageVersion3;
+};
+
+struct SceUpdateDLLibraryPatch {
 	u32 SceUpdateDL_UpdateListStr;
 	u32 SceUpdateDL_UpdateListCall1;
 	u32 SceUpdateDL_UpdateListCall2;
@@ -71,10 +83,14 @@ struct CustomUpdatePatch {
 
 typedef struct _PatchOffset {
 	u32 fw_version;
-	struct VshctrlPatch vshctrl_patch;
-	struct MsVideoMainPatch msvideo_main_patch;
+	struct VshBridgePatch vshbridge_patch;
+	struct SysConfPluginPatch sysconf_plugin_patch;
+	struct GamePluginPatch game_plugin_patch;
+	struct HtmlViewerPluginPatch htmlviewer_plugin_patch;
+	struct MsVideoMainPluginPatch msvideo_main_plugin_patch;
 	struct VshModulePatch vsh_module_patch;
-	struct CustomUpdatePatch custom_update_patch;
+	struct UpdatePluginPatch update_plugin_patch;
+	struct SceUpdateDLLibraryPatch SceUpdateDL_library_patch;
 } PatchOffset;
 
 extern PatchOffset *g_offs;

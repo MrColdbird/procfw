@@ -26,16 +26,20 @@ struct sceLoadExecPatch {
 	u32 RebootJump;
 };
 
-typedef struct _PatchOffset {
-	u32 fw_version;
+struct SysMemPatch {
 	u32 sceKernelIcacheInvalidateAll;
 	u32 sceKernelDcacheWritebackInvalidateAll;
-	u32 sceKernelFindModuleByName;
 	u32 sceKernelGetModel;
-	struct sceLoadExecPatch loadexec_patch_05g;
-	struct sceLoadExecPatch loadexec_patch_other;
 	u32 sceKernelPowerLockForUser;
 	u16 sceKernelPowerLockForUser_data_offset;
+};
+
+typedef struct _PatchOffset {
+	u32 fw_version;
+	struct SysMemPatch sysmem_patch;
+	u32 sceKernelFindModuleByName;
+	struct sceLoadExecPatch loadexec_patch_05g;
+	struct sceLoadExecPatch loadexec_patch_other;
 	u32 patchRangeStart;
 	u32 patchRangeEnd;
 } PatchOffset;

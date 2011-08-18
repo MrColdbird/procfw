@@ -400,9 +400,9 @@ int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceK
 	text_addr = mod->text_addr;
 
 	if (psp_model == PSP_GO) {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype_05g);
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_05g.sctrlKernelLoadExecVSHWithApitype);
 	} else {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->systemctrl_export_patch.sctrlKernelLoadExecVSHWithApitype);
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_other.sctrlKernelLoadExecVSHWithApitype);
 	}
 
 	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
@@ -423,7 +423,7 @@ int sctrlKernelSetUserLevel(int level)
 	ret = sceKernelGetUserLevel();
 	mod = (SceModule2*) sctrlKernelFindModuleByName("sceThreadManager");
 	text_addr = mod->text_addr;
-	_sw((level^8)<<28, *(u32*)(text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetUserLevel)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
+	_sw((level^8)<<28, *(u32*)(text_addr+g_offs->threadmgr_patch.sctrlKernelSetUserLevel)+0x14); // 0x00019E80 and 0x14 in 6.20, 6.31 remains the same
 
 	pspSdkSetK1(k1);
 
@@ -438,8 +438,8 @@ int sctrlKernelSetDevkitVersion(int version)
 	k1 = pspSdkSetK1(0);
 	ret = sceKernelDevkitVersion();
 
-	_sh((version>>16), g_offs->systemctrl_export_patch.sctrlKernelSetDevkitVersion); // 0x88011AAC in 6.20
-	_sh((version&0xFFFF), g_offs->systemctrl_export_patch.sctrlKernelSetDevkitVersion+8); // 0x88011AB4 in 6.20
+	_sh((version>>16), SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sctrlKernelSetDevkitVersion); // 0x88011AAC in 6.20
+	_sh((version&0xFFFF), SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sctrlKernelSetDevkitVersion + 8); // 0x88011AB4 in 6.20
 
 	sync_cache();
 	pspSdkSetK1(k1);
@@ -476,7 +476,7 @@ PspIoDrv *sctrlHENFindDriver(char *drvname)
 
 	k1 = pspSdkSetK1(0);
 	mod = (SceModule2*) sctrlKernelFindModuleByName("sceIOFileManager");
-	find_driver = (void*)(mod->text_addr + g_offs->systemctrl_export_patch.sctrlHENFindDriver); // 0x00002A38 in 6.20/6.31
+	find_driver = (void*)(mod->text_addr + g_offs->iofilemgr_patch.sctrlHENFindDriver); // 0x00002A38 in 6.20/6.31
 	p = find_driver(drvname);
 
 	if (p != NULL) {
@@ -632,7 +632,7 @@ int sctrlKernelSetUMDEmuFile(const char *iso)
 	}
 
 	STRCPY_S(g_iso_filename, iso);
-	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetUMDEmuFile) = g_iso_filename;
+	*(const char**)(modmgr->text_addr+g_offs->modulemgr_patch.sctrlKernelSetUMDEmuFile) = g_iso_filename;
 
 	return 0;
 }
@@ -648,7 +648,7 @@ int sctrlKernelSetInitFileName(char *filename)
 	}
 
 	STRCPY_S(g_initfilename, filename);
-	*(const char**)(modmgr->text_addr+g_offs->systemctrl_export_patch.sctrlKernelSetInitFileName) = g_initfilename;
+	*(const char**)(modmgr->text_addr+g_offs->modulemgr_patch.sctrlKernelSetInitFileName) = g_initfilename;
 
 	return 0;
 }

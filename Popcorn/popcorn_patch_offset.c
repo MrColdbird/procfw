@@ -22,6 +22,62 @@
 #error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
 #endif
 
+#ifdef CONFIG_660
+PatchOffset g_660_offsets = {
+	.fw_version = FW_660,
+	.popsman_patch = {
+		.get_rif_path = 0x00000190,
+		.get_rif_path_call1 = 0x00002798,
+		.get_rif_path_call2 = 0x00002C58,
+		.sceNpDrmGetVersionKeyCall = 0x000029C4,
+		.scePspNpDrm_driver_9A34AC9F_Call = 0x00002DA8,
+		.scePopsManLoadModuleCheck = 0x00001E80,
+	},
+	.pops_patch = {
+		.decomp = {
+			{ 0x000D5424, 0x0000DB78 }, // 01G
+			{ 0x000D64DC, 0x0000DB78 }, // 02G
+			{ 0x000D64DC, 0x0000DB78 }, // 03G
+			{ 0x000D654C, 0x0000DBE8 }, // 04G
+			{ 0x000D84D8, 0x0000E300 }, // 05G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0x000D656C, 0x0000DBE8 }, // 07G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0x000D656C, 0x0000DBE8 }, // 09G
+			{ 0xDEADBEEF, 0xDEADBEEF }, // unused
+			{ 0x000D5494, 0x0000DBE8 }, // 11G
+		},
+		.ICON0SizeOffset = {
+			0x00036D50, // 01G
+			0x00037D8C, // 02G
+			0x00037D8C, // 03G
+			0x00037E04, // 04G
+			0x00039BEC, // 05G
+			0xDEADBEEF, // unused
+			0x00037E1C, // 07G
+			0xDEADBEEF, // unused
+			0x00037E1C, // 09G
+			0xDEADBEEF, // unused
+			0x00036DCC, // 11G
+		},
+		.manualNameCheck = {
+			0x00025248, // 01G
+			0x00025754, // 02G
+			0x00025754, // 03G
+			0x000257CC, // 04G
+			0x00026060, // 05G
+			0xDEADBEEF, // unused
+			0x000257E4, // 07G
+			0xDEADBEEF, // unused
+			0x000257E4, // 09G
+			0xDEADBEEF, // unused
+			0x000252C4, // 11G
+		},
+		.sceMeAudio_67CD7972_NID = 0x2AB4FE43,
+	},
+};
+#endif
+
 #ifdef CONFIG_639
 PatchOffset g_639_offsets = {
 	.fw_version = FW_639,
@@ -194,6 +250,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_660_offsets.fw_version) {
+		g_offs = &g_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_639_offsets.fw_version) {
 		g_offs = &g_639_offsets;

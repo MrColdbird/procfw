@@ -592,6 +592,12 @@ int main(int argc, char * argv[])
 
 	psp_fw_version = sceKernelDevkitVersion();
 
+#ifdef CONFIG_660
+	if(psp_fw_version == FW_660) {
+		goto version_OK;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639) {
 		goto version_OK;
@@ -634,6 +640,14 @@ version_OK:
 
 		return 0;
 	}
+
+#ifdef CONFIG_660
+	if(psp_fw_version == FW_660) {
+		pspDebugScreenPrintf("Oops, we need a kxploit to do the job!\n");
+		sceKernelDelayThread(5*1000000);
+		goto exit;
+	}
+#endif
 
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639) {

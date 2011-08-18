@@ -138,20 +138,20 @@ static void patch_sceCtrlReadBufferPositive(void)
 	SceModule* mod;
 
 	mod = sceKernelFindModuleByName("sceVshBridge_Driver");
-	hook_import_bynid(mod, "sceCtrl_driver", g_offs->vshctrl_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
+	hook_import_bynid(mod, "sceCtrl_driver", g_offs->vshbridge_patch.sceCtrlReadBufferPositiveNID, _sceCtrlReadBufferPositive, 0);
 	g_sceCtrlReadBufferPositive = (void *) sctrlHENFindFunction("sceController_Service", "sceCtrl", 0x1F803938);
 	sctrlHENPatchSyscall(g_sceCtrlReadBufferPositive, _sceCtrlReadBufferPositive);
 }
 
 static void patch_Gameboot(SceModule2 *mod)
 {
-	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + g_offs->vshctrl_patch.sceDisplaySetHoldModeCall);
-	sceDisplaySetHoldMode = (void*)(mod->text_addr + g_offs->vshctrl_patch.sceDisplaySetHoldMode);
+	_sw(MAKE_CALL(_sceDisplaySetHoldMode), mod->text_addr + g_offs->vshbridge_patch.sceDisplaySetHoldModeCall);
+	sceDisplaySetHoldMode = (void*)(mod->text_addr + g_offs->vshbridge_patch.sceDisplaySetHoldMode);
 }
 
 static void patch_hibblock(SceModule2 *mod)
 {
-	MAKE_DUMMY_FUNCTION_RETURN_0(mod->text_addr + g_offs->vshctrl_patch.HibBlockCheck);
+	MAKE_DUMMY_FUNCTION_RETURN_0(mod->text_addr + g_offs->vshbridge_patch.HibBlockCheck);
 }
 
 static inline void ascii2utf16(char *dest, const char *src)
@@ -269,7 +269,7 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	text_addr = mod->text_addr;
 	minor_version = sctrlHENGetMinorVersion();
 
-	sprintf(str, g_offs->vshctrl_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
+	sprintf(str, g_offs->sysconf_plugin_patch.SystemVersionMessage, 'A'+(sctrlHENGetVersion()&0xF)-1);
 
 	if(minor_version != 0) {
 		sprintf(str+strlen(str), "%d", (uint)minor_version);
@@ -279,14 +279,14 @@ static void patch_sysconf_plugin_module(SceModule2 *mod)
 	strcpy(str, "PRO NIGHTLY");
 #endif
 	
-	p = (void*)(text_addr + g_offs->vshctrl_patch.SystemVersionStr);
+	p = (void*)(text_addr + g_offs->sysconf_plugin_patch.SystemVersionStr);
 	ascii2utf16(p, str);
 
-	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr + g_offs->vshctrl_patch.SystemVersion); // lui $v0, 
-	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr + g_offs->vshctrl_patch.SystemVersion + 4); // or $v0, $v0, 
+	_sw(0x3C020000 | ((u32)(p) >> 16), text_addr + g_offs->sysconf_plugin_patch.SystemVersion); // lui $v0, 
+	_sw(0x34420000 | ((u32)(p) & 0xFFFF), text_addr + g_offs->sysconf_plugin_patch.SystemVersion + 4); // or $v0, $v0, 
 
 	if (conf.machidden) {
-		p = (void*)(text_addr + g_offs->vshctrl_patch.MacAddressStr);
+		p = (void*)(text_addr + g_offs->sysconf_plugin_patch.MacAddressStr);
 		
 		if(conf.useversion) {
 			char *tmpbuf;
@@ -327,7 +327,7 @@ out:
 	if(psp_model == PSP_1000 && conf.slimcolor) {
 		u32 patch_addr, value;
 
-		patch_addr = g_offs->vshctrl_patch.SlimColor + text_addr;
+		patch_addr = g_offs->sysconf_plugin_patch.SlimColor + text_addr;
 		value = *(u32 *)(patch_addr + 4);
 
 		_sw(0x24020001, patch_addr + 4);
@@ -343,58 +343,58 @@ int fakeParamInexistance(void)
 static void patch_game_plugin_module(u32 text_addr)
 {
 	//disable executable check for normal homebrew
-	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->vshctrl_patch.HomebrewCheck);
+	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->game_plugin_patch.HomebrewCheck);
 
 	//kill ps1 eboot check
-	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->vshctrl_patch.PopsCheck);
+	MAKE_DUMMY_FUNCTION_RETURN_0(text_addr + g_offs->game_plugin_patch.PopsCheck);
 
 	//kill multi-disc ps1 check
-	_sw(NOP, text_addr + g_offs->vshctrl_patch.MultiDiscPopsCheck);
+	_sw(NOP, text_addr + g_offs->game_plugin_patch.MultiDiscPopsCheck);
 
 	if (conf.hidepic) {
-		_sw(0x00601021, text_addr + g_offs->vshctrl_patch.HidePicCheck1);
-		_sw(0x00601021, text_addr + g_offs->vshctrl_patch.HidePicCheck2);
+		_sw(0x00601021, text_addr + g_offs->game_plugin_patch.HidePicCheck1);
+		_sw(0x00601021, text_addr + g_offs->game_plugin_patch.HidePicCheck2);
 	}
 	
 	if (conf.skipgameboot) {
-		_sw(MAKE_CALL(text_addr + g_offs->vshctrl_patch.SkipGameBootSubroute), text_addr + g_offs->vshctrl_patch.SkipGameBoot);
-		_sw(0x24040002, text_addr + g_offs->vshctrl_patch.SkipGameBoot + 4);
+		_sw(MAKE_CALL(text_addr + g_offs->game_plugin_patch.SkipGameBootSubroute), text_addr + g_offs->game_plugin_patch.SkipGameBoot);
+		_sw(0x24040002, text_addr + g_offs->game_plugin_patch.SkipGameBoot + 4);
 	}
 
 	// disable check for custom psx eboot restore 
 	// rif file check
-	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.RifFileCheck);
+	_sw(0x00001021, text_addr + g_offs->game_plugin_patch.RifFileCheck);
 	// rif content memcmp check
-	_sw(NOP, text_addr + g_offs->vshctrl_patch.RifCompareCheck);
+	_sw(NOP, text_addr + g_offs->game_plugin_patch.RifCompareCheck);
 	// some type check, branch it
-	_sw(0x10000010, text_addr + g_offs->vshctrl_patch.RifTypeCheck);
+	_sw(0x10000010, text_addr + g_offs->game_plugin_patch.RifTypeCheck);
 	// fake npdrm call
-	_sw(0x00001021, text_addr + g_offs->vshctrl_patch.RifNpDRMCheck);
+	_sw(0x00001021, text_addr + g_offs->game_plugin_patch.RifNpDRMCheck);
 }
 
 static void patch_msvideo_main_plugin_module(u32 text_addr)
 {
 	/* Patch resolution limit to (130560) pixels (480x272) */
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[0]);
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[1]);
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[2]);
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[3]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[0]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[1]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[2]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[3]);
 
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[4]);
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[5]);
-	_sh(0xFE00, text_addr + g_offs->msvideo_main_patch.checks[6]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[4]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[5]);
+	_sh(0xFE00, text_addr + g_offs->msvideo_main_plugin_patch.checks[6]);
 
 	/* Patch bitrate limit (increase to 16384+2) */
-	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[7]);
-	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[8]);
-	_sh(0x4003, text_addr + g_offs->msvideo_main_patch.checks[9]);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_plugin_patch.checks[7]);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_plugin_patch.checks[8]);
+	_sh(0x4003, text_addr + g_offs->msvideo_main_plugin_patch.checks[9]);
 }
 
 static void patch_htmlviewer_plugin_module(u32 text_addr)
 {
 	char *p;
 
-	p = (void*)(text_addr + g_offs->vshctrl_patch.htmlviewer_save_location); // "/PSP/COMMON"
+	p = (void*)(text_addr + g_offs->htmlviewer_plugin_patch.htmlviewer_save_location); // "/PSP/COMMON"
 
 	strcpy(p, "/ISO");
 }

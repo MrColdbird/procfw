@@ -618,7 +618,7 @@ static nid_entry SysclibForKernel_nid[] = {
 };
 
 static nid_entry ThreadManForKernel_nid[] = {
-	{ 0xDD55A192, 0x37BD0C9C, }, // sceKernelGetSyscallRA
+	{ 0xDD55A192, UNKNOWNNID, }, // sceKernelGetSyscallRA
 };
 
 static nid_entry InitForKernel_nid[] = {

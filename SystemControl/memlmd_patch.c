@@ -44,8 +44,8 @@ int _memlmd_unsigner(u8 *prx, u32 size, u32 use_polling)
 		u32 i;
 		int result = 0;
 
-		// 6.3x kernel modules use type 3 PRX... 0xd4~0x10C is zero padded
-		for(i=0; i<0x38; ++i) {
+		// 6.60 kernel modules use type 9 PRX... 0xd4~0x104 is zero padded
+		for(i=0; i<0x30; ++i) {
 			if (prx[i+0xd4]) {
 				result = 1;
 				break;

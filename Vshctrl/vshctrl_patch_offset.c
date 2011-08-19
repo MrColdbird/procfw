@@ -74,8 +74,8 @@ PatchOffset g_660_offsets = {
 			0x00012058,
 			0x00012060,
 		},
-		.loadexecNID1 = 0xB8B07CAF,
-		.loadexecNID2 = 0x9347D693,
+		.loadexecNID1 = 0x21D4D038,
+		.loadexecNID2 = 0xE533E98C,
 		.loadexecDisc = 0x63E69956,
 		.loadexecDiscUpdater = 0x81682A40,
 		.PBPFWCheck = {

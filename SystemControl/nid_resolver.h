@@ -41,6 +41,8 @@ extern resolver_config nid_620_fix[];
 extern u32 nid_620_fix_size;
 extern resolver_config nid_639_fix[];
 extern u32 nid_639_fix_size;
+extern resolver_config nid_660_fix[];
+extern u32 nid_660_fix_size;
 
 resolver_config* get_nid_resolver(const char *libname);
 u32 resolve_nid(resolver_config *resolver, u32 nid);

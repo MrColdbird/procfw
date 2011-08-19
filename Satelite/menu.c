@@ -206,6 +206,11 @@ int menu_setup(void)
 			scePaf_sprintf_620(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
 #endif
 		
+#ifdef CONFIG_660
+		if (psp_fw_version == FW_660)
+			scePaf_sprintf_660(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
+#endif
+		
 		bridge = freq_buf;
 	} else {
 		bridge = str_default;
@@ -230,6 +235,11 @@ int menu_setup(void)
 			scePaf_sprintf_620(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
 #endif
 		
+#ifdef CONFIG_660
+		if (psp_fw_version == FW_660)
+			scePaf_sprintf_660(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
+#endif
+		
 		bridge = freq2_buf;
 	} else {
 		bridge = str_default;
@@ -252,6 +262,11 @@ int menu_setup(void)
 #ifdef CONFIG_620
 		if (psp_fw_version == FW_620)
 			scePaf_sprintf_620(device_buf, "Flash %d", cnf.usbdevice-1);	
+#endif
+
+#ifdef CONFIG_660
+		if (psp_fw_version == FW_660)
+			scePaf_sprintf_660(device_buf, "Flash %d", cnf.usbdevice-1);	
 #endif
 
 		bridge = device_buf;

@@ -147,5 +147,10 @@ int blit_string_ctr(int sy,const char *msg)
 		sx = 480/2-scePaf_strlen_620(msg)*(8/2);
 #endif
 
+#ifdef CONFIG_660
+	if(psp_fw_version == FW_660)
+		sx = 480/2-scePaf_strlen_660(msg)*(8/2);
+#endif
+
 	return blit_string(sx,sy,msg);
 }

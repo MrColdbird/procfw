@@ -31,8 +31,8 @@
 #include "blit.h"
 #include "utils.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
 #endif
 
 extern u32 psp_model;
@@ -75,6 +75,14 @@ int scePaf_sprintf_620(char *buffer , const char *format , ...);
 int scePaf_snprintf_620(char *buffer,int c , const char *format, ...);
 int scePaf_memcpy_620(void *path , void *name , int size);
 int scePaf_strcpy_620(char *path , const char *name);
+
+int scePaf_strlen_660(const char *path);
+int scePaf_memset_660(void *buff ,int c ,int size);
+int scePaf_memcmp_660(const void *path , const void *name , int c);
+int scePaf_sprintf_660(char *buffer , const char *format , ...);
+int scePaf_snprintf_660(char *buffer,int c , const char *format, ...);
+int scePaf_memcpy_660(void *path , void *name , int size);
+int scePaf_strcpy_660(char *path , const char *name);
 
 typedef struct _UmdVideoEntry {
 	char *path;

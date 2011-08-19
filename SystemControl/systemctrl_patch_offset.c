@@ -18,8 +18,192 @@
 #include <pspsdk.h>
 #include "systemctrl_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#endif
+
+#ifdef CONFIG_660
+PatchOffset g_660_offsets = {
+	.fw_version = FW_660,
+	.interruptman_patch = {
+		.InvalidSyscallCheck1 = 0xDEADBEEF,
+		.InvalidSyscallCheck2 = 0xDEADBEEF,
+	},
+	.modulemgr_patch = {
+		.sctrlKernelSetUMDEmuFile = 0xDEADBEEF + 0x00000008,   /* See 0x00005C28 */
+		.sctrlKernelSetInitFileName = 0xDEADBEEF + 0x00000004, /* See 0x00004F54 */
+		.ProbeExec3 = 0xDEADBEEF,
+		.ProbeExec3Call = 0xDEADBEEF,
+		.sceKernelCheckExecFileImport = 0xDEADBEEF,
+		.PartitionCheck = 0xDEADBEEF,
+		.PartitionCheckCall1 = 0xDEADBEEF,
+		.PartitionCheckCall2 = 0xDEADBEEF,
+		.DeviceCheck1 = 0xDEADBEEF,
+		.DeviceCheck2 = 0xDEADBEEF,
+		.DeviceCheck3 = 0xDEADBEEF,
+		.DeviceCheck4 = 0xDEADBEEF,
+		.DeviceCheck5 = 0xDEADBEEF,
+		.DeviceCheck6 = 0xDEADBEEF,
+		.DeviceCheck7 = 0xDEADBEEF,
+		.DeviceCheck8 = 0xDEADBEEF,
+		.PrologueModule = 0xDEADBEEF,
+		.PrologueModuleCall = 0xDEADBEEF,
+		.StartModule = 0xDEADBEEF,
+		.StartModuleCall = 0xDEADBEEF,
+		.sceKernelLinkLibraryEntriesCall = 0xDEADBEEF,
+		.sceKernelLinkLibraryEntriesForUserCall = 0xDEADBEEF,
+	},
+	.threadmgr_patch = {
+		.sctrlKernelSetUserLevel = 0xDEADBEEF,
+	},
+	.mediasync_patch = {
+		.sceSystemFileGetIndex = 0xDEADBEEF,
+		.MsCheckMediaCheck = 0xDEADBEEF,
+		.DiscCheckMediaCheck1 = 0xDEADBEEF,
+		.DiscCheckMediaCheck2 = 0xDEADBEEF,
+		.MsSystemFileCheck = 0xDEADBEEF,
+		.DiscIDCheck1 = 0xDEADBEEF,
+		.DiscIDCheck2 = 0xDEADBEEF,
+		.sceSystemFileGetIndexCall = 0xDEADBEEF,
+	},
+	.memlmd_patch_01g = {
+		.memlmd_TagPatch = 0xDEADBEEF,
+		.memlmd_unsigner = 0xDEADBEEF,
+		.memlmd_decrypt = 0xDEADBEEF,
+		.sceMemlmdInitializeScrambleKey = 0xDEADBEEF,
+		.memlmd_unsigner_call1 = 0xDEADBEEF,
+		.memlmd_unsigner_call2 = 0xDEADBEEF,
+		.memlmd_decrypt_call1 = 0xDEADBEEF,
+		.memlmd_decrypt_call2 = 0xDEADBEEF,
+	},
+	.memlmd_patch_other = {
+		.memlmd_TagPatch = 0xDEADBEEF,
+		.memlmd_unsigner = 0xDEADBEEF,
+		.memlmd_decrypt = 0xDEADBEEF,
+		.sceMemlmdInitializeScrambleKey = 0xDEADBEEF,
+		.memlmd_unsigner_call1 = 0xDEADBEEF,
+		.memlmd_unsigner_call2 = 0xDEADBEEF,
+		.memlmd_decrypt_call1 = 0xDEADBEEF,
+		.memlmd_decrypt_call2 = 0xDEADBEEF,
+	},
+	.mesgled_patch = {
+		.mesg_decrypt_call = {
+			/*0xDEADBEEF  0xE71C010B  0xADF305F0  0x457B0AF0  0x380280F0 */
+			{ 0xDEADBEEF, 0x00003914, 0x00003B70, 0x00001E84, 0x00001ADC }, // 01g
+			{ 0xDEADBEEF, 0x00003E84, 0x00004128, 0x00001F7C, 0x00001B70 }, // 02g
+			{ 0xDEADBEEF, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 03g
+			{ 0xDEADBEEF, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 04g
+			{ 0xDEADBEEF, 0x00004880, 0x00004BB4, 0x000021C4, 0x00001C04 }, // 05g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 06g
+			{ 0xDEADBEEF, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 07g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 08g
+			{ 0xDEADBEEF, 0x000043AC, 0x00004698, 0x0000209C, 0x00001BB8 }, // 09g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 10g
+			{ 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF, 0xDEADBEEF }, // 11g
+		},
+		.mesgled_decrypt = 0xDEADBEEF,
+	},
+	.sysmem_patch = {
+		.sctrlKernelSetDevkitVersion = 0xDEADBEEF,
+		.sysmemforuser_patch = {
+			{ 0xDEADBEEF, 0x1F }, // sceKernelSetCompiledSdkVersion
+			{ 0xDEADBEEF, 0x12 }, // SysMemUserForUser_342061E5
+			{ 0xDEADBEEF, 0x18 }, // SysMemUserForUser_315AD3A0
+			{ 0xDEADBEEF, 0x1C }, // SysMemUserForUser_EBD5C3E6
+			{ 0xDEADBEEF, 0x15 }, // SysMemUserForUser_057E7380
+			{ 0xDEADBEEF, 0x15 }, // SysMemUserForUser_91DE343C
+			{ 0xDEADBEEF, 0x12 }, // SysMemUserForUser_7893F79A
+			{ 0xDEADBEEF, 0x18 }, // SysMemUserForUser_35669D4C
+			{ 0xDEADBEEF, 0x12 }, // SysMemUserForUser_1B4217BC
+		},
+		.get_partition = 0xDEADBEEF,
+	},
+	.iofilemgr_patch = {
+		.sctrlHENFindDriver = 0xDEADBEEF,
+	},
+	.march33_patch = {
+		.MsMediaInsertedCheck = 0xDEADBEEF,
+	},
+	.psnfix_patch = {
+		.NPSignupImageVersion = 0xDEADBEEF,
+		.NPSigninCheck = 0xDEADBEEF,
+		.NPSigninImageVersion = 0xDEADBEEF,
+		.NPMatchVersionMajor = 0xDEADBEEF,
+		.NPMatchVersionMinor = 0xDEADBEEF,
+	},
+	.wlan_driver_patch = {
+		.FreqCheck = 0xDEADBEEF,
+	},
+	.power_service_patch = {
+		.scePowerGetBacklightMaximumCheck = 0xDEADBEEF,
+	},
+	.syscon_patch = {
+		.sceSysconPowerStandby = 0xDEADBEEF,
+	},
+	.init_patch = {
+		.sceKernelStartModuleImport = 0xDEADBEEF,
+		.module_bootstart = 0xDEADBEEF,
+	},
+	.umdcache_patch = {
+		.module_start = 0xDEADBEEF,
+	},
+	.loadercore_patch = {
+		.sceKernelCheckExecFile = 0xDEADBEEF,
+		.sceKernelCheckExecFileCall1 = 0xDEADBEEF,
+		.sceKernelCheckExecFileCall2 = 0xDEADBEEF,
+		.sceKernelCheckExecFileCall3 = 0xDEADBEEF,
+		.ReloactionTable = 0xDEADBEEF,
+		.ProbeExec1 = 0xDEADBEEF,
+		.ProbeExec1Call = 0xDEADBEEF,
+		.ProbeExec2 = 0xDEADBEEF,
+		.ProbeExec2Call1 = 0xDEADBEEF,
+		.ProbeExec2Call2 = 0xDEADBEEF,
+		.EnableSyscallExport = 0xDEADBEEF,
+		.LoaderCoreCheck1 = 0xDEADBEEF,
+		.LoaderCoreCheck2 = 0xDEADBEEF,
+		.LoaderCoreCheck3 = 0xDEADBEEF,
+		.LoaderCoreUndo1Call1 = 0xDEADBEEF,
+		.LoaderCoreUndo1Call2 = 0xDEADBEEF,
+		.LoaderCoreUndo1Call3 = 0xDEADBEEF,
+		.LoaderCoreUndo2Call1 = 0xDEADBEEF,
+		.LoaderCoreUndo2Call2 = 0xDEADBEEF,
+		.memlmd_323366CA_NID = 0xDEADBEEF,
+		.memlmd_7CF1CD3E_NID = 0xDEADBEEF,
+		.pops_version_check = 0xDEADBEEF,
+		.sceInitBootStartCall = 0xDEADBEEF,
+		.sceKernelLinkLibraryEntries = 0xDEADBEEF,
+		.sceKernelLinkLibraryEntriesForUser = 0xDEADBEEF,
+		.sceKernelIcacheClearAll = 0xDEADBEEF,
+	},
+	.loadexec_patch_other = {
+		.LoadReboot = 0xDEADBEEF,
+		.LoadRebootCall = 0xDEADBEEF,
+		.RebootJump = 0xDEADBEEF,
+		.sceKernelLoadExecWithApiTypeCheck1 = 0xDEADBEEF,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0xDEADBEEF,
+		.sceKernelExitVSHVSHCheck1 = 0xDEADBEEF,
+		.sceKernelExitVSHVSHCheck2 = 0xDEADBEEF,
+		.sctrlKernelLoadExecVSHWithApitype = 0xDEADBEEF,
+	},
+	.loadexec_patch_05g = {
+		.LoadReboot = 0xDEADBEEF,
+		.LoadRebootCall = 0xDEADBEEF,
+		.RebootJump = 0xDEADBEEF,
+		.sceKernelLoadExecWithApiTypeCheck1 = 0xDEADBEEF,
+		.sceKernelLoadExecWithApiTypeCheck2 = 0xDEADBEEF,
+		.sceKernelExitVSHVSHCheck1 = 0xDEADBEEF,
+		.sceKernelExitVSHVSHCheck2 = 0xDEADBEEF,
+		.sctrlKernelLoadExecVSHWithApitype = 0xDEADBEEF,
+	},
+	.impose_patch = {
+		2,
+		0xDEADBEEF,
+	},
+	.usb_patch = {
+		.scePowerBatteryDisableUsbChargingStub = 0xDEADBEEF,
+		.scePowerBatteryEnableUsbChargingStub = 0xDEADBEEF,
+	},
+};
 #endif
 
 #ifdef CONFIG_639
@@ -578,6 +762,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_660
+	if(fw_version == g_660_offsets.fw_version) {
+		g_offs = &g_660_offsets;
+	}
+#endif
+
 #ifdef CONFIG_639
 	if(fw_version == g_639_offsets.fw_version) {
 		g_offs = &g_639_offsets;

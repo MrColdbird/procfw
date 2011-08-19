@@ -735,7 +735,7 @@ static nid_entry sceRtc_driver_nid[] = {
 	{ 0xDFBC5F16, 0x2A7A5D67, }, // sceRtcParseDateTime
 	{ 0x28E1E988, 0x87EA3D9F, }, // sceRtcParseRFC3339
 	{ 0x011F03C1, 0xC6E489D5, }, // sceRtcGetAccumulativeTime
-	{ 0x17C26C00, UNKNOWNNID, }, // sceRtc_driver_17C26C00
+	{ 0x17C26C00, 0x059B7D97, }, // sceRtcSetCurrentSecureTick
 	{ 0x1909C99B, 0xDACE3710, }, // sceRtcSetTime64_t
 	{ 0x203CEB0D, 0xA01B48AC, }, // sceRtcGetLastReincarnatedTime
 	{ 0x62685E98, 0x65725896, }, // sceRtcGetLastAdjustedTime

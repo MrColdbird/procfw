@@ -36,6 +36,10 @@ extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
 extern SceModule* sceKernelFindModuleByName_620(char *modname);
 
+extern u32 sceKernelGetModel_660(void);
+extern u32 sceKernelDevkitVersion_660(void);
+extern SceModule* sceKernelFindModuleByName_660(char *modname);
+
 static int (*LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg4) = NULL;
 
 u32 sctrlKernelGetModel(void)
@@ -43,6 +47,11 @@ u32 sctrlKernelGetModel(void)
 	u32 model = -1;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_660
+		case FW_660:
+			model = sceKernelGetModel_660();
+			break;
+#endif
 #ifdef CONFIG_639
 		case FW_639:
 			model = sceKernelGetModel();
@@ -66,11 +75,15 @@ u32 sctrlKernelGetModel(void)
 u32 sctrlKernelDevkitVersion(void)
 {
 	u32 fw_version;
-   
-	fw_version = sceKernelDevkitVersion_620();
+
+	fw_version = sceKernelDevkitVersion_660();
 
 	if(fw_version == 0x8002013A) {
-		fw_version = sceKernelDevkitVersion();
+		fw_version = sceKernelDevkitVersion_620();
+
+		if(fw_version == 0x8002013A) {
+			fw_version = sceKernelDevkitVersion();
+		}
 	}
 
 	return fw_version;
@@ -81,6 +94,11 @@ SceModule* sctrlKernelFindModuleByName(char *modname)
 	SceModule *mod = NULL;
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_660
+		case FW_660:
+			mod = sceKernelFindModuleByName_660(modname);
+			break;
+#endif
 #ifdef CONFIG_639
 		case FW_639:
 			mod = sceKernelFindModuleByName(modname);

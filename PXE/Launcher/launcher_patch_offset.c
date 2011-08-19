@@ -30,7 +30,7 @@ PatchOffset g_660_offsets = {
 		.sceKernelDcacheWritebackInvalidateAll = 0x00000744,
 		.sceKernelGetModel = 0x0000A0B0,
 		.sceKernelPowerLockForUser = 0x0000CBB8,
-		.sceKernelPowerLockForUser_data_offset = 0xDEADBEEF,
+		.sceKernelPowerLockForUser_data_offset = 0, // unused
 	},
 	.sceKernelFindModuleByName = 0x88017000 + 0x00006F98,
 	.loadexec_patch_05g = {

@@ -114,7 +114,7 @@ PatchOffset g_660_offsets = {
 			{ 0x00009CD0, 0x15 }, // SysMemUserForUser_91DE343C
 			{ 0x00009D74, 0x12 }, // SysMemUserForUser_7893F79A
 			{ 0x00009E0C, 0x18 }, // SysMemUserForUser_35669D4C
-			{ 0x00009EBC, 0x12 }, // SysMemUserForUser_1B4217BC
+			{ 0x00009EBC, 0x18 }, // SysMemUserForUser_1B4217BC
 			{ 0x00009F6C, 0x12 }, // SysMemUserForUser_358CA1BB
 		},
 		.get_partition = 0x00003D28,

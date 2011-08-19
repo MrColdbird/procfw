@@ -764,11 +764,15 @@ u32 sctrlKernelGetModel(void)
 u32 sctrlKernelDevkitVersion(void)
 {
 	u32 fw_version;
-   
-	fw_version = sceKernelDevkitVersion_620();
+
+	fw_version = sceKernelDevkitVersion_660();
 
 	if(fw_version == 0x8002013A) {
-		fw_version = sceKernelDevkitVersion();
+		fw_version = sceKernelDevkitVersion_620();
+
+		if(fw_version == 0x8002013A) {
+			fw_version = sceKernelDevkitVersion();
+		}
 	}
 
 	return fw_version;

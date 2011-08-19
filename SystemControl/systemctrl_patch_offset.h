@@ -96,7 +96,7 @@ struct SysMemForUserPatch {
 };
 
 struct SysMemPatch {
-	struct SysMemForUserPatch sysmemforuser_patch[9];
+	struct SysMemForUserPatch sysmemforuser_patch[10];
 	u32 sctrlKernelSetDevkitVersion;
 	u32 get_partition;
 };

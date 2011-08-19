@@ -299,6 +299,7 @@ PatchOffset g_639_offsets = {
 			{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
+			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_358CA1BB missing
 		},
 		.get_partition = 0x00003E34,
 	},
@@ -483,6 +484,7 @@ PatchOffset g_635_offsets = {
 			{ 0x00009EB0, 0x12 }, // SysMemUserForUser_7893F79A
 			{ 0x00009F48, 0x18 }, // SysMemUserForUser_35669D4C
 			{ 0x00009FF8, 0x12 }, // SysMemUserForUser_1B4217BC
+			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_358CA1BB missing
 		},
 		.get_partition = 0x00003E34,
 	},
@@ -666,7 +668,8 @@ PatchOffset g_620_offsets = {
 			{ 0x00009F2C, 0x15 }, // SysMemUserForUser_91DE343C
 			{ 0x00009FD0, 0x12 }, // SysMemUserForUser_7893F79A
 			{ 0x0000A068, 0x18 }, // SysMemUserForUser_35669D4C
-			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC Missing in 6.20
+			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_1B4217BC missing
+			{ 0x0000FFFF, 0x12 }, // SysMemUserForUser_358CA1BB missing
 		},
 		.get_partition = 0x00003E2C,
 	},

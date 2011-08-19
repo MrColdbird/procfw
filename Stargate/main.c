@@ -121,12 +121,7 @@ static int stargate_module_chain(SceModule2 *mod)
 
 	patch_utility((SceModule*)mod);
 	patch_load_module((SceModule*)mod);
-
-#ifdef CONFIG_620
-	if(psp_fw_version == FW_620) {
-		patch_for_620((SceModule*)mod);
-	}
-#endif
+	patch_for_old_fw((SceModule*)mod);
 
 	// m33 mode: until npdrm loaded
 	if(conf.usenodrm) {
@@ -262,12 +257,7 @@ int module_start(SceSize args, void *argp)
 		nodrm_get_npdrm_functions(); // np9660 mode: npdrm already loaded
 	}
 
-#ifdef CONFIG_620
-	if(psp_fw_version == FW_620) {
-		get_620_function();
-	}
-#endif
-	
+	get_functions_for_old_fw();
 	previous = sctrlHENSetStartModuleHandler(&stargate_module_chain);
 	sctrlSetCustomStartModule(&start_module_handler);
 

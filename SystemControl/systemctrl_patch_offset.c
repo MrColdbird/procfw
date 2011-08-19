@@ -27,7 +27,7 @@ PatchOffset g_660_offsets = {
 	.fw_version = FW_660,
 	.interruptman_patch = {
 		.InvalidSyscallCheck1 = 0x00000DEC,
-		.InvalidSyscallCheck2 = 0x00000E94,
+		.InvalidSyscallCheck2 = 0x00000E98,
 	},
 	.modulemgr_patch = {
 		.sctrlKernelSetUMDEmuFile = 0x000099A0 + 0x00000008,   /* See 0x00005C1C */

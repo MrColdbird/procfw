@@ -31,11 +31,6 @@ void patch_sceInterruptManager(void)
 {
 	SceModule2 *mod = (SceModule2*) sctrlKernelFindModuleByName("sceInterruptManager");
 
-#pragma TODO this patch crashes 6.60
-	if (psp_fw_version == FW_660) {
-		return;
-	}
-
 	// disable writing invalid address to reset vector
 	_sw(NOP, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck1);
 	_sw(NOP, mod->text_addr + g_offs->interruptman_patch.InvalidSyscallCheck1+4);

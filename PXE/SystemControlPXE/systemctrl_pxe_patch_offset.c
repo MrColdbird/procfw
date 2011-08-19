@@ -18,7 +18,7 @@
 #include <pspsdk.h>
 #include "systemctrl_pxe_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) !defined(CONFIG_660)
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
 #error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
 #endif
 

@@ -17,6 +17,10 @@ ifeq ($(CONFIG_639), 1)
 CFLAGS+=-DCONFIG_639=1
 endif
 
+ifeq ($(CONFIG_660), 1)
+CFLAGS+=-DCONFIG_660=1
+endif
+
 a.bin:
 	bin2c systemctrl.prx systemctrl.h systemcontrol
 	psp-gcc $(CFLAGS) main.c -o main.s

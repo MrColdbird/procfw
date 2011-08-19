@@ -673,7 +673,7 @@ void sctrlHENPatchSyscall(void *addr, void *newaddr)
 	syscalls = (u32*)(ptr+0x10);
 
 	for(i=0; i<0xFF4; ++i) {
-		if (syscalls[i] == _addr) {
+		if ((syscalls[i] & 0x0FFFFFFF) == (_addr & 0x0FFFFFFF)) {
 			syscalls[i] = (u32)newaddr;
 		}
 	}

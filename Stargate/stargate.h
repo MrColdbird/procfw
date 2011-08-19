@@ -40,8 +40,8 @@ void module_blacklist(SceModule *mod);
 
 extern int (*mesgled_decrypt)(u32 *tag, u8 *key, u32 code, u8 *prx, u32 size, u32 *newsize, u32 use_polling, u8 *blacklist, u32 blacklistsize, u32 type, u8 *xor_key1, u8 *xor_key2);
 
-void patch_for_620(SceModule *mod);
-void get_620_function(void);
+void patch_for_old_fw(SceModule *mod);
+void get_functions_for_old_fw(void);
 
 void patch_IsoDrivers(void);
 

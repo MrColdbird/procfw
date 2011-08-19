@@ -32,7 +32,6 @@
 #include "stargate.h"
 #include "stargate_patch_offset.h"
 
-#ifdef CONFIG_620
 static int (*_scePowerSetClockFrequency)(int pllfreq, int cpufreq, int busfreq);
 static int (*_KDebugForKernel_93F5D2A6)(int unk);
 
@@ -78,31 +77,21 @@ int myPower_A85880D0(void)
 	return ret;
 }
 
-void patch_for_620(SceModule *mod)
+void patch_for_old_fw(SceModule *mod)
 {
-	hook_import_bynid(mod, "SysMemUserForUser", 0x1B4217BC, &_SysMemUserForUser_1B4217BC, 1);
-	hook_import_bynid(mod, "scePower", 0x469989AD, &myPower_469989AD, 1);
-	hook_import_bynid(mod, "scePower", 0xA85880D0, &myPower_A85880D0, 1);
+	if(psp_fw_version < FW_660) {
+		hook_import_bynid(mod, "SysMemUserForUser", 0x358CA1BB, &_SysMemUserForUser_1B4217BC, 1);
+	}
+
+	if(psp_fw_version == FW_620) {
+		hook_import_bynid(mod, "SysMemUserForUser", 0x1B4217BC, &_SysMemUserForUser_1B4217BC, 1);
+		hook_import_bynid(mod, "scePower", 0x469989AD, &myPower_469989AD, 1);
+		hook_import_bynid(mod, "scePower", 0xA85880D0, &myPower_A85880D0, 1);
+	}
 }
 
-void get_620_function(void)
+void get_functions_for_old_fw(void)
 {
 	_scePowerSetClockFrequency = (void*)sctrlHENFindFunction("scePower_Service", "scePower", 0x737486F2);
 	_KDebugForKernel_93F5D2A6 = (void*)sctrlHENFindFunction("sceSystemMemoryManager", "KDebugForKernel", 0x93F5D2A6);
 }
-#else
-int _SysMemUserForUser_1B4217BC(u32 fw_version)
-{
-	return 0;
-}
-
-int myPower_469989AD(int pllfreq, int cpufreq, int busfreq)
-{
-	return 0;
-}
-
-int myPower_A85880D0(void)
-{
-	return 0;
-}
-#endif

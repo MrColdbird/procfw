@@ -393,7 +393,7 @@ void setup_nid_resolver(void)
 	_sw(MAKE_CALL(_sceKernelLinkLibraryEntriesForUser), modmgr->text_addr + g_offs->modulemgr_patch.sceKernelLinkLibraryEntriesForUserCall);
 
 	switch(psp_fw_version) {
-#ifdef CONFIG_660:
+#ifdef CONFIG_660
 		case FW_660:
 			nid_fix = nid_660_fix;
 			nid_fix_size = nid_660_fix_size;

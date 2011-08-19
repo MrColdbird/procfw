@@ -7,6 +7,7 @@ def main():
 			"ISODrivers/Galaxy/galaxy.prx",
 			"ISODrivers/March33/march33.prx",
 			"ISODrivers/March33/march33_620.prx",
+			"ISODrivers/March33/march33_660.prx",
 			"ISODrivers/Inferno/inferno.prx",
 			"Popcorn/popcorn.prx",
 			"Satelite/satelite.prx",

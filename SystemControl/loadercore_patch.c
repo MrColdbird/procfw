@@ -340,7 +340,7 @@ void patch_sceLoaderCore(void)
 	SceModule2 * loadcore = (SceModule2 *)sctrlKernelFindModuleByName("sceLoaderCore");
 
 	//patch sceKernelCheckExecFile (sub_0C10)
-	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFile);
+	_sw((unsigned int)_sceKernelCheckExecFile, loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFilePtr);
 	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall1);
 	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall2);
 	_sw(MAKE_CALL(_sceKernelCheckExecFile), loadcore->text_addr + g_offs->loadercore_patch.sceKernelCheckExecFileCall3);

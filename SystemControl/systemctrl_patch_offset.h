@@ -102,7 +102,7 @@ struct SysMemPatch {
 };
 
 struct sceLoaderCorePatch {
-	u32 sceKernelCheckExecFile;
+	u32 sceKernelCheckExecFilePtr;
 	u32 sceKernelCheckExecFileCall1;
 	u32 sceKernelCheckExecFileCall2;
 	u32 sceKernelCheckExecFileCall3;

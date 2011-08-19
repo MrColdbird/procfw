@@ -160,8 +160,8 @@ static nid_entry KDebugForKernel_nid[] = {
 	{ 0x8B041DFB, 0x8A0F4E94, },
 	{ 0x9F8703E4, 0x568DCD25, },
 	{ 0xFFD2F2B9, 0xACF427DC, },
-	{ 0xA126F497, UNKNOWNNID, },
-	{ 0xB7251823, UNKNOWNNID, },
+	{ 0xA126F497, 0x604276EB, },
+	{ 0xB7251823, 0xF339073C, },
 };
 
 static nid_entry LoadCoreForKernel_nid[] = {

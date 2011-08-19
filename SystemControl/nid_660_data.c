@@ -418,7 +418,7 @@ static nid_entry scePower_driver_nid[] = {
 static nid_entry InterruptManagerForKernel_nid[] = {
 	{ 0x8A389411, 0x4D6E7305, }, // sceKernelDisableSubIntr
 	{ 0xD2E8363F, UNKNOWNNID, }, // QueryIntrHandlerInfo
-	{ 0x8B61808B, UNKNOWNNID, }, // sceKernelQuerySystemCall
+	{ 0x8B61808B, 0xF153B371, }, // sceKernelQuerySystemCall
 	{ 0x53991063, UNKNOWNNID, }, // InterruptManagerForKernel_53991063
 	{ 0x468BC716, UNKNOWNNID, }, // sceKernelGetInterruptExitCount
 	{ 0x43CD40EF, UNKNOWNNID, }, // ReturnToThread

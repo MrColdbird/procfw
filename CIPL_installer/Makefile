@@ -6,7 +6,20 @@ INCDIR = ../Common/ ../include/
 LIBDIR = ../libs
 
 BUILD_PRX = 1
-PSP_FW_VERSION = 635
+
+
+PSP_FW_VERSION = 0
+
+ifeq ($(CONFIG_639), 1)
+CFLAGS += -DCONFIG_639=1
+PSP_FW_VERSION = 639
+endif
+
+ifeq ($(CONFIG_660), 1)
+CFLAGS += -DCONFIG_660=1
+PSP_FW_VERSION = 660
+endif
+
 
 CFLAGS = -O2 -G0 -Wall -fshort-wchar
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

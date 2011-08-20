@@ -208,6 +208,7 @@ static nid_entry LoadExecForKernel_nid[] = {
 	{ 0xB7AB08DA, 0x7CABED9B, }, // sceKernelLoadExecVSHMs5
 	{ 0x11412288, 0xA5ECA6E3, }, // LoadExecForKernel_11412288
 	{ 0x6D8D3A3A, 0xF9CFCF2F, }, // LoadExecForKernel_6D8D3A3A
+
 	{ 0xD3D13800, 0xDBD0CF1B, },
 	{ 0x15EB8575, 0xBC26BEEF, },
 };
@@ -255,7 +256,7 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0x5C88479B, 0x4493E013, }, // sceKernelLoadModuleDeci
 	{ 0xCE70664B, 0x2F3F9B6A, }, // sceKernelLoadModuleBufferForLoadExecBufferVSHUsbWlan
 	{ 0xB5DDABD3, 0xC13E2DE5, }, // sceKernelLoadModuleBufferForLoadExecBufferVSHUsbWlanDebug
-	
+
 	{ 0xEF7A7F02, 0x1CF0B794, },
 	{ 0x2BE2B17E, 0xC3DDABEF, },
 	{ 0x25E1F458, 0x955D6CB2, },
@@ -694,7 +695,7 @@ static nid_entry sceSyscon_driver_nid[] = {
 	{ 0x53072985, 0x50446BE5, }, // sceSysconSetWlanSwitchCallback
 	{ 0xF9193EC3, 0xD2C053E7, }, // sceSysconSetWlanPowerCallback
 	{ 0x88FDB279, 0xE19BC2DF, }, // sceSysconSetBtSwitchCallback
-	{ 0xBAAECDF8, 0x5C4C1130, }, // sceSysconSetBtPowerCallback ?
+	{ 0xBAAECDF8, 0x5C4C1130, }, // sceSysconSetBtPowerCallback
 	{ 0x7479DB05, 0x399708EB, }, // sceSysconSetHoldSwitchCallback
 	{ 0x6848D817, 0xD6C2FD5F, }, // sceSysconSetUmdSwitchCallback
 	{ 0xFC32141A, 0x22240B41, }, // sceSysconGetPowerSupplyStatus

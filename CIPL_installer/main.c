@@ -18,8 +18,15 @@
 PSP_MODULE_INFO("IPLFlasher", 0x0800, 1, 0); 
 PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_VSH);
 
+#if _PSP_FW_VERSION == 639
+#define DEVKIT_VER	0x06030910
+#define VERSION_STR	"6.39"
+#elif _PSP_FW_VERSION == 660
+#define DEVKIT_VER	0x06060010
+#define VERSION_STR	"6.60"
+#endif
+
 #define printf pspDebugScreenPrintf
-#define RED 0x111FFF
 #define WHITE 0xFFFFF1
 #define GREEN 0x0000FF00
 
@@ -62,86 +69,7 @@ void ErrorExit(int milisecs, char *fmt, ...)
 	sceKernelExitGame(); 
 }
 ////////////////////////////////////////
-int flash_file(char *file, void *file_name,  int file_size) 
-{
-	int written;
-	SceUID fd;
-
-    printf("Writing File %s.... ", file);
-    fd = sceIoOpen(file, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC , 511 );
-    if(fd < 0)
-	{
-          pspDebugScreenSetTextColor(RED);
-          ErrorExit(5000, "\n\nCannot open file for writing.\n"); 
-	}
-
-    written = sceIoWrite(fd, file_name, file_size);
-    if(written != file_size) 
-	{
-		sceIoClose(fd);     
-		pspDebugScreenSetTextColor(RED);
-		ErrorExit(5000, "\n\nCannot write file.\n"); 
-	}
-    sceIoClose(fd);
-    printf("OK\n\n");
-    return 0;
-}
-////////////////////////////////////////
-void remove_files(char *files) {
-     printf("Removing File %s....", files);
-     sceIoRemove(files);
-     printf("OK\n"); }
-
-int Assign()
-{
-	if (sceIoUnassign("flash0:") < 0)
-		return -1;
-	
-	if (sceIoAssign("flash0:", "lflash0:0,0", "flashfat0:", IOASSIGN_RDWR, NULL, 0) < 0)
-		return -1;
-
-	return 0;
-}
-////////////////////////////////////////
-
 u8 nand_buff[0x40000];
-
-int FileCopy(const char *name , const char * to)
-{
-	char path_buff[64];
-	int size;
-
-	strcpy( path_buff , to );
-	strcat( path_buff , name);
-
-	SceUID fd_write = sceIoOpen( path_buff, PSP_O_WRONLY | PSP_O_CREAT | PSP_O_TRUNC, 0777);
-
-//	strcpy( path_buff , "ms0:/PSP/GAME/UPDATE/6xxModules/");
-	strcpy( path_buff , name);
-
-	SceUID fd_load = sceIoOpen( path_buff , PSP_O_RDONLY, 0777);
-
-	if( fd_write <0 || fd_load <0)
-	{
-		sceIoClose(fd_write);
-		sceIoClose(fd_load);
-		return -1;
-	}
-	printf("writing %s...", name);
-
-	while((size = sceIoRead(fd_load , nand_buff , 0x30000)) > 0)
-	{
-		sceIoWrite(fd_write, nand_buff , size);
-	}
-
-		sceIoClose(fd_write);
-		sceIoClose(fd_load);
-
-		printf("Done.\n");
-	return 0;
-}
-
-
 void flash_ipl(int size)
 {
 
@@ -186,7 +114,7 @@ int main()
 	pspDebugScreenSetTextColor(WHITE);
 	devkit = sceKernelDevkitVersion();
 
-	if(devkit != 0x06030910) {
+	if(devkit != DEVKIT_VER ) {
 		ErrorExit(5000,"FW ERROR!\n");
 	}
 
@@ -225,7 +153,7 @@ int main()
 		ErrorExit(5000,"Failed to get ipl!\n");
 	}
 
-	printf("\nCustom ipl Flasher for 6.39.\n\n\n");
+	printf("\nCustom ipl Flasher for "VERSION_STR".\n\n\n");
 
 	int ipl_type = 0;
 
@@ -238,7 +166,6 @@ int main()
 		printf("Raw ipl \n");
 	} else {
 		printf("ipl size;%08X\n", size);
-//		if(( size = ReadFile("raw_ipl.bin", 0 , ipl_block_large + 0x4000 , 0x30000)) < 0)
 		ErrorExit(5000,"Unknown ipl!\n");
 	}
 
@@ -262,14 +189,6 @@ int main()
 
 		if (pad.Buttons & PSP_CTRL_CROSS) {
 			flash_ipl( size );
-
-//		if(Assign()<0)
-//		ErrorExit(5000,"Error in assign.\n");
-//			FileCopy("pspbtjnf_02g.bin" , "flash0:/kd/");
-//			FileCopy("vshctrl_02g.prx" , "flash0:/kd/");
-//			FileCopy("recovery.prx" , "flash0:/vsh/module/");
-//			FileCopy("satelite.prx" , "flash0:/vsh/module/");
-			
 			break; 
 		} else if ( (pad.Buttons & PSP_CTRL_CIRCLE) && ipl_type ) {		
 			printf("Flashing IPL...");

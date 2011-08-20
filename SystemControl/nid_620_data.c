@@ -40,19 +40,13 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0x6373995D, 0x864EBFD7, }, // sceKernelGetModel
 	{ 0xEB7A74DB, 0x191C6F98, }, // sceKernelAllocHeapMemoryWithOption
 	{ 0xA823047E, 0xA60B6316, }, // sceKernelHeapTotalFreeSize
-	{ 0xB2163AA1, UNKNOWNNID, }, // sceKernelGetHeapTypeCB
-	{ 0xEFF0C6DD, UNKNOWNNID, }, // SysMemForKernel_EFF0C6DD
-	{ 0xEFEEBAC7, UNKNOWNNID, }, // SysMemForKernel_EFEEBAC7
-	{ 0x2DB687E9, UNKNOWNNID, }, // sceKernelIsValidHeap
 	{ 0xA2A65F0E, 0x22CD6BE7, }, // sceKernelFillFreeBlock
 	{ 0xEE867074, 0x5FBC6777, }, // sceKernelSizeLockMemoryBlock
 	{ 0xCE5544F4, 0x6467A511, }, // sceKernelResizeMemoryBlock
 	{ 0x915EF4AC, 0x7BC702B2, }, // SysMemForKernel_915EF4AC
 	{ 0x5EBE73DE, 0x138082C6, }, // sceKernelJointMemoryBlock
 	{ 0x2A3E5280, 0x442F5709, }, // sceKernelQueryMemoryInfo
-	{ 0xEB4C0E1B, UNKNOWNNID, }, // sceKernelQueryBlockSize
 	{ 0x82CCA14F, 0x51674BC8, }, // sceKernelQueryMemoryBlockInfo
-	{ 0x2F3B7611, UNKNOWNNID, }, // SysMemForKernel_2F3B7611
 	{ 0x7B3E7441, 0xFE305C1C, }, // sceKernelMemoryExtendSize
 	{ 0x6C1DCD41, 0x455CF575, }, // sceKernelCallUIDFunction
 	{ 0x5367923C, 0xCBA3E53A, }, // sceKernelCallUIDObjFunction
@@ -73,16 +67,9 @@ static nid_entry SysMemForKernel_nid[] = {
 	{ 0xDFAEBD5B, 0xD0DBFFE7, }, // sceKernelIsHold
 	{ 0x7BE95FA0, 0xFEA10418, }, // sceKernelHoldUID
 	{ 0xFE8DEBE0, 0xCCD58B8B, }, // sceKernelReleaseUID
-	{ 0xBD5941B4, UNKNOWNNID, }, // sceKernelSysmemIsValidAccess
-	{ 0x80F25772, UNKNOWNNID, }, // sceKernelIsValidUserAccess
-	{ 0x3905D956, UNKNOWNNID, }, // sceKernelSysMemCheckCtlBlk
-	{ 0x26F96157, UNKNOWNNID, }, // sceKernelSysMemDump
-	{ 0x6D6200DD, UNKNOWNNID, }, // sceKernelSysMemDumpBlock
-	{ 0x621037F5, UNKNOWNNID, }, // sceKernelSysMemDumpTail
-	{ 0xA089ECA4, UNKNOWNNID, }, // sceKernelMemset
+	{ 0xA089ECA4, 0x74F3DC82, }, // sceKernelMemset
 	{ 0x2F808748, 0x18D7F644, }, // sceKernelMemset32
 	{ 0x1C4B1713, 0x08F96A1B, }, // sceKernelMemmove
-	{ 0xE400FDB0, UNKNOWNNID, }, // sceKernelSysMemInit
 	{ 0x1890BE9C, 0xF4C96DB4, }, // sceKernelSysMemMemSize
 	{ 0x03072750, 0xAF8CBF62, }, // sceKernelSysMemMaxFreeMemSize
 	{ 0x811BED79, 0x17BF724F, }, // sceKernelSysMemTotalFreeMemSize
@@ -173,27 +160,16 @@ static nid_entry LoadCoreForKernel_nid[] = {
 	{ 0x7BE1421C, 0xB0466E46, }, // sceKernelCheckExecFile
 	{ 0xBF983EF2, 0xB95FA50D, }, // sceKernelProbeExecutableObject
 	{ 0x7068E6BA, 0x6E8B6AB6, }, // sceKernelLoadExecutableObject
-	{ 0xB4D6FECC, UNKNOWNNID, }, // sceKernelApplyElfRelSection
-	{ 0x54AB2675, UNKNOWNNID, }, // sceKernelApplyPspRelSection
-	{ 0x2952F5AC, UNKNOWNNID, }, // sceKernelDcacheWBinvAll
-	{ 0xD8779AC6, UNKNOWNNID, }, // sceKernelIcacheClearAll not exported any more
 	{ 0x99A695F0, 0xCD1D28E3, }, // sceKernelRegisterLibrary
 	{ 0x5873A31F, 0x79970B0B, }, // sceKernelRegisterLibraryForUser
 	{ 0x0B464512, 0x4CF715C5, }, // sceKernelReleaseLibrary
 	{ 0x9BAF90F6, 0x3E5F5629, }, // sceKernelCanReleaseLibrary
 	{ 0x0E760DBA, 0x8C712A03, }, // sceKernelLinkLibraryEntries
 	{ 0x0DE1F600, 0x3922A067, }, // sceKernelLinkLibraryEntriesForUser
-	{ 0xDA1B09AA, UNKNOWNNID, }, // sceKernelUnLinkLibraryEntries
 	{ 0xC99DD47A, 0x1B107A36, }, // sceKernelQueryLoadCoreCB
 	{ 0x616FCCCD, 0x371962BE, }, // sceKernelSetBootCallbackLevel
-	{ 0xF32A2940, UNKNOWNNID, }, // sceKernelModuleFromUID
 	{ 0x6B2371C2, 0xA3035783, }, // sceKernelDeleteModule
-	{ 0x7320D964, UNKNOWNNID, }, // sceKernelModuleAssign
-	{ 0x44B292AB, UNKNOWNNID, }, // sceKernelAllocModule
-	{ 0xBD61D4D5, UNKNOWNNID, }, // sceKernelFreeModule
 	{ 0xAE7C6E76, 0x602BF42A, }, // sceKernelRegisterModule
-	{ 0x82CE54ED, UNKNOWNNID, }, // sceKernelModuleCount
-	{ 0xC0584F0C, UNKNOWNNID, }, // sceKernelGetModuleList
 	{ 0x7E63F86D, 0xF62D0F30, }, // sceKernelGetLibraryLinkInfo
 	{ 0xB370DF29, 0xA5E8A07F, }, // sceKernelGetLibraryList
 	{ 0x5248A98F, 0xD5B046F0, }, // sceKernelLoadModuleBootLoadCore
@@ -220,20 +196,11 @@ static nid_entry LoadExecForKernel_nid[] = {
 	{ 0xA3D5E142, 0xAEFEF0F4, }, // sceKernelExitVSHVSH
 	{ 0x1B97BDB3, 0x73BAD4F8, }, // sceKernelLoadExecVSHDisc(3.xx)
 	{ 0x94A1C627, 0xAEFEF0F4, }, // sceKernelExitVSHVSH
-	{ 0xBD2F1094, UNKNOWNNID, }, // sceKernelLoadExec
-	{ 0x2AC9954B, UNKNOWNNID, }, // sceKernelExitGameWithStatus
-	{ 0x05572A5F, UNKNOWNNID, }, // sceKernelExitGame
-	{ 0xAC085B9E, UNKNOWNNID, }, // sceKernelLoadExecVSHFromHost
 	{ 0x821BE114, 0xD364D324, }, // sceKernelLoadExecVSHDiscUpdater
 	{ 0x015DA036, 0x32224187, }, // sceKernelLoadExecBufferVSHUsbWlan
 	{ 0x4F41E75E, 0x0C12D5DC, }, // sceKernelLoadExecBufferVSHUsbWlanDebug
 	{ 0x31DF42BF, 0x783EA19F, }, // sceKernelLoadExecVSHMs1
 	{ 0x70901231, 0xE09DAFDC, }, // sceKernelLoadExecVSHMs3
-	{ 0x62C459E1, UNKNOWNNID, }, // sceKernelLoadExecBufferVSHPlain
-	{ 0x918782E8, UNKNOWNNID, }, // sceKernelLoadExecBufferVSHFromHost
-	{ 0xBB28E9B7, UNKNOWNNID, }, // sceKernelLoadExecBufferPlain0
-	{ 0x71A1D738, UNKNOWNNID, }, // sceKernelLoadExecBufferPlain
-	{ 0x4D5C75BE, UNKNOWNNID, }, // sceKernelLoadExecFromHost
 	{ 0x4AC57943, 0xB5CE3204, }, // sceKernelRegisterExitCallback
 	{ 0xD9739B89, 0x71EF3793, }, // sceKernelUnregisterExitCallback
 	{ 0x659188E1, 0xB848CC2C, }, // sceKernelCheckExitCallback
@@ -257,15 +224,10 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0xA1A78C58, 0x7F9670CF, }, // sceKernelLoadModuleDisc
 	{ 0x748CBED9, 0x8F38EBE9, }, // sceKernelQueryModuleInfo
 	{ 0xD675EBB8, 0x75ECB8BA, }, // sceKernelSelfStopUnloadModule
-	{ 0xABE84F8A, UNKNOWNNID, }, // sceKernelLoadModuleBufferWithApitype
 	{ 0xBA889C07, 0x5352C26C, }, // sceKernelLoadModuleBuffer
-	{ 0xB7F46618, UNKNOWNNID, }, // sceKernelLoadModuleByID
-	{ 0x437214AE, UNKNOWNNID, }, // sceKernelLoadModuleWithApitype
-	{ 0x710F61B5, UNKNOWNNID, }, // sceKernelLoadModuleMs
+	{ 0xB7F46618, 0x3E9AA3D1, }, // sceKernelLoadModuleByID
 	{ 0x91B87FAE, 0xB0752D7D, }, // sceKernelLoadModuleVSHByID
 	{ 0xA4370E7C, 0x329C89DB, }, // sceKernelLoadModuleVSH
-	{ 0x23425E93, UNKNOWNNID, }, // sceKernelLoadModuleVSHPlain
-	{ 0xF9275D98, UNKNOWNNID, }, // sceKernelLoadModuleBufferUsbWlan
 	{ 0xF0CAC59E, 0xBB6E2BCA, }, // sceKernelLoadModuleBufferVSH
 	{ 0xCC1D3699, 0xB751A9DE, }, // sceKernelStopUnloadSelfModule
 	{ 0x04B7BD22, 0x6620C340, }, // sceKernelSearchModuleByName
@@ -291,12 +253,18 @@ static nid_entry ModuleMgrForKernel_nid[] = {
 	{ 0x74690AEB, 0x748EC4A6, }, // sceKernelLoadModuleByIDBootInitConfig
 	{ 0xF80F3C96, 0xF4B7909C, }, // sceKernelLoadModuleBufferBootInitConfig
 	{ 0x61EC6AB0, 0xDBE7524B, }, // sceKernelModuleMgrMode
+	{ 0x3E4FEDDC, 0x07290699, }, // sceKernelLoadModuleToBlock
+	{ 0xAB77DC5A, 0xA035AADA, }, // sceKernelLoadModuleBootInitConfig
+	{ 0x5C88479B, 0x2124FEC7, }, // sceKernelLoadModuleDeci
+	{ 0xCE70664B, 0x5226F362, }, // sceKernelLoadModuleBufferForLoadExecBufferVSHUsbWlan
+	{ 0xB5DDABD3, 0xDEE14448, }, // sceKernelLoadModuleBufferForLoadExecBufferVSHUsbWlanDebug
 
 	{ 0xEF7A7F02, 0x76D0B981, },
 	{ 0x2BE2B17E, 0x42F022E4, },
 	{ 0x25E1F458, 0xDAC8A7B3, },
 	{ 0xF7E46A72, 0xA63A565A, },
 	{ 0x1B91F6EC, 0xADAE7610, },
+	{ 0x245B698D, 0xED5094E2, },
 };
 
 static nid_entry ExceptionManagerForKernel_nid[] = {
@@ -306,9 +274,6 @@ static nid_entry ExceptionManagerForKernel_nid[] = {
 	{ 0x1AA6CFFA, 0xC0BC60E9, }, // sceKernelReleaseExceptionHandler
 	{ 0xDF83875E, 0x014FD1D1, }, // sceKernelGetActiveDefaultExceptionHandler
 	{ 0x291FF031, 0x85F02133, }, // sceKernelReleaseDefaultExceptionHandler
-	{ 0x15ADC862, UNKNOWNNID, }, // sceKernelRegisterNmiHandler
-	{ 0xB15357C9, UNKNOWNNID, }, // sceKernelReleaseNmiHandler
-
 	{ 0xFC26C354, 0x7DDFBCC7, },
 };
 
@@ -345,7 +310,6 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0x23BB0A60, 0x5D311801, }, // scePowerWlanDeactivate
 	{ 0x2B51FE2F, 0xCE9C5F0E, }, // scePower_driver_2B51FE2F
 	{ 0x442BFBAC, 0x4084E678, }, // scePowerGetBacklightMaximum
-	{ 0xE8685403, UNKNOWNNID, }, // scePower_driver_E8685403
 	{ 0xEDC13FE5, 0xB361215A, }, // scePowerGetIdleTimer
 	{ 0x7F30B3B1, 0x69513373, }, // scePowerIdleTimerEnable
 	{ 0x972CE941, 0x21361196, }, // scePowerIdleTimerDisable
@@ -408,33 +372,29 @@ static nid_entry scePower_driver_nid[] = {
 	{ 0x0442D852, 0x599A2901, }, // scePowerRequestColdReset
 	{ 0x733F973B, 0xF52F66EB, }, // scePowerBatteryEnableUsbCharging
 	{ 0x90285886, 0xC2B7CD0C, }, // scePowerBatteryDisableUsbCharging
+	{ 0xD66EF08D, 0x9CDB22B5, }, // scePowerCheckWlanCondition
 
 	{ 0x9B1A9C5F, 0x47F4E1A8, },
 	{ 0xE65F00BD, 0x599A2901, },
 	{ 0xD7B9C925, 0x2D5A880D, },
+	{ 0xC71EE866, 0x207119B3, },
+	{ 0xC3C33306, 0x756261FC, },
 };
 
 static nid_entry InterruptManagerForKernel_nid[] = {
 	{ 0x8A389411, 0xC03C8D51, }, // sceKernelDisableSubIntr
 	{ 0xD2E8363F, 0x2BF441EF, }, // QueryIntrHandlerInfo
 	{ 0x8B61808B, 0xAC9306F0, }, // sceKernelQuerySystemCall
-	{ 0x53991063, UNKNOWNNID, }, // InterruptManagerForKernel_53991063
-	{ 0x468BC716, UNKNOWNNID, }, // sceKernelGetInterruptExitCount
-	{ 0x43CD40EF, UNKNOWNNID, }, // ReturnToThread
 	{ 0x85F7766D, 0xD24AE49D, }, // SaveThreadContext
 	{ 0x00B6B0F3, 0x5F3525D5, }, // QueryInterruptManCB
 	{ 0x15894D0B, 0xD2274728, }, // InterruptManagerForKernel_15894D0B
 	{ 0xB5A15B30, 0x54ACF6F8, }, // sceKernelSetIntrLevel
 	{ 0x43A7BBDC, 0xCCC5A332, }, // InterruptManagerForKernel_43A7BBDC
-	{ 0x02475AAF, UNKNOWNNID, }, // sceKernelIsInterruptOccurred
 	{ 0x750E2507, 0xEC5485ED, }, // sceKernelSuspendIntr
 	{ 0x494D6D2B, 0xEC5485ED, }, // sceKernelResumeIntr
-	{ 0x2CD783A1, UNKNOWNNID, }, // RegisterContextHooks
 	{ 0x55242A8B, 0xE3CDA797, }, // ReleaseContextHooks
 	{ 0x27BC9A45, 0x47B6E6B7, }, // UnSupportIntr
 	{ 0x0E224D66, 0x3AB4955A, }, // SupportIntr
-	{ 0x272766F8, UNKNOWNNID, }, // sceKernelRegisterDebuggerIntrHandler
-	{ 0xB386A459, UNKNOWNNID, }, // sceKernelReleaseDebuggerIntrHandler
 	{ 0xCDC86B64, 0xEC51802D, }, // sceKernelCallSubIntrHandler
 	{ 0xD6878EB6, 0xFEE218CE, }, // sceKernelGetUserIntrStack
 	{ 0xF4454E44, 0xD157AF51, }, // sceKernelCallUserIntrHandler
@@ -527,6 +487,7 @@ static nid_entry sceDisplay_driver_nid[] = {
 	{ 0xA83EF139, 0x2F4E7DF1, }, // sceDisplayAdjustAccumulatedHcount
 	{ 0x21038913, 0x800E01C6, }, // sceDisplayIsVsync
 	{ 0x92C8F8B7, 0x2DFD5B55, }, // sceDisplayIsPseudoField
+	{ 0xAE0E8972, 0xF4B7B531, }, // sceDisplaySetPseudoVsync
 
 	{ 0x643F3841, 0xDC68E0EF, },
 	{ 0x820C6038, 0x452B3820, },
@@ -571,6 +532,7 @@ static nid_entry sceAudio_driver_nid[] = {
 	{ 0xE926D3FB, 0xB82D416A, }, // sceAudioInputInitEx
 	{ 0xA633048E, 0x3076A373, }, // sceAudioPollInputEnd
 	{ 0xE9D97901, 0x79AF2DA3, }, // sceAudioGetChannelRestLen
+	{ 0x647CEF33, 0xA500F7F2, }, // sceAudioOutput2GetRestSample
 };
 
 static nid_entry sceReg_driver_nid[] = {
@@ -595,36 +557,6 @@ static nid_entry sceReg_driver_nid[] = {
 	{ 0x30BE0259, 0x4D81184D, }, // sceRegGetKeyValueByName
 	{ 0xBE8C1263, 0x675482AD, }, // sceReg_BE8C1263
 	{ 0x835ECE6F, 0x3D3A1014, }, // sceReg_835ECE6F
-};
-
-static nid_entry UtilsForKernel_nid[] = {
-	{ 0x80FE032E, UNKNOWNNID, }, // sceUtilsKernelDcacheWBinvRange
-	{ 0x7B7ED3FD, UNKNOWNNID, }, // sceKernelRegisterLibcRtcFunc
-	{ 0x6151A7C3, UNKNOWNNID, }, // sceKernelReleaseLibcRtcFunc
-};
-
-static nid_entry SysclibForKernel_nid[] = {
-//	{ 0x89B79CB1, UNKNOWNNID, }, // strcspn MISSING
-//	{ 0x62AE052F, UNKNOWNNID, }, // strspn  MISSING
-//	{ 0x87F8D2DA, UNKNOWNNID, }, // strtok  MISSING
-//	{ 0x1AB53A58, UNKNOWNNID, }, // strtok_r  MISSING
-	{ 0x1D83F344, UNKNOWNNID, }, // atob
-	{ 0x8AF6B8F8, UNKNOWNNID, }, // SysclibForKernel_8AF6B8F8
-//	{ 0xD3D1A3B9, UNKNOWNNID, }, // strncat  MISSING
-	{ 0xD887CACD, UNKNOWNNID, }, // get_ctype_table
-//	{ 0x909C228B, UNKNOWNNID, }, // setjmp  MISSING
-//	{ 0x18FE80DB, UNKNOWNNID, }, // longjmp  MISSING
-};
-
-static nid_entry ThreadManForKernel_nid[] = {
-	{ 0xDD55A192, UNKNOWNNID, }, // sceKernelGetSyscallRA
-};
-
-static nid_entry InitForKernel_nid[] = {
-	{ 0x33D30F49, UNKNOWNNID, }, // InitForKernel_33D30F49
-	{ 0x9F9AE99C, UNKNOWNNID, }, // sceKernelSetInitCallback
-	{ 0xC4F1BA33, UNKNOWNNID, }, // InitForKernel_C4F1BA33
-	{ 0xFD0F25AD, UNKNOWNNID, }, // InitForKernel_FD0F25AD
 };
 
 static nid_entry SysTimerForKernel_nid[] = {
@@ -732,7 +664,7 @@ static nid_entry sceRtc_driver_nid[] = {
 	{ 0x27F98543, 0x5D6735B0, }, // sceRtcFormatRFC3339LocalTime
 	{ 0xDFBC5F16, 0xFC555073, }, // sceRtcParseDateTime
 	{ 0x28E1E988, 0xDDC10EEE, }, // sceRtcParseRFC3339
-	{ 0x011F03C1, 0x186CE2F1, }, // sceRtcGetAccumulativeTime
+	{ 0x029CA3B3, 0x011F03C1, }, // sceRtcGetAccumulativeTime
 	{ 0x17C26C00, 0x4F970DF9, }, // sceRtcSetCurrentSecureTick
 	{ 0x1909C99B, 0xCD653A7E, }, // sceRtcSetTime64_t
 	{ 0x203CEB0D, 0xC55A5A0C, }, // sceRtcGetLastReincarnatedTime
@@ -750,10 +682,7 @@ static nid_entry sceRtc_driver_nid[] = {
 	{ 0xF2A4AFE5, 0xF6E4C8A6, }, // sceRtcTickAddSeconds
 
 	{ 0xD24DF719, 0xF2FCB0F3, },
-};
-
-static nid_entry sceMpegbase_driver_nid[] = {
-	{ 0x304882E1, UNKNOWNNID, }, // sceMpegbase_driver_304882E1
+	{ 0xF5FCC995, 0xF2FCB0F3, },
 };
 
 static nid_entry sceSyscon_driver_nid[] = {
@@ -1192,15 +1121,10 @@ resolver_config nid_620_fix[] = {
 	NID_ENTRY(sceCtrl_driver),
 	NID_ENTRY(sceDisplay_driver),
 	NID_ENTRY(sceAudio_driver),
-	NID_ENTRY(UtilsForKernel),
-	NID_ENTRY(SysclibForKernel),
-	NID_ENTRY(ThreadManForKernel),
-	NID_ENTRY(InitForKernel),
 	NID_ENTRY(SysTimerForKernel),
 	NID_ENTRY(sceImpose_driver),
 	NID_ENTRY(sceGe_driver),
 	NID_ENTRY(sceRtc_driver),
-	NID_ENTRY(sceMpegbase_driver),
 	NID_ENTRY(memlmd),
 	NID_ENTRY(sceSyscon_driver),
 	NID_ENTRY(sceUmd),

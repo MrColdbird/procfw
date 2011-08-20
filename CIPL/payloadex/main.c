@@ -17,12 +17,13 @@
 
 /*
  * 
- * 6.3X payloadex.bin
+ * 6.XX payloadex.bin
  *
  */
 
 #include <pspsdk.h>
 #include "main.h"
+#include "payloadex_patch_addr.h"
 
 #include "rebootex_conf.h"
 #include "utils.h"
@@ -65,49 +66,42 @@ int Reboot_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, voi
 	return Main(a0, a1, a2, a3, t0, t1, t2);
 }
 
-int elf_load_flag;
-int btcnf_load_flag;
 int recovery_flag;
-int psp_model;
 u32 hold_key;
 
 int (* Real_Reboot)(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) = (void *)0x88600000;
-
-int (* sceKernelCheckExecFile)(void *buf, int *check) =NULL;
 int (* memlmd_E42AFE2E)(void *buf ,void *check , void *s) = NULL;
 int (* memlmd_3F2AC9C6)(void *a0,void *a1) = NULL;
 
-#if PSP_MODEL == 0
-//fat
+
+#if PSP_MODEL == 0//fat
 #include "../btcnf/recovery_btcnf_01g.h"
-//#define BTCNF_PATH "pspbtcnf.bin"
-int (* DcacheClear)(void) = (void *)0x88601510;//6.38
-int (* IcacheClear)(void) = (void *)0x88600DBC;//6.38
-int (* sceBootLfatOpen)(const char *path) = (void *)0x88604A20;			//6.38
-int (* sceBootLfatRead)(void *buff , int max_size) = (void *)0x88604B94;//6.38
-int (* sceBootLfatClose)(void) = (void *)0x88604B38;					//6.38
-int (* sceKernelCheckPspConfig)(void *a0 , int size , int flag) = (void *)0x8860A890;//6.38
-#elif PSP_MODEL == 1
-//slim
+#elif PSP_MODEL == 1//slim
 #include "../btcnf/recovery_btcnf_02g.h"
-//#define BTCNF_PATH "pspbtcnf_02g.bin"
-int (* DcacheClear)(void) = (void *)0x886015E0;//6.37
-int (* IcacheClear)(void) = (void *)0x88600E8C;//6.37
-int (* sceBootLfatOpen)(const char *path) = (void *)0x88604AF0;			//6.37
-int (* sceBootLfatRead)(void *buff , int max_size) = (void *)0x88604C64;//6.37
-int (* sceBootLfatClose)(void) = (void *)0x88604C08;					//6.37
-int (* sceKernelCheckPspConfig)(void *a0 , int size , int flag) = (void *)0x8860A960;
 #else
 #error PSP_MODEL is not defined
 #endif
 
+#if _PSP_FW_VERSION == 639
+#define DEVKIT_VER	0x06030910
+#elif _PSP_FW_VERSION == 660
+#define DEVKIT_VER	0x06060010
+#endif
 
 void ClearCaches()
 {
+	int (* DcacheClear)(void) = (void *)payloadex_patch_list.function_list.DcacheClearAddr;
+	int (* IcacheClear)(void) = (void *)payloadex_patch_list.function_list.IcacheClearAddr;
+
 	DcacheClear();
 	IcacheClear();
 }
 
+static int sceKernelCheckPspConfig(void *buffer , int size , int flag)
+{
+	int (* sceKernelCheckPspConfig_k)(void *, int, int ) = (void *)payloadex_patch_list.function_list.CheckPspConfig;
+	return sceKernelCheckPspConfig_k( buffer, size, flag );
+}
 
 int _strlen(char * string)
 {
@@ -226,65 +220,30 @@ int _memset(unsigned char * buffer, unsigned char value, unsigned int length)
 	return result;
 }
 
-/*
-int sceBootLfatOpenPatched(char *path)//open
-{
-	if( memcmp( path + 4 , BTCNF_PATH , sizeof( BTCNF_PATH )) == 0)
-	{
-		if(recovery_flag)
-		{
-			btcnf_load_flag = 1;
-			return 0;
-		}
-		
-		path[9] = 'j';
-	}
-
-	return sceBootLfatOpen( path );
-}
-
-int sceBootLfatReadPatched(void *buff , int max_size )//
-{
-	if( btcnf_load_flag )
-	{
-		memcpy( buff , recovery_btcnf , size_recovery_btcnf );
-		return size_recovery_btcnf;
-	}
-
-	return sceBootLfatRead( buff , max_size );
-}
-
-int sceBootLfatClosePatched(void)//close
-{
-	if(btcnf_load_flag)
-	{
-		btcnf_load_flag = 0;
-		return 0;
-	}
-
-	return sceBootLfatClose();
-}
-*/
-
-int memlmd_E42AFE2E_patched(PSP_Header *buf, int *check,int *s)//decrypt patch
+//memlmd_E42AFE2E_patched
+int memlmd_Decrypt_patched(PSP_Header *buf, int *check,int *s)
 {
 	if(buf->oe_tag == 0xC01DB15D )//0x55668D96
 	{
 		_memcpy(buf,&(buf->main_data), buf->comp_size);
-		s[0] = buf->comp_size;
+		*s = buf->comp_size;
 		return 0;
 	}
 	
 	return memlmd_E42AFE2E(buf , check , s);	
 }
 
-
-int memlmd_3F2AC9C6_patched(void *a0,void *a1)//sig check
+//memlmd_3F2AC9C6_patched
+int memlmd_Sigcheck_patched(void *a0,void *a1)
 {
 	PSP_Header *head=(PSP_Header *)a0;
 	int i;
 
+#if _PSP_FW_VERSION == 639
 	for(i=0;i<0x38;i++)
+#else
+	for(i=0;i<0x30;i++)
+#endif
 	{
 		if(head->scheck[i] != 0)
 			return memlmd_3F2AC9C6(a0,a1);
@@ -295,28 +254,21 @@ int memlmd_3F2AC9C6_patched(void *a0,void *a1)//sig check
 
 int PatchLoadCore(void *a0, void *a1, void *a2, int (* module_start)(void *, void *, void *))
 {
-	u32 text_addr = ((u32)module_start);
+	u32 text_addr = ((u32)module_start) - payloadex_patch_list.memlmd_list.ModuleOffsetAddr;
 
-	_MAKE_CALL(text_addr + 0x00005CC8 - 0x00000BBC , memlmd_3F2AC9C6_patched );
-	_MAKE_CALL(text_addr + 0x00005CF8 - 0x00000BBC , memlmd_3F2AC9C6_patched );
-	_MAKE_CALL(text_addr + 0x00005D90 - 0x00000BBC , memlmd_3F2AC9C6_patched );
+	_MAKE_CALL(text_addr + payloadex_patch_list.memlmd_list.SigcheckPatchAddr , memlmd_Sigcheck_patched );
+	_MAKE_CALL(text_addr + payloadex_patch_list.memlmd_list.DecryptPatchAddr , memlmd_Decrypt_patched );
 
-	_MAKE_CALL(text_addr + 0x000041A4 - 0x00000BBC , memlmd_E42AFE2E_patched );
-	_MAKE_CALL(text_addr + 0x00005CA4 - 0x00000BBC , memlmd_E42AFE2E_patched );
+	memlmd_3F2AC9C6 = (void *)(text_addr + payloadex_patch_list.memlmd_list.SigcheckFuncAddr );
+	memlmd_E42AFE2E = (void *)(text_addr + payloadex_patch_list.memlmd_list.DecryptFuncAddr );
 
-	memlmd_3F2AC9C6 = (void *)(text_addr + 0x00007AE8 - 0x00000BBC);
-	memlmd_E42AFE2E = (void *)(text_addr + 0x00007B08 - 0x00000BBC);
-
-	ClearCaches();//
-
+	ClearCaches();
 	return module_start(a0, a1, a2);
 }
 
 int sceKernelCheckPspConfigPatched(u8 *buffer , int size , int flag)
 {
 	int result = sceKernelCheckPspConfig( buffer , size , flag);
-//	result = btcnf_edit((BtcnfHeader *)buffer , result , flag);
-//	_btcnf_header *header =( _btcnf_header *)buffer;
 
 	if( recovery_flag ){
 		_memcpy( buffer , recovery_btcnf, size_recovery_btcnf);
@@ -344,10 +296,8 @@ int Main(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 	conf->magic = REBOOTEX_CONFIG_MAGIC;
 	conf->psp_model = PSP_MODEL;
 	conf->rebootex_size = 0;
-	conf->psp_fw_version = 0x06030910;
+	conf->psp_fw_version = DEVKIT_VER;
 
-	elf_load_flag = 0;
-	btcnf_load_flag = 0;
 	recovery_flag = 0;
 
 	if ( hold_key & SYSCON_CTRL_HOME)
@@ -357,67 +307,29 @@ int Main(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 		if( SYSCON_CTRL_RTRG & hold_key)
 			recovery_flag = 1;
 
-#if PSP_MODEL == 0
-//fat
-//		_MAKE_CALL( 0x88603EB8 , sceBootLfatOpenPatched);//6.38
-//		_MAKE_CALL( 0x88603F20 , sceBootLfatReadPatched);//6.38
-//		_MAKE_CALL( 0x88603F40  , sceBootLfatClosePatched);//6.38
-		_MAKE_CALL( 0x88603594 , sceKernelCheckPspConfigPatched);//6.38
+		_MAKE_CALL( payloadex_patch_list.patch_list.CheckPspConfigPatch	, sceKernelCheckPspConfigPatched);
 
-		_sw( 0x03E00008 , 0x8860C80C);// -6.38
-		_sw( 0x24020001 , 0x8860C810);//addiu  $v0, $zr, 1
+		_sw( 0x03E00008 , payloadex_patch_list.patch_list.KdebugPatchAddr );
+		_sw( 0x24020001 , payloadex_patch_list.patch_list.KdebugPatchAddr + 4);//addiu  $v0, $zr, 1
 
-		// Patch ~PSP header check // 6.38
-		_sw(0xafa50000, 0x8860A8C4);//sw $a0, 0($sp) -> sw $a1, 0($sp)
-		_sw(0x20a30000, 0x8860A8C8);//addiu v1, zr,-1 -> addi	$v1, $a1, 0x0000
+		// Patch ~PSP header check
+		_sw(0xafa50000, payloadex_patch_list.patch_list.BtHeaderPatchAddr );//sw $a0, 0($sp) -> sw $a1, 0($sp)
+		_sw(0x20a30000, payloadex_patch_list.patch_list.BtHeaderPatchAddr + 4 );//addiu v1, zr,-1 -> addi	$v1, $a1, 0x0000
 
-		///patch sceBootLfatfsMount -6.38
-		_sw(0, 0x88603EB0 );
+		///patch sceBootLfatfsMount
+		_sw(0, payloadex_patch_list.patch_list.LfatMountPatchAddr );
 
-		//patch sceBootLfatSeek size -6.38
-		_sw(0, 0x88603F00);
+		//patch sceBootLfatSeek size
+		_sw(0, payloadex_patch_list.patch_list.LfatSeekPatchAddr1 );
+		_sw(0, payloadex_patch_list.patch_list.LfatSeekPatchAddr2 );
 
-		//patch buffer size check -6.38
-		_sw(0, 0x88603F10);
+		//MIPS_ADDU( 7 , 15 , 0 )
+		_sw( 0x01E03821 ,	payloadex_patch_list.patch_list.LoadCorePatchAddr );//addu $a3,$t7,$zr
+		_MAKE_JUMP(			payloadex_patch_list.patch_list.LoadCorePatchAddr + 4 , PatchLoadCore );
+		_sw( 0x0280E821 ,	payloadex_patch_list.patch_list.LoadCorePatchAddr + 8 );//addu  $sp, $s4, $zr
 
-		_sw( _MIPS_ADDU( 7 , 15 , 0 ) , 0x8860339C );////addu $a3,$t7,$zr MIPS_ADDU( 7 ,15 , 0 ) = 0x01E03821
-		_MAKE_JUMP( 0x886033A0 , PatchLoadCore );//-6.38
-		_sw( 0x0280E821 , 0x886033A4);//addu  $sp, $s4, $zr
-
-		//patch hash error -6.38
-		_sw(0, 0x88603954);
-
-#elif PSP_MODEL == 1
-//slim
-//		_MAKE_CALL( 0x88603F88 , sceBootLfatOpenPatched);//6.37
-//		_MAKE_CALL( 0x88603FF0 , sceBootLfatReadPatched);//6.37
-//		_MAKE_CALL( 0x88604010 , sceBootLfatClosePatched);//6.37
-		_MAKE_CALL( 0x88603680 , sceKernelCheckPspConfigPatched);//6.37
-
-		_sw( 0x03E00008 , 0x8860C8DC);// -6.37
-		_sw( 0x24020001 , 0x8860C8E0);//addiu  $v0, $zr, 1
-
-		// Patch ~PSP header check // 6.37
-		_sw(0xafa50000, 0x8860A994);//sw $a0, 0($sp) -> sw $a1, 0($sp)
-		_sw(0x20a30000, 0x8860A998);//addiu v1, zr,-1 -> addi	$v1, $a1, 0x0000
-
-		///patch sceBootLfatfsMount -6.37
-		_sw(0, 0x88603F80 );
-
-		//patch sceBootLfatSeek size -6.37
-		_sw(0, 0x88603FD0);
-
-		//patch buffer size check -6.37
-		_sw(0, 0x88603FE0);
-
-		_sw( _MIPS_ADDU( 7 , 15 , 0 ) , 0x8860346C);////addu $a3,$t7,$zr MIPS_ADDU( 7 ,15 , 0 ) = 0x01E03821
-		_MAKE_JUMP( 0x88603470 , PatchLoadCore );//-6.37
-		_sw( 0x0280E821 , 0x88603474);//addu  $sp, $s4, $zr
-
-		//patch hash error -6.37
-		_sw(0, 0x88603A24);
-#endif
-
+		//patch hash error
+		_sw(0, payloadex_patch_list.patch_list.HashCheckPatchAddr );
 	}
 
 	ClearCaches();

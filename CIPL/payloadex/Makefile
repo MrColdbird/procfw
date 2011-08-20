@@ -12,7 +12,7 @@ endif
 all:	a.bin
 
 a.bin: 
-	psp-gcc $(CFLAGS) -DPSP_MODEL=$(PSP_MODEL)  main.c -o main.s
+	psp-gcc $(CFLAGS) -DPSP_MODEL=$(PSP_MODEL) -D_PSP_FW_VERSION=$(PSP_FW_VERSION) main.c -o main.s
 	psp-as main.s -o main.o
 	psp-ld -T linkfile.l main.o -o main.elf
 	psp-strip -s main.elf

@@ -34,7 +34,8 @@ OBJS = main.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
 	   ../Common/strsafe.o \
-	   setlongjmp.o
+	   setlongjmp.o \
+	   cross_fw.o
 
 IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/LoadCoreForKernel.o \

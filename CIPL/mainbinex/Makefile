@@ -7,10 +7,12 @@ else
 TARGET = patch_01g
 endif
 
+CFLAGS=$(INCLUDES) -W -Wall -G0 -Os -DPSP_MODEL=$(PSP_MODEL) -D_PSP_FW_VERSION=$(PSP_FW_VERSION)
+
 all:	a.bin
 
 a.bin: 
-	psp-gcc $(INCLUDES) -W -Wall -G0 -Os -DPSP_MODEL=$(PSP_MODEL) -fno-pic -mno-abicalls -w -S main.c -o main.s
+	psp-gcc $(CFLAGS) -fno-pic -mno-abicalls -w -S main.c -o main.s
 	psp-as main.s -o main.o
 	psp-ld -T linkfile.l main.o -o main.elf
 	psp-strip -s main.elf

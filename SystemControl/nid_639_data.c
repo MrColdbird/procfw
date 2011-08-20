@@ -707,7 +707,6 @@ static nid_entry sceGe_driver_nid[] = {
 };
 
 static nid_entry sceRtc_driver_nid[] = {
-	{ 0x029CA3B3, UNKNOWNNID, }, // sceRtc_029CA3B3
 	{ 0xE7C27D1B, 0x0287B1C2, }, // sceRtcGetCurrentClockLocalTime
 	{ 0x34885E0D, 0xFF530D9F, }, // sceRtcConvertUtcToLocalTime
 	{ 0x779242A2, 0x9FAADB5A, }, // sceRtcConvertLocalTimeToUTC
@@ -1165,6 +1164,9 @@ static nid_entry sceClockgen_driver_nid[] = {
 
 static nid_entry sceCodec_driver_nid[] = {
 	{ 0x20C61103, 0xD26B6CCE, }, // sceCodecSelectVolumeTable
+	{ 0xEEB91526, 0xF071BF60, }, // sceCodecSetVolumeOffset
+	{ 0x6D945509, 0xD6A2D0D6, }, // sceCodecSetHeadphoneVolume
+	{ 0x40D5C897, 0x55CD9281, }, // sceCodecSetSpeakerVolume
 };
 
 static nid_entry scePaf_nid[] = {

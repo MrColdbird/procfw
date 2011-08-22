@@ -434,6 +434,11 @@ void* sctrlKernelGetBlockHeadAddr(SceUID blockid)
 	k1 = pspSdkSetK1(0);
 
 	switch(psp_fw_version) {
+#ifdef CONFIG_660
+		case FW_660:
+			ret = sceKernelGetBlockHeadAddr_660(blockid);
+			break;
+#endif
 #ifdef CONFIG_639
 		case FW_639:
 			ret = sceKernelGetBlockHeadAddr(blockid);

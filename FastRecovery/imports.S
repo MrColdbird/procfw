@@ -21,3 +21,7 @@
 	STUB_FUNC  0x764F5A3C, scePowerRegisterCallbackPrivate_620
 	STUB_FUNC  0x2DC8380C, scePowerUnregisterCallbackPrivate_620
 	STUB_END
+
+	STUB_START "sceNetIfhandle_lib",0x40090011,0x00010005
+	STUB_FUNC  0xE80F00A4, sceNetMPulldown
+	STUB_END

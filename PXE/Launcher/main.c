@@ -64,6 +64,7 @@ extern int sceKernelPowerLock(unsigned int, unsigned int);
 u8 decompress_buf[1024*1024L];
 
 void do_exploit_639(void);
+void do_exploit_660(void);
 
 int scePowerRegisterCallbackPrivate_635(unsigned int slot, int cbid);
 int scePowerUnregisterCallbackPrivate_635(unsigned int slot);
@@ -643,9 +644,7 @@ version_OK:
 
 #ifdef CONFIG_660
 	if(psp_fw_version == FW_660) {
-		pspDebugScreenPrintf("Oops, we need a kxploit to do the job!\n");
-		sceKernelDelayThread(5*1000000);
-		goto exit;
+		do_exploit_660();
 	}
 #endif
 

@@ -27,9 +27,16 @@ endif
 
 ifeq ($(CONFIG_639), 1)
 CFLAGS += -DCONFIG_639=1
-OBJS += kxp_639.o
+OBJS += ../PXE/Launcher/kxp_639.o
 PSP_FW_VERSION = 639
 PSP_EBOOT_TITLE = 639
+endif
+
+ifeq ($(CONFIG_660), 1)
+CFLAGS += -DCONFIG_660=1
+OBJS += ../PXE/Launcher/kxp_660.o
+PSP_FW_VERSION = 660
+PSP_EBOOT_TITLE = 660
 endif
 
 BUILD_PRX = 1

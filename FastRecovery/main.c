@@ -92,6 +92,7 @@ int (* LoadReboot)(void * arg1, unsigned int arg2, void * arg3, unsigned int arg
 extern int sceKernelPowerLock(unsigned int, unsigned int);
 
 void do_exploit_639(void);
+void do_exploit_660(void);
 
 int scePowerRegisterCallbackPrivate_635(unsigned int slot, int cbid);
 int scePowerUnregisterCallbackPrivate_635(unsigned int slot);
@@ -261,6 +262,13 @@ void recovery_sysmem_635(void)
 }
 #endif
 
+#ifdef CONFIG_660
+void recovery_sysmem_660()
+{
+	_sw(0x3C058801, SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser); // lui $a1, 0x8801
+}
+#endif
+
 #ifdef CONFIG_639
 void recovery_sysmem_639()
 {
@@ -275,6 +283,12 @@ int kernel_permission_call(void)
 	//cache invalidation functions
 	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelIcacheInvalidateAll);
 	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelDcacheWritebackInvalidateAll);
+
+#ifdef CONFIG_660
+	if(psp_fw_version == FW_660) {
+		recovery_sysmem_660();
+	}
+#endif
 
 #ifdef CONFIG_639
 	if(psp_fw_version == FW_639) {
@@ -528,6 +542,12 @@ int main(int argc, char * argv[])
 #if defined(CONFIG_620) || defined(CONFIG_635)
 	if(psp_fw_version == FW_620 || psp_fw_version == FW_635) {
 		do_exploit();
+	}
+#endif
+
+#ifdef CONFIG_660
+	{
+		do_exploit_660();
 	}
 #endif
 

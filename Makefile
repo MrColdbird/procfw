@@ -61,6 +61,9 @@ endif
 ifeq ($(CONFIG_639), 1)
 	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
 endif
+ifeq ($(CONFIG_660), 1)
+	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
+endif
 	@rm -f ./Common/*.o
 
 # Creating Live-System Reboot Buffer
@@ -99,7 +102,15 @@ endif
 ifeq ($(CONFIG_639), 1)
 	@cd $(CIPL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cd $(CIPL_INSTALLER)/kpspident; make $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/CIPL_Flasher
+endif
+ifeq ($(CONFIG_660), 1)
+	@cd $(CIPL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/CIPL_Flasher
 	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/CIPL_Flasher
 	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/CIPL_Flasher
@@ -120,9 +131,14 @@ ifeq ($(CONFIG_620), 1)
 	@cd $(PERMANENT); make clean $(DEBUG_OPTION)
 endif
 ifeq ($(CONFIG_639), 1)
-	@cd $(CIPL); make clean $(DEBUG_OPTION)
-	@cd $(CIPL_INSTALLER); make clean $(DEBUG_OPTION)
-	@cd $(CIPL_INSTALLER)/kpspident; make clean $(DEBUG_OPTION)
+	@cd $(CIPL); make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER); make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+endif
+ifeq ($(CONFIG_660), 1)
+	@cd $(CIPL); make clean $(OPT_FLAGS) $(DEBUG_OPTION) 
+	@cd $(CIPL_INSTALLER); make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make clean $(OPT_FLAGS) $(DEBUG_OPTION)
 endif
 	@cd $(SATELITE); make clean $(DEBUG_OPTION)
 	@cd $(LAUNCHER); make clean $(DEBUG_OPTION)

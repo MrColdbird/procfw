@@ -15,6 +15,6 @@ neur0n for his syscall execution in kernel mode, and CIPL allowing hackable PSPs
 jas0nuk for his PSPident source to detect if it is a TA-88v3 unit
 ardi for his umd4homebrew to enable UMD in homebrews
 some1 for his exploit on 6.39 OFW, allowing CFW on 6.39
-again some1 for his exploit on 6.60 OFW, allowing CFW on 6.60
+again some1 and Davee for their exploit on 6.60 OFW, allowing CFW on 6.60
 Yoti for blocking satellite menu in Go!cam
 And last but not least - Sony for making a wonderful, however very locked down, portable gaming handheld.

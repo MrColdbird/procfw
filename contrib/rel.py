@@ -11,18 +11,22 @@ PRO_BUILD = [
 			{ "fn": "620PRO-%s.rar", "config": "make CONFIG_620=1" },
 			{ "fn": "635PRO-%s.rar", "config": "make CONFIG_635=1" },
 			{ "fn": "639PRO-%s.rar", "config": "make CONFIG_639=1" },
+			{ "fn": "660PRO-%s.rar", "config": "make CONFIG_660=1" },
 
 #			{ "fn": "620PRO-%s.zip", "config": "make CONFIG_620=1" },
 #			{ "fn": "635PRO-%s.zip", "config": "make CONFIG_635=1" },
 #			{ "fn": "639PRO-%s.zip", "config": "make CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.zip", "config": "make CONFIG_660=1" },
 
 #			{ "fn": "620PRO-%s.tar.gz", "config": "make CONFIG_620=1" },
 #			{ "fn": "635PRO-%s.tar.gz", "config": "make CONFIG_635=1" },
 #			{ "fn": "639PRO-%s.tar.gz", "config": "make CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.tar.gz", "config": "make CONFIG_660=1" },
 
 #			{ "fn": "620PRO-%s.tar.bz2", "config": "make CONFIG_620=1" },
 #			{ "fn": "635PRO-%s.tar.bz2", "config": "make CONFIG_635=1" },
 #			{ "fn": "639PRO-%s.tar.bz2", "config": "make CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.tar.bz2", "config": "make CONFIG_660=1" },
 ]
 
 def build_pro(build_conf):

@@ -29,7 +29,7 @@
 #include "libs.h"
 
 static const int g_cpu_list[] = {
-	20, 75, 100, 133, 222, 266, 300, 333
+	20, 75, 100, 133, 166, 222, 266, 300, 333
 };
 
 static int g_fake_pll = 222;

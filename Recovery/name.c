@@ -34,8 +34,8 @@
 #include "main.h"
 #include "pspusbdevice.h"
 
-static const int cpu_list[]={0, 20, 75, 100, 133, 222, 266, 300, 333};
-static const int bus_list[]={0, 10, 37, 50, 66, 111, 133, 150, 166};
+static const int cpu_list[]={0, 20, 75, 100, 133, 166, 222, 266, 300, 333};
+static const int bus_list[]={0, 10, 37, 50, 66, 83, 111, 133, 150, 166};
 
 const char *get_bool_name(int boolean)
 {

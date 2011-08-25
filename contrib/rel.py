@@ -37,9 +37,10 @@ def build_pro(build_conf):
 	if NIGHTLY:
 		build_conf += " " + "NIGHTLY=1"
 
+	build_conf += " " + OPT_FLAG
 	os.system("make clean %s" % (build_conf))
 	os.system("make deps %s" % (build_conf))
-	build_conf = "make " + build_conf + " " + OPT_FLAG
+	build_conf = "make " + build_conf
 	os.system(build_conf)
 
 def copy_sdk():

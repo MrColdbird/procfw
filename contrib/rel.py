@@ -8,34 +8,38 @@ NIGHTLY=0
 VERSION="B9"
 
 PRO_BUILD = [
-			{ "fn": "620PRO-%s.rar", "config": "make CONFIG_620=1" },
-			{ "fn": "635PRO-%s.rar", "config": "make CONFIG_635=1" },
-			{ "fn": "639PRO-%s.rar", "config": "make CONFIG_639=1" },
-			{ "fn": "660PRO-%s.rar", "config": "make CONFIG_660=1" },
+			{ "fn": "620PRO-%s.rar", "config": "CONFIG_620=1" },
+			{ "fn": "635PRO-%s.rar", "config": "CONFIG_635=1" },
+			{ "fn": "639PRO-%s.rar", "config": "CONFIG_639=1" },
+			{ "fn": "660PRO-%s.rar", "config": "CONFIG_660=1" },
 
-#			{ "fn": "620PRO-%s.zip", "config": "make CONFIG_620=1" },
-#			{ "fn": "635PRO-%s.zip", "config": "make CONFIG_635=1" },
-#			{ "fn": "639PRO-%s.zip", "config": "make CONFIG_639=1" },
-#			{ "fn": "660PRO-%s.zip", "config": "make CONFIG_660=1" },
+#			{ "fn": "620PRO-%s.zip", "config": "CONFIG_620=1" },
+#			{ "fn": "635PRO-%s.zip", "config": "CONFIG_635=1" },
+#			{ "fn": "639PRO-%s.zip", "config": "CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.zip", "config": "CONFIG_660=1" },
 
-#			{ "fn": "620PRO-%s.tar.gz", "config": "make CONFIG_620=1" },
-#			{ "fn": "635PRO-%s.tar.gz", "config": "make CONFIG_635=1" },
-#			{ "fn": "639PRO-%s.tar.gz", "config": "make CONFIG_639=1" },
-#			{ "fn": "660PRO-%s.tar.gz", "config": "make CONFIG_660=1" },
+#			{ "fn": "620PRO-%s.tar.gz", "config": "CONFIG_620=1" },
+#			{ "fn": "635PRO-%s.tar.gz", "config": "CONFIG_635=1" },
+#			{ "fn": "639PRO-%s.tar.gz", "config": "CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.tar.gz", "config": "CONFIG_660=1" },
 
-#			{ "fn": "620PRO-%s.tar.bz2", "config": "make CONFIG_620=1" },
-#			{ "fn": "635PRO-%s.tar.bz2", "config": "make CONFIG_635=1" },
-#			{ "fn": "639PRO-%s.tar.bz2", "config": "make CONFIG_639=1" },
-#			{ "fn": "660PRO-%s.tar.bz2", "config": "make CONFIG_660=1" },
+#			{ "fn": "620PRO-%s.tar.bz2", "config": "CONFIG_620=1" },
+#			{ "fn": "635PRO-%s.tar.bz2", "config": "CONFIG_635=1" },
+#			{ "fn": "639PRO-%s.tar.bz2", "config": "CONFIG_639=1" },
+#			{ "fn": "660PRO-%s.tar.bz2", "config": "CONFIG_660=1" },
 ]
 
+OPT_FLAG = ""
+
 def build_pro(build_conf):
-	os.system("make clean")
-	os.system("make deps")
+	global OPT_FLAG
 
 	if NIGHTLY:
-		build_conf += " NIGHTLY=1"
+		build_conf += " " + "NIGHTLY=1"
 
+	os.system("make clean %s" % (build_conf))
+	os.system("make deps %s" % (build_conf))
+	build_conf = "make " + build_conf + " " + OPT_FLAG
 	os.system(build_conf)
 
 def copy_sdk():
@@ -83,6 +87,9 @@ def make_archive(fn):
 	os.chdir(path)
 
 def main():
+	global OPT_FLAG
+
+	OPT_FLAG = os.getenv("PRO_OPT_FLAG", "")
 	restore_chdir()
 	
 	for conf in PRO_BUILD:

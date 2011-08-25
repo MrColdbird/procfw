@@ -755,12 +755,12 @@ static int display_game(struct MenuEntry* entry, char *buf, int size)
 
 struct ValueOption g_xmb_clock_option = {
 	&g_xmb_clock_number,
-	0, 9,
+	0, 10,
 };
 
 struct ValueOption g_game_clock_option = {
 	&g_game_clock_number,
-	0, 9,
+	0, 10,
 };
 
 static void update_clock_config(void)

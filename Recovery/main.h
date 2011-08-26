@@ -158,6 +158,9 @@ struct Menu {
 #define DRAW_BUF (void*)(0x44000000)
 #define DISPLAY_BUF (void*)(0x44000000 + FRAME_SIZE)
 #define MAX_MENU_NUMBER_PER_PAGE (MAX_SCREEN_Y-5-2-5)
+#define MENU_MIN_BACK_COLOR 0x00
+#define MENU_MAX_BACK_COLOR 0x40
+#define MENU_BACK_COLOR_HALFTIME 1
 
 #define printf pspDebugScreenPrintf
 

@@ -36,6 +36,7 @@
 
 static char g_bottom_info[MAX_SCREEN_X+1];
 static int g_bottom_info_color;
+static int g_frame_count = 0;
 
 static void set_screen_xy(int x, int y)
 {
@@ -67,6 +68,39 @@ static void draw_bottom_line(void)
 	for(i=0; i<MAX_SCREEN_X; ++i) {
 		write_string_with_color("*", 0xFF);
 	}
+}
+
+static void set_line_backcolor(int x, int y, int color)
+{
+	int i;
+
+	pspDebugScreenSetBackColor(color);
+	pspDebugScreenSetXY(0, y);
+	pspDebugScreenEnableBackColor(1);
+
+	for(i=0; i<MAX_SCREEN_X; ++i) {
+		pspDebugScreenPrintf(" ");
+	}
+
+	pspDebugScreenEnableBackColor(0);
+	pspDebugScreenSetXY(x, y);
+}
+
+static int get_back_color(int frame_count)
+{
+	int color = 0;
+	int speed = ((MENU_MAX_BACK_COLOR - MENU_MIN_BACK_COLOR) / 60 / MENU_BACK_COLOR_HALFTIME);
+	int half_time_frame = 60 * MENU_BACK_COLOR_HALFTIME;
+
+	if(frame_count < half_time_frame) {
+		color = MENU_MIN_BACK_COLOR + frame_count * speed;
+	} else {
+		color = MENU_MAX_BACK_COLOR - (frame_count - half_time_frame) * speed;
+	}
+
+	color = (color) | (color << 8) | (color << 16);
+
+	return color;
 }
 
 static void menu_draw(struct Menu *menu)
@@ -116,6 +150,7 @@ static void menu_draw(struct Menu *menu)
 		entry = &menu->submenu[i];
 
 		if(menu->cur_sel == i+1) {
+			set_line_backcolor(x, y, get_back_color(g_frame_count % (60 * 2 * MENU_BACK_COLOR_HALFTIME)));
 			color = CUR_SEL_COLOR;
 			strcpy(buf, "> ");
 		} else {
@@ -301,6 +336,7 @@ void menu_loop(struct Menu *menu)
 		if(ret != 0)
 			break;
 
+		g_frame_count++;
 		frame_end();
 	}
 }

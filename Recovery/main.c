@@ -182,6 +182,7 @@ int main_thread(SceSize size, void *argp)
 	vpl_init();
 	suspend_vsh_thread();
 	pspDebugScreenInit();
+	pspDebugScreenClearLineDisable();
 	get_confirm_button();
 	main_menu();
 	recovery_exit();

@@ -34,19 +34,7 @@ OBJS = main.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
 	   ../Common/strsafe.o \
-	   setlongjmp.o \
-	   cross_fw.o
-
-IMPORTS = ../Imports/SysMemForKernel.o \
-		  ../Imports/LoadCoreForKernel.o \
-		  ../Imports/SysMemForKernel.o \
-		  ../Imports/ModuleMgrForKernel.o \
-		  ../Imports/InterruptManagerForKernel.o \
-		  ../Imports/sceResmgr_driver.o \
-		  ../Imports/InitForKernel.o \
-		  ../Imports/LoadExecForKernel.o
-
-OBJS += $(IMPORTS)
+	   setlongjmp.o
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic
@@ -91,7 +79,7 @@ USE_KERNEL_LIBS=1
 
 LIBDIR = ../libs
 LDFLAGS = -mno-crt0 -nostartfiles
-LIBS = -lpspsemaphore
+LIBS = -lpspsemaphore ../CrossFW/cross_fw.a
 
 PSPSDK=$(shell psp-config --pspsdk-path)
 include $(PSPSDK)/lib/build.mak

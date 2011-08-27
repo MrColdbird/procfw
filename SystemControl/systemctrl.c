@@ -373,3 +373,28 @@ u32 sctrlKernelRand(void)
 
 	return result;
 }
+
+int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param)
+{
+	u32 k1;
+	int ret;
+	SceModule2 *mod;
+	u32 text_addr;
+	int (*_sctrlKernelLoadExecVSHWithApitype)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, u32 unk);
+
+	k1 = pspSdkSetK1(0);
+	mod = (SceModule2*) sctrlKernelFindModuleByName("sceLoadExec");
+	text_addr = mod->text_addr;
+
+	if (psp_model == PSP_GO) {
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_05g.sctrlKernelLoadExecVSHWithApitype);
+	} else {
+		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_other.sctrlKernelLoadExecVSHWithApitype);
+	}
+
+	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
+
+	pspSdkSetK1(k1);
+
+	return ret;
+}

@@ -25,15 +25,12 @@
 #include <pspcrypt.h>
 #include <stdio.h>
 #include <string.h>
-#include "main.h"
 #include "utils.h"
 #include "systemctrl.h"
-#include "systemctrl_se.h"
 #include "printk.h"
-#include "nid_resolver.h"
-#include "strsafe.h"
-#include "systemctrl_patch_offset.h"
-#include "rebootex_conf.h"
+
+extern u32 psp_fw_version;
+extern u32 psp_model;
 
 extern u32 sceKernelGetModel_620(void);
 extern u32 sceKernelDevkitVersion_620(void);
@@ -456,31 +453,6 @@ void* sctrlKernelGetBlockHeadAddr(SceUID blockid)
 #endif
 	};
 	
-	pspSdkSetK1(k1);
-
-	return ret;
-}
-
-int sctrlKernelLoadExecVSHWithApitype(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param)
-{
-	u32 k1;
-	int ret;
-	SceModule2 *mod;
-	u32 text_addr;
-	int (*_sctrlKernelLoadExecVSHWithApitype)(int apitype, const char *file, struct SceKernelLoadExecVSHParam *param, u32 unk);
-
-	k1 = pspSdkSetK1(0);
-	mod = (SceModule2*) sctrlKernelFindModuleByName("sceLoadExec");
-	text_addr = mod->text_addr;
-
-	if (psp_model == PSP_GO) {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_05g.sctrlKernelLoadExecVSHWithApitype);
-	} else {
-		_sctrlKernelLoadExecVSHWithApitype = (void*)(text_addr + g_offs->loadexec_patch_other.sctrlKernelLoadExecVSHWithApitype);
-	}
-
-	ret = _sctrlKernelLoadExecVSHWithApitype(apitype, file, param, 0x10000);
-
 	pspSdkSetK1(k1);
 
 	return ret;

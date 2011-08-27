@@ -26,6 +26,7 @@
 #include "../Rebootex_bin/rebootex.h"
 #include "../PXE/Launcher/launcher_patch_offset.h"
 #include "rebootex_conf.h"
+#include "../CrossFw/cross_fw.h"
 
 u32 psp_model;
 u32 psp_fw_version;

@@ -331,11 +331,6 @@ void sctrlHENSetSpeed(int cpu, int bus);
 */
 int sctrlHENSetMemory(u32 p2, u32 p8);
 
-u32 sctrlKernelGetModel(void);
-u32 sctrlKernelDevkitVersion(void);
-SceModule* sctrlKernelFindModuleByName(char *modname);
-int sctrlKernelCheckExecFile(unsigned char * buffer, int * check);
-int sctrlKernelLoadModule(const char *path, int flags, SceKernelLMOption *option);
-int sctrlKernelStartModule(SceUID modid, SceSize argsize, void *argp, int *status, SceKernelSMOption *option);
+#include "../../CrossFW/cross_fw.h"
 
 #endif

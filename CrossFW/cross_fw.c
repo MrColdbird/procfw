@@ -28,6 +28,7 @@
 #include "utils.h"
 #include "systemctrl.h"
 #include "printk.h"
+#include "cross_fw.h"
 
 extern u32 psp_fw_version;
 extern u32 psp_model;

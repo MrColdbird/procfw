@@ -1,5 +1,5 @@
 TARGET = Rebootex
-OBJS = main.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o imports.o
+OBJS = main.o ../PXE/Launcher/launcher_patch_offset.o ../Common/utils.o
 
 CFLAGS = -Os -G0 -Wall -I ../Common -I ../include
 
@@ -24,7 +24,7 @@ PSP_FW_VERSION = 660
 endif
 
 LDFLAGS = -mno-crt0 -nostartfiles -L ../libs
-LIBS += -lpspsystemctrl_kernel -lpspkubridge
+LIBS += -lpspkubridge ../CrossFW/cross_fw.a
 
 BUILD_PRX=1
 USE_KERNEL_LIBS=1

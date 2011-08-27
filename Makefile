@@ -19,6 +19,7 @@ PERMANENT = Permanent
 CIPL = CIPL
 CIPL_INSTALLER = CIPL_installer
 USBDEVICE=usbdevice
+CROSSFW = CrossFW
 DISTRIBUTE = dist
 OPT_FLAGS=-j4
 
@@ -65,6 +66,9 @@ ifeq ($(CONFIG_660), 1)
 	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
 endif
 	@rm -f ./Common/*.o
+
+# Creating CrossFW library
+	@cd $(CROSSFW); make $(OPT_FLAGS) $(DEBUG_OPTION)
 
 # Creating Live-System Reboot Buffer
 	@cd $(REBOOTEXBIN); make $(OPT_FLAGS)
@@ -118,6 +122,7 @@ endif
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)
+	@cd $(CROSSFW); make clean $(DEBUG_OPTION)
 	@cd $(REBOOTEX); make clean $(DEBUG_OPTION)
 	@cd $(INSTALLER); make clean $(DEBUG_OPTION)
 	@cd $(VSHCONTROL); make clean $(DEBUG_OPTION)

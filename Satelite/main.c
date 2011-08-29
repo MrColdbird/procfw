@@ -277,22 +277,39 @@ static void launch_umdvideo_mount(void)
 	sctrlKernelExitVSH(NULL);
 }
 
+char g_cur_font_select[256];
+
+int load_recovery_font_select(void)
+{
+	SceUID fd;
+
+	g_cur_font_select[0] = '\0';
+	fd = sceIoOpen("ef0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		fd = sceIoOpen("ms0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
+
+		if(fd < 0) {
+			return fd;
+		}
+	}
+
+	sceIoRead(fd, g_cur_font_select, sizeof(g_cur_font_select));
+	sceIoClose(fd);
+
+	return 0;
+}
+
 int TSRThread(SceSize args, void *argp)
 {
 	sceKernelChangeThreadPriority(0, 8);
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
-	if(psp_model == PSP_GO) {
-		int ret;
+	load_recovery_font_select();
 
-		ret = load_external_font("ef0:/seplugins/font_recovery.bin");
-
-		if(ret < 0) {
-			load_external_font("ms0:/seplugins/font_recovery.bin");
-		}
-	} else {
-		load_external_font("ms0:/seplugins/font_recovery.bin");
+	if(g_cur_font_select[0] != '\0') {
+		load_external_font(g_cur_font_select);
 	}
 
 	umdvideolist_init(&g_umdlist);

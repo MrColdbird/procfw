@@ -162,7 +162,7 @@ struct Menu {
 #define MENU_MAX_BACK_COLOR 0x40
 #define MENU_BACK_COLOR_HALFTIME 1
 
-#define printf pspDebugScreenPrintf
+#define printf proDebugScreenPrintf
 
 #define RECOVERY_EBOOT_PATH "ms0:/PSP/GAME/RECOVERY/EBOOT.PBP"
 #define RECOVERY_EBOOT_PATH_EF0 "ef0:/PSP/GAME/RECOVERY/EBOOT.PBP"

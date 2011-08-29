@@ -23,6 +23,9 @@
 //#define ALPHA_BLEND 1
 
 extern unsigned char msx[];
+static unsigned char *g_cur_font = msx;
+
+static SceUID g_memid = -1;
 
 /////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////
@@ -104,7 +107,7 @@ int blit_string(int sx,int sy,const char *msg)
 		for(y=0;y<8;y++)
 		{
 			offset = (sy+y)*bufferwidth + sx+x*8;
-			font = y>=7 ? 0x00 : msx[ code*8 + y ];
+			font = y>=7 ? 0x00 : g_cur_font[ code*8 + y ];
 			for(p=0;p<8;p++)
 			{
 				col = (font & 0x80) ? fg_col : bg_col;
@@ -153,4 +156,60 @@ int blit_string_ctr(int sy,const char *msg)
 #endif
 
 	return blit_string(sx,sy,msg);
+}
+
+int load_external_font(const char *file)
+{
+	SceUID fd;
+	size_t f_si;
+	int ret;
+	void *buf;
+
+	fd = sceIoOpen(file, PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		return fd;
+	}
+
+	sceIoLseek(fd, 0, PSP_SEEK_END);
+	f_si = sceIoLseek(fd, 0, PSP_SEEK_CUR);
+	sceIoLseek(fd, 0, PSP_SEEK_SET);
+
+	g_memid = sceKernelAllocPartitionMemory(2, "proDebugScreenFontBuffer", PSP_SMEM_High, f_si, NULL);
+
+	if(g_memid < 0) {
+		sceIoClose(fd);
+		return g_memid;
+	}
+
+	buf = sceKernelGetBlockHeadAddr(g_memid);
+
+	if(buf == NULL) {
+		sceKernelFreePartitionMemory(g_memid);
+		sceIoClose(fd);
+		return -2;
+	}
+
+	ret = sceIoRead(fd, buf, f_si);
+
+	if(ret != f_si) {
+		sceKernelFreePartitionMemory(g_memid);
+		sceIoClose(fd);
+		return -3;
+	}
+
+	sceIoClose(fd);
+	g_cur_font = buf;
+
+	return 0;
+}
+
+void release_font(void)
+{
+	if(g_memid >= 0) {
+		sceKernelFreePartitionMemory(g_memid);
+		g_memid = -1;
+	}
+
+	g_cur_font = msx;
 }

@@ -20,7 +20,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pspsdk.h>
-#include <pspdebug.h>
 #include <pspkernel.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
@@ -32,6 +31,7 @@
 #include "vshctrl.h"
 #include "utils.h"
 #include "vpl.h"
+#include "prodebug.h"
 #include "main.h"
 
 static char g_bottom_info[MAX_SCREEN_X+1];
@@ -40,17 +40,17 @@ static int g_frame_count = 0;
 
 static void set_screen_xy(int x, int y)
 {
-	pspDebugScreenSetXY(x, y);
+	proDebugScreenSetXY(x, y);
 }
 
 static void write_string_with_color(const char *str, int color)
 {
 	if(color != 0) {
-		pspDebugScreenSetTextColor(color);
+		proDebugScreenSetTextColor(color);
 	}
 	
 	printf(str);
-	pspDebugScreenSetTextColor(0xFFFFFFFF);
+	proDebugScreenSetTextColor(0xFFFFFFFF);
 }
 
 static void write_bottom_info(void)
@@ -74,16 +74,16 @@ static void set_line_backcolor(int x, int y, int color)
 {
 	int i;
 
-	pspDebugScreenSetBackColor(color);
-	pspDebugScreenSetXY(0, y);
-	pspDebugScreenEnableBackColor(1);
+	proDebugScreenSetBackColor(color);
+	proDebugScreenSetXY(0, y);
+	proDebugScreenEnableBackColor(1);
 
 	for(i=0; i<MAX_SCREEN_X; ++i) {
-		pspDebugScreenPrintf(" ");
+		proDebugScreenPrintf(" ");
 	}
 
-	pspDebugScreenEnableBackColor(0);
-	pspDebugScreenSetXY(x, y);
+	proDebugScreenEnableBackColor(0);
+	proDebugScreenSetXY(x, y);
 }
 
 static int get_back_color(int frame_count)
@@ -313,7 +313,7 @@ void frame_start(void)
 {
 	scePowerTick(0);
 	sceDisplayWaitVblank();
-	pspDebugScreenSetOffset((int)get_drawing_buffer() - 0x44000000);
+	proDebugScreenSetOffset((int)get_drawing_buffer() - 0x44000000);
 	memset(get_drawing_buffer(), 0, 512*272*4);
 }
 

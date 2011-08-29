@@ -31,6 +31,7 @@
 #include "systemctrl_se.h"
 #include "kubridge.h"
 #include "vpl.h"
+#include "blit.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -282,6 +283,18 @@ int TSRThread(SceSize args, void *argp)
 	vctrlVSHRegisterVshMenu(EatKey);
 	sctrlSEGetConfig(&cnf);
 
+	if(psp_model == PSP_GO) {
+		int ret;
+
+		ret = load_external_font("ef0:/seplugins/font_recovery.bin");
+
+		if(ret < 0) {
+			load_external_font("ms0:/seplugins/font_recovery.bin");
+		}
+	} else {
+		load_external_font("ms0:/seplugins/font_recovery.bin");
+	}
+
 	umdvideolist_init(&g_umdlist);
 	umdvideolist_clear(&g_umdlist);
 	get_umdvideo(&g_umdlist, "ms0:/ISO/VIDEO");
@@ -355,6 +368,7 @@ int TSRThread(SceSize args, void *argp)
 	vpl_finish();
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);
+	release_font();
 
 	return sceKernelExitDeleteThread(0);
 }

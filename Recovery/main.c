@@ -20,18 +20,19 @@
 #include <stdlib.h>
 #include <time.h>
 #include <pspsdk.h>
-#include <pspdebug.h>
 #include <pspkernel.h>
 #include <pspctrl.h>
 #include <pspdisplay.h>
 #include <psputility.h>
 
 #include "systemctrl.h"
+#include "prodebug.h"
 #include "systemctrl_se.h"
 #include "vshctrl.h"
 #include "utils.h"
 #include "vpl.h"
 #include "main.h"
+#include "kubridge.h"
 
 PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
@@ -156,6 +157,7 @@ void *get_display_buffer(void)
 
 void recovery_exit(void)
 {
+	proDebugScreenReleaseFont();
 	exit_usb();
 
 	if(no_vsh) {
@@ -177,6 +179,7 @@ void recovery_exit(void)
 int main_thread(SceSize size, void *argp)
 {
 	int thid;
+	u32 psp_model;
 
 	thid = get_thread_id("SCE_VSH_GRAPHICS");
 
@@ -187,8 +190,22 @@ int main_thread(SceSize size, void *argp)
 	sctrlSEGetConfig(&g_config);
 	vpl_init();
 	suspend_vsh_thread();
-	pspDebugScreenInit();
-	pspDebugScreenClearLineDisable();
+	proDebugScreenInit();
+	psp_model = kuKernelGetModel();
+
+	if(psp_model == PSP_GO) {
+		int ret;
+
+		ret = proDebugScreenSetFontFile("ef0:/seplugins/font_recovery.bin", 1);
+
+		if(ret < 0) {
+			proDebugScreenSetFontFile("ms0:/seplugins/font_recovery.bin", 1);
+		}
+	} else {
+		proDebugScreenSetFontFile("ms0:/seplugins/font_recovery.bin", 1);
+	}
+
+	proDebugScreenClearLineDisable();
 	get_confirm_button();
 	main_menu();
 	recovery_exit();

@@ -33,6 +33,7 @@
 #include "vpl.h"
 #include "main.h"
 #include "kubridge.h"
+#include "font_list.h"
 
 PSP_MODULE_INFO("Recovery", 0, 1, 2);
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
@@ -157,6 +158,8 @@ void *get_display_buffer(void)
 
 void recovery_exit(void)
 {
+	extern void save_font_select(void);
+	save_font_select();
 	proDebugScreenReleaseFont();
 	exit_usb();
 
@@ -176,6 +179,83 @@ void recovery_exit(void)
 	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 }
 
+FontList g_font_list;
+
+static int get_fontlist(FontList *list, char *path)
+{
+	SceIoDirent dir;
+	int result = 0, dfd;
+	char fullpath[256];
+
+	memset(&dir, 0, sizeof(dir));
+	dfd = sceIoDopen(path);
+
+	if(dfd < 0) {
+		return dfd;
+	}
+
+	while (sceIoDread(dfd, &dir) > 0) {
+		const char *p;
+
+		p = strrchr(dir.d_name, '.');
+
+		if(p == NULL)
+			p = dir.d_name;
+
+		if(0 == stricmp(p, ".bin") || 0 == stricmp(p, ".pf")) {
+			sprintf(fullpath, "%s/%s", path, dir.d_name);
+			fontlist_add(list, fullpath);
+		}
+	}
+
+	sceIoDclose(dfd);
+
+	return result;
+}
+
+char g_cur_font_select[256];
+
+int load_recovery_font_select(void)
+{
+	SceUID fd;
+
+	g_cur_font_select[0] = '\0';
+	fd = sceIoOpen("ef0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
+
+	if(fd < 0) {
+		fd = sceIoOpen("ms0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
+
+		if(fd < 0) {
+			return fd;
+		}
+	}
+
+	sceIoRead(fd, g_cur_font_select, sizeof(g_cur_font_select));
+	sceIoClose(fd);
+
+	return 0;
+}
+
+int save_recovery_font_select(void)
+{
+	SceUID fd;
+
+	fd = sceIoOpen("ef0:/seplugins/font_recovery.txt", PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
+
+	if(fd < 0) {
+		fd = sceIoOpen("ms0:/seplugins/font_recovery.txt",  PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
+
+		if(fd < 0) {
+			return fd;
+		}
+	}
+
+	sceIoWrite(fd, g_cur_font_select, strlen(g_cur_font_select));
+	sceIoClose(fd);
+
+	return 0;
+}
+
 int main_thread(SceSize size, void *argp)
 {
 	int thid;
@@ -193,16 +273,13 @@ int main_thread(SceSize size, void *argp)
 	proDebugScreenInit();
 	psp_model = kuKernelGetModel();
 
-	if(psp_model == PSP_GO) {
-		int ret;
+	fontlist_init(&g_font_list);
+	get_fontlist(&g_font_list, "ms0:/seplugins/fonts");
+	get_fontlist(&g_font_list, "ef0:/seplugins/fonts");
+	load_recovery_font_select();
 
-		ret = proDebugScreenSetFontFile("ef0:/seplugins/font_recovery.bin", 1);
-
-		if(ret < 0) {
-			proDebugScreenSetFontFile("ms0:/seplugins/font_recovery.bin", 1);
-		}
-	} else {
-		proDebugScreenSetFontFile("ms0:/seplugins/font_recovery.bin", 1);
+	if(g_cur_font_select[0] != '\0') {
+		proDebugScreenSetFontFile(g_cur_font_select, 1);
 	}
 
 	proDebugScreenClearLineDisable();

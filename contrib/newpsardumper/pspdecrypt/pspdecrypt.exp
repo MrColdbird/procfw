@@ -1,0 +1,33 @@
+# Define the exports for the prx
+PSP_BEGIN_EXPORTS
+
+# These four lines are mandatory (although you can add other functions like module_stop)
+# syslib is a psynonym for the single mandatory export.
+PSP_EXPORT_START(syslib, 0, 0x8000)
+PSP_EXPORT_FUNC_HASH(module_start)
+PSP_EXPORT_VAR_HASH(module_info)
+PSP_EXPORT_END
+
+PSP_EXPORT_START(pspDecrypt, 0, 0x4001)
+PSP_EXPORT_FUNC_HASH(pspDecryptPRX)
+PSP_EXPORT_FUNC_HASH(pspSignCheck)
+PSP_EXPORT_FUNC_HASH(pspUnsignCheck)
+PSP_EXPORT_FUNC_HASH(pspDecryptIPL1)
+PSP_EXPORT_FUNC_HASH(pspLinearizeIPL2)
+PSP_EXPORT_FUNC_HASH(pspDecryptIPL3)
+PSP_EXPORT_FUNC_HASH(pspDecompress)
+PSP_EXPORT_FUNC_HASH(pspDecryptTable)
+PSP_EXPORT_END
+
+PSP_EXPORT_START(pspDecrypt_driver, 0, 0x0001)
+PSP_EXPORT_FUNC_HASH(pspDecryptPRX)
+PSP_EXPORT_FUNC_HASH(pspSignCheck)
+PSP_EXPORT_FUNC_HASH(pspUnsignCheck)
+PSP_EXPORT_FUNC_HASH(pspDecryptIPL1)
+PSP_EXPORT_FUNC_HASH(pspLinearizeIPL2)
+PSP_EXPORT_FUNC_HASH(pspDecryptIPL3)
+PSP_EXPORT_FUNC_HASH(pspDecompress)
+PSP_EXPORT_FUNC_HASH(pspDecryptTable)
+PSP_EXPORT_END
+
+PSP_END_EXPORTS

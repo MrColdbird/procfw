@@ -490,6 +490,7 @@ void* sceGeEdramGetAddr(void)
 
 static void proDebugScreenSetFont(u8 *font)
 {
+	proDebugScreenReleaseFont();
 	g_cur_font = font;
 }
 
@@ -523,6 +524,7 @@ int proDebugScreenSetFontFile(const char *file, int is_user)
 
 	if(buf == NULL) {
 		sceKernelFreePartitionMemory(g_memid);
+		g_memid = -1;
 		sceIoClose(fd);
 		return -2;
 	}
@@ -531,6 +533,7 @@ int proDebugScreenSetFontFile(const char *file, int is_user)
 
 	if(ret != f_si) {
 		sceKernelFreePartitionMemory(g_memid);
+		g_memid = -1;
 		sceIoClose(fd);
 		return -3;
 	}

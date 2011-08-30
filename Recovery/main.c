@@ -156,10 +156,13 @@ void *get_display_buffer(void)
 	return buffer;
 }
 
+FontList g_font_list;
+
 void recovery_exit(void)
 {
 	extern void save_font_select(void);
 	save_font_select();
+	fontlist_clear(&g_font_list);
 	proDebugScreenReleaseFont();
 	exit_usb();
 
@@ -178,8 +181,6 @@ void recovery_exit(void)
 
 	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
 }
-
-FontList g_font_list;
 
 static int get_fontlist(FontList *list, char *path)
 {

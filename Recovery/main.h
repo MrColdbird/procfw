@@ -21,7 +21,7 @@
 #include "config.h"
 
 enum {
-	PRO_RECOVERY_MENU,
+	PRO_RECOVERY_MENU = 0,
 	MAIN_MENU,
 	ENTERING,
 	EXITING,
@@ -117,6 +117,7 @@ enum {
 	CHINA,
 	DEBUG_TYPE_I,
 	DEBUG_TYPE_II,
+	MSG_END,
 };
 
 extern const char ** g_messages;

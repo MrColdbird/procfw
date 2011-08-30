@@ -316,7 +316,8 @@ int iso_cache_read(struct IoReadArg *arg)
 	} else {
 		// we have to sleep a bit to prevent mystery freeze in KHBBS (from worldmap to location)
 		// it's caused by caching too fast 
-		sceKernelDelayThread(100);
+		// tested NFS Carbon: Own the city, seems delaying 100 wasn't enough...
+		sceKernelDelayThread(500);
 	}
 
 	read_call += len;

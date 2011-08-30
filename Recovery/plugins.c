@@ -323,6 +323,7 @@ static void create_submenu(struct MenuEntry *entry, struct Plugin *head)
 	plugin = head->next;
 
 	while(plugin != NULL) {
+		entry->info_idx = -1;
 		entry->display_callback = &display_callback;
 		entry->change_value_callback = &change_value_callback;
 		entry->enter_callback = &enter_callback;

@@ -134,7 +134,6 @@ enum {
 };
 
 struct MenuEntry {
-//	const char **info;
 	int info_idx;
 	int type;
 	int color;
@@ -151,7 +150,6 @@ struct ValueOption {
 };
 
 struct Menu {
-//	const char **banner;
 	int banner_id;
 	struct MenuEntry *submenu;
 	int submenu_size;

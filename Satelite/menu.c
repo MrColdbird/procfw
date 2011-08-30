@@ -22,6 +22,8 @@
 
 #include "common.h"
 
+const char **g_messages = g_messages_en;
+
 void change_clock(int dir, int a);
 
 extern int pwidth;
@@ -31,20 +33,7 @@ extern SEConfig cnf;
 char freq_buf[3+3+2] = "";
 char freq2_buf[3+3+2] = "";
 char device_buf[13] = "";
-const char str_default[] = "Default";
 char umdvideo_path[256] = "";
-
-const char * enable_disable[] ={
-	"Disable",
-	"Enable",
-};
-
-const char *iso[]={
-	"Normal",
-	"M33 driver",
-	"Sony NP9660",
-	"Inferno",
-};
 
 #define TMENU_MAX 11
 
@@ -69,29 +58,6 @@ enum{
 	TMENU_RESET_DEVICE,
 	TMENU_RESET_VSH,
 	TMENU_EXIT
-};
-
-const char *top_menu_list[TMENU_MAX] ={
-	"CPU CLOCK XMB  ",
-	"CPU CLOCK GAME ",
-	"USB DEVICE     ",
-	"UMD ISO MODE   ",
-	"ISO VIDEO MOUNT",
-//	"XMB  PLUGINS   ",
-//	"GAME PLUGINS   ",
-//	"POPS PLUGINS   ",
-	"RECOVERY MENU  ->",
-//	"USB CHARGE     ",
-//	"HIDE MAC       ",
-//	"SKIP GAMEBOOT  ",
-//	"HIDE PIC       ",
-//	"FLASH PROTECT  ",
-//	"FAKE REGION    ",
-	"SHUTDOWN DEVICE",
-	"SUSPEND DEVICE",
-	"RESET DEVICE",
-	"RESET VSH",
-	"EXIT",
 };
 
 int item_fcolor[TMENU_MAX];
@@ -121,14 +87,14 @@ int menu_draw(void)
 
 	// show menu list
 	blit_set_color(0xffffff,0x8000ff00);
-	blit_string(pointer[0], pointer[1], "PRO VSH MENU");
+	blit_string(pointer[0], pointer[1], g_messages[MSG_PRO_VSH_MENU]);
 
 	for(max_menu=0;max_menu<TMENU_MAX;max_menu++) {
 		fc = 0xffffff;
 		bc = (max_menu==menu_sel) ? 0xff8080 : 0xc00000ff;
 		blit_set_color(fc,bc);
 
-		msg = top_menu_list[max_menu];
+		msg = g_messages[MSG_CPU_CLOCK_XMB + max_menu];
 
 		if(msg) {
 			switch(max_menu) {
@@ -173,7 +139,11 @@ int menu_draw(void)
 
 static inline const char *get_enable_disable(int opt)
 {
-	return enable_disable[opt != 0 ? 1 : 0];
+	if(opt) {
+		return g_messages[MSG_ENABLE];
+	}
+
+	return g_messages[MSG_DISABLE];
 }
 
 int menu_setup(void)
@@ -213,7 +183,7 @@ int menu_setup(void)
 		
 		bridge = freq_buf;
 	} else {
-		bridge = str_default;
+		bridge = g_messages[MSG_DEFAULT];
 	}
 
 	item_str[TMENU_XMB_CLOCK] = bridge;
@@ -242,7 +212,7 @@ int menu_setup(void)
 		
 		bridge = freq2_buf;
 	} else {
-		bridge = str_default;
+		bridge = g_messages[MSG_DEFAULT];
 	}
 
 	item_str[TMENU_GAME_CLOCK] = bridge;
@@ -251,32 +221,32 @@ int menu_setup(void)
 	if((cnf.usbdevice>0) && (cnf.usbdevice<5)) {
 #ifdef CONFIG_639
 		if(psp_fw_version == FW_639)
-			scePaf_sprintf(device_buf, "Flash %d", cnf.usbdevice-1);	
+			scePaf_sprintf(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 
 #ifdef CONFIG_635
 		if(psp_fw_version == FW_635)
-			scePaf_sprintf(device_buf, "Flash %d", cnf.usbdevice-1);	
+			scePaf_sprintf(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 
 #ifdef CONFIG_620
 		if (psp_fw_version == FW_620)
-			scePaf_sprintf_620(device_buf, "Flash %d", cnf.usbdevice-1);	
+			scePaf_sprintf_620(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 
 #ifdef CONFIG_660
 		if (psp_fw_version == FW_660)
-			scePaf_sprintf_660(device_buf, "Flash %d", cnf.usbdevice-1);	
+			scePaf_sprintf_660(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 
 		bridge = device_buf;
 	} else {
-		char *device;
+		const char *device;
 
 		if(cnf.usbdevice==5)
-			device="UMD Disc";
+			device= g_messages[MSG_UMD_DISC];
 		else
-			device="Memory Stick";
+			device= g_messages[MSG_MEMORY_STICK];
 
 		bridge = device;
 	}
@@ -291,8 +261,19 @@ int menu_setup(void)
 
 	item_str[TMENU_UMD_VIDEO] = umdvideo_disp;
 	item_str[TMENU_USB_DEVICE] = bridge;
-	item_str[TMENU_UMD_MODE] = iso[(int)cnf.umdmode];
-	
+
+	switch(cnf.umdmode) {
+		case MODE_MARCH33:
+			item_str[TMENU_UMD_MODE] = g_messages[MSG_MARCH33];
+			break;
+		case MODE_NP9660:
+			item_str[TMENU_UMD_MODE] = g_messages[MSG_NP9660];
+			break;
+		case MODE_INFERNO:
+			item_str[TMENU_UMD_MODE] = g_messages[MSG_INFERNO];
+			break;
+	}
+
 	return 0;
 }
 
@@ -355,7 +336,7 @@ int menu_ctrl(u32 button_on)
 					}
 				} else {
 none:
-					strcpy(umdvideo_path, "None");
+					strcpy(umdvideo_path, g_messages[MSG_NONE]);
 				}
 			} else {
 				return 7; // Mount UMDVideo ISO flag

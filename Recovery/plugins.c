@@ -59,7 +59,7 @@ static int plugins_ms0_menu(struct MenuEntry *entry);
 static int g_type;
 
 static struct Menu g_plugins_menu = {
-	&g_messages[PLUGINS],
+	PLUGINS,
 	NULL,
 	0,
 	0,
@@ -386,8 +386,8 @@ static void create_submenus(struct Menu *menu)
 }
 
 static struct MenuEntry g_plugins_pspgo[] = {
-	{ &g_messages[SYSTEM_STORAGE], 1, 0, NULL, NULL, &plugins_ef0_menu, NULL},
-	{ &g_messages[MEMORY_STICK], 1, 0, NULL, NULL, &plugins_ms0_menu, NULL},
+	{ SYSTEM_STORAGE, 1, 0, NULL, NULL, &plugins_ef0_menu, NULL},
+	{ MEMORY_STICK, 1, 0, NULL, NULL, &plugins_ms0_menu, NULL},
 };
 
 int init_plugin_list(void)
@@ -432,7 +432,7 @@ static void free_plugin_lists(void)
 }
 
 static struct Menu g_ef0_plugins_menu = {
-	&g_messages[PLUGINS_ON_SYSTEM_STORAGE],
+	PLUGINS_ON_SYSTEM_STORAGE,
 	NULL,
 	0,
 	0,
@@ -440,7 +440,7 @@ static struct Menu g_ef0_plugins_menu = {
 };
 
 static struct Menu g_ms0_plugins_menu = {
-	&g_messages[PLUGINS_ON_MEMORY_STICK],
+	PLUGINS_ON_MEMORY_STICK,
 	NULL,
 	0,
 	0,

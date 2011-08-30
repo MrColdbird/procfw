@@ -60,6 +60,7 @@ const char * g_messages[] = {
 	"USB Disabled",
 	"Configuration",
 	"Fake Region",
+	"Recovery Font",
 	"ISO Mode",
 	"XMB USB Device",
 	"Flash 0",
@@ -318,27 +319,36 @@ static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 
 extern FontList g_font_list;
 
-static int display_recovery_font(struct MenuEntry* entry, char *buf, int size)
+static const char *get_recovery_fontname(size_t idx)
 {
-	char *fontname, *p;
-
-	if(g_font_cur_sel == 0) {
+	char *fontname;
+	
+	if(idx == 0) {
 		fontname = "Default";
 	} else {
-		fontname = fontlist_get(&g_font_list, (size_t)(g_font_cur_sel - 1));
+		fontname = fontlist_get(&g_font_list, idx - 1);
 
 		if(fontname == NULL) {
-			fontname = "FIXME";
-		}
-
-		p = strrchr(fontname, '/');
-
-		if(p != NULL) {
-			fontname = p + 1;
+			fontname = "Default";
 		}
 	}
 
-	sprintf(buf, "%-48s %-11s", "Recovery Font", fontname);
+	return fontname;
+}
+
+static int display_recovery_font(struct MenuEntry* entry, char *buf, int size)
+{
+	const char *fontname;
+	const char *p;
+
+	fontname = get_recovery_fontname((size_t)(g_font_cur_sel));
+	p = strrchr(fontname, '/');
+
+	if(p != NULL) {
+		fontname = p + 1;
+	}
+
+	sprintf(buf, "%-48s %-11s", g_messages[RECOVERY_FONT], fontname);
 
 	return 0;
 }
@@ -346,23 +356,22 @@ static int display_recovery_font(struct MenuEntry* entry, char *buf, int size)
 static int change_font_select_option(struct MenuEntry *entry, int direct)
 {
 	struct ValueOption *c = (struct ValueOption*)entry->arg;
-	char *fontname;
+	const char *fontname;
 
 	*c->value -= c->limit_start;
 	*c->value = limit_int(*c->value, direct, c->limit_end - c->limit_start);
 	*c->value += c->limit_start;
 
-	if(*c->value == 0) {
+	fontname = get_recovery_fontname((size_t)(g_font_cur_sel));
+
+	if(0 == strcmp(fontname, "Default")) {
+		fontname = "";
 		proDebugScreenReleaseFont();
 	} else {
-		fontname = fontlist_get(&g_font_list, (size_t)(*c->value - 1));
-
-		if(fontname == NULL) {
-			proDebugScreenReleaseFont();
-		} else {
-			proDebugScreenSetFontFile(fontname, 1);
-		}
+		proDebugScreenSetFontFile(fontname, 1);
 	}
+
+	strcpy(g_cur_font_select, fontname);
 
 	return 0;
 }
@@ -469,6 +478,7 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
+	{ NULL, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
 	{ NULL, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
@@ -482,7 +492,6 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
 	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option },
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
-	{ NULL, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
 };
 
 static struct Menu g_configuration_menu = {
@@ -789,26 +798,6 @@ static struct Menu g_top_menu = {
 
 extern char g_cur_font_select[256];
 
-void save_font_select(void)
-{
-	if(g_font_cur_sel == 0) {
-		g_cur_font_select[0] = '\0';
-	} else {
-		char *fontname;
-
-		fontname = fontlist_get(&g_font_list, (size_t)(g_font_cur_sel - 1));
-
-		if(fontname == NULL) {
-			g_cur_font_select[0] = '\0';
-		} else {
-			strcpy(g_cur_font_select, fontname);
-		}
-	}
-
-	extern int save_recovery_font_select(void);
-	save_recovery_font_select();
-}
-
 static int configuration_menu(struct MenuEntry *entry)
 {
 	struct Menu *menu = &g_configuration_menu;
@@ -816,7 +805,7 @@ static int configuration_menu(struct MenuEntry *entry)
 	menu->cur_sel = 0;
 	menu_loop(menu);
 
-	save_font_select();
+	save_recovery_font_select();
 	sctrlSESetConfig(&g_config);
 
 	return 0;

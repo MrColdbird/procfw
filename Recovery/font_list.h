@@ -35,4 +35,8 @@ void fontlist_clear(FontList *list);
 int fontlist_find(FontList *list, const char *search);
 void fontlist_init(FontList *list);
 
+extern char g_cur_font_select[256];
+int load_recovery_font_select(void);
+int save_recovery_font_select(void);
+
 #endif

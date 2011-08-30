@@ -46,7 +46,7 @@ void proDebugScreenInitEx(void *vram_base, int mode, int setup);
   * @param fmt - Format string to print
   * @param ... - Arguments
   */
-void proDebugScreenPrintf(const char *fmt, ...) __attribute__((format(printf,1,2)));
+void proDebugScreenPrintf(const char *fmt, ...); //__attribute__((format(printf,1,2)));
 
 /**
   * Do a printf to the debug screen.
@@ -57,7 +57,7 @@ void proDebugScreenPrintf(const char *fmt, ...) __attribute__((format(printf,1,2
   * @param format - Format string to print
   * @param ... - Arguments
   */
-void proDebugScreenKprintf(const char *format, ...) __attribute__((format(printf,1,2)));
+// void proDebugScreenKprintf(const char *format, ...) __attribute__((format(printf,1,2)));
 
 /**
  * Enable or disable background colour writing (defaults to enabled)

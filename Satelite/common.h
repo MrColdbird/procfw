@@ -104,4 +104,34 @@ void umdvideolist_init(UmdVideoList *list);
 extern u32 psp_fw_version;
 extern UmdVideoList g_umdlist;
 
+enum {
+	MSG_DEFAULT = 0,
+	MSG_DISABLE,
+	MSG_ENABLE,
+	MSG_NORMAL,
+	MSG_MARCH33,
+	MSG_NP9660,
+	MSG_INFERNO,
+	MSG_CPU_CLOCK_XMB,
+	MSG_CPU_CLOCK_GAME,
+	MSG_USB_DEVICE,
+	MSG_UMD_ISO_MODE,
+	MSG_ISO_VIDEO_MOUNT,
+	MSG_RECOVERY_MENU,
+	MSG_SHUTDOWN_DEVICE,
+	MSG_SUSPEND_DEVICE,
+	MSG_RESET_DEVICE,
+	MSG_RESET_VSH,
+	MSG_EXIT,
+	MSG_PRO_VSH_MENU,
+	MSG_FLASH,
+	MSG_UMD_DISC,
+	MSG_MEMORY_STICK,
+	MSG_NONE,
+	MSG_END,
+};
+
+extern const char **g_messages;
+extern const char *g_messages_en[];
+
 #endif

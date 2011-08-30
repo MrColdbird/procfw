@@ -160,8 +160,7 @@ FontList g_font_list;
 
 void recovery_exit(void)
 {
-	extern void save_font_select(void);
-	save_font_select();
+	save_recovery_font_select();
 	fontlist_clear(&g_font_list);
 	proDebugScreenReleaseFont();
 	exit_usb();
@@ -212,49 +211,6 @@ static int get_fontlist(FontList *list, char *path)
 	sceIoDclose(dfd);
 
 	return result;
-}
-
-char g_cur_font_select[256];
-
-int load_recovery_font_select(void)
-{
-	SceUID fd;
-
-	g_cur_font_select[0] = '\0';
-	fd = sceIoOpen("ef0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
-
-	if(fd < 0) {
-		fd = sceIoOpen("ms0:/seplugins/font_recovery.txt", PSP_O_RDONLY, 0777);
-
-		if(fd < 0) {
-			return fd;
-		}
-	}
-
-	sceIoRead(fd, g_cur_font_select, sizeof(g_cur_font_select));
-	sceIoClose(fd);
-
-	return 0;
-}
-
-int save_recovery_font_select(void)
-{
-	SceUID fd;
-
-	fd = sceIoOpen("ef0:/seplugins/font_recovery.txt", PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
-
-	if(fd < 0) {
-		fd = sceIoOpen("ms0:/seplugins/font_recovery.txt",  PSP_O_WRONLY | PSP_O_TRUNC | PSP_O_CREAT, 0777);
-
-		if(fd < 0) {
-			return fd;
-		}
-	}
-
-	sceIoWrite(fd, g_cur_font_select, strlen(g_cur_font_select));
-	sceIoClose(fd);
-
-	return 0;
 }
 
 int main_thread(SceSize size, void *argp)

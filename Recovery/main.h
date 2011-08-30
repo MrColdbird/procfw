@@ -36,6 +36,10 @@ enum {
 	FAKE_REGION,
 	RECOVERY_FONT,
 	ISO_MODE,
+	NORMAL,
+	M33,
+	NP9660,
+	INFERNO,
 	XMB_USBDEVICE,
 	FLASH0,
 	FLASH1,
@@ -68,6 +72,14 @@ enum {
 	ISO_CACHE_POLICY,
 	ALLOW_NON_LATIN1_ISO_FILENAME,
 	MSSPEED_UP,
+	NONE,
+	POP,
+	GAME,
+	VSH,
+	POP_GAME,
+	GAME_VSH,
+	VSH_POP,
+	ALWAYS,
 	CPU_SPEED,
 	XMB_CPU_BUS,
 	GAME_CPU_BUS,
@@ -91,6 +103,7 @@ enum {
 	SUSPEND_DEVICE,
 	RESET_DEVICE,
 	RESET_VSH,
+	PAGE,
 	JAPAN,
 	AMERICA,
 	EUROPE,
@@ -106,7 +119,8 @@ enum {
 	DEBUG_TYPE_II,
 };
 
-extern const char * g_messages[];
+extern const char ** g_messages;
+extern const char * g_messages_en[];
 
 enum {
 	TYPE_NORMAL = 0,
@@ -120,7 +134,8 @@ enum {
 };
 
 struct MenuEntry {
-	const char **info;
+//	const char **info;
+	int info_idx;
 	int type;
 	int color;
 	int (*display_callback)(struct MenuEntry*, char *, int);
@@ -136,7 +151,8 @@ struct ValueOption {
 };
 
 struct Menu {
-	const char **banner;
+//	const char **banner;
+	int banner_id;
 	struct MenuEntry *submenu;
 	int submenu_size;
 	int cur_sel;

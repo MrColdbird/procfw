@@ -34,6 +34,8 @@
 #include "vpl.h"
 #include "main.h"
 #include "pspusbdevice.h"
+#include "font_list.h"
+#include "prodebug.h"
 
 extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
@@ -58,6 +60,7 @@ const char * g_messages[] = {
 	"USB Disabled",
 	"Configuration",
 	"Fake Region",
+	"Recovery Font",
 	"ISO Mode",
 	"XMB USB Device",
 	"Flash 0",
@@ -236,6 +239,13 @@ static struct ValueOption g_usb_charge_option = {
 	0, 2,
 };
 
+static s16 g_font_cur_sel = 0;
+
+static struct ValueOption g_recovery_font_option = {
+	&g_font_cur_sel,
+	0, 0,
+};
+
 static struct ValueOption g_slim_color_option = {
 	&g_config.slimcolor,
 	0, 2,
@@ -304,6 +314,87 @@ static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
 
+	return 0;
+}
+
+extern FontList g_font_list;
+
+static const char *get_recovery_fontname(size_t idx)
+{
+	char *fontname;
+	
+	if(idx == 0) {
+		fontname = "Default";
+	} else {
+		fontname = fontlist_get(&g_font_list, idx - 1);
+
+		if(fontname == NULL) {
+			fontname = "Default";
+		}
+	}
+
+	return fontname;
+}
+
+static int display_recovery_font(struct MenuEntry* entry, char *buf, int size)
+{
+	const char *fontname;
+	const char *p;
+
+	fontname = get_recovery_fontname((size_t)(g_font_cur_sel));
+	p = strrchr(fontname, '/');
+
+	if(p != NULL) {
+		fontname = p + 1;
+	}
+
+	sprintf(buf, "%-48s %-11s", g_messages[RECOVERY_FONT], fontname);
+
+	return 0;
+}
+
+static int change_font_select_option(struct MenuEntry *entry, int direct)
+{
+	struct ValueOption *c = (struct ValueOption*)entry->arg;
+	const char *fontname;
+
+	*c->value -= c->limit_start;
+	*c->value = limit_int(*c->value, direct, c->limit_end - c->limit_start);
+	*c->value += c->limit_start;
+
+	fontname = get_recovery_fontname((size_t)(g_font_cur_sel));
+
+	if(0 == strcmp(fontname, "Default")) {
+		fontname = "";
+		proDebugScreenReleaseFont();
+	} else {
+		proDebugScreenSetFontFile(fontname, 1);
+	}
+
+	strcpy(g_cur_font_select, fontname);
+
+	return 0;
+}
+
+static int change_font_select_option_by_enter(struct MenuEntry *entry)
+{
+	char buf[256], *p;
+	
+	change_font_select_option(entry, 1);
+	strcpy(buf, "> ");
+	p = buf + strlen(buf);
+
+	if(entry->display_callback != NULL) {
+		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
+	} else {
+		strcpy(p, *entry->info);
+	}
+
+	set_bottom_info(buf, 0);
+	frame_end();
+	sceKernelDelayThread(CHANGE_DELAY);
+	set_bottom_info("", 0);
+	
 	return 0;
 }
 
@@ -387,6 +478,7 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
 	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
+	{ NULL, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
 	{ NULL, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
 	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
 	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
@@ -398,7 +490,7 @@ static struct MenuEntry g_configuration_menu_entries[] = {
 	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
 	{ NULL, 0, 0, &display_use_usbversion, &change_option, &change_option_by_enter, &g_use_usbversion_option},
 	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
-	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option},
+	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option },
 	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
 };
 
@@ -704,12 +796,16 @@ static struct Menu g_top_menu = {
 	0xFF,
 };
 
+extern char g_cur_font_select[256];
+
 static int configuration_menu(struct MenuEntry *entry)
 {
 	struct Menu *menu = &g_configuration_menu;
 
 	menu->cur_sel = 0;
 	menu_loop(menu);
+
+	save_recovery_font_select();
 	sctrlSESetConfig(&g_config);
 
 	return 0;
@@ -899,7 +995,19 @@ static int registery_hack_menu(struct MenuEntry *entry)
 void main_menu(void)
 {
 	struct Menu *menu = &g_top_menu;
+	int idx;
+
 	(void)message_test;
+
+	// setup font list size and cur select
+	g_recovery_font_option.limit_end = (s16)fontlist_count(&g_font_list) + 1;
+	idx = fontlist_find(&g_font_list, g_cur_font_select);
+
+	if(idx == -1) {
+		g_font_cur_sel = 0;
+	} else {
+		g_font_cur_sel = idx + 1;
+	}
 	
 	menu->cur_sel = 0;
 	menu_loop(menu);

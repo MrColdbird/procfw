@@ -86,13 +86,13 @@ const char *get_iso_name(int iso_mode)
 {
 	switch(iso_mode) {
 		case MODE_UMD:
-			return "Normal";
+			return g_messages[NORMAL];
 		case MODE_MARCH33:
-			return "M33 driver";
+			return g_messages[MARCH33];
 		case MODE_NP9660:
-			return "Sony NP9660";
+			return g_messages[NP9660];
 		case MODE_INFERNO:
-			return "Inferno";
+			return g_messages[INFERNO];
 	}
 
 	return "FIXME";

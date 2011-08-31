@@ -46,93 +46,7 @@ static int registery_hack_menu(struct MenuEntry *entry);
 static int cpu_speed_menu(struct MenuEntry *entry);
 static int advanced_menu(struct MenuEntry *entry);
 
-const char * g_messages[] = {
-	"PRO Recovery Menu",
-	"Main Menu",
-	"Entering",
-	"Exiting",
-	"Back",
-	"Default",
-	"Enabled",
-	"Disabled",
-	"Toggle USB",
-	"USB Enabled",
-	"USB Disabled",
-	"Configuration",
-	"Fake Region",
-	"Recovery Font",
-	"ISO Mode",
-	"XMB USB Device",
-	"Flash 0",
-	"Flash 1",
-	"Flash 2",
-	"Flash 3",
-	"UMD Disc",
-	"Charge battery when USB cable is plugged in",
-	"Use Slim Color on PSP-1000",
-	"Use htmlviewer custom save location",
-	"Hide MAC address",
-	"Skip Sony Logo at Startup",
-	"Skip Game Boot Screen",
-	"Hide PIC0.PNG and PIC1.PNG in game menu",
-	"Protect flash in USB device mount",
-	"Use version.txt in /seplugins",
-	"Use usbversion.txt in /seplugins",
-	"Use Custom Update Server",
-	"Prevent Hibernation Deletion (PSP-Go only)",
-	"Advanced",
-	"XMB Plugin",
-	"Game Plugin",
-	"Pops Plugin",
-	"NoDRM Engine",
-	"Hide CFW Files from game",
-	"Block Analog Input in Game",
-	"Old Plugin Support (PSP-Go only)",
-	"Inferno & NP9660 Use ISO Cache",
-	"Inferno & NP9660 Cache Size(in MB)",
-	"Inferno & NP9660 Cache Number",
-	"Inferno & NP9660 Cache Policy",
-	"Allow Non-latin1 ISO Filename",
-	"Memory Stick Speedup",
-	"CPU Speed",
-	"XMB CPU/BUS",
-	"Game CPU/BUS",
-	"Plugins",
-	"System storage",
-	"Memory stick",
-	"Plugins on system storage",
-	"Plugins on memory stick",
-	"Registry hacks",
-	"WMA activated",
-	"Flash activated",
-	"Buttons swapped",
-	"Confirm Button: X",
-	"Confirm Button: O",
-	"Activate WMA",
-	"Activate Flash",
-	"Swap O/X buttons",
-	"Swap O/X buttons (needs Reset VSH to take effect)",
-	"Run /PSP/GAME/RECOVERY/EBOOT.PBP",
-	"Shutdown device",
-	"Suspend device",
-	"Reset device",
-	"Reset VSH",
-	"Japan",
-	"America",
-	"Europe",
-	"Korea",
-	"United Kingdom",
-	"Mexico",
-	"Australia",
-	"Hongkong",
-	"Taiwan",
-	"Russia",
-	"China",
-	"Debug Type I",
-	"Debug Type II",
-};
-
-static u8 message_test[NELEMS(g_messages) == DEBUG_TYPE_II + 1 ? 0 : -1];
+const char ** g_messages = g_messages_en;
 
 static int display_fake_region(struct MenuEntry* entry, char *buf, int size)
 {
@@ -178,7 +92,7 @@ static int change_option_by_enter(struct MenuEntry *entry)
 	if(entry->display_callback != NULL) {
 		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
 	} else {
-		strcpy(p, *entry->info);
+		strcpy(p, g_messages[entry->info_idx]);
 	}
 
 	set_bottom_info(buf, 0);
@@ -218,7 +132,7 @@ static int change_iso_cache_number_option_by_enter(struct MenuEntry *entry)
 	if(entry->display_callback != NULL) {
 		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
 	} else {
-		strcpy(p, *entry->info);
+		strcpy(p, g_messages[entry->info_idx]);
 	}
 
 	set_bottom_info(buf, 0);
@@ -321,15 +235,15 @@ extern FontList g_font_list;
 
 static const char *get_recovery_fontname(size_t idx)
 {
-	char *fontname;
+	const char *fontname;
 	
 	if(idx == 0) {
-		fontname = "Default";
+		fontname = g_messages[DEFAULT];
 	} else {
 		fontname = fontlist_get(&g_font_list, idx - 1);
 
 		if(fontname == NULL) {
-			fontname = "Default";
+			fontname = g_messages[DEFAULT];
 		}
 	}
 
@@ -364,7 +278,7 @@ static int change_font_select_option(struct MenuEntry *entry, int direct)
 
 	fontname = get_recovery_fontname((size_t)(g_font_cur_sel));
 
-	if(0 == strcmp(fontname, "Default")) {
+	if(0 == strcmp(fontname, g_messages[DEFAULT])) {
 		fontname = "";
 		proDebugScreenReleaseFont();
 	} else {
@@ -387,7 +301,7 @@ static int change_font_select_option_by_enter(struct MenuEntry *entry)
 	if(entry->display_callback != NULL) {
 		(entry->display_callback)(entry, p, sizeof(buf) - (p - buf));
 	} else {
-		strcpy(p, *entry->info);
+		strcpy(p, g_messages[entry->info_idx]);
 	}
 
 	set_bottom_info(buf, 0);
@@ -476,26 +390,26 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 }
 
 static struct MenuEntry g_configuration_menu_entries[] = {
-	{ NULL, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
-	{ NULL, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
-	{ NULL, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
-	{ NULL, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
-	{ NULL, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
-	{ NULL, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
-	{ NULL, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
-	{ NULL, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
-	{ NULL, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect_option },
-	{ NULL, 0, 0, &display_htmlviewer_custom_save_location, &change_option, &change_option_by_enter, &g_htmlviewer_custom_save_location_option },
-	{ NULL, 0, 0, &display_slim_color, &change_option, &change_option_by_enter, &g_slim_color_option },
-	{ NULL, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
-	{ NULL, 0, 0, &display_use_usbversion, &change_option, &change_option_by_enter, &g_use_usbversion_option},
-	{ NULL, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
-	{ NULL, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option },
-	{ NULL, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
+	{ -1, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
+	{ -1, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
+	{ -1, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
+	{ -1, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
+	{ -1, 0, 0, &display_hidden_mac, &change_option, &change_option_by_enter, &g_mac_hidden_option },
+	{ -1, 0, 0, &display_skip_gameboot, &change_option, &change_option_by_enter, &g_skip_gameboot_option },
+	{ -1, 0, 0, &display_skip_logo, &change_option, &change_option_by_enter, &g_skip_logo_option },
+	{ -1, 0, 0, &display_use_ownupdate, &change_option, &change_option_by_enter, &g_use_ownupdate_option},
+	{ -1, 0, 0, &display_flash_protect, &change_option, &change_option_by_enter, &g_flash_protect_option },
+	{ -1, 0, 0, &display_htmlviewer_custom_save_location, &change_option, &change_option_by_enter, &g_htmlviewer_custom_save_location_option },
+	{ -1, 0, 0, &display_slim_color, &change_option, &change_option_by_enter, &g_slim_color_option },
+	{ -1, 0, 0, &display_use_version, &change_option, &change_option_by_enter, &g_use_version_option},
+	{ -1, 0, 0, &display_use_usbversion, &change_option, &change_option_by_enter, &g_use_usbversion_option},
+	{ -1, 0, 0, &display_hide_pic, &change_option, &change_option_by_enter, &g_hide_pic_option },
+	{ -1, 0, 0, &display_hibernation_deletion, &change_option, &change_option_by_enter, &g_hibblock_option },
+	{ -1, 0, 0, &display_usb_charge, &change_option, &change_option_by_enter, &g_usb_charge_option },
 };
 
 static struct Menu g_configuration_menu = {
-	&g_messages[CONFIGURATION],
+	CONFIGURATION,
 	g_configuration_menu_entries,
 	NELEMS(g_configuration_menu_entries),
 	0,
@@ -584,21 +498,21 @@ static int display_msspeed(struct MenuEntry* entry, char *buf, int size)
 	char speedstr[20];
 
 	if(g_config.msspeed == MSSPEED_NONE) {
-		sprintf(speedstr, "None");
+		sprintf(speedstr, g_messages[NONE]);
 	} else if(g_config.msspeed == MSSPEED_POP) {
-		sprintf(speedstr, "Pop");
+		sprintf(speedstr, g_messages[POP]);
 	} else if(g_config.msspeed == MSSPEED_GAME) {
-		sprintf(speedstr, "Game");
+		sprintf(speedstr, g_messages[GAME]);
 	} else if(g_config.msspeed == MSSPEED_VSH) {
-		sprintf(speedstr, "Vsh");
+		sprintf(speedstr, g_messages[VSH]);
 	} else if(g_config.msspeed == MSSPEED_POP_GAME) {
-		sprintf(speedstr, "Pop & Game");
+		sprintf(speedstr, g_messages[POP_GAME]);
 	} else if(g_config.msspeed == MSSPEED_GAME_VSH) {
-		sprintf(speedstr, "Game & Vsh");
+		sprintf(speedstr, g_messages[GAME_VSH]);
 	} else if(g_config.msspeed == MSSPEED_VSH_POP) {
-		sprintf(speedstr, "Vsh & Pop");
+		sprintf(speedstr, g_messages[VSH_POP]);
 	} else if(g_config.msspeed == MSSPEED_ALWAYS) {
-		sprintf(speedstr, "Always");
+		sprintf(speedstr, g_messages[ALWAYS]);
 	}
 
 	sprintf(buf, "%-48s %-11s", g_messages[MSSPEED_UP], speedstr);
@@ -679,23 +593,23 @@ static struct ValueOption g_hide_cfw_dirs = {
 };
 
 static struct MenuEntry g_advanced_menu_entries[] = {
-	{ NULL, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
-	{ NULL, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
-	{ NULL, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
-	{ NULL, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
-	{ NULL, 0, 0, &display_msspeed, &change_option, &change_option_by_enter, &g_msspeed},
-	{ NULL, 0, 0, &display_hide_cfw_dirs, &change_option, &change_option_by_enter, &g_hide_cfw_dirs},
-	{ NULL, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
-	{ NULL, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
-	{ NULL, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
-	{ NULL, 0, 0, &display_iso_cache, &change_option, &change_option_by_enter, &g_iso_cache},
-	{ NULL, 0, 0, &display_iso_cache_total_size, &change_option, &change_option_by_enter, &g_iso_cache_total_size},
-	{ NULL, 0, 0, &display_iso_cache_number, &change_iso_cache_number_option, &change_iso_cache_number_option_by_enter, &g_iso_cache_number},
-	{ NULL, 0, 0, &display_iso_cache_policy, &change_option, &change_option_by_enter, &g_iso_cache_policy},
+	{ -1, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
+	{ -1, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
+	{ -1, 0, 0, &display_pops_plugin, &change_option, &change_option_by_enter, &g_pops_plugin_option },
+	{ -1, 0, 0, &display_use_nodrm, &change_option, &change_option_by_enter, &g_use_nodrm_option},
+	{ -1, 0, 0, &display_msspeed, &change_option, &change_option_by_enter, &g_msspeed},
+	{ -1, 0, 0, &display_hide_cfw_dirs, &change_option, &change_option_by_enter, &g_hide_cfw_dirs},
+	{ -1, 0, 0, &display_use_noanalog, &change_option, &change_option_by_enter, &g_use_noanalog_option},
+	{ -1, 0, 0, &display_chn_iso, &change_option, &change_option_by_enter, &g_chn_iso},
+	{ -1, 0, 0, &display_use_oldplugin, &change_option, &change_option_by_enter, &g_use_oldplugin},
+	{ -1, 0, 0, &display_iso_cache, &change_option, &change_option_by_enter, &g_iso_cache},
+	{ -1, 0, 0, &display_iso_cache_total_size, &change_option, &change_option_by_enter, &g_iso_cache_total_size},
+	{ -1, 0, 0, &display_iso_cache_number, &change_iso_cache_number_option, &change_iso_cache_number_option_by_enter, &g_iso_cache_number},
+	{ -1, 0, 0, &display_iso_cache_policy, &change_option, &change_option_by_enter, &g_iso_cache_policy},
 };
 
 static struct Menu g_advanced_menu = {
-	&g_messages[ADVANCED],
+	ADVANCED,
 	g_advanced_menu_entries,
 	NELEMS(g_advanced_menu_entries),
 	0,
@@ -775,21 +689,21 @@ static int run_recovery_eboot(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_top_menu_entries[] = {
-	{ &g_messages[TOGGLE_USB], 0, 0, NULL, NULL, &toggle_usb, NULL },
-	{ &g_messages[RUN_RECOVERY_EBOOT], 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
-	{ &g_messages[CONFIGURATION], 1, 0, NULL, NULL, &configuration_menu, NULL},
-	{ &g_messages[ADVANCED], 1, 0, NULL, NULL, &advanced_menu, NULL},
-	{ &g_messages[CPU_SPEED], 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
-	{ &g_messages[PLUGINS], 1, 0, NULL, NULL, &plugins_menu, NULL },
-	{ &g_messages[REGISTERY_HACKS], 1, 0, NULL, NULL, &registery_hack_menu, NULL },
-	{ &g_messages[SHUTDOWN_DEVICE], 0, 0, NULL, NULL, &shutdown_device, NULL },
-	{ &g_messages[SUSPEND_DEVICE], 0, 0, NULL, NULL, &suspend_device, NULL },
-	{ &g_messages[RESET_DEVICE], 0, 0, NULL, NULL, &reset_device, NULL },
-	{ &g_messages[RESET_VSH], 0, 0, NULL, NULL, &reset_vsh, NULL },
+	{ TOGGLE_USB, 0, 0, NULL, NULL, &toggle_usb, NULL },
+	{ RUN_RECOVERY_EBOOT, 0, 0, NULL, NULL, &run_recovery_eboot, NULL },
+	{ CONFIGURATION, 1, 0, NULL, NULL, &configuration_menu, NULL},
+	{ ADVANCED, 1, 0, NULL, NULL, &advanced_menu, NULL},
+	{ CPU_SPEED, 1, 0, NULL, NULL, &cpu_speed_menu, NULL },
+	{ PLUGINS, 1, 0, NULL, NULL, &plugins_menu, NULL },
+	{ REGISTERY_HACKS, 1, 0, NULL, NULL, &registery_hack_menu, NULL },
+	{ SHUTDOWN_DEVICE, 0, 0, NULL, NULL, &shutdown_device, NULL },
+	{ SUSPEND_DEVICE, 0, 0, NULL, NULL, &suspend_device, NULL },
+	{ RESET_DEVICE, 0, 0, NULL, NULL, &reset_device, NULL },
+	{ RESET_VSH, 0, 0, NULL, NULL, &reset_vsh, NULL },
 };
 
 static struct Menu g_top_menu = {
-	&g_messages[MAIN_MENU],
+	MAIN_MENU,
 	g_top_menu_entries,
 	NELEMS(g_top_menu_entries),
 	0,
@@ -890,12 +804,12 @@ static int change_clock_option_by_enter(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_cpu_speed_menu_entries[] = {
-	{ NULL, 0, 0, &display_xmb, &change_clock_option, &change_clock_option_by_enter, &g_xmb_clock_option},
-	{ NULL, 0, 0, &display_game, &change_clock_option, &change_clock_option_by_enter, &g_game_clock_option},
+	{ -1, 0, 0, &display_xmb, &change_clock_option, &change_clock_option_by_enter, &g_xmb_clock_option},
+	{ -1, 0, 0, &display_game, &change_clock_option, &change_clock_option_by_enter, &g_game_clock_option},
 };
 
 static struct Menu g_cpu_speed_menu = {
-	&g_messages[CPU_SPEED],
+	CPU_SPEED,
 	g_cpu_speed_menu_entries,
 	NELEMS(g_cpu_speed_menu_entries),
 	0,
@@ -969,13 +883,13 @@ static int swap_buttons(struct MenuEntry *entry)
 }
 
 static struct MenuEntry g_registery_menu_entries[] = {
-	{ &g_messages[ACTIVATE_WMA], 0, 0, NULL, NULL, &active_wma, NULL },
-	{ &g_messages[ACTIVATE_FLASH], 0, 0, NULL, NULL, &active_flash, NULL },
-	{ &g_messages[SWAP_BUTTONS_FULL], 0, 0, NULL, NULL, &swap_buttons, NULL },
+	{ ACTIVATE_WMA, 0, 0, NULL, NULL, &active_wma, NULL },
+	{ ACTIVATE_FLASH, 0, 0, NULL, NULL, &active_flash, NULL },
+	{ SWAP_BUTTONS_FULL, 0, 0, NULL, NULL, &swap_buttons, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {
-	&g_messages[REGISTERY_HACKS],
+	REGISTERY_HACKS,
 	g_registery_menu_entries,
 	NELEMS(g_registery_menu_entries),
 	0,
@@ -992,12 +906,63 @@ static int registery_hack_menu(struct MenuEntry *entry)
 	return 0;
 }
 
+static void select_language(void)
+{
+	int ret, value;
+
+	ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
+
+	if(ret == 0) {
+		switch(value) {
+			case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
+				g_messages = g_messages_en;
+				break;
+			default:
+				g_messages = g_messages_en;
+				break;
+		}
+	}
+}
+
 void main_menu(void)
 {
 	struct Menu *menu = &g_top_menu;
 	int idx;
 
-	(void)message_test;
+	select_language();
 
 	// setup font list size and cur select
 	g_recovery_font_option.limit_end = (s16)fontlist_count(&g_font_list) + 1;

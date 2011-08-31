@@ -212,6 +212,7 @@ int get_cpu_freq(int number);
 int get_bus_freq(int number);
 const char *get_plugin_name(int type);
 const char* get_cache_policy_name(int policy);
+const char* get_language_name(s16 lang);
 
 void suspend_vsh_thread(void);
 void resume_vsh_thread(void);

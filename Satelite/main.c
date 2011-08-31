@@ -304,50 +304,56 @@ static void select_language(void)
 {
 	int ret, value;
 
-	ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
+	if(cnf.language == -1) {
+		ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
 
-	if(ret == 0) {
-		switch(value) {
-			case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
-				g_messages = g_messages_de;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
-				g_messages = g_messages_en;
-				break;
-			default:
-				g_messages = g_messages_en;
-				break;
+		if(ret != 0) {
+			value = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 		}
+	} else {
+		value = cnf.language;
+	}
+
+	switch(value) {
+		case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+			g_messages = g_messages_de;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
+			g_messages = g_messages_en;
+			break;
+		default:
+			g_messages = g_messages_en;
+			break;
 	}
 }
 

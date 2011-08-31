@@ -209,6 +209,7 @@ void load_default_conf(SEConfig *config)
 	config->iso_cache_num = 128;
 	config->iso_cache_policy = CACHE_POLICY_LRU;
 	config->usbversion = 0;
+	config->language = -1;
 }
 
 void load_config(void)

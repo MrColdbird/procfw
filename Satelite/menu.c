@@ -102,10 +102,20 @@ int menu_draw(void)
 					xPointer = pointer[2];
 					break;
 				case TMENU_RESET_DEVICE:
-					xPointer = pointer[3];
+					if(g_messages == g_messages_en) {
+						xPointer = pointer[3];
+					} else if (g_messages == g_messages_de) {
+						xPointer = pointer[3] - 2 * 8 - 1;
+					}
+					
 					break;
 				case TMENU_RESET_VSH:
-					xPointer = pointer[7];
+					if(g_messages == g_messages_en) {
+						xPointer = pointer[7];
+					} else if (g_messages == g_messages_de) {
+						xPointer = pointer[7] - 2 * 8 - 1;
+					}
+					
 					break;
 				case TMENU_RECOVERY_MENU:
 					xPointer = 168;

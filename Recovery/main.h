@@ -122,6 +122,7 @@ enum {
 
 extern const char ** g_messages;
 extern const char * g_messages_en[];
+extern const char * g_messages_de[];
 
 enum {
 	TYPE_NORMAL = 0,

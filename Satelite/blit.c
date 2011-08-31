@@ -87,8 +87,7 @@ int blit_string(int sx,int sy,const char *msg)
 {
 	int x,y,p;
 	int offset;
-	char code;
-	u8 font;
+	u8 code, font;
 	u32 fg_col,bg_col;
 
 	u32 col,c1,c2;
@@ -103,7 +102,8 @@ int blit_string(int sx,int sy,const char *msg)
 
 	for(x=0;msg[x] && x<(pwidth/8);x++)
 	{
-		code = msg[x] & 0x7f; // 7bit ANK
+		code = (u8)msg[x]; // no truncate now
+
 		for(y=0;y<8;y++)
 		{
 			offset = (sy+y)*bufferwidth + sx+x*8;

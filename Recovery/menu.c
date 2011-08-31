@@ -153,6 +153,11 @@ static struct ValueOption g_usb_charge_option = {
 	0, 2,
 };
 
+static struct ValueOption g_language_charge_option = {
+	&g_config.language,
+	-1, PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED+1,
+};
+
 static s16 g_font_cur_sel = 0;
 
 static struct ValueOption g_recovery_font_option = {
@@ -227,6 +232,14 @@ static int display_xmb_usbdevice(struct MenuEntry* entry, char *buf, int size)
 static int display_usb_charge(struct MenuEntry* entry, char *buf, int size)
 {
 	sprintf(buf, "%-48s %-11s", g_messages[USB_CHARGE], get_bool_name(g_config.usbcharge));
+
+	return 0;
+}
+
+// No need to translate this function
+static int display_language(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", "Language", get_language_name(g_config.language));
 
 	return 0;
 }
@@ -391,6 +404,7 @@ static int display_hibernation_deletion(struct MenuEntry* entry, char *buf, int 
 
 static struct MenuEntry g_configuration_menu_entries[] = {
 	{ -1, 0, 0, &display_iso_mode, &change_option, &change_option_by_enter, &g_iso_mode_option },
+	{ -1, 0, 0, &display_language, &change_option, &change_option_by_enter, &g_language_charge_option },
 	{ -1, 0, 0, &display_fake_region, &change_option, &change_option_by_enter, &g_fake_region_option },
 	{ -1, 0, 0, &display_recovery_font, &change_font_select_option, &change_font_select_option_by_enter, &g_recovery_font_option },
 	{ -1, 0, 0, &display_xmb_usbdevice, &change_option, &change_option_by_enter, &g_xmb_usbdevice_option },
@@ -910,50 +924,56 @@ static void select_language(void)
 {
 	int ret, value;
 
-	ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
+	if(g_config.language == -1) {
+		ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
 
-	if(ret == 0) {
-		switch(value) {
-			case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
-				g_messages = g_messages_de;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
-				g_messages = g_messages_en;
-				break;
-			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
-				g_messages = g_messages_en;
-				break;
-			default:
-				g_messages = g_messages_en;
-				break;
+		if(ret != 0) {
+			value = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 		}
+	} else {
+		value = g_config.language;
+	}
+
+	switch(value) {
+		case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+			g_messages = g_messages_de;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
+			g_messages = g_messages_en;
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
+			g_messages = g_messages_en;
+			break;
+		default:
+			g_messages = g_messages_en;
+			break;
 	}
 }
 

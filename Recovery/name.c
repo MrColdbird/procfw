@@ -187,3 +187,52 @@ const char* get_cache_policy_name(int policy)
 
 	return "FIXME";
 }
+
+// No need to translate this function
+const char* get_language_name(s16 lang)
+{
+	switch(lang)
+	{
+		case -1:
+			return "Autodetect";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+			return "Japanese";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+			return "English";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+			return "French";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+			return "Spanish";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+			return "German";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+			return "Italian";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
+			return "Dutch";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+			return "Portuguese";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
+			return "Russian";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
+			return "Korean";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
+			return "Chinese Trad.";
+			break;
+		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED :
+			return "Chinese Simp.";
+			break;
+	}
+
+	return "FIXME";
+}

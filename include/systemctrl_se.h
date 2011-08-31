@@ -88,6 +88,7 @@ typedef struct _SEConfig
 	s16 iso_cache_num;
 	s16 iso_cache_policy;
 	s16 usbversion;
+	s16 language; /* -1 as autodetect */
 } SEConfig;
 
 /**

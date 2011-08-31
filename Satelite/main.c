@@ -300,6 +300,57 @@ int load_recovery_font_select(void)
 	return 0;
 }
 
+static void select_language(void)
+{
+	int ret, value;
+
+	ret = sceUtilityGetSystemParamInt(PSP_SYSTEMPARAM_ID_INT_LANGUAGE, &value);
+
+	if(ret == 0) {
+		switch(value) {
+			case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
+				g_messages = g_messages_en;
+				break;
+			case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
+				g_messages = g_messages_en;
+				break;
+			default:
+				g_messages = g_messages_en;
+				break;
+		}
+	}
+}
+
 int TSRThread(SceSize args, void *argp)
 {
 	sceKernelChangeThreadPriority(0, 8);
@@ -307,6 +358,7 @@ int TSRThread(SceSize args, void *argp)
 	sctrlSEGetConfig(&cnf);
 
 	load_recovery_font_select();
+	select_language();
 
 	if(g_cur_font_select[0] != '\0') {
 		load_external_font(g_cur_font_select);
@@ -320,7 +372,7 @@ int TSRThread(SceSize args, void *argp)
 
 	if(umdvideo_path[0] == '\0') {
 		umdvideo_idx = 0;
-		strcpy(umdvideo_path, "None");
+		strcpy(umdvideo_path, g_messages[MSG_NONE]);
 	} else {
 		umdvideo_idx = umdvideolist_find(&g_umdlist, umdvideo_path);
 
@@ -328,7 +380,7 @@ int TSRThread(SceSize args, void *argp)
 			umdvideo_idx++;
 		} else {
 			umdvideo_idx = 0;
-			strcpy(umdvideo_path, "None");
+			strcpy(umdvideo_path, g_messages[MSG_NONE]);
 		}
 	}
 

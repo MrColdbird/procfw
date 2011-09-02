@@ -98,6 +98,8 @@ const char * g_messages_de[] = {
 	"Aktiviere Flash",
 	"Vertausche O/X buttons",
 	"Vertausche O/X buttons (needs Reset VSH to take effect)",
+	"Delete hibernation", //TODO
+	"Hibernation deleted", //TODO
 	"Starte /PSP/GAME/RECOVERY/EBOOT.PBP",
 	"Ger„t abschalten",
 	"Ger„t pausieren",

@@ -896,10 +896,63 @@ static int swap_buttons(struct MenuEntry *entry)
 	return 0;
 }
 
+static int _delete_hibernation(void)
+{
+	SceUID fd;
+	char buf[512 + 64], *p;
+	int ret;
+	u32 psp_model;
+
+	psp_model = kuKernelGetModel();
+
+	if(psp_model != PSP_GO) {
+		return -1;
+	}
+
+	p = (char*)((((u32)buf) & ~(64-1)) + 64);
+	memset(p, 0, 512);
+
+	fd = sceIoOpen("eflash0a:__hibernation", PSP_O_RDWR | 0x04000000, 0777);
+
+	if(fd < 0) {
+		return fd;
+	}
+
+	ret = sceIoWrite(fd, p, 512);
+
+	if(ret < 0) {
+		sceIoClose(fd);
+		return ret;
+	}
+
+	sceIoClose(fd);
+
+	return 0;
+}
+
+static int delete_hibernation(struct MenuEntry *entry)
+{
+	char buf[80];
+
+	_delete_hibernation();
+	sprintf(buf, "> %s", g_messages[HIBERNATION_DELETED]);
+	set_bottom_info(buf, 0);
+	frame_end();
+	sceKernelDelayThread(CHANGE_DELAY);
+	set_bottom_info("", 0);
+
+	resume_vsh_thread();
+	sctrlKernelExitVSH(NULL);
+	sceKernelStopUnloadSelfModule(0, NULL, NULL, NULL);
+
+	return 0;
+}
+
 static struct MenuEntry g_registery_menu_entries[] = {
 	{ ACTIVATE_WMA, 0, 0, NULL, NULL, &active_wma, NULL },
 	{ ACTIVATE_FLASH, 0, 0, NULL, NULL, &active_flash, NULL },
 	{ SWAP_BUTTONS_FULL, 0, 0, NULL, NULL, &swap_buttons, NULL },
+	{ DELETE_HIBERNATION, 0, 0, NULL, NULL, &delete_hibernation, NULL },
 };
 
 static struct Menu g_registery_hack_menu = {

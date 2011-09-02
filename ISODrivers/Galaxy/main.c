@@ -84,7 +84,7 @@ struct CISO_header {
 };
 
 // 0x000011C8
-struct CISO_header g_CISO_hdr;
+static struct CISO_header g_CISO_hdr __attribute__((aligned(64)));
 
 // 0x000011E0
 u32 ciso_total_block = 0;

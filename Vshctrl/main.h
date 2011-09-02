@@ -30,4 +30,6 @@ int vshpatch_init(void);
 void patch_update_plugin_module(SceModule *mod);
 void patch_SceUpdateDL_Library(u32 text_addr);
 
+int vshCtrlDeleteHibernation(void);
+
 #endif

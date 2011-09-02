@@ -40,6 +40,7 @@
 extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
 extern int scePowerRequestSuspend(void);
+extern int vshCtrlDeleteHibernation(void);
 
 static int configuration_menu(struct MenuEntry *entry);
 static int registery_hack_menu(struct MenuEntry *entry);
@@ -896,45 +897,11 @@ static int swap_buttons(struct MenuEntry *entry)
 	return 0;
 }
 
-static int _delete_hibernation(void)
-{
-	SceUID fd;
-	char buf[512 + 64], *p;
-	int ret;
-	u32 psp_model;
-
-	psp_model = kuKernelGetModel();
-
-	if(psp_model != PSP_GO) {
-		return -1;
-	}
-
-	p = (char*)((((u32)buf) & ~(64-1)) + 64);
-	memset(p, 0, 512);
-
-	fd = sceIoOpen("eflash0a:__hibernation", PSP_O_RDWR | 0x04000000, 0777);
-
-	if(fd < 0) {
-		return fd;
-	}
-
-	ret = sceIoWrite(fd, p, 512);
-
-	if(ret < 0) {
-		sceIoClose(fd);
-		return ret;
-	}
-
-	sceIoClose(fd);
-
-	return 0;
-}
-
 static int delete_hibernation(struct MenuEntry *entry)
 {
 	char buf[80];
 
-	_delete_hibernation();
+	vshCtrlDeleteHibernation();
 	sprintf(buf, "> %s", g_messages[HIBERNATION_DELETED]);
 	set_bottom_info(buf, 0);
 	frame_end();

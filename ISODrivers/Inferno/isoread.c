@@ -78,7 +78,7 @@ struct CISO_header {
 };
 
 // 0x00002708
-static struct CISO_header g_CISO_hdr;
+static struct CISO_header g_CISO_hdr __attribute__((aligned(64)));
 
 // 0x00002500
 static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));

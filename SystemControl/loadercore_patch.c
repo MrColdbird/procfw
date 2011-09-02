@@ -240,15 +240,16 @@ int _ProbeExec3(unsigned char * buffer, int * check)
 	return result;
 }
 
-static unsigned int checkBuf[64] __attribute__((aligned(64)));
-
 int _PartitionCheck(unsigned int * st0, unsigned int * check)
 {
 	//get file descriptor
 	SceUID fd = st0[6];
+	unsigned int p[64 + 64 / sizeof(unsigned int)], *checkBuf;
 
 	//module attributes
 	unsigned short attributes = 0;
+
+	checkBuf = (unsigned int*)((((u32)p) & ~(64-1)) + 64);
 
 	//invalid file descriptor
 	if(fd < 0) return PartitionCheck(st0, check);

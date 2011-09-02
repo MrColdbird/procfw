@@ -63,14 +63,15 @@ static int check_file_is_encrypted(int fd)
 {
 	int ret;
 	u32 k1;
-	char buf[8] __attribute__((aligned(64)));
+	char p[8 + 64], *buf;
 
 	k1 = pspSdkSetK1(0);
-	ret = sceIoRead(fd, buf, sizeof(buf));
+	buf = (char*)((((u32)p) & ~(64-1)) + 64);
+	ret = sceIoRead(fd, buf, 8);
 	pspSdkSetK1(k1);
 	sceIoLseek32(fd, 0, PSP_SEEK_SET);
 
-	if (ret != sizeof(buf))
+	if (ret != 8)
 		return 0;
 
 	if (!memcmp(buf, g_drm_magic_1, sizeof(g_drm_magic_1))) {
@@ -83,7 +84,7 @@ static int check_file_is_encrypted(int fd)
 
 #if 0
 	printk("%s: buf:\n", __func__);
-	hexdump(buf, sizeof(buf));
+	hexdump(buf, 8);
 #endif
 
 	return 0;

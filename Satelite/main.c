@@ -277,7 +277,7 @@ static void launch_umdvideo_mount(void)
 	sctrlKernelExitVSH(NULL);
 }
 
-static char g_cur_font_select[256];
+static char g_cur_font_select[256] __attribute((aligned(64)));
 
 int load_recovery_font_select(void)
 {

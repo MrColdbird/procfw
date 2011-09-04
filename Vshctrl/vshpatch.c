@@ -415,7 +415,24 @@ int umdLoadExec(char * file, struct SceKernelLoadExecVSHParam * param)
 		sctrlSESetDiscType(PSP_UMD_TYPE_GAME);
 	}
 
-	ret = sctrlKernelLoadExecVSHDisc(file, param);
+	if(psp_model == PSP_GO) {
+		char devicename[20];
+		int apitype;
+
+		file = sctrlSEGetUmdFile();
+		ret = get_device_name(devicename, sizeof(devicename), file);
+
+		if(ret == 0 && 0 == stricmp(devicename, "ef0:")) {
+			apitype = 0x125;
+		} else {
+			apitype = 0x123;
+		}
+
+		param->key = "umdemu";
+		ret = sctrlKernelLoadExecVSHWithApitype(apitype, file, param);
+	} else {
+		ret = sctrlKernelLoadExecVSHDisc(file, param);
+	}
 
 	return ret;
 }

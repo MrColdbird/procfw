@@ -1,5 +1,5 @@
 TARGET = satelite
-OBJS = main.o blit.o ui.o menu.o clock.o umdvideo_list.o vpl.o trans_en.o trans_de.o stubkk.o
+OBJS = main.o blit.o ui.o menu.o clock.o umdvideo_list.o vpl.o trans_en.o trans_de.o trans_it.o trans_es.o stubkk.o
 
 BUILD_PRX=1
 

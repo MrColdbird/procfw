@@ -965,13 +965,13 @@ static void select_language(void)
 			g_messages = g_messages_en;
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
-			g_messages = g_messages_en;
+			g_messages = g_messages_es;
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
 			g_messages = g_messages_de;
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
-			g_messages = g_messages_en;
+			g_messages = g_messages_it;
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
 			g_messages = g_messages_en;

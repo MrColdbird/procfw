@@ -99,7 +99,7 @@ const char * g_messages_it[] = { /* Translated by xFede and sinistro */
 	"Inverti i tasti O/X",
 	"Inverti i tasti O/X (è necessario Riavviare la VSH)",
 	"Elimina ibernazione",
-	"Ibernazione eliminata"
+	"Ibernazione eliminata",
 	"Avvia /PSP/GAME/RECOVERY/EBOOT.PBP",
 	"Spegni la Console",
 	"Sospendi la Console",
@@ -120,3 +120,5 @@ const char * g_messages_it[] = { /* Translated by xFede and sinistro */
 	"Modalità di Debug I",
 	"Modalità di Debug II",
 };
+
+u8 message_test_it[NELEMS(g_messages_it) == MSG_END ? 0 : -1];

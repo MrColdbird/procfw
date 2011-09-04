@@ -121,4 +121,4 @@ const char * g_messages_en[] = {
 	"Debug Type II",
 };
 
-u8 message_test[NELEMS(g_messages_en) == MSG_END ? 0 : -1];
+u8 message_test_en[NELEMS(g_messages_en) == MSG_END ? 0 : -1];

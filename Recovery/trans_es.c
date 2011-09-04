@@ -120,3 +120,5 @@ const char * g_messages_es[] = { /* Translated by xFede */
 	"Modalidad de Debug I",
 	"Modalidad de Debug II",
 };
+
+u8 message_test_es[NELEMS(g_messages_es) == MSG_END ? 0 : -1];

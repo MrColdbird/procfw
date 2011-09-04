@@ -116,6 +116,7 @@ void resume_thread(const char *thread_name)
 
 void suspend_vsh_thread(void)
 {
+	sceDisplayWaitVblankStart();
 	suspend_thread("SCE_VSH_GRAPHICS");
 	suspend_thread("movie_player");
 	suspend_thread("audio_buffer");
@@ -127,6 +128,7 @@ void resume_vsh_thread(void)
 	resume_thread("music_player");
 	resume_thread("audio_buffer");
 	resume_thread("movie_player");
+	sceDisplayWaitVblankStart();
 	resume_thread("SCE_VSH_GRAPHICS");
 }
 
@@ -223,7 +225,7 @@ int main_thread(SceSize size, void *argp)
 	if(thid < 0) {
 		no_vsh = 1;
 	}
-	
+
 	sctrlSEGetConfig(&g_config);
 	vpl_init();
 	suspend_vsh_thread();

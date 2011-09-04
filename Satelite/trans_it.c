@@ -43,5 +43,4 @@ const char *g_messages_it[] = { /* Translated by xFede */
 	"Nessuno",
 };
 
-u8 message_test[NELEMS(g_messages_it) == MSG_END ? 0 : -1];
-
+u8 message_test_it[NELEMS(g_messages_it) == MSG_END ? 0 : -1];

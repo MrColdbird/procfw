@@ -8,7 +8,8 @@ IMPORTS = ../Imports/SysMemForKernel.o \
 		  ../Imports/InterruptManagerForKernel.o \
 		  ../Imports/sceResmgr_driver.o \
 		  ../Imports/InitForKernel.o \
-		  ../Imports/LoadExecForKernel.o
+		  ../Imports/LoadExecForKernel.o \
+		  ../Imports/sceCtrl_driver.o
 
 OBJS += $(IMPORTS)
 

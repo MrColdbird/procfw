@@ -2,6 +2,7 @@
 #define CROSS_FW_H
 
 #include <pspsysmem_kernel.h>
+#include <pspctrl.h>
 
 u32 sctrlKernelGetModel(void);
 u32 sctrlKernelDevkitVersion(void);
@@ -25,5 +26,7 @@ SceUID sctrlKernelLoadModuleWithApitype2(int apitype, const char *path, int flag
 int sceKernelApplicationType(void);
 SceUID sctrlKernelAllocPartitionMemory(SceUID partitionid, const char * name, int type, SceSize size, void * addr);
 void* sctrlKernelGetBlockHeadAddr(SceUID blockid);
+
+int sctrlReadBufferPositive(SceCtrlData *pad_data, int count);
 
 #endif

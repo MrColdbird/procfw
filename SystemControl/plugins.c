@@ -19,6 +19,7 @@
 #include <pspinit.h>
 #include <pspiofilemgr.h>
 #include <string.h>
+#include <pspctrl.h>
 #include "main.h"
 #include "utils.h"
 #include "printk.h"
@@ -272,6 +273,20 @@ static void wait_memory_stick_ready_timeout(int wait)
 	}
 }
 
+static int is_vsh_plugins_enabled(void)
+{
+	SceCtrlData pad;
+	int ret;
+
+	ret = sctrlReadBufferPositive(&pad, 1);
+
+	if(ret >= 0 && pad.Buttons & PSP_CTRL_RTRIGGER) {
+		return 0;
+	}
+
+	return 1;
+}
+
 int load_plugins(void)
 {
 	unsigned int key = sceKernelApplicationType();
@@ -280,7 +295,7 @@ int load_plugins(void)
 		return 0;
 	}
 
-	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH) {
+	if(conf.plugvsh && key == PSP_INIT_KEYCONFIG_VSH && is_vsh_plugins_enabled()) {
 		if(psp_model == PSP_GO) {
 			load_plugin("ef0:/seplugins/vsh.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		}

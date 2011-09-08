@@ -109,6 +109,10 @@ extern int sceKernelBootFromGo_635(void);
 void* sceKernelGetBlockHeadAddr(SceUID blockid);
 SceUID sceKernelAllocPartitionMemory(SceUID partitionid, const char * name, int type, SceSize size, void * addr);
 
+extern int sceCtrlReadBufferPositive_639(SceCtrlData *pad_data, int count);
+extern int sceCtrlReadBufferPositive_620(SceCtrlData *pad_data, int count);
+extern int sceCtrlReadBufferPositive_660(SceCtrlData *pad_data, int count);
+
 int sctrlKernelExitVSH(struct SceKernelLoadExecVSHParam *param)
 {
 	u32 k1;
@@ -1066,4 +1070,34 @@ int sctrlKernelBootFrom(void)
 	}
 
 	return sceKernelBootFrom();
+}
+
+int sctrlReadBufferPositive(SceCtrlData *pad_data, int count)
+{
+	int ret = -1;
+
+	switch(psp_fw_version) {
+#ifdef CONFIG_660
+		case FW_660:
+			ret = sceCtrlReadBufferPositive_660(pad_data, count);
+			break;
+#endif
+#ifdef CONFIG_639
+		case FW_639:
+			ret = sceCtrlReadBufferPositive_639(pad_data, count);
+			break;
+#endif
+#ifdef CONFIG_635
+		case FW_635:
+			ret = sceCtrlReadBufferPositive_639(pad_data, count);
+			break;
+#endif
+#ifdef CONFIG_620
+		case FW_620:
+			ret = sceCtrlReadBufferPositive_620(pad_data, count);
+			break;
+#endif
+	};
+
+	return ret;
 }

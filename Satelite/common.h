@@ -136,5 +136,6 @@ extern const char *g_messages_en[];
 extern const char *g_messages_de[];
 extern const char *g_messages_it[];
 extern const char *g_messages_es[];
+extern const char *g_messages_fr[];
 
 #endif

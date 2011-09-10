@@ -17,30 +17,30 @@
 
 #include "common.h"
 
-const char *g_messages_es[] = { /* Translated by xFede */
-        "Default", /* TODO : Por Defecto */
-        "Desactivado",
-        "Activado",
+const char *g_messages_fr[] = { /* Translated by xFede */
+        "Défaut",
+        "Déactivé",
+        "Activé",
         "Normal",
         "M33 driver",
         "Sony NP9660",
         "Inferno",
         "CPU CLOCK XMB  ",
-        "CPU CLOCK JUEGOS ",
-        "DISPOSITIVO USB  ",
-        "MODALIDAD ISO  ",
-        "VÍDEO .ISO ",
-        "RECOVERY MENU  ->",
-        "APAGA LA CONSOLA",
-        "SUSPENDE LA CONSOLA",
-        "REINICIA LA CONSOLA",
-        "REINICIA LA VSH",
-        "SALIR",
+        "CPU CLOCK JEUX ",
+        "PÉRIPHÉRIQUE USB  ",
+        "MODE ISO  ",
+        "VIDEO .ISO",
+        "MENU RECOVERY  ->",
+        "ÉTEINDRE LA CONSOLE",
+        "METTRE EN VEILLE LA CONSOLE",
+        "REDÉMARRER LA CONSOLE",
+        "REDÉMARRER LA VSH",
+        "SORTIE",
         "PRO VSH MENU",
         "Flash",
-        "Disco UMD",
-        "Memoria Stick",
-        "Ninguno",
+        "Disque UMD",
+        "Memory Stick",
+        "Aucun",
 };
 
-u8 message_test[NELEMS(g_messages_es) == MSG_END ? 0 : -1];
+u8 message_test[NELEMS(g_messages_fr) == MSG_END ? 0 : -1];

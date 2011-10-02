@@ -146,14 +146,18 @@ static int is_iso(SceIoDirent * dir)
 	//result
 	int result = 0;
 
+	// is it a file?
+	if (!FIO_S_ISREG(dir->d_stat.st_mode)) {
+		return 0;
+	}
+
 	//grab extension
-	char * ext = dir->d_name + strlen(dir->d_name) - 3;
+	char * ext = dir->d_name + strlen(dir->d_name) - 4;
 
 	//filename length check
 	if (ext > dir->d_name) {
 		//check extension
-		if (stricmp(ext, "iso") == 0 || stricmp(ext, "cso") == 0) {
-			//valid iso detected (more checks can be added here lateron)
+		if (stricmp(ext, ".iso") == 0 || stricmp(ext, ".cso") == 0) {
 			result = 1;
 		}
 	}

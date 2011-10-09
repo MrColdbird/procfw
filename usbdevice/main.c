@@ -419,6 +419,8 @@ int pspUsbDeviceSetDevice(u32 unit, int ronly, int unassign_mask)
 				
 				memcpy(boot_sector+0x2B, pvd+0x373, p);
 				memcpy(file_entry, pvd+0x373, p);
+
+				memcpy( &umd_file_size, pvd+0x50, 4 );
 			}
 		}
 		

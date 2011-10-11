@@ -72,17 +72,20 @@ static int vshpatch_module_chain(SceModule2 *mod)
 	if(0 == strcmp(mod->modname, "sysconf_plugin_module")) {
 		patch_sysconf_plugin_module(mod);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "game_plugin_module")) {
 		patch_game_plugin_module(text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "vsh_module")) {
 		patch_vsh_module(mod);
 		patch_sceCtrlReadBufferPositive();
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceVshBridge_Driver")) {
@@ -93,28 +96,34 @@ static int vshpatch_module_chain(SceModule2 *mod)
 		}
 
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "msvideo_main_plugin_module")) {
 		patch_msvideo_main_plugin_module(text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if( 0 == strcmp(mod->modname, "update_plugin_module")) {
 		patch_update_plugin_module((SceModule*)mod);
 		sync_cache();
+		goto exit;
 	}
 
 	if(conf.useownupdate && 0 == strcmp(mod->modname, "SceUpdateDL_Library")) {
 		patch_SceUpdateDL_Library(text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(conf.htmlviewer_custom_save_location && 0 == strcmp(mod->modname, "htmlviewer_plugin_module")) {
 		patch_htmlviewer_plugin_module(text_addr);
 		sync_cache();
+		goto exit;
 	}
 
+exit:
 	if (previous)
 		return (*previous)(mod);
 

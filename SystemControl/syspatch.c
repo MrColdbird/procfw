@@ -69,13 +69,10 @@ static int need_msstor_speed(void)
 
 static void system_booted_action(void)
 {
-	int key_config, ret;
+	int key_config;
 	static int booted = 0;
 
-	ret = sctrlKernelGetSystemStatus();
-   
-	// status becomes 0x00020000 after init_file loads
-	if (booted || ret != 0x00020000) {
+	if (booted) {
 		return;
 	}
 	
@@ -98,6 +95,19 @@ static void system_booted_action(void)
 	sync_cache();
 }
 
+static int is_system_booted(void)
+{
+	int status;
+
+	status = sctrlKernelGetSystemStatus();
+
+	if (status == 0x00020000) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static int syspatch_module_chain(SceModule2 *mod)
 {
 	int apitype;
@@ -106,7 +116,37 @@ static int syspatch_module_chain(SceModule2 *mod)
 	
 #ifdef DEBUG
 	printk("Starting %s Apitype: 0x%X\n", mod->modname, apitype);
+	hook_import_bynid((scemodule*)mod, "kdebugforkernel", 0x84f370bc, printk, 0);
 #endif
+
+	if (is_system_booted()) {
+		if(0 == strcmp(mod->modname, "sceNpSignupPlugin_Module")) {
+			patch_npsignup(mod->text_addr);
+			sync_cache();
+			goto exit;
+		}
+
+		if(0 == strcmp(mod->modname, "sceVshNpSignin_Module")) {
+			patch_npsignin(mod->text_addr);
+			sync_cache();
+			goto exit;
+		}
+
+		if(0 == strcmp(mod->modname, "sceNp")) {
+			patch_np(mod->text_addr, 9, 90);
+			sync_cache();
+			goto exit;
+		}
+
+		if(conf.usbversion && 0 == strcmp(mod->modname, "sceUSB_Stor_Ms_Driver")) {
+			patch_sceUSB_Stor_Ms_Driver((SceModule*)mod);
+			goto exit;
+		}
+
+		system_booted_action();
+		patch_module_for_version_spoof((SceModule*)mod);
+		goto exit;
+	}
 
 	if(0 == strcmp(mod->modname, "sceLoadExec")) {
 		u32 key_config;
@@ -119,10 +159,13 @@ static int syspatch_module_chain(SceModule2 *mod)
 				sync_cache();
 			}
 		}
+
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceSYSCON_Driver")) {
 		resolve_syscon_driver((SceModule*)mod);
+		goto exit;
 	}
 
 	// load after lflash
@@ -130,51 +173,43 @@ static int syspatch_module_chain(SceModule2 *mod)
 		load_config();
 		patch_sceLoadExec();
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceMediaSync")) {
 		patch_sceMediaSync(mod->text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdMan_driver")) {
 		patch_sceUmdMan_driver((SceModule*)mod);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceUmdCache_driver")) {
 		patch_umdcache(mod->text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceWlan_Driver")) {
 		patch_sceWlan_Driver(mod->text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "scePower_Service")) {
 		patch_scePower_Service(mod->text_addr);
 		sync_cache();
+		goto exit;
 	}
 
 	if(0 == strcmp(mod->modname, "sceMesgLed")) {
 		patch_mesgled((SceModule*)mod);
 		sync_cache();
-	}
-
-	if(0 == strcmp(mod->modname, "sceNpSignupPlugin_Module")) {
-		patch_npsignup(mod->text_addr);
-		sync_cache();
-	}
-
-	if(0 == strcmp(mod->modname, "sceVshNpSignin_Module")) {
-		patch_npsignin(mod->text_addr);
-		sync_cache();
-	}
-
-	if(0 == strcmp(mod->modname, "sceNp")) {
-		patch_np(mod->text_addr, 9, 90);
-		sync_cache();
+		goto exit;
 	}
 
 	if (0 == strcmp(mod->modname, "sceImpose_Driver")) {
@@ -182,29 +217,24 @@ static int syspatch_module_chain(SceModule2 *mod)
 		disable_PauseGame(mod->text_addr);
 		usb_charge();
 		sync_cache();
+		goto exit;
 	} 
 
 	if(psp_model == PSP_GO && 0 == strcmp(mod->modname, "pspMarch33_Driver")) {
 		patch_pspMarch33_Driver(mod->text_addr);
 		sync_cache();
-	}
-
-	if(conf.usbversion && 0 == strcmp(mod->modname, "sceUSB_Stor_Ms_Driver")) {
-		patch_sceUSB_Stor_Ms_Driver((SceModule*)mod);
+		goto exit;
 	}
 
 #ifdef DEBUG
 	if(0 == strcmp(mod->modname, "sceKernelLibrary")) {
 		printk_sync();
 		printk("printk synchronized\n");
+		goto exit;
 	}
-
-	hook_import_bynid((SceModule*)mod, "KDebugForKernel", 0x84F370BC, printk, 0);
 #endif
 
-	patch_module_for_version_spoof((SceModule*)mod);
-	system_booted_action();
-
+exit:
 	if (previous)
 		return (*previous)(mod);
 

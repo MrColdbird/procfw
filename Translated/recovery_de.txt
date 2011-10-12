@@ -40,7 +40,7 @@ XMB Plugin
 Game Plugin
 Pops Plugin
 NoDRM Engine
-Verstecke CFW Dateien vor Spielmodulen (PSP Go)
+Verstecke CFW Dateien vor Spielmodulen
 Deaktiviere Analog-Stick in Spielen
 ef0 zu ms0 Umleitung fÅr Plugins (PSP Go)
 Inferno & NP9660 Verwende ISO Cache

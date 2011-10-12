@@ -197,7 +197,7 @@ static int add_cache(struct IoReadArg *arg)
 	int read_len, len, ret;
 	struct IoReadArg cache_arg;
 	struct ISOCache *cache, *last_cache;
-	int pos, cur, next;
+	int pos, cur;
 	char *data;
 
 	len = arg->size;
@@ -205,12 +205,10 @@ static int add_cache(struct IoReadArg *arg)
 	data = (char*)arg->address;
 
 	for(cur = pos; cur < pos + len;) {
-		next = len - (cur - pos);
-
 		if(data == NULL) {
-			ret = get_hit_caches(cur, next, NULL, &last_cache);
+			ret = get_hit_caches(cur, len - (cur - pos), NULL, &last_cache);
 		} else {
-			ret = get_hit_caches(cur, next, data + cur - pos, &last_cache);
+			ret = get_hit_caches(cur, len - (cur - pos), data + cur - pos, &last_cache);
 		}
 
 		if(ret >= 0) {
@@ -232,7 +230,7 @@ static int add_cache(struct IoReadArg *arg)
 
 		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = MIN(g_total_blocks * ISO_SECTOR_SIZE - cur, g_caches_cap);
+		cache_arg.size = MIN(g_total_blocks * ISO_SECTOR_SIZE - cache_arg.offset, g_caches_cap);
 
 		ret = iso_read(&cache_arg);
 
@@ -249,6 +247,11 @@ static int add_cache(struct IoReadArg *arg)
 
 			cur += read_len;
 			reorder_iso_cache(cache - g_caches);
+
+			// EOF reached, time to exit
+			if (ret == 0) {
+				break;
+			}
 		} else {
 			reorder_iso_cache(cache - g_caches);
 			printk("%s: read -> 0x%08X\n", __func__, ret);
@@ -399,7 +402,7 @@ int infernoCacheInit(int cache_size, int cache_num)
 		return -3;
 	}
 
-	memid = sceKernelAllocPartitionMemory(9, "inferoCache", PSP_SMEM_High, g_caches_cap * g_caches_num + 64, NULL);
+	memid = sceKernelAllocPartitionMemory(9, "infernoCache", PSP_SMEM_High, g_caches_cap * g_caches_num + 64, NULL);
 
 	if(memid < 0) {
 		printk("%s: sctrlKernelAllocPartitionMemory -> 0x%08X\n", __func__, memid);

@@ -973,6 +973,8 @@ static char ** apply_language(char *translate_file)
 	return (char**) g_messages_en;
 }
 
+int cur_language = 0;
+
 static void select_language(void)
 {
 	int ret, value;
@@ -987,6 +989,7 @@ static void select_language(void)
 		value = g_config.language;
 	}
 
+	cur_language = value;
 	clear_language();
 
 	switch(value) {
@@ -1029,6 +1032,10 @@ static void select_language(void)
 		default:
 			g_messages = g_messages_en;
 			break;
+	}
+
+	if(g_messages == g_messages_en) {
+		cur_language = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 	}
 }
 

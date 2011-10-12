@@ -19,6 +19,7 @@
 #define MAIN_H
 
 #include "config.h"
+#include <psputility.h>
 
 enum {
 	PRO_RECOVERY_MENU = 0,
@@ -189,6 +190,8 @@ extern int g_ctrl_OK;
 extern int g_ctrl_CANCEL;
 extern int g_display_flip;
 extern SEConfig g_config;
+
+extern int cur_language;
 
 u32 ctrl_read(void);
 void ctrl_waitreleasekey(u32 key);

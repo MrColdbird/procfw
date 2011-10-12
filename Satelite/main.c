@@ -391,8 +391,11 @@ static void select_language(void)
 			break;
 		default:
 			g_messages = g_messages_en;
-			cur_language = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 			break;
+	}
+
+	if(g_messages == g_messages_en) {
+		cur_language = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 	}
 }
 

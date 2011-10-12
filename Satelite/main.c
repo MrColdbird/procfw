@@ -32,6 +32,7 @@
 #include "kubridge.h"
 #include "vpl.h"
 #include "blit.h"
+#include "trans.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -300,6 +301,40 @@ int load_recovery_font_select(void)
 	return 0;
 }
 
+void clear_language(void)
+{
+	if (g_messages != g_messages_en) {
+		free_translate_table((char**)g_messages, MSG_END);
+	}
+
+	g_messages = g_messages_en;
+}
+
+static char ** apply_language(char *translate_file)
+{
+	char path[512];
+	char **message = NULL;
+	int ret;
+
+	sprintf(path, "ms0:/seplugins/%s", translate_file);
+	ret = load_translate_table(&message, path, MSG_END);
+
+	if(ret >= 0) {
+		return message;
+	}
+
+	sprintf(path, "ef0:/seplugins/%s", translate_file);
+	ret = load_translate_table(&message, path, MSG_END);
+
+	if(ret >= 0) {
+		return message;
+	}
+
+	return (char**) g_messages_en;
+}
+
+int cur_language = 0;
+
 static void select_language(void)
 {
 	int ret, value;
@@ -314,45 +349,49 @@ static void select_language(void)
 		value = cnf.language;
 	}
 
+	cur_language = value;
+	clear_language();
+
 	switch(value) {
 		case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_jp.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_en.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
-			g_messages = g_messages_fr;
+			g_messages = (const char**)apply_language("satelite_fr.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
-			g_messages = g_messages_es;
+			g_messages = (const char**)apply_language("satelite_es.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
-			g_messages = g_messages_de;
+			g_messages = (const char**)apply_language("satelite_de.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
-			g_messages = g_messages_it;
+			g_messages = (const char**)apply_language("satelite_it.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_nu.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_pt.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_ru.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_kr.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_cht.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("satelite_chs.txt");
 			break;
 		default:
 			g_messages = g_messages_en;
+			cur_language = PSP_SYSTEMPARAM_LANGUAGE_ENGLISH;
 			break;
 	}
 }
@@ -440,6 +479,7 @@ int TSRThread(SceSize args, void *argp)
 	}
 
 	umdvideolist_clear(&g_umdlist);
+	clear_language();
 	vpl_finish();
 
 	vctrlVSHExitVSHMenu(&cnf, NULL, 0);

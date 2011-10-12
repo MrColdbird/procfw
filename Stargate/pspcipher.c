@@ -472,8 +472,7 @@ int _uprx_decrypt(user_decryptor *pBlock)
 		p += 0x10;
 		// loc_00001648
 		memcpy(p, buf1+0x12c, 0x14);
-		p += 0x14;
-		// loc_00001670
+		// loc_00001670, (yes, p no increase)
 		memcpy(p, buf4+0x40, 0x10);
 		p += 0x14;
 		// loc_0000169C

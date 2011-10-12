@@ -174,6 +174,7 @@ void recovery_exit(void)
 		resume_vsh_thread();
 	}
 
+	clear_language();
 	vpl_finish();
 
 	if(no_vsh) {

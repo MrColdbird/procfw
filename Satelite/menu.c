@@ -21,6 +21,7 @@
 */
 
 #include "common.h"
+#include <psputility.h>
 
 const char **g_messages = g_messages_en;
 
@@ -102,7 +103,7 @@ int menu_draw(void)
 					xPointer = pointer[2];
 					break;
 				case TMENU_RESET_DEVICE:
-					if (g_messages == g_messages_de) {
+					if (cur_language == PSP_SYSTEMPARAM_LANGUAGE_GERMAN) {
 						xPointer = pointer[3] - 2 * 8 - 1;
 					} else {
 						xPointer = pointer[3];
@@ -110,7 +111,7 @@ int menu_draw(void)
 					
 					break;
 				case TMENU_RESET_VSH:
-					if (g_messages == g_messages_de) {
+					if (cur_language == PSP_SYSTEMPARAM_LANGUAGE_GERMAN) {
 						xPointer = pointer[7] - 2 * 8 - 1;
 					} else {
 						xPointer = pointer[7];

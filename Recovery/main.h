@@ -124,10 +124,6 @@ enum {
 
 extern const char ** g_messages;
 extern const char * g_messages_en[];
-extern const char * g_messages_de[];
-extern const char * g_messages_it[];
-extern const char * g_messages_es[];
-extern const char * g_messages_fr[];
 
 enum {
 	TYPE_NORMAL = 0,
@@ -231,5 +227,7 @@ int plugins_menu(struct MenuEntry *entry);
 
 int toggle_usb(struct MenuEntry *entry);
 void exit_usb(void);
+
+void clear_language(void);
 
 #endif

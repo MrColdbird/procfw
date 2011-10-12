@@ -36,6 +36,7 @@
 #include "pspusbdevice.h"
 #include "font_list.h"
 #include "prodebug.h"
+#include "trans.h"
 
 extern int scePowerRequestColdReset(int unk);
 extern int scePowerRequestStandby(void);
@@ -940,6 +941,38 @@ static int registery_hack_menu(struct MenuEntry *entry)
 	return 0;
 }
 
+void clear_language(void)
+{
+	if (g_messages != g_messages_en) {
+		free_translate_table((char**)g_messages, MSG_END);
+	}
+
+	g_messages = g_messages_en;
+}
+
+static char ** apply_language(char *translate_file)
+{
+	char path[512];
+	char **message = NULL;
+	int ret;
+
+	sprintf(path, "ms0:/seplugins/%s", translate_file);
+	ret = load_translate_table(&message, path, MSG_END);
+
+	if(ret >= 0) {
+		return message;
+	}
+
+	sprintf(path, "ef0:/seplugins/%s", translate_file);
+	ret = load_translate_table(&message, path, MSG_END);
+
+	if(ret >= 0) {
+		return message;
+	}
+
+	return (char**) g_messages_en;
+}
+
 static void select_language(void)
 {
 	int ret, value;
@@ -954,42 +987,44 @@ static void select_language(void)
 		value = g_config.language;
 	}
 
+	clear_language();
+
 	switch(value) {
 		case PSP_SYSTEMPARAM_LANGUAGE_JAPANESE:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_jp.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_ENGLISH:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_en.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_FRENCH:
-			g_messages = g_messages_fr;
+			g_messages = (const char**)apply_language("recovery_fr.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_SPANISH:
-			g_messages = g_messages_es;
+			g_messages = (const char**)apply_language("recovery_es.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_GERMAN:
-			g_messages = g_messages_de;
+			g_messages = (const char**)apply_language("recovery_de.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_ITALIAN:
-			g_messages = g_messages_it;
+			g_messages = (const char**)apply_language("recovery_it.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_DUTCH:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_nu.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_PORTUGUESE:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_pt.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_RUSSIAN:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_ru.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_KOREAN:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_kr.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_TRADITIONAL:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_cht.txt");
 			break;
 		case PSP_SYSTEMPARAM_LANGUAGE_CHINESE_SIMPLIFIED:
-			g_messages = g_messages_en;
+			g_messages = (const char**)apply_language("recovery_chs.txt");
 			break;
 		default:
 			g_messages = g_messages_en;

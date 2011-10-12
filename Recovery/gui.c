@@ -114,7 +114,7 @@ static void menu_draw(struct Menu *menu)
 	set_screen_xy(x, y);
 	write_string_with_color(g_messages[menu->banner_id], menu->banner_color);
 
-	x = 3, y = 4;
+	x = (cur_language == PSP_SYSTEMPARAM_LANGUAGE_FRENCH ? 0 : 3), y = 4;
 	set_screen_xy(x, y);
 
 	{
@@ -133,7 +133,7 @@ static void menu_draw(struct Menu *menu)
 		write_string_with_color(buf, color);
 	}
 
-	x = 3, y = 6;
+	x = (cur_language == PSP_SYSTEMPARAM_LANGUAGE_FRENCH ? 0 : 3), y = 6;
 	set_screen_xy(x, y);
 
 	if(menu->cur_sel == 0) {

@@ -211,13 +211,24 @@ exit:
 // 0x000009D4
 int iso_open(void)
 {
-	int ret;
+	int ret, retries;
 
 	wait_until_ms0_ready();
 	sceIoClose(g_iso_fd);
 	g_iso_opened = 0;
+	retries = 0;
 
-	g_iso_fd = sceIoOpen(g_iso_fn, 0x000F0001, 0777);
+	do {
+		g_iso_fd = sceIoOpen(g_iso_fn, 0x000F0001, 0777);
+
+		if(g_iso_fd < 0) {
+			if(++retries >= 16) {
+				return -1;
+			}
+
+			sceKernelDelayThread(20000);
+		}
+	} while(g_iso_fd < 0);
 
 	if(g_iso_fd < 0) {
 		return -1;

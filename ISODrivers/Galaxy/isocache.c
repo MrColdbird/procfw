@@ -21,7 +21,7 @@ static u32 read_missed = 0;
 static u32 cache_on = 0;
 
 #define NR_CACHE_REQ 8
-#define CACHE_MINIMUM_THRESHOLD (16 * 1024)
+#define CACHE_MINIMUM_THRESHOLD (2 * ISO_SECTOR_SIZE)
 
 //#define CACHE_TEST 1
 #undef CACHE_TEST

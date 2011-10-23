@@ -1,0 +1,29 @@
+	.set noreorder
+
+#include "pspimport.s"
+
+	IMPORT_START	"LoadExecForKernel",0x00090000
+	IMPORT_FUNC	"LoadExecForKernel",0x5AA1A6D2,sceKernelExitVSH
+	IMPORT_FUNC	"LoadExecForKernel",0x45C6125B,sceKernelLoadExecVSHDisc
+	IMPORT_FUNC	"LoadExecForKernel",0x179D905A,sceKernelLoadExecVSHDiscUpdater
+	IMPORT_FUNC	"LoadExecForKernel",0x7286CF0B,sceKernelLoadExecVSHMs1
+	IMPORT_FUNC	"LoadExecForKernel",0x3D805DE6,sceKernelLoadExecVSHMs2
+	IMPORT_FUNC	"LoadExecForKernel",0xBAEB4B89,sceKernelLoadExecVSHMs3
+	IMPORT_FUNC	"LoadExecForKernel",0x8EF38192,sceKernelLoadExecVSHMs4
+	IMPORT_FUNC	"LoadExecForKernel",0xD35D6403,sceKernelLoadExecVSHEf2
+	IMPORT_FUNC	"LoadExecForKernel",0xAEFEF0F4,sceKernelExitVSH_620
+	IMPORT_FUNC	"LoadExecForKernel",0x73BAD4F8,sceKernelLoadExecVSHDisc_620
+	IMPORT_FUNC	"LoadExecForKernel",0xD364D324,sceKernelLoadExecVSHDiscUpdater_620
+	IMPORT_FUNC	"LoadExecForKernel",0x783EA19F,sceKernelLoadExecVSHMs1_620
+	IMPORT_FUNC	"LoadExecForKernel",0x254F01CB,sceKernelLoadExecVSHMs2_620
+	IMPORT_FUNC	"LoadExecForKernel",0xE09DAFDC,sceKernelLoadExecVSHMs3_620
+	IMPORT_FUNC	"LoadExecForKernel",0xEFA048F1,sceKernelLoadExecVSHMs4_620
+	IMPORT_FUNC	"LoadExecForKernel",0x88F03BAF,sceKernelLoadExecVSHEf2_620
+	IMPORT_FUNC	"LoadExecForKernel",0x08F7166C,sceKernelExitVSH_660
+	IMPORT_FUNC	"LoadExecForKernel",0xD8320A28,sceKernelLoadExecVSHDisc_660
+	IMPORT_FUNC	"LoadExecForKernel",0xD4B49C4B,sceKernelLoadExecVSHDiscUpdater_660
+	IMPORT_FUNC	"LoadExecForKernel",0x4FB44D27,sceKernelLoadExecVSHMs1_660
+	IMPORT_FUNC	"LoadExecForKernel",0xD940C83C,sceKernelLoadExecVSHMs2_660
+	IMPORT_FUNC	"LoadExecForKernel",0xCC6A47D2,sceKernelLoadExecVSHMs3_660
+	IMPORT_FUNC	"LoadExecForKernel",0x00745486,sceKernelLoadExecVSHMs4_660
+	IMPORT_FUNC	"LoadExecForKernel",0x032A7938,sceKernelLoadExecVSHEf2_660

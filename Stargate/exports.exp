@@ -1,0 +1,36 @@
+# Define the exports for the prx
+PSP_BEGIN_EXPORTS
+
+# These four lines are mandatory (although you can add other functions like module_stop)
+# syslib is a psynonym for the single mandatory export.
+PSP_EXPORT_START(syslib, 0, 0x8000)
+PSP_EXPORT_FUNC_HASH(module_start)
+PSP_EXPORT_VAR_HASH(module_info)
+PSP_EXPORT_END
+
+PSP_EXPORT_START(stargate, 0x0011, 0x4001)
+PSP_EXPORT_FUNC_NID(myPauth_98B83B5D, 0x98B83B5D)
+PSP_EXPORT_FUNC(myIoOpen)
+PSP_EXPORT_FUNC(myIoOpenAsync)
+PSP_EXPORT_FUNC(myIoClose)
+PSP_EXPORT_FUNC(myIoCloseAsync)
+PSP_EXPORT_FUNC(myIoIoctl)
+PSP_EXPORT_FUNC(myIoIoctlAsync)
+PSP_EXPORT_FUNC(myNpDrmRenameCheck)
+PSP_EXPORT_FUNC(myNpDrmEdataSetupKey)
+PSP_EXPORT_FUNC(myNpDrmEdataGetDataSize)
+PSP_EXPORT_FUNC(myKernelLoadModuleNpDrm)
+PSP_EXPORT_FUNC(myUtilityLoadModule)
+PSP_EXPORT_FUNC(myUtilityUnloadModule)
+PSP_EXPORT_FUNC(myKernelLoadModule)
+PSP_EXPORT_FUNC(myCtrlPeekBufferPositive)
+PSP_EXPORT_FUNC(myCtrlPeekBufferNegative)
+PSP_EXPORT_FUNC(myCtrlReadBufferPositive)
+PSP_EXPORT_FUNC(myCtrlReadBufferNegative)
+PSP_EXPORT_FUNC(_SysMemUserForUser_1B4217BC)
+PSP_EXPORT_FUNC(myPower_469989AD)
+PSP_EXPORT_FUNC(myPower_A85880D0)
+PSP_EXPORT_FUNC(hideIoDread)
+PSP_EXPORT_END
+
+PSP_END_EXPORTS

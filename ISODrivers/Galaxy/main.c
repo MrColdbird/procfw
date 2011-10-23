@@ -405,16 +405,21 @@ int read_cso_sector(u8 *addr, int sector)
 	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }
 
-// 998
 int read_cso_data(u8* addr, u32 size, int offset)
 {
-	u32 cur_block = offset / ISO_SECTOR_SIZE;
-	int ret;
-	int read_bytes;
-	int pos = offset & 0x7FF;
+	u32 cur_block;
+	int pos, ret, read_bytes;
+	int o_offset = offset;
 
-	if(pos) {
-		// loc_A80
+	while(size > 0) {
+		cur_block = offset / ISO_SECTOR_SIZE;
+		pos = offset & (ISO_SECTOR_SIZE - 1);
+
+		if(cur_block >= g_total_blocks) {
+			// EOF reached
+			break;
+		}
+
 		ret = read_cso_sector(g_ciso_block_buf, cur_block);
 
 		if(ret != ISO_SECTOR_SIZE) {
@@ -428,50 +433,10 @@ int read_cso_data(u8* addr, u32 size, int offset)
 		memcpy(addr, g_ciso_block_buf + pos, read_bytes);
 		size -= read_bytes;
 		addr += read_bytes;
-		cur_block++;
-	} else {
-		read_bytes = 0;
+		offset += read_bytes;
 	}
 
-	// loc_9E4
-	// more than 1 block left
-	if(size / ISO_SECTOR_SIZE > 0) {
-		int i;
-		int block_cnt = size / ISO_SECTOR_SIZE;
-
-		for(i=0; i<block_cnt; ++i) {
-			ret = read_cso_sector(addr, cur_block);
-
-			if(ret != ISO_SECTOR_SIZE) {
-				ret = -8;
-				printk("%s: -> %d\n", __func__, ret);
-
-				return ret;
-			}
-
-			cur_block++;
-			addr += ISO_SECTOR_SIZE;
-			read_bytes += ISO_SECTOR_SIZE;
-			size -= ISO_SECTOR_SIZE;
-		}
-	}
-
-	if(size != 0) {
-		ret = read_cso_sector(g_ciso_block_buf, cur_block);
-
-		if(ret != ISO_SECTOR_SIZE) {
-			ret = -9;
-			printk("%s: -> %d\n", __func__, ret);
-
-			return ret;
-		}
-
-		memcpy(addr, g_ciso_block_buf, size);
-
-		return size + read_bytes;
-	}
-
-	return read_bytes;
+	return offset - o_offset;
 }
 
 // 0x00001210~0x0000121C

@@ -23,6 +23,9 @@ static u32 cache_on = 0;
 #define NR_CACHE_REQ 8
 #define CACHE_MINIMUM_THRESHOLD (16 * 1024)
 
+//#define CACHE_TEST 1
+#undef CACHE_TEST
+
 static u32 cache_policy = CACHE_POLICY_LRU;
 
 struct ISOCacheRequest {
@@ -227,14 +230,13 @@ static int add_cache(struct IoReadArg *arg)
 
 		cache = get_retirng_cache();
 		disable_cache(cache);
-
 		cache_arg.offset = cur & (~(64-1));
 		cache_arg.address = (u8*)cache->buf;
-		cache_arg.size = MIN(g_total_sectors * ISO_SECTOR_SIZE - cache_arg.offset, g_caches_cap);
+		cache_arg.size = g_caches_cap;
 
 		ret = iso_read(&cache_arg);
 
-		if(ret >= 0) {
+		if(ret > 0) {
 			cache->pos = cache_arg.offset;
 			cache->age = -1;
 			cache->bufsize = ret;
@@ -247,11 +249,10 @@ static int add_cache(struct IoReadArg *arg)
 
 			cur += read_len;
 			reorder_iso_cache(cache - g_caches);
-
+		} else if (ret == 0) {
 			// EOF reached, time to exit
-			if (ret == 0) {
-				break;
-			}
+			reorder_iso_cache(cache - g_caches);
+			break;
 		} else {
 			reorder_iso_cache(cache - g_caches);
 			printk("%s: read -> 0x%08X\n", __func__, ret);
@@ -282,6 +283,62 @@ static void process_request(void)
 	add_cache(&cache_arg);
 }
 
+#ifdef CACHE_TEST
+void cache_test(struct IoReadArg *arg)
+{
+	SceUID memid;
+	struct IoReadArg testarg;
+	int ret, cur;
+
+	cur = 0;
+	testarg.size = MIN(16 * 1024, arg->size - cur);
+	memid = sceKernelAllocPartitionMemory(1, "infernoCacheTest", PSP_SMEM_High, testarg.size + 64, NULL);
+
+	if(memid < 0) {
+		asm("break 1");
+		return;
+	}
+
+	testarg.address = sceKernelGetBlockHeadAddr(memid);
+	testarg.address = (void*)(((u32)testarg.address & (~(64-1))) + 64);
+	memset(testarg.address, 0, testarg.size);
+
+	while(cur < arg->size) {
+		testarg.size = MIN(16 * 1024, arg->size - cur);
+		testarg.offset = arg->offset + cur;
+		ret = iso_read(&testarg);
+
+		if(ret == 0) {
+			if(cur != arg->size) {
+				char buf[256];
+
+				sprintf(buf, "%s: 0x%08X <%d> unexpected EOF for %d bytes\n", __func__, (uint)testarg.offset, (int)testarg.size, cur);
+				sceIoWrite(2, buf, strlen(buf));
+				asm("break 2");
+			}
+
+			break;
+		}
+
+		if(ret < 0 || 0 != memcmp(arg->address + cur, testarg.address, ret)) {
+			char buf[256];
+
+			sprintf(buf, "%s: 0x%08X <%d> cache error at pos 0x%08X, status %d\n", __func__, (uint)arg->offset, (int)arg->size, arg->offset + cur, ret);
+			sceIoWrite(2, buf, strlen(buf));
+
+			sprintf(buf, "%s: cbuf: 0x%08X tbuf: 0x%08X\n", __func__, (uint)arg->address + cur, (int)testarg.address);
+			sceIoWrite(2, buf, strlen(buf));
+			asm("break 3");
+			break;
+		}
+
+		cur += ret;
+	}
+
+	sceKernelFreePartitionMemory(memid);
+}
+#endif
+
 int iso_cache_read(struct IoReadArg *arg)
 {
 	int ret, len;
@@ -304,7 +361,7 @@ int iso_cache_read(struct IoReadArg *arg)
 			char buf[256];
 
 			sprintf(buf, "%s: 0x%08X <%d>\n", __func__, (uint)arg->offset, (int)arg->size);
-			sceIoWrite(1, buf, strlen(buf));
+			sceIoWrite(2, buf, strlen(buf));
 		}
 #endif
 
@@ -323,54 +380,13 @@ int iso_cache_read(struct IoReadArg *arg)
 		sceKernelDelayThread(MAX(512, len / 16));
 	}
 
+#ifdef CACHE_TEST
+	cache_test(arg);
+#endif
+	
 	read_call += len;
 	process_request();
 	update_cache_info();
-
-#if 0
-	{
-		SceUID memid;
-		struct IoReadArg testarg;
-		int retv;
-
-		memcpy(&testarg, arg, sizeof(testarg));
-
-		// Check validate code
-		memid = sceKernelAllocPartitionMemory(9, "infernoCacheTest", PSP_SMEM_High, testarg.size + 64, NULL);
-
-		if(memid >= 0) {
-			testarg.address = sceKernelGetBlockHeadAddr(memid);
-			testarg.address = (void*)(((u32)testarg.address & (~(64-1))) + 64);
-			
-			retv = iso_read(&testarg);
-
-			if(0 != memcmp(data, testarg.address, testarg.size)) {
-				char buf[256];
-
-				sprintf(buf, "%s: 0x%08X <%d> cache mismatched\n", __func__, (uint)testarg.offset, (int)testarg.size);
-				sceIoWrite(1, buf, strlen(buf));
-
-//				memcpy(data, testarg.address, testarg.size);
-			}
-
-			if(ret != retv) {
-				char buf[256];
-				
-				sprintf(buf, "%s: 0x%08X <%d> return (%d/%d) mismatched\n", __func__, (uint)testarg.offset, (int)testarg.size, ret, retv);
-				sceIoWrite(1, buf, strlen(buf));
-
-//				ret = retv;
-			}
-
-			sceKernelFreePartitionMemory(memid);
-		} else {
-			char buf[256];
-
-			sprintf(buf, "%s: 0x%08X <%d> cache too large to verify\n", __func__, (uint)testarg.offset, (int)testarg.size);
-			sceIoWrite(1, buf, strlen(buf));
-		}
-	}
-#endif
 
 	return ret;
 }
@@ -439,7 +455,7 @@ int infernoCacheAdd(int pos, int len)
 			char buf[256];
 
 			sprintf(buf, "%s: 0x%08X <%d> added\n", __func__, pos, len);
-			sceIoWrite(1, buf, strlen(buf));
+			sceIoWrite(2, buf, strlen(buf));
 		}
 #endif
 
@@ -456,29 +472,30 @@ void isocache_stat(int reset)
 	char buf[256];
 	size_t i, used;
 
-	if(read_call != 0) {
-		sprintf(buf, "caches stat:\n");
-		sceIoWrite(1, buf, strlen(buf));
+	sprintf(buf, "caches stat:\n");
+	sceIoWrite(2, buf, strlen(buf));
 
-		for(i=0, used=0; i<g_caches_num; ++i) {
-			if(g_caches[i].pos != -1) {
-				used++;
-			}
-
-			sprintf(buf, "%d: 0x%08X size %d age %02d\n", i+1, (uint)g_caches[i].pos, g_caches[i].bufsize, g_caches[i].age);
-			sceIoWrite(1, buf, strlen(buf));
+	for(i=0, used=0; i<g_caches_num; ++i) {
+		if(g_caches[i].pos != -1) {
+			used++;
 		}
 
-		sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, (int)cache_policy);
-		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
-		sceIoWrite(1, buf, strlen(buf));
-		sprintf(buf, "%d caches used(%02d%%)\n", used, 100 * used / g_caches_num);
-		sceIoWrite(1, buf, strlen(buf));
-	} else {
-		sprintf(buf, "no cache call yet\n");
-		sceIoWrite(1, buf, strlen(buf));
+		sprintf(buf, "%d: 0x%08X size %d age %02d address 0x%08X\n", i+1, (uint)g_caches[i].pos, g_caches[i].bufsize, g_caches[i].age, (int)g_caches[i].buf);
+		sceIoWrite(2, buf, strlen(buf));
 	}
+
+	sprintf(buf, "%dKB per cache, %d caches policy %d\n", g_caches_cap / 1024, g_caches_num, (int)cache_policy);
+	sceIoWrite(2, buf, strlen(buf));
+
+	if (read_call == 0) {
+		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(0), (int)(0), (int)read_hit, (int)read_missed, (int)read_call);
+	} else {
+		sprintf(buf, "hit percent: %02d%%/%02d%%, [%d/%d/%d]\n", (int)(100 * read_hit / read_call), (int)(100 * read_missed / read_call), (int)read_hit, (int)read_missed, (int)read_call);
+	}
+
+	sceIoWrite(2, buf, strlen(buf));
+	sprintf(buf, "%d caches used(%02d%%)\n", used, 100 * used / g_caches_num);
+	sceIoWrite(2, buf, strlen(buf));
 
 	if(reset) {
 		read_call = read_hit = read_missed = 0;

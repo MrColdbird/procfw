@@ -29,7 +29,7 @@ static u32 cache_on = 0;
 static u32 cache_policy = CACHE_POLICY_LRU;
 
 struct ISOCacheRequest {
-	int pos;
+	u32 pos;
 	int len;
 };
 
@@ -39,23 +39,23 @@ static int g_cache_request_idx = 0;
 struct ISOCache {
 	char *buf;
 	int bufsize;
-	int pos; /* -1 = invalid */
+	u32 pos; /* -1 = invalid */
 	int age;
 };
 
 static struct ISOCache *g_caches = NULL;
 static int g_caches_num = 0, g_caches_cap = 0;
 
-static inline int is_within_range(int pos, int start, int len)
+static inline int is_within_range(u32 pos, u32 start, int len)
 {
-	if(start != -1 && pos >= start && pos < start + len) {
+	if(start != (u32)-1 && pos >= start && pos < start + len) {
 		return 1;
 	}
 
 	return 0;
 }
 
-static int binary_search(const struct ISOCache *caches, size_t n, int pos)
+static int binary_search(const struct ISOCache *caches, size_t n, u32 pos)
 {
 	int low, high, mid;
 
@@ -77,7 +77,7 @@ static int binary_search(const struct ISOCache *caches, size_t n, int pos)
 	return -1;
 }
 
-static struct ISOCache *get_matched_buffer(int pos)
+static struct ISOCache *get_matched_buffer(u32 pos)
 {
 	int cache_pos;
 
@@ -90,9 +90,10 @@ static struct ISOCache *get_matched_buffer(int pos)
 	return &g_caches[cache_pos];
 }
 
-static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_cache)
+static int get_hit_caches(u32 pos, int len, char *data, struct ISOCache **last_cache)
 {
-	int cur, read_len;
+	u32 cur;
+	int read_len;
 	struct ISOCache *cache = NULL;
 
 	*last_cache = NULL;
@@ -125,13 +126,13 @@ static int get_hit_caches(int pos, int len, char *data, struct ISOCache **last_c
 
 static void update_cache_info(void)
 {
-	size_t i;
+	int i;
 
 	if(cache_policy != CACHE_POLICY_LRU)
 		return;
 
 	for(i=0; i<g_caches_num; ++i) {
-		if (g_caches[i].pos != -1) {
+		if (g_caches[i].pos != (u32)-1) {
 			g_caches[i].age++;
 		}
 	}
@@ -139,13 +140,13 @@ static void update_cache_info(void)
 
 static struct ISOCache *get_retirng_cache(void)
 {
-	size_t i, retiring;
+	int i, retiring;
 
 	retiring = 0;
 
 	// invalid cache first
 	for(i=0; i<g_caches_num; ++i) {
-		if(g_caches[i].pos == -1) {
+		if(g_caches[i].pos == (u32)-1) {
 			retiring = i;
 			goto exit;
 		}
@@ -167,7 +168,7 @@ exit:
 
 static void disable_cache(struct ISOCache *cache)
 {
-	cache->pos = -1;
+	cache->pos = (u32)-1;
 	cache->age = -1;
 	cache->bufsize = 0;
 }
@@ -200,7 +201,7 @@ static int add_cache(struct IoReadArg *arg)
 	int read_len, len, ret;
 	struct IoReadArg cache_arg;
 	struct ISOCache *cache, *last_cache;
-	int pos, cur;
+	u32 pos, cur;
 	char *data;
 
 	len = arg->size;
@@ -288,7 +289,8 @@ void cache_test(struct IoReadArg *arg)
 {
 	SceUID memid;
 	struct IoReadArg testarg;
-	int ret, cur;
+	int ret;
+	u32 cur;
 
 	cur = 0;
 	testarg.size = MIN(16 * 1024, arg->size - cur);
@@ -342,7 +344,7 @@ void cache_test(struct IoReadArg *arg)
 int iso_cache_read(struct IoReadArg *arg)
 {
 	int ret, len;
-	int pos;
+	u32 pos;
 	char *data;
 	struct ISOCache *last_cache;
 
@@ -367,7 +369,7 @@ int iso_cache_read(struct IoReadArg *arg)
 
 		// abandon the caching, because the bufsize is too small
 		// if we cache it then random access performance will be hurt
-		if(arg->size < MIN(CACHE_MINIMUM_THRESHOLD, g_caches_cap)) {
+		if(arg->size < MIN(CACHE_MINIMUM_THRESHOLD, (u32)g_caches_cap)) {
 			return iso_read(arg);
 		}
 
@@ -394,7 +396,7 @@ int iso_cache_read(struct IoReadArg *arg)
 int infernoCacheInit(int cache_size, int cache_num)
 {
 	SceUID memid;
-	SceUInt i;
+	int i;
 	struct ISOCache *cache;
 	void *pbuf;
 
@@ -439,13 +441,13 @@ int infernoCacheInit(int cache_size, int cache_num)
 	return 0;
 }
 
-int infernoCacheAdd(int pos, int len)
+int infernoCacheAdd(u32 pos, int len)
 {
 	if(!cache_on) {
 		return -1;
 	}
 
-	if(g_cache_request_idx < NELEMS(g_cache_request)) {
+	if(g_cache_request_idx < (int)NELEMS(g_cache_request)) {
 		g_cache_request[g_cache_request_idx].pos = pos;
 		g_cache_request[g_cache_request_idx].len = len;
 		g_cache_request_idx++;
@@ -470,13 +472,13 @@ int infernoCacheAdd(int pos, int len)
 void isocache_stat(int reset)
 {
 	char buf[256];
-	size_t i, used;
+	int i, used;
 
 	sprintf(buf, "caches stat:\n");
 	sceIoWrite(2, buf, strlen(buf));
 
 	for(i=0, used=0; i<g_caches_num; ++i) {
-		if(g_caches[i].pos != -1) {
+		if(g_caches[i].pos != (u32)-1) {
 			used++;
 		}
 

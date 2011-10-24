@@ -280,18 +280,18 @@ int get_total_block(void)
 }
 
 // 244
-int read_raw_data(u8* addr, u32 size, int offset)
+int read_raw_data(u8* addr, u32 size, u32 offset)
 {
-	int ret;
-	int i;
+	int ret, i;
+	SceOff ofs;
 
 	i = 0;
 
 	do {
 		i++;
-		ret = sceIoLseek32(g_iso_fd, offset, PSP_SEEK_SET);
+		ofs = sceIoLseek(g_iso_fd, offset, PSP_SEEK_SET);
 
-		if(ret >= 0) {
+		if(ofs >= 0) {
 			i = 0;
 			break;
 		} else {
@@ -329,7 +329,7 @@ int read_cso_sector(u8 *addr, int sector)
 {
 	int ret;
 	int n_sector;
-	int offset, next_offset;
+	u32 offset, next_offset;
 	int size;
 
 	n_sector = sector - g_CISO_cur_idx;
@@ -405,11 +405,11 @@ int read_cso_sector(u8 *addr, int sector)
 	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }
 
-int read_cso_data(u8* addr, u32 size, int offset)
+int read_cso_data(u8* addr, u32 size, u32 offset)
 {
 	u32 cur_block;
 	int pos, ret, read_bytes;
-	int o_offset = offset;
+	u32 o_offset = offset;
 
 	while(size > 0) {
 		cur_block = offset / ISO_SECTOR_SIZE;

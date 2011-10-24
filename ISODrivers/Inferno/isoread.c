@@ -248,22 +248,22 @@ int iso_open(void)
 }
 
 // 0x00000BB4
-static int read_raw_data(u8* addr, u32 size, int offset)
+static int read_raw_data(u8* addr, u32 size, u32 offset)
 {
-	int ret;
-	int i;
+	int ret, i;
+	SceOff ofs;
 
 	i = 0;
 
 	do {
 		i++;
-		ret = sceIoLseek32(g_iso_fd, offset, PSP_SEEK_SET);
+		ofs = sceIoLseek(g_iso_fd, offset, PSP_SEEK_SET);
 
-		if(ret >= 0) {
+		if(ofs >= 0) {
 			i = 0;
 			break;
 		} else {
-			printk("%s: lseek32 retry %d error 0x%08X\n", __func__, i, ret);
+			printk("%s: lseek retry %d error 0x%08X\n", __func__, i, (int)ofs);
 			iso_open();
 		}
 	} while(i < 16);
@@ -299,7 +299,7 @@ static int read_cso_sector(u8 *addr, int sector)
 {
 	int ret;
 	int n_sector;
-	int offset, next_offset;
+	u32 offset, next_offset;
 	int size;
 
 	n_sector = sector - g_CISO_cur_idx;
@@ -369,11 +369,11 @@ static int read_cso_sector(u8 *addr, int sector)
 	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }
 
-static int read_cso_data(u8* addr, u32 size, int offset)
+static int read_cso_data(u8* addr, u32 size, u32 offset)
 {
 	u32 cur_block;
 	int pos, ret, read_bytes;
-	int o_offset = offset;
+	u32 o_offset = offset;
 
 	while(size > 0) {
 		cur_block = offset / ISO_SECTOR_SIZE;

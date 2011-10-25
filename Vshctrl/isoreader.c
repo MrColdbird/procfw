@@ -96,17 +96,18 @@ static int reOpen(void)
 	return fd;
 }
 
-static int readRawData(void* addr, u32 size, int offset)
+static int readRawData(void* addr, u32 size, u32 offset)
 {
 	int ret, i;
+	SceOff ofs;
 
 	for(i=0; i<MAX_RETRIES; ++i) {
-		ret = sceIoLseek32(g_isofd, offset, PSP_SEEK_SET);
+		ofs = sceIoLseek(g_isofd, offset, PSP_SEEK_SET);
 
-		if (ret >= 0) {
+		if (ofs >= 0) {
 			break;
 		} else {
-			printk("%s: sceIoLseek32 -> 0x%08X\n", __func__, ret);
+			printk("%s: sceIoLseek -> 0x%08X\n", __func__, (int)ofs);
 			reOpen();
 		}
 
@@ -121,7 +122,7 @@ static int readRawData(void* addr, u32 size, int offset)
 		} else {
 			printk("%s: sceIoRead -> 0x%08X\n", __func__, ret);
 			reOpen();
-			sceIoLseek32(g_isofd, offset, PSP_SEEK_SET);
+			sceIoLseek(g_isofd, offset, PSP_SEEK_SET);
 		}
 
 		sceKernelDelayThread(100000);
@@ -134,7 +135,7 @@ static int readSectorCompressed(int sector, void *addr)
 {
 	int ret;
 	int n_sector;
-	int offset, next_offset;
+	u32 offset, next_offset;
 	int size;
 
 	n_sector = sector - g_CISO_cur_idx;
@@ -384,7 +385,7 @@ int isoOpen(const char *path)
 		goto error;
 	}
 
-	sceIoLseek32(g_isofd, 0, PSP_SEEK_SET);
+	sceIoLseek(g_isofd, 0, PSP_SEEK_SET);
 	memset(&g_ciso_h, 0, sizeof(g_ciso_h));
 	ret = sceIoRead(g_isofd, &g_ciso_h, sizeof(g_ciso_h));
 
@@ -419,13 +420,13 @@ int isoOpen(const char *path)
 		g_ciso_dec_buf_offset = -1;
 		g_CISO_cur_idx = -1;
 	} else {
-		int ret, size;
+		SceOff size, orig;
 
-		ret = sceIoLseek32(g_isofd, 0, PSP_SEEK_CUR);
-		size = sceIoLseek32(g_isofd, 0, PSP_SEEK_END);
-		sceIoLseek32(g_isofd, ret, PSP_SEEK_SET);
+		orig = sceIoLseek(g_isofd, 0, PSP_SEEK_CUR);
+		size = sceIoLseek(g_isofd, 0, PSP_SEEK_END);
+		sceIoLseek(g_isofd, orig, PSP_SEEK_SET);
 
-		g_total_sectors = isoPos2LBA(size);
+		g_total_sectors = isoPos2LBA((u32)size);
 	}
 
 	ret = readSector(16, g_sector_buffer);
@@ -505,6 +506,10 @@ int isoRead(void *buffer, u32 lba, int offset, u32 size)
 	copied = 0;
 
 	while(remaining > 0) {
+		if (isoPos2LBA(pos) >= g_total_sectors) {
+			break;
+		}
+
 		ret = readSector(isoPos2LBA(pos), g_sector_buffer);
 
 		if (ret != SECTOR_SIZE) {

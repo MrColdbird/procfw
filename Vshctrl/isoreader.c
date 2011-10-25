@@ -496,16 +496,13 @@ int isoGetFileInfo(char * path, u32 *filesize, u32 *lba)
 
 int isoRead(void *buffer, u32 lba, int offset, u32 size)
 {
-	u32 remaining;
-	u32 pos, copied;
-	u32 re;
+	u32 pos, re;
 	int ret;
+	void *o_buffer = buffer;
 
-	remaining = size;
 	pos = isoLBA2Pos(lba, offset);
-	copied = 0;
 
-	while(remaining > 0) {
+	while(size > 0) {
 		if (isoPos2LBA(pos) >= g_total_sectors) {
 			break;
 		}
@@ -518,12 +515,12 @@ int isoRead(void *buffer, u32 lba, int offset, u32 size)
 			return -20;
 		}
 
-		re = MIN(isoPos2RestSize(pos), remaining);
-		memcpy(buffer+copied, g_sector_buffer+isoPos2OffsetInSector(pos), re);
-		remaining -= re;
+		re = MIN(isoPos2RestSize(pos), size);
+		memcpy(buffer, g_sector_buffer+isoPos2OffsetInSector(pos), re);
+		size -= re;
 		pos += re;
-		copied += re;
+		buffer += re;
 	}
 
-	return copied;
+	return buffer - o_buffer;
 }

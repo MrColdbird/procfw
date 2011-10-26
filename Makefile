@@ -54,16 +54,20 @@ endif
 all:
 # Preparing Distribution Folders
 	@mkdir $(DISTRIBUTE) || true
-	@mkdir $(DISTRIBUTE)/PROUPDATE || true
-	@mkdir $(DISTRIBUTE)/FastRecovery || true
+	@mkdir $(DISTRIBUTE)/seplugins/ || true
+	@cp -r contrib/fonts $(DISTRIBUTE)/seplugins/fonts || true
+	@mkdir $(DISTRIBUTE)/PSP || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME/PROUPDATE || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME/FastRecovery || true
 ifeq ($(CONFIG_620), 1)
-	@mkdir $(DISTRIBUTE)/620PRO_Permanent || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME/620PRO_Permanent || true
 endif
 ifeq ($(CONFIG_639), 1)
-	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher || true
 endif
 ifeq ($(CONFIG_660), 1)
-	@mkdir $(DISTRIBUTE)/CIPL_Flasher || true
+	@mkdir $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher || true
 endif
 	@rm -f ./Common/*.o
 
@@ -92,32 +96,32 @@ endif
 	@cd $(REBOOTEXPXE); make $(OPT_FLAGS)
 	@mv $(REBOOTEXPXE)/rebootex.h $(LAUNCHER)
 	@cd $(LAUNCHER); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(LAUNCHER)/EBOOT.PBP $(DISTRIBUTE)/PROUPDATE
+	@mv $(LAUNCHER)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/PROUPDATE
 
 # Creating Debugging Suite for Live-System
 	@cd $(FASTRECOVERY); make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/FastRecovery
+	@mv $(FASTRECOVERY)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/FastRecovery
 ifeq ($(CONFIG_620), 1)
 	@cd $(PERMANENT); make $(DEBUG_OPTION)
-	@mv $(PERMANENT)/EBOOT.PBP $(DISTRIBUTE)/620PRO_Permanent
-	@mv $(PERMANENT)/hen.prx $(DISTRIBUTE)/620PRO_Permanent
-	@mv $(PERMANENT)/kmod.prx $(DISTRIBUTE)/620PRO_Permanent
+	@mv $(PERMANENT)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/620PRO_Permanent
+	@mv $(PERMANENT)/hen.prx $(DISTRIBUTE)/PSP/GAME/620PRO_Permanent
+	@mv $(PERMANENT)/kmod.prx $(DISTRIBUTE)/PSP/GAME/620PRO_Permanent
 endif
 ifeq ($(CONFIG_639), 1)
 	@cd $(CIPL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER)/kpspident; make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/CIPL_Flasher
-	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/CIPL_Flasher
-	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
 endif
 ifeq ($(CONFIG_660), 1)
 	@cd $(CIPL); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER)/kpspident; make $(OPT_FLAGS) $(DEBUG_OPTION)
-	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/CIPL_Flasher
-	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/CIPL_Flasher
-	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
 endif
 
 clean:

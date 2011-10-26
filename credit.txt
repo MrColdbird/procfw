@@ -18,4 +18,5 @@ some1 for his exploit on 6.39 OFW, allowing CFW on 6.39
 again some1/Davee/Proxima/Zecoxao for their exploit on 6.60 OFW, allowing CFW on 6.60
 Yoti for blocking satellite menu in Go!cam
 xFede and sinistro for their translations for Italian and Spanish
+Richard J. Prinz for the 8x8 fonts in 8x8 Pixel ROM Font Editor
 And last but not least - Sony for making a wonderful, however very locked down, portable gaming handheld.

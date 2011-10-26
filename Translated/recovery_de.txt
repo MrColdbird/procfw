@@ -1,0 +1,98 @@
+PRO Recovery MenÅ
+HauptmenÅ
+Entering
+Exiting
+ZurÅck
+Standard
+Aktiviert
+Deaktiviert
+Toggle USB
+USB Aktiviert
+USB Deaktiviert
+Einstellungen
+Region wechseln
+Recovery Schriftart
+ISO Modus
+Normal
+M33 Treiber
+Sony NP9660
+Inferno
+XMB USB GerÑt
+Flash 0
+Flash 1
+Flash 2
+Flash 3
+UMD Disc
+Lade Battery wenn USB Kabel eingesteckt ist
+Aktiviere Slimline Farben fÅr 1g
+Aktiviere alternative Webbrowser Speicherorte
+Verstecke MAC Adresse
+öberspringe Sony Bootlogo
+öberspringe Gameboot Video
+Verstecke PIC0.PNG und PIC1.PNG im Spiele MenÅ
+SchÅtze Flash-Speicher im USB Modus
+Verwende version.txt in /seplugins
+Verwende usbversion.txt in /seplugins
+Verwende PRO Update Server
+Verhindere Spielpausendaten-Lîschung
+Erweitert
+XMB Plugin
+Game Plugin
+Pops Plugin
+NoDRM Engine
+Verstecke CFW Dateien vor Spielmodulen
+Deaktiviere Analog-Stick in Spielen
+ef0 zu ms0 Umleitung fÅr Plugins (PSP Go)
+Inferno & NP9660 Verwende ISO Cache
+Inferno & NP9660 Cache Grî·e (in MB)
+Inferno & NP9660 Cache Nummer
+Inferno & NP9660 Cache Regelsatz
+Erlaube Non-latin1 ISO Dateinamen
+Memory Stick Beschleunigung
+Keine
+Pop
+Game
+Vsh
+Pop & Game
+Game & Vsh
+Vsh & Pop
+Immer
+CPU Geschwindigkeit
+XMB CPU/BUS
+Game CPU/BUS
+Plugins
+Systemspeicher
+Memory stick
+Plugins am Systemspeicher
+Plugins am Memory Stick
+Registry hacks
+WMA aktiviert
+Flash aktiviert
+Buttonbelegung vertauscht
+BestÑtigungs-Button: X
+BestÑtigungs-Button: O
+Aktiviere WMA
+Aktiviere Flash
+Vertausche O/X buttons
+Vertausche O/X buttons (needs Reset VSH to take effect)
+Lîsche Pausierungsdaten
+Pausierungsdaten gelîscht
+Starte /PSP/GAME/RECOVERY/EBOOT.PBP
+GerÑt abschalten
+GerÑt pausieren
+GerÑt neu starten
+VSH neu starten
+Seite
+Japan
+Amerika
+Europa
+Korea
+England
+Mexiko
+Australien
+Hongkong
+Taiwan
+Russland
+China
+Debug Typ I
+Debug Typ II

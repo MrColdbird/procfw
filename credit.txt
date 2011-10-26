@@ -1,0 +1,22 @@
+Acknowledge:
+
+Total_Noob: For the initial discovery of the Power-Kernel-Exploit in 6.20 OFW.
+Coldbird: For initial reverse of the TN Kernel Exploit, Hacks to make it 6.3X compatible and several other things CFW related.
+VirtuousFlame: For the ISO Loading Code, Custom PSX EBOOT Support and most of the CFW related code.
+Mathieulh, Geohotz, TPU and everyone else involved for making PSP signing possible, making the Minna No Sukkiri Exploit redundant.
+Dark_Alex for the initial M33 CFW who guided us mentally through several CFW generations by giving good examples on how to patch Sony OFW.
+Davee for his v1 register leak address discovery used in Power-Argument-Patching.
+victor.rds for the cool animated Fast Recovery Icon. (http://wololo.net/talk/viewtopic.php?f=17&t=3716#p42091)
+Takka and Plum for their idea of preventing hibernation deletetion.
+kgsws for his idea of faking vshmain module as permanent patch
+bbtgp and Draan for their PrxEncrypter source code to produce the signed fake vshmain module for permanent patch
+bbtgp, Dark_AleX, Noobz, Team C+D, M33 Team, and coyotebean for their new psardumper source to get the OFW binary
+neur0n for his syscall execution in kernel mode, and CIPL allowing hackable PSPs to have CFW installed permanently, and several bug fixes
+jas0nuk for his PSPident source to detect if it is a TA-88v3 unit
+ardi for his umd4homebrew to enable UMD in homebrews
+some1 for his exploit on 6.39 OFW, allowing CFW on 6.39
+again some1/Davee/Proxima/Zecoxao for their exploit on 6.60 OFW, allowing CFW on 6.60
+Yoti for blocking satellite menu in Go!cam
+xFede and sinistro for their translations for Italian and Spanish
+Richard J. Prinz for the 8x8 fonts in 8x8 Pixel ROM Font Editor
+And last but not least - Sony for making a wonderful, however very locked down, portable gaming handheld.

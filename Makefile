@@ -56,6 +56,7 @@ all:
 	@mkdir $(DISTRIBUTE) || true
 	@mkdir $(DISTRIBUTE)/seplugins/ || true
 	@cp -r contrib/fonts $(DISTRIBUTE)/seplugins/fonts || true
+	@cp Translated/* $(DISTRIBUTE)/seplugins || true
 	@mkdir $(DISTRIBUTE)/PSP || true
 	@mkdir $(DISTRIBUTE)/PSP/GAME || true
 	@mkdir $(DISTRIBUTE)/PSP/GAME/PROUPDATE || true

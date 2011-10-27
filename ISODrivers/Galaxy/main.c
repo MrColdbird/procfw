@@ -224,8 +224,7 @@ int open_iso(void)
 		printk("%s: g_is_ciso = 1\n", __func__);
 	}
 
-	ret = get_total_block();
-	g_total_blocks = ret;
+	g_total_blocks = get_total_block();
 	g_iso_opened = 1;
 
 	return 0;
@@ -271,7 +270,12 @@ int get_total_block(void)
 	} else {
 		offset = sceIoLseek(g_iso_fd, 0, PSP_SEEK_END);
 
-		ret = ((u32)(offset >> 32) << 21) | (((u32)offset) >> 11);
+		if(offset < 0) {
+			printk("%s: lseek 0x%08X\n", __func__, (int)offset);
+			return (int)offset;
+		}
+
+		ret = offset / ISO_SECTOR_SIZE;
 	}
 
 	printk("%s: returns %d blocks\n", __func__, ret);

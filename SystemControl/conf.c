@@ -206,7 +206,7 @@ void load_default_conf(SEConfig *config)
 	config->slimcolor = 1;
 	config->iso_cache = psp_model == PSP_GO ? 0 : 1;
 	config->iso_cache_total_size = 20;
-	config->iso_cache_num = 128;
+	config->iso_cache_num = 256;
 	config->iso_cache_policy = CACHE_POLICY_LRU;
 	config->usbversion = 0;
 	config->language = -1;

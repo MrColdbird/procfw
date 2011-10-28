@@ -34,6 +34,7 @@ u32 sceSysregGetTachyonVersion(void);		// 0xE2A5D1EE
 
 char msg[256];
 int model;
+static u8 orig_ipl[0x24000] __attribute__((aligned(64)));
 
 int ReadFile(char *file, int seek, void *buf, int size)
 {
@@ -147,7 +148,7 @@ int main()
 		ErrorExit(5000,"Could not start module!\n");
 	}
 
-	size = pspIplUpdateGetIpl( ipl_block_large + 0x4000 );
+	size = pspIplUpdateGetIpl(orig_ipl);
 
 	if(size < 0) {
 		ErrorExit(5000,"Failed to get ipl!\n");
@@ -160,10 +161,11 @@ int main()
 	if( size == 0x24000 ) {
 		printf("Custom ipl is installed\n");
 		size -= 0x4000;
-		memmove( ipl_block_large + 0x4000 , ipl_block_large + 0x8000 , size);
+		memmove( ipl_block_large + 0x4000 , orig_ipl + 0x4000 , size);
 		ipl_type = 1;
 	} else if( size == 0x20000 ) {
 		printf("Raw ipl \n");
+		memmove( ipl_block_large + 0x4000, orig_ipl, size);
 	} else {
 		printf("ipl size;%08X\n", size);
 		ErrorExit(5000,"Unknown ipl!\n");

@@ -41,7 +41,8 @@ typedef struct _CISOHeader {
 
 static void *g_ciso_dec_buf = NULL;
 static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
-static int g_ciso_dec_buf_offset = -1;
+static u32 g_ciso_dec_buf_offset = (u32)-1;
+static int g_ciso_dec_buf_size = 0;
 static CISOHeader g_ciso_h;
 static int g_CISO_cur_idx = -1;
 
@@ -176,20 +177,23 @@ static int readSectorCompressed(int sector, void *addr)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_ciso_h.align;
 	size = next_offset - offset;
 	
+	if(g_ciso_h.align)
+		size += 1 << g_ciso_h.align;
+
 	if (size <= SECTOR_SIZE)
 		size = SECTOR_SIZE;
 
-	if (offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
-		ret = readRawData(PTR_ALIGN_64(g_ciso_dec_buf), CISO_DEC_BUFFER_SIZE, offset);
+	if (g_ciso_dec_buf_offset == (u32)-1 || offset < g_ciso_dec_buf_offset || offset + size >= g_ciso_dec_buf_offset + g_ciso_dec_buf_size) {
+		ret = readRawData(PTR_ALIGN_64(g_ciso_dec_buf), size, offset);
 
-		/* May not reach CISO_DEC_BUFFER_SIZE */	
 		if (ret < 0) {
-			g_ciso_dec_buf_offset = 0xFFF00000;
+			g_ciso_dec_buf_offset = (u32)-1;
 
 			return -24;
 		}
 
 		g_ciso_dec_buf_offset = offset;
+		g_ciso_dec_buf_size = ret;
 	}
 
 	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, PTR_ALIGN_64(g_ciso_dec_buf) + offset - g_ciso_dec_buf_offset, 0);
@@ -407,7 +411,7 @@ int isoOpen(const char *path)
 		g_CISO_cur_idx = -1;
 
 		if (g_ciso_dec_buf == NULL) {
-			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
+			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + (1 << g_ciso_h.align) + 64);
 
 			if (g_ciso_dec_buf == NULL) {
 				printk("oe_malloc -> 0x%08x\n", (uint)g_ciso_dec_buf);
@@ -417,7 +421,8 @@ int isoOpen(const char *path)
 		}
 
 		memset(g_CISO_idx_cache, 0, sizeof(g_CISO_idx_cache));
-		g_ciso_dec_buf_offset = -1;
+		g_ciso_dec_buf_offset = (u32)-1;
+		g_ciso_dec_buf_size = 0;
 		g_CISO_cur_idx = -1;
 	} else {
 		SceOff size, orig;

@@ -55,14 +55,16 @@ static int g_is_ciso = 0;
 // 0x000024C0
 static void *g_ciso_block_buf = NULL;
 
-// 0x000024C4, size CISO_DEC_BUFFER_SIZE, align 64
+// 0x000024C4, size CISO_DEC_BUFFER_SIZE + (1 << g_CISO_hdr.align), align 64
 static void *g_ciso_dec_buf = NULL;
 
 // 0x00002704
 static int g_CISO_cur_idx = 0;
 
 // 0x00002700
-static int g_ciso_dec_buf_offset = -1;
+static u32 g_ciso_dec_buf_offset = (u32)-1;
+
+static int g_ciso_dec_buf_size = 0;
 
 // 0x00002720
 static u32 g_ciso_total_block = 0;
@@ -155,7 +157,8 @@ static int is_ciso(SceUID fd)
 	u32 *magic;
 
 	g_CISO_hdr.magic[0] = '\0';
-	g_ciso_dec_buf_offset = 0x7FFFFFFF;
+	g_ciso_dec_buf_offset = (u32)-1;
+	g_ciso_dec_buf_size = 0;
 
 	sceIoLseek(fd, 0, PSP_SEEK_SET);
 	ret = sceIoRead(fd, &g_CISO_hdr, sizeof(g_CISO_hdr));
@@ -174,7 +177,7 @@ static int is_ciso(SceUID fd)
 		printk("%s: total block %d\n", __func__, (int)g_ciso_total_block);
 
 		if(g_ciso_dec_buf == NULL) {
-			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
+			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + (1 << g_CISO_hdr.align) + 64);
 
 			if(g_ciso_dec_buf == NULL) {
 				ret = -2;
@@ -346,15 +349,18 @@ static int read_cso_sector(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
+	if(g_CISO_hdr.align)
+		size += 1 << g_CISO_hdr.align;
+
 	if(size <= ISO_SECTOR_SIZE)
 		size = ISO_SECTOR_SIZE;
 
-	if(offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
-		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
+	if(g_ciso_dec_buf_offset == (u32)-1 || offset < g_ciso_dec_buf_offset || offset + size >= g_ciso_dec_buf_offset + g_ciso_dec_buf_size) {
+		ret = read_raw_data(g_ciso_dec_buf, size, offset);
 
 		/* May not reach CISO_DEC_BUFFER_SIZE */	
 		if(ret < 0) {
-			g_ciso_dec_buf_offset = 0xFFF00000;
+			g_ciso_dec_buf_offset = (u32)-1;
 			ret = -6;
 			printk("%s: -> %d\n", __func__, ret);
 
@@ -362,6 +368,7 @@ static int read_cso_sector(u8 *addr, int sector)
 		}
 
 		g_ciso_dec_buf_offset = offset;
+		g_ciso_dec_buf_size = ret;
 	}
 
 	ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);

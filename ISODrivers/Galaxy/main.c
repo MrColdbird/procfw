@@ -61,14 +61,16 @@ int g_is_ciso = 0;
 // 0x00000F80
 void *g_ciso_block_buf = NULL;
 
-// 0x00000F84, size CISO_DEC_BUFFER_SIZE, align 64
+// 0x00000F84, size CISO_DEC_BUFFER_SIZE + (1 << g_CISO_hdr.align), align 64
 void *g_ciso_dec_buf = NULL;
 
 // 0x00000FC0
 u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
 
 // 0x000011C0
-int g_ciso_dec_buf_offset = -1;
+static u32 g_ciso_dec_buf_offset = (u32)-1;
+
+static int g_ciso_dec_buf_size = 0;
 
 // 0x000011C4
 int g_CISO_cur_idx = 0;
@@ -142,7 +144,8 @@ int cso_open(SceUID fd)
 	u32 *magic;
 
 	g_CISO_hdr.magic[0] = '\0';
-	g_ciso_dec_buf_offset = 0x7FFFFFFF;
+	g_ciso_dec_buf_offset = (u32)-1;
+	g_ciso_dec_buf_size = 0;
 
 	sceIoLseek(fd, 0, PSP_SEEK_SET);
 	ret = sceIoRead(fd, &g_CISO_hdr, sizeof(g_CISO_hdr));
@@ -161,7 +164,7 @@ int cso_open(SceUID fd)
 		printk("%s: total block %d\n", __func__, (int)ciso_total_block);
 
 		if(g_ciso_dec_buf == NULL) {
-			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + 64);
+			g_ciso_dec_buf = oe_malloc(CISO_DEC_BUFFER_SIZE + (1 << g_CISO_hdr.align) + 64);
 
 			if(g_ciso_dec_buf == NULL) {
 				ret = -2;
@@ -383,12 +386,15 @@ int read_cso_sector(u8 *addr, int sector)
 	next_offset = (g_CISO_idx_cache[n_sector] & 0x7FFFFFFF) << g_CISO_hdr.align;
 	size = next_offset - offset;
 	
+	if(g_CISO_hdr.align)
+		size += 1 << g_CISO_hdr.align;
+
 	if(size <= ISO_SECTOR_SIZE)
 		size = ISO_SECTOR_SIZE;
 
-	if(offset < g_ciso_dec_buf_offset || size + offset >= g_ciso_dec_buf_offset + CISO_DEC_BUFFER_SIZE) {
+	if(g_ciso_dec_buf_offset == (u32)-1 || offset < g_ciso_dec_buf_offset || offset + size >= g_ciso_dec_buf_offset + g_ciso_dec_buf_size) {
 		// loc_93C
-		ret = read_raw_data(g_ciso_dec_buf, CISO_DEC_BUFFER_SIZE, offset);
+		ret = read_raw_data(g_ciso_dec_buf, size, offset);
 
 		/* May not reach CISO_DEC_BUFFER_SIZE */	
 		if(ret < 0) {
@@ -401,6 +407,7 @@ int read_cso_sector(u8 *addr, int sector)
 		}
 
 		g_ciso_dec_buf_offset = offset;
+		g_ciso_dec_buf_size = ret;
 	}
 
 	// loc_8B8

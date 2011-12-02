@@ -635,7 +635,7 @@ version_OK:
 			printf("PSP FAT 1000 Detected ....\n");
 			break;
 		default:
-			printf("Unkown PSP model 0%dg\n", psp_model+1);
+			printf("Unknown PSP model 0%dg\n", psp_model+1);
 			break;
 	}
 

@@ -634,6 +634,9 @@ version_OK:
 		case PSP_1000:
 			printf("PSP FAT 1000 Detected ....\n");
 			break;
+		case PSP_11000:
+			printf("PSP STREET E1000 Detected ....\n");
+			break;
 		default:
 			printf("Unknown PSP model 0%dg\n", psp_model+1);
 			break;

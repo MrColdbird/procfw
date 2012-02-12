@@ -74,7 +74,7 @@ Best„tigungs-Button: O
 Aktiviere WMA
 Aktiviere Flash
 Vertausche O/X buttons
-Vertausche O/X buttons (needs Reset VSH to take effect)
+Vertausche O/X buttons (erfordert VSH Neustart)
 L”sche Pausierungsdaten
 Pausierungsdaten gel”scht
 Starte /PSP/GAME/RECOVERY/EBOOT.PBP
@@ -96,3 +96,4 @@ Russland
 China
 Debug Typ I
 Debug Typ II
+Retail RAM-Begrenzung aufheben (bugged Homescreen)

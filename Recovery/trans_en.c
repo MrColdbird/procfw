@@ -119,6 +119,7 @@ const char * g_messages_en[] = {
 	"China",
 	"Debug Type I",
 	"Debug Type II",
+	"Unlock Memory in PSP Games (breaks Homescreen)",
 };
 
 u8 message_test_en[NELEMS(g_messages_en) == MSG_END ? 0 : -1];

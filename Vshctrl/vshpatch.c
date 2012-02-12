@@ -424,6 +424,9 @@ int umdLoadExec(char * file, struct SceKernelLoadExecVSHParam * param)
 		sctrlSESetDiscType(PSP_UMD_TYPE_GAME);
 	}
 
+	//enable high memory on demand
+	if(config.retail_high_memory) sctrlHENSetMemory(55, 0);
+
 	if(psp_model == PSP_GO) {
 		char devicename[20];
 		int apitype;

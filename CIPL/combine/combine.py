@@ -41,7 +41,7 @@ def main():
 	fp.close()
 
 	if len(buf) < inputsize:
-		buf += b'\0' * (inputsize - len(buf))
+		buf += '\0' * (inputsize - len(buf))
 
 	assert(len(buf) == inputsize)
 

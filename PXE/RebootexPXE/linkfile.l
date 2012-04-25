@@ -6,8 +6,8 @@ ENTRY(main)
 SECTIONS
 {
   . = 0x88FC0000;
-  .text.start : {
-    *(.text.start)
+  .text.startup : {
+    *(.text.startup)
   }
   .text : {
     *(.text)

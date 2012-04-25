@@ -6,8 +6,8 @@ ENTRY(Reboot_Entry)
 SECTIONS
 {
   . = 0x88fc0000;
-  .text.start : {
-    *(.text.start)
+  .text.startup : {
+    *(.text.startup)
   }
   .text : {
     *(.text)

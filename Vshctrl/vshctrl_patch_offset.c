@@ -56,7 +56,7 @@ PatchOffset g_660_offsets = {
 		.htmlviewer_manual_location = 0x0001C2B0,
 	},
 	.htmlviewer_utility_patch = {
-		.htmlutility_manual_location = 0x0000CDBC,
+		.htmlviewer_manual_location = 0x0000CDBC,
 	},
 	.msvideo_main_plugin_patch = {
 		.checks = {
@@ -143,7 +143,7 @@ PatchOffset g_639_offsets = {
 		.htmlviewer_manual_location = 0x0001C2B0,
 	},
 	.htmlviewer_utility_patch = {
-		.htmlutility_manual_location = 0x0000CD3C,
+		.htmlviewer_manual_location = 0x0000CD3C,
 	},
 	.msvideo_main_plugin_patch = {
 		.checks = {
@@ -230,7 +230,7 @@ PatchOffset g_635_offsets = {
 		.htmlviewer_manual_location = 0x0001C2B0,
 	},
 	.htmlviewer_utility_patch = {
-		.htmlutility_manual_location = 0x0000CD3C,
+		.htmlviewer_manual_location = 0x0000CD3C,
 	},
 	.msvideo_main_plugin_patch = {
 		.checks = {

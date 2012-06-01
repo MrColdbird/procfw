@@ -29,6 +29,7 @@ static char *g_blacklist[] = {
 	"iso",
 	"seplugins",
 	"isocache.bin",
+	"irshell",
 };
 
 static inline int is_in_blacklist(const char *dname)

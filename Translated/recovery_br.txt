@@ -1,0 +1,99 @@
+Menu Recovery PRO
+Menu Principal
+Dar entrada
+Sair
+Voltar
+Padrão
+Ativado
+Desativado
+Conecção USB
+Conecção USB Ativada
+Conecção USB Desativada
+Configuração
+Mudar de região
+Police du Menu Recovery
+Modo ISO
+Normal
+M33 driver
+Sony NP9660
+Inferno
+Vincular o PSP ao PC mediante o fio USB
+Flash 0
+Flash 1
+Flash 2
+Flash 3
+Disco UMD
+Carregar a bateria enquanto o fiu USB estah plugado
+Usar as cores da PSP Slim numa PSP Fat
+Usar uma destinação escolhida pelo utilizador para htmlviewer
+Esconder o endereço MAC
+Pular a imagem da SONY 
+Pular o Gameboot
+Esconder os PIC0.PNG et PIC1.PNG no menu dos Jogos
+Proteger o Flash durante uma conecção USB
+Usar o version.txt em /seplugins
+Usar o usbversion.txt em /seplugins
+Atualizar mediante o servidor PRO
+Impedir deletar o arquivo de pausa (PSP-Go)
+Ferramentas avançadas
+Plugins para XMB
+Plugins para Jogos
+Plugins para Pops
+NoDRM Engine
+Esconder os arquivos do Custom Firmware no menu jeux
+Travar o stick analógico nos jogos
+Suporte dos plugins velhos (PSP-Go)
+Inferno & NP9660 Usar o ISO Cache
+Inferno & NP9660 Tamanho do cache (en Mo)
+Inferno & NP9660 Número do cache
+Inferno & NP9660 Comportamento do cache
+Permitir nomes de arquivos de forma ISO non-latin1
+Acelerar o cartão de memória (Memory Stick)
+Nenhum
+Pops
+Jogos
+VSH
+Pops & Jogos
+Jogos & VSH
+VSH & Pops
+Sempre
+Rapidez do processador (CPU)
+CPU / BUS do XMB
+CPU / BUS nos jogos
+Plugins
+Memória interna (PSP-Go)
+Cartão de memória (Memory Stick)
+Plugins na memória interna (PSP-Go)
+Plugins dans la memory stick
+Hacks de registro
+WMA Ativado
+Flash Ativado
+Botões invertidos
+Confirmar o botão: X
+Confirmar o botão: O
+Ativar o WMA
+Activer o Flash
+Invertir os botões O / X
+Inverser os botões O / X (requer reinício)
+Desativar modo de hibernação (PSP-Go)
+Hibernation desativada
+Rodar o / PSP / GAME / RECOVERY / EBOOT.PBP
+Desligar o PSP
+Hibernar o PSP
+Reiniciar o PSP
+Reiniciar o VSH
+Page
+Japão
+América
+Europa
+Coreia
+Reino Unido
+México
+Austrália
+Hong Kong
+Taïwan
+Rússia
+China
+Modo Debug I
+Modo Debug II
+Liberar memoria adicional

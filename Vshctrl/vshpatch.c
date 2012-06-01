@@ -62,6 +62,7 @@ static void patch_Gameboot(SceModule2 *mod);
 static void patch_hibblock(SceModule2 *mod); 
 static void patch_msvideo_main_plugin_module(u32 text_addr);
 static void patch_htmlviewer_plugin_module(u32 text_addr);
+static void patch_htmlviewer_utility_module(u32 text_addr);
 
 static int vshpatch_module_chain(SceModule2 *mod)
 {
@@ -119,6 +120,12 @@ static int vshpatch_module_chain(SceModule2 *mod)
 
 	if(conf.htmlviewer_custom_save_location && 0 == strcmp(mod->modname, "htmlviewer_plugin_module")) {
 		patch_htmlviewer_plugin_module(text_addr);
+		sync_cache();
+		goto exit;
+	}
+	
+	if(0 == strcmp(mod->modname, "sceVshHVUtility_Module")) {
+		patch_htmlviewer_utility_module(text_addr);
 		sync_cache();
 		goto exit;
 	}
@@ -406,6 +413,19 @@ static void patch_htmlviewer_plugin_module(u32 text_addr)
 	p = (void*)(text_addr + g_offs->htmlviewer_plugin_patch.htmlviewer_save_location); // "/PSP/COMMON"
 
 	strcpy(p, "/ISO");
+	
+	p = (void*)(text_addr + g_offs->htmlviewer_plugin_patch.htmlviewer_manual_location); // "http://manuals.playstation.net/document/pspindex.html"
+	
+	strcpy(p, "http://www.prometheus.uk.to/manual/index.html");
+}
+
+static void patch_htmlviewer_utility_module(u32 text_addr)
+{
+	char *p;
+
+	p = (void*)(text_addr + g_offs->htmlviewer_utility_patch.htmlviewer_manual_location); // "http://manuals.playstation.net/document/pspindex.html"
+	
+	strcpy(p, "http://www.prometheus.uk.to/manual/index.html");
 }
 
 int umdLoadExec(char * file, struct SceKernelLoadExecVSHParam * param)

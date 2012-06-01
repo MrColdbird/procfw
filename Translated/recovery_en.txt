@@ -96,3 +96,4 @@ Russia
 China
 Debug Type I
 Debug Type II
+Force High Memory Layout

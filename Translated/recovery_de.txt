@@ -96,4 +96,4 @@ Russland
 China
 Debug Typ I
 Debug Typ II
-Retail RAM-Begrenzung aufheben (bugged Homescreen)
+RAM-Begrenzung aufheben

@@ -51,6 +51,11 @@ struct GamePluginPatch {
 
 struct HtmlViewerPluginPatch {
 	u32 htmlviewer_save_location;
+	u32 htmlviewer_manual_location;
+};
+
+struct HtmlUtilityPatch {
+	u32 htmlviewer_manual_location;
 };
 
 struct MsVideoMainPluginPatch {
@@ -87,6 +92,7 @@ typedef struct _PatchOffset {
 	struct SysConfPluginPatch sysconf_plugin_patch;
 	struct GamePluginPatch game_plugin_patch;
 	struct HtmlViewerPluginPatch htmlviewer_plugin_patch;
+	struct HtmlUtilityPatch htmlviewer_utility_patch;
 	struct MsVideoMainPluginPatch msvideo_main_plugin_patch;
 	struct VshModulePatch vsh_module_patch;
 	struct UpdatePluginPatch update_plugin_patch;

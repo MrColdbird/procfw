@@ -11,21 +11,21 @@ Conecção USB Ativada
 Conecção USB Desativada
 Configuração
 Mudar de região
-Police du Menu Recovery
+Fonte du Menu Recovery
 Modo ISO
 Normal
 M33 driver
 Sony NP9660
 Inferno
-Vincular o PSP ao PC mediante o fio USB
+Vincular o PSP ao PC através do cabo USB
 Flash 0
 Flash 1
 Flash 2
 Flash 3
 Disco UMD
-Carregar a bateria enquanto o fiu USB estah plugado
+Carregar a bateria enquanto o cabo USB estiver ligado
 Usar as cores da PSP Slim numa PSP Fat
-Usar uma destinação escolhida pelo utilizador para htmlviewer
+Usar uma destinação escolhida pelo usuário para htmlviewer
 Esconder o endereço MAC
 Pular a imagem da SONY 
 Pular o Gameboot
@@ -96,4 +96,4 @@ Rússia
 China
 Modo Debug I
 Modo Debug II
-Liberar memoria adicional
+Liberar memória adicional

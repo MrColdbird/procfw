@@ -96,3 +96,4 @@ Russia
 Cina
 Modalità di Debug I
 Modalità di Debug II
+Forzare l'uso dell'High Memory Layout

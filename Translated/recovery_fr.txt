@@ -8,7 +8,7 @@ Activé
 Déactivé
 Connexion USB
 Connexion USB Activé
-Connexion USB Déactivé
+Connexion USB Désactivé
 Configuration
 Changer de région
 Police du Menu Recovery
@@ -24,17 +24,17 @@ Flash 2
 Flash 3
 Disque UMD
 Charger la batterie pendant que le câble USB est inséré
-Utilisation de la couleur d'une Slim sur une PSP-1000
+Utilisation des couleurs vives de la Slim sur une PSP-1000
 Utiliser une destination personnalisée pour htmlviewer
 Cacher l'adresse MAC
 Passer le logo Sony au démarrage
 Passer le GameBoot
 Cacher PIC0.PNG et PIC1.PNG dans le menu Jeux
 Protéger le Flash lors d'une connexion USB
-Utiliser version.txt dans / seplugins
-Utiliser usbversion.txt dans / seplugins
+Utiliser version.txt dans /seplugins
+Utiliser usbversion.txt dans /seplugins
 Mise à jour via le serveur PRO
-Empêcher la suppression de l'hibernation (PSP-Go)
+Empêcher la suppression du fichier de mise en pause (PSP-Go)
 Options avancées
 Plugins pour le XMB
 Plugins pour les Jeux
@@ -44,7 +44,7 @@ Cacher les fichiers CFW du menu jeux
 Bloquer le stick analogique dans les jeux
 Support des vieux plugins (PSP-Go)
 Inferno & NP9660 Utiliser ISO Cache
-Inferno & NP9660 Taille du cache (en Mb)
+Inferno & NP9660 Taille du cache (en Mo)
 Inferno & NP9660 Nombre du cache
 Inferno & NP9660 Politique du cache
 Permettre les noms de fichiers ISO non-latin1
@@ -65,7 +65,7 @@ Mémoire interne (PSP-Go)
 Memory Stick
 Plugins dans la mémoire interne (PSP-Go)
 Plugins dans la memory stick
-Registre Hacks
+Hacks du registre
 WMA Activé
 Flash Activé
 Touches inversées
@@ -81,7 +81,7 @@ Démarrer / PSP / GAME / RECOVERY / EBOOT.PBP
 Eteindre la console
 Mettre en veille la Console
 Redémarrer la console
-Redémarrer VSH
+Redémarrer le VSH
 Page
 Japon
 Amérique
@@ -96,3 +96,4 @@ La Russie
 La Chine
 Le mode Debug I
 Le mode Debug II
+Débloquer de la mémoire supplémentaire

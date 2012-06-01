@@ -440,6 +440,11 @@ int gameloadexec(char * file, struct SceKernelLoadExecVSHParam * param)
 
 	printk("%s: %s %s\n", __func__, file, param->key);
 	
+	//enable high memory on demand
+	SEConfig config;
+	sctrlSEGetConfig(&config);
+	if(config.retail_high_memory) sctrlHENSetMemory(55, 0);
+	
 	//virtual iso eboot detected
 	if (is_iso_eboot(file)) {
 		u32 k1 = pspSdkSetK1(0);

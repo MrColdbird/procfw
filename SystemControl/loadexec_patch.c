@@ -45,10 +45,11 @@ static int load_reboot(void * arg1, unsigned int arg2, void * arg3, unsigned int
 	memset((void*)REBOOTEX_CONFIG, 0, 0x100);
 
 	//store custom partition size
-	if(g_p2_size != 24 || g_p9_size != 24) {
+	//coldbird: why only when size != 24?
+	//if(g_p2_size != 24 || g_p9_size != 24) {
 		rebootex_conf.p2_size = g_p2_size;
 		rebootex_conf.p9_size = g_p9_size;
-	}
+	//}
 
 	memcpy((void*)REBOOTEX_CONFIG, &rebootex_conf, sizeof(rebootex_conf));
 	memset((void*)REBOOTEX_CONFIG_ISO_PATH, 0, 256);

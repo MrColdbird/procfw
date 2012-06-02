@@ -26,7 +26,7 @@ CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti
 ASFLAGS = $(CFLAGS)
 
 EXTRA_TARGETS = EBOOT.PBP
-PSP_EBOOT_TITLE = CIPL Flasher For PRO-B
+PSP_EBOOT_TITLE = CIPL Flasher For PRO-C
 PSP_EBOOT_ICON = ICON0.PNG
 
 PSPSDK=$(shell psp-config --pspsdk-path)

@@ -61,7 +61,7 @@ PSP_MODULE_INFO("PROUpdater", 0x0800, 1, 0);
 /* Define the main thread's attribute value (optional) */
 PSP_MAIN_THREAD_ATTR(THREAD_ATTR_USER | THREAD_ATTR_VFPU);
 
-#define VERSION_STR "PRO-B"
+#define VERSION_STR "PRO-C"
 #define printf pspDebugScreenPrintf
 
 int psp_model = 0;

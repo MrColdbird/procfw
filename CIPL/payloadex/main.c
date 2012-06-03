@@ -60,7 +60,7 @@ int AddPRXNoCopyName(char * buffer, char * insertbefore, int prxname_offset, u32
 
 int Main(void *, void *, void *, void *, void *, void *, void *);
 
-int Reboot_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) __attribute__ ((section (".text.start")));
+int Reboot_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) __attribute__ ((section (".text.startup")));
 int Reboot_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
 	return Main(a0, a1, a2, a3, t0, t1, t2);

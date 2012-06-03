@@ -31,7 +31,7 @@ void ClearCache()
 	Icache();
 }
 
-void Patch_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) __attribute__ ((section (".text.start")));
+void Patch_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2) __attribute__ ((section (".text.startup")));
 void Patch_Entry(void *a0, void *a1, void *a2, void *a3, void *t0, void *t1, void *t2)
 {
 	MAKE_JUMP( 0x040EC2C8 , patch_main_bin);

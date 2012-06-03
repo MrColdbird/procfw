@@ -6,48 +6,49 @@ Voltar
 Padrão
 Ativado
 Desativado
-Conecção USB
-Conecção USB Ativada
-Conecção USB Desativada
+Conexão USB
+Conexão USB Ativada
+Conexão USB Desativada
 Configuração
-Mudar de região
-Fonte du Menu Recovery
+Mudar Região
+Fonte de Recuperação
 Modo ISO
 Normal
-M33 driver
+Driver M33
 Sony NP9660
 Inferno
-Vincular o PSP ao PC através do cabo USB
+Dispositivo XMB USB
 Flash 0
 Flash 1
 Flash 2
 Flash 3
 Disco UMD
-Carregar a bateria enquanto o cabo USB estiver ligado
+Carregar a bateria enquanto o fio USB estiver plugado
 Usar as cores da PSP Slim numa PSP Fat
-Usar uma destinação escolhida pelo usuário para htmlviewer
+Usar local padrão de salvamento do htmlviewer
 Esconder o endereço MAC
-Pular a imagem da SONY 
-Pular o Gameboot
-Esconder os PIC0.PNG et PIC1.PNG no menu dos Jogos
-Proteger o Flash durante uma conecção USB
+Pular logo da Sony no início
+Pular a tela do Gameboot
+Esconder PIC0.PNG e PIC1.PNG no menu dos Jogos
+Proteger o Flash durante uma conexão USB
 Usar o version.txt em /seplugins
 Usar o usbversion.txt em /seplugins
-Atualizar mediante o servidor PRO
-Impedir deletar o arquivo de pausa (PSP-Go)
-Ferramentas avançadas
+Usar Servidor de Atualização Padrão
+Evitar deleção na hibernação (Somente PSP-Go)
+Avançado
 Plugins para XMB
 Plugins para Jogos
 Plugins para Pops
 NoDRM Engine
 Esconder os arquivos do Custom Firmware no menu jeux
+Esconder arquivos CFW do jogo
 Travar o stick analógico nos jogos
-Suporte dos plugins velhos (PSP-Go)
-Inferno & NP9660 Usar o ISO Cache
-Inferno & NP9660 Tamanho do cache (en Mo)
+Suporte a plugins velhos (Somente PSP-Go)
+Inferno & NP9660 Usar o Cache ISO
+Inferno & NP9660 Tamanho do cache (em MB)
 Inferno & NP9660 Número do cache
-Inferno & NP9660 Comportamento do cache
-Permitir nomes de arquivos de forma ISO non-latin1
+Inferno & NP9660 Política do cache
+Permitir nomes de arquivos ISO de forma non-latin1
 Acelerar o cartão de memória (Memory Stick)
 Nenhum
 Pops
@@ -64,7 +65,6 @@ Plugins
 Memória interna (PSP-Go)
 Cartão de memória (Memory Stick)
 Plugins na memória interna (PSP-Go)
-Plugins dans la memory stick
 Hacks de registro
 WMA Ativado
 Flash Ativado
@@ -72,28 +72,28 @@ Botões invertidos
 Confirmar o botão: X
 Confirmar o botão: O
 Ativar o WMA
-Activer o Flash
-Invertir os botões O / X
-Inverser os botões O / X (requer reinício)
+Ativar o Flash
+Inverter os botões O / X
+Inverter os botões O / X (requer reinício)
 Desativar modo de hibernação (PSP-Go)
-Hibernation desativada
+Hibernação desativada
 Rodar o / PSP / GAME / RECOVERY / EBOOT.PBP
 Desligar o PSP
 Hibernar o PSP
 Reiniciar o PSP
 Reiniciar o VSH
-Page
+Página
 Japão
 América
 Europa
-Coreia
+Coréia
 Reino Unido
 México
 Austrália
 Hong Kong
-Taïwan
+Taiwan
 Rússia
 China
 Modo Debug I
 Modo Debug II
-Liberar memória adicional
+Liberar memoria adicional

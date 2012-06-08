@@ -1,0 +1,23 @@
+Стандарт
+Отключено
+Включено
+Normal
+M33 driver
+Sony NP9660
+Inferno
+CPU/BUS  в меню
+CPU/BUS  в игре
+USB  устройство
+Драйвер ISO/CSO
+Образ UMD VIDEO
+Recovery меню  ->
+Выключить PSP
+Спящий режим
+Перезагрузка
+Рестарт VSH
+Выход
+PRO VSH Меню
+Flash
+UMD-диск
+Карта Памяти
+Нет

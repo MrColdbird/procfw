@@ -90,6 +90,7 @@ typedef struct _SEConfig
 	s16 usbversion;
 	s16 language; /* -1 as autodetect */
 	s16 retail_high_memory;
+	s16 macspoofer;
 } SEConfig;
 
 /**

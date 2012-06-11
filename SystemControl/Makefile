@@ -30,6 +30,7 @@ OBJS = main.o \
 	   cpuclock.o \
 	   fake_region.o \
 	   msstor_cache.o \
+	   libertas.o \
 	   systemctrl_patch_offset.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \

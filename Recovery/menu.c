@@ -550,6 +550,13 @@ static int display_retail_high_memory(struct MenuEntry* entry, char *buf, int si
 	return 0;
 }
 
+static int display_mac_spoofer(struct MenuEntry* entry, char *buf, int size)
+{
+	sprintf(buf, "%-48s %-11s", g_messages[MAC_SPOOFER], get_bool_name(g_config.macspoofer));
+
+	return 0;
+}
+
 static struct ValueOption g_xmb_plugin_option = {
 	&g_config.plugvsh,
 	0, 2,
@@ -620,6 +627,11 @@ static struct ValueOption g_retail_high_memory = {
 	0, 2,
 };
 
+static struct ValueOption g_mac_spoofer = {
+	&g_config.macspoofer,
+	0, 2,
+};
+
 static struct MenuEntry g_advanced_menu_entries[] = {
 	{ -1, 0, 0, &display_xmb_plugin, &change_option, &change_option_by_enter, &g_xmb_plugin_option },
 	{ -1, 0, 0, &display_game_plugin, &change_option, &change_option_by_enter, &g_game_plugin_option },
@@ -635,6 +647,7 @@ static struct MenuEntry g_advanced_menu_entries[] = {
 	{ -1, 0, 0, &display_iso_cache_number, &change_iso_cache_number_option, &change_iso_cache_number_option_by_enter, &g_iso_cache_number},
 	{ -1, 0, 0, &display_iso_cache_policy, &change_option, &change_option_by_enter, &g_iso_cache_policy},
 	{ -1, 0, 0, &display_retail_high_memory, &change_option, &change_option_by_enter, &g_retail_high_memory},
+	{ -1, 0, 0, &display_mac_spoofer, &change_option, &change_option_by_enter, &g_mac_spoofer},
 };
 
 static struct Menu g_advanced_menu = {

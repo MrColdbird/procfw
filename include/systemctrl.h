@@ -381,4 +381,13 @@ int sctrlKernelSetNidResolver(char *libname, u32 enabled);
  */
 u32 sctrlKernelRand(void);
 
+/**
+ * Get the real unspoofed Ethernet (MAC) Address of the systems WLAN chip
+ *
+ * @param mac Out-Buffer (6B) for real MAC Address
+ *
+ * @return 0 on success, < 0 on error
+ */
+int sctrlGetRealEthernetAddress(uint8_t * mac);
+
 #endif

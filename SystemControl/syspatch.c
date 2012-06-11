@@ -29,6 +29,7 @@
 #include "printk.h"
 #include "libs.h"
 #include "nid_resolver.h"
+#include "libertas.h"
 #include "systemctrl_patch_offset.h"
 
 static STMOD_HANDLER previous;
@@ -196,6 +197,7 @@ static int syspatch_module_chain(SceModule2 *mod)
 
 	if(0 == strcmp(mod->modname, "sceWlan_Driver")) {
 		patch_sceWlan_Driver(mod->text_addr);
+		patch_Libertas_MAC(mod);
 		sync_cache();
 		goto exit;
 	}

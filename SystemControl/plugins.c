@@ -25,6 +25,7 @@
 #include "printk.h"
 #include "strsafe.h"
 #include "rebootex_conf.h"
+#include "libertas.h"
 
 #define WAIT_MEMORY_STICK_TIMEOUT ( 2 * 1000000 )
 
@@ -317,7 +318,7 @@ int load_plugins(void)
 			load_plugin("ms0:/seplugins/pops.txt", WAIT_MEMORY_STICK_TIMEOUT);
 		}
 	}
-
+	
 	//return success
 	return 0;
 }

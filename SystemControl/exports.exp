@@ -73,6 +73,7 @@ PSP_EXPORT_FUNC(sctrlSESetDiscType)
 PSP_EXPORT_FUNC(sctrlSEGetDiscType)
 PSP_EXPORT_FUNC(sctrlKernelSetNidResolver)
 PSP_EXPORT_FUNC(sctrlKernelRand)
+PSP_EXPORT_FUNC(sctrlGetRealEthernetAddress)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlForKernel, 0, 0x0001)
@@ -132,6 +133,7 @@ PSP_EXPORT_FUNC_NID(sctrlGetInitTextAddr, 0x72F29A6E)
 PSP_EXPORT_FUNC(sctrlSetCustomStartModule)
 PSP_EXPORT_FUNC(sctrlKernelSetNidResolver)
 PSP_EXPORT_FUNC(sctrlKernelRand)
+PSP_EXPORT_FUNC(sctrlGetRealEthernetAddress)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x0001)

@@ -97,3 +97,4 @@ China
 Debug Typ I
 Debug Typ II
 RAM-Begrenzung aufheben
+Verwende mac.txt in /seplugins

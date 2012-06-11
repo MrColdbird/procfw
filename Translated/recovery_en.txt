@@ -97,3 +97,4 @@ China
 Debug Type I
 Debug Type II
 Force High Memory Layout
+Use mac.txt in /seplugins

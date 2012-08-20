@@ -128,7 +128,7 @@ def decompress_cso(fname_in, fname_out, level):
 
 	while block < total_block:
 		percent_cnt += 1
-		if percent_cnt >= percent_period:
+		if percent_cnt >= percent_period and percent_period != 0:
 			percent_cnt = 0
 			print >> sys.stderr, ("decompress %d%%\r" % (block / percent_period)),
 
@@ -218,7 +218,7 @@ def compress_cso(fname_in, fname_out, level):
 		else:
 			percent_cnt += 1
 
-		if percent_cnt >= percent_period:
+		if percent_cnt >= percent_period and percent_period != 0:
 			percent_cnt = 0
 
 			if block == 0:

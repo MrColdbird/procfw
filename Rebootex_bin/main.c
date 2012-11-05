@@ -650,9 +650,9 @@ int patch_bootconf_fatms371(char *buffer, int length)
 {
 	int newsize;
 
-	newsize = AddPRX(buffer, "/kd/fatms.prx", PATH_FATMS_HELPER+sizeof(PATH_FLASH0)-2, 0xEF);
-	RemovePrx(buffer, "/kd/fatms.prx", 0xEF);
-	newsize = AddPRX(buffer, "/kd/wlan.prx", PATH_FATMS_371+sizeof(PATH_FLASH0)-2, 0xEF);
+	newsize = AddPRX(buffer, "/kd/fatms.prx", PATH_FATMS_HELPER+sizeof(PATH_FLASH0)-2, 0xEF & ~VSH_RUNLEVEL);
+	RemovePrx(buffer, "/kd/fatms.prx", 0xEF & ~VSH_RUNLEVEL);
+	newsize = AddPRX(buffer, "/kd/wlan.prx", PATH_FATMS_371+sizeof(PATH_FLASH0)-2, 0xEF & ~VSH_RUNLEVEL);
 
 	return newsize;
 }
@@ -763,7 +763,7 @@ int _UnpackBootConfig(char **p_buffer, int length)
 
 exit:
 	if((!recovery_mode || ofw_mode) && is_permanent_mode()) {
-		RenameModule(buffer, VSHMAIN + sizeof("flash0:") - 1, VSHORIG + sizeof("flash0:") - 1);
+		RenameModule(buffer, VSHMAIN + sizeof(PATH_FLASH0) - 2, VSHORIG + sizeof(PATH_FLASH0) - 2);
 	}
 
 	return result;

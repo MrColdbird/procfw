@@ -36,5 +36,7 @@
 #define PATH_POPCORN PATH_FLASH0 "kd/_popcorn.prx"
 #define PATH_SATELITE PATH_FLASH0 "vsh/module/_satelite.prx"
 #define PATH_RECOVERY PATH_FLASH0 "vsh/module/_recovery.prx"
+#define PATH_FATMS_HELPER PATH_FLASH0 "kd/_fatmshlp.prx"
+#define PATH_FATMS_371 PATH_FLASH0 "kd/_fatms371.prx"
 
 #endif

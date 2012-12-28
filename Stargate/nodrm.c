@@ -36,6 +36,7 @@ typedef struct _NoDrmHookEntry {
 
 struct NoDrmFd {
 	SceUID fd;
+	int asyncKeySetup;
 	struct NoDrmFd *next;
 };
 
@@ -138,22 +139,24 @@ static inline int is_encrypted_flag(int flag)
 	return 0;
 }
 
-static inline int is_nodrm_fd(SceUID fd)
+static struct NoDrmFd *find_nodrm_fd(SceUID fd)
 {
 	struct NoDrmFd *fds;
 
 	if (fd < 0)
-		return 0;
+		return NULL;
 
 	for(fds = g_head.next; fds != NULL; fds = fds->next) {
 		if(fds->fd == fd)
 			break;
 	}
 
-	if(fds == NULL)
-		return 0;
+	return fds;
+}
 
-	return 1;
+static int is_nodrm_fd(SceUID fd)
+{
+	return find_nodrm_fd(fd) != NULL ? 1 : 0;
 }
 
 static int add_nodrm_fd(SceUID fd)
@@ -173,6 +176,7 @@ static int add_nodrm_fd(SceUID fd)
 	}
 
 	slot->fd = fd;
+	slot->asyncKeySetup = 0;
 	
 	g_tail->next = slot;
 	g_tail = slot;
@@ -441,6 +445,7 @@ int myIoIoctlAsync(SceUID fd, unsigned int cmd, void * indata, int inlen, void *
 	if (cmd == 0x04100001 || cmd == 0x04100002) {
 		if (is_nodrm_fd(fd)) {
 			ret = 0;
+			find_nodrm_fd(fd)->asyncKeySetup = 1;
 			goto exit;
 		}
 	} 
@@ -510,6 +515,52 @@ int myIoCloseAsync(SceUID fd)
 	return ret;
 }
 
+int myIoWaitAsyncCB(SceUID fd, SceIores *result)
+{
+	int ret;
+
+	ret = sceIoWaitAsyncCB(fd, result);
+
+	{
+		struct NoDrmFd *fds;
+
+		fds = find_nodrm_fd(fd);
+
+		if(fds != NULL && fds->asyncKeySetup) {
+			fds->asyncKeySetup = 0;
+			*result = 0LL;
+			ret = 0;
+		}
+	}
+
+//	printk("%s: %d -> 0x%08X\r\n", __func__, fd, ret);
+
+	return ret;
+}
+
+int myIoPollAsync( SceUID fd, SceIores *result)
+{
+	int ret;
+
+	ret = sceIoPollAsync(fd, result);
+
+	{
+		struct NoDrmFd *fds;
+
+		fds = find_nodrm_fd(fd);
+
+		if(fds != NULL && fds->asyncKeySetup) {
+			fds->asyncKeySetup = 0;
+			*result = 0LL;
+			ret = 0;
+		}
+	}
+
+//	printk("%s: %d -> 0x%08X\r\n", __func__, fd, ret);
+
+	return ret;
+}
+
 static NoDrmHookEntry g_nodrm_hook_map[] = {
 	{ "IoFileMgrForUser", 0x109F50BC, &myIoOpen },
 	{ "IoFileMgrForUser", 0x89AA9906, &myIoOpenAsync },
@@ -517,6 +568,8 @@ static NoDrmHookEntry g_nodrm_hook_map[] = {
 	{ "IoFileMgrForUser", 0xFF5940B6, &myIoCloseAsync },
 	{ "IoFileMgrForUser", 0x63632449, &myIoIoctl },
 	{ "IoFileMgrForUser", 0xE95A012B, &myIoIoctlAsync },
+	{ "IoFileMgrForUser", 0x35DBD746, &myIoWaitAsyncCB },
+	{ "IoFileMgrForUser", 0x3251EA56, &myIoPollAsync },
 	{ "scePspNpDrm_user", 0x275987D1, &myNpDrmRenameCheck },
 	{ "scePspNpDrm_user", 0x08D98894, &myNpDrmEdataSetupKey },
 	{ "scePspNpDrm_user", 0x219EF5CC, &myNpDrmEdataGetDataSize },

@@ -33,6 +33,7 @@
 #include "vpl.h"
 #include "blit.h"
 #include "trans.h"
+#include "config.h"
 
 int TSRThread(SceSize args, void *argp);
 
@@ -476,7 +477,7 @@ int TSRThread(SceSize args, void *argp)
 	} else if (stop_flag == 5) {
 		scePowerRequestSuspend();
 	} else if (stop_flag == 6) {
-		load_start_module("flash0:/vsh/module/_recovery.prx");
+		load_start_module(PATH_RECOVERY);
 	} else if (stop_flag == 7) {
 		launch_umdvideo_mount();
 	}

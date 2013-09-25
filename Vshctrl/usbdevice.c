@@ -33,6 +33,7 @@
 #include "main.h"
 #include "virtual_pbp.h"
 #include "pspusbdevice.h"
+#include "config.h"
 
 static SceUID g_usbdevice_modid = -1;
 
@@ -40,7 +41,7 @@ static SceUID load_start_usbdevice(void)
 {
 	SceUID modid = -1;
 	int ret;
-	const char *mod = "flash0:/kd/_usbdevice.prx";
+	const char *mod = PATH_USBDEVICE;
 
 	modid = sceKernelLoadModule(mod, 0, NULL);
 

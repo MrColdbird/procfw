@@ -134,6 +134,7 @@ PSP_EXPORT_FUNC(sctrlSetCustomStartModule)
 PSP_EXPORT_FUNC(sctrlKernelSetNidResolver)
 PSP_EXPORT_FUNC(sctrlKernelRand)
 PSP_EXPORT_FUNC(sctrlGetRealEthernetAddress)
+PSP_EXPORT_FUNC(LZ4_decompress_fast)
 PSP_EXPORT_END
 
 PSP_EXPORT_START(SystemCtrlPrivate, 0, 0x0001)

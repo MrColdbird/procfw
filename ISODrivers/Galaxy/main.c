@@ -29,6 +29,7 @@
 #include "utils.h"
 #include "printk.h"
 #include "galaxy_patch_offset.h"
+#include "lz4.h"
 
 #define CISO_IDX_BUFFER_SIZE 0x200
 #define CISO_DEC_BUFFER_SIZE 0x2000
@@ -115,6 +116,8 @@ u8 g_umddata[16] = {
 	0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
 };
 
+static int lz4_compressed = 0;
+
 // 0x00000000
 SceUID myKernelCreateThread(const char * name,
 		SceKernelThreadEntry entry,
@@ -158,7 +161,8 @@ int cso_open(SceUID fd)
 
 	magic = (u32*)g_CISO_hdr.magic;
 
-	if(*magic == 0x4F534943) { // CISO
+	if(*magic == 0x4F534943 || *magic == 0x4F53495A) { // CISO or ZISO
+		lz4_compressed = (*magic == 0x4F53495A) ? 1 : 0;
 		g_CISO_cur_idx = -1;
 		ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
 		printk("%s: total block %d\n", __func__, (int)ciso_total_block);
@@ -411,7 +415,15 @@ int read_cso_sector(u8 *addr, int sector)
 	}
 
 	// loc_8B8
-	ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
+	if(!lz4_compressed) {
+		ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
+	} else {
+		ret = LZ4_decompress_fast(g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, addr, ISO_SECTOR_SIZE);
+		if(ret < 0) {
+			ret = -20;
+			printk("%s: -> %d\n", __func__, ret);
+		}
+	}
 
 	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }

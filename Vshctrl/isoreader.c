@@ -22,6 +22,7 @@
 #include "printk.h"
 #include "utils.h"
 #include "systemctrl_private.h"
+#include "lz4.h"
 
 #define MAX_RETRIES 8
 #define MAX_DIR_LEVEL 8
@@ -53,6 +54,8 @@ static u32 g_total_sectors = 0;
 static u32 g_is_compressed = 0;
 
 static Iso9660DirectoryRecord g_root_record;
+
+static int lz4_compressed = 0;
 
 static inline u32 isoPos2LBA(u32 pos)
 {
@@ -196,7 +199,15 @@ static int readSectorCompressed(int sector, void *addr)
 		g_ciso_dec_buf_size = ret;
 	}
 
-	ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, PTR_ALIGN_64(g_ciso_dec_buf) + offset - g_ciso_dec_buf_offset, 0);
+	if(!lz4_compressed) {
+		ret = sceKernelDeflateDecompress(addr, SECTOR_SIZE, PTR_ALIGN_64(g_ciso_dec_buf) + offset - g_ciso_dec_buf_offset, 0);
+	} else {
+		ret = LZ4_decompress_fast(PTR_ALIGN_64(g_ciso_dec_buf) + offset - g_ciso_dec_buf_offset, addr, SECTOR_SIZE);
+		if(ret < 0) {
+			ret = -20;
+			printk("%s: -> %d\n", __func__, ret);
+		}
+	}
 
 	return ret < 0 ? ret : SECTOR_SIZE;
 }
@@ -400,7 +411,8 @@ int isoOpen(const char *path)
 
 	magic = (u32*)g_ciso_h.magic;
 
-	if (*magic == 0x4F534943 && g_ciso_h.block_size == SECTOR_SIZE) {
+	if ((*magic == 0x4F534943 || *magic == 0x4F53495A) && g_ciso_h.block_size == SECTOR_SIZE) {
+		lz4_compressed = (*magic == 0x4F53495A) ? 1 : 0;
 		g_is_compressed = 1;
 	} else {
 		g_is_compressed = 0;

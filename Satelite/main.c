@@ -209,7 +209,7 @@ static int get_umdvideo(UmdVideoList *list, char *path)
 		if(p == NULL)
 			p = dir.d_name;
 
-		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso")) {
+		if(0 == stricmp(p, ".iso") || 0 == stricmp(p, ".cso") || 0 == stricmp(p, ".zso")) {
 #ifdef CONFIG_639
 			if(psp_fw_version == FW_639)
 				scePaf_sprintf(fullpath, "%s/%s", path, dir.d_name);

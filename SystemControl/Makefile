@@ -35,7 +35,8 @@ OBJS = main.o \
 	   ../Common/libs.o \
 	   ../Common/utils.o \
 	   ../Common/strsafe.o \
-	   setlongjmp.o
+	   setlongjmp.o \
+	   lz4.o
 
 INCDIR = ../Common/ ../include/
 CFLAGS = -Os -G0 -Wall -fno-pic

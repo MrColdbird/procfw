@@ -33,6 +33,13 @@
 #include "systemctrl_se.h"
 #include "systemctrl_private.h"
 #include "inferno.h"
+#include "lz4.h"
+
+#define CISO_IDX_MAX_ENTRIES 4096
+
+#define REMAINDER(a,b) ((a) % (b))
+#define IS_DIVISIBLE(a,b) (REMAINDER(a,b) == 0)
+#define GET_CSO_OFFSET(block) ((g_cso_idx_cache[block] & 0x7FFFFFFF) << g_CISO_hdr.align)
 
 // 0x00002784
 struct IoReadArg g_read_arg;
@@ -69,6 +76,8 @@ static int g_ciso_dec_buf_size = 0;
 // 0x00002720
 static u32 g_ciso_total_block = 0;
 
+static int lz4_compressed = 0;
+
 struct CISO_header {
 	u8 magic[4];  // 0
 	u32 header_size;  // 4
@@ -84,6 +93,10 @@ static struct CISO_header g_CISO_hdr __attribute__((aligned(64)));
 
 // 0x00002500
 static u32 g_CISO_idx_cache[CISO_IDX_BUFFER_SIZE/4] __attribute__((aligned(64)));
+
+static u32 *g_cso_idx_cache = NULL;
+
+u32 g_cso_idx_start_block = -1;
 
 // 0x00000368
 static void wait_until_ms0_ready(void)
@@ -171,7 +184,8 @@ static int is_ciso(SceUID fd)
 
 	magic = (u32*)g_CISO_hdr.magic;
 
-	if(*magic == 0x4F534943) { // CISO
+	if(*magic == 0x4F534943 || *magic == 0x4F53495A) { // CISO or ZISO
+		lz4_compressed = (*magic == 0x4F53495A) ? 1 : 0;
 		g_CISO_cur_idx = -1;
 		g_ciso_total_block = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
 		printk("%s: total block %d\n", __func__, (int)g_ciso_total_block);
@@ -200,6 +214,19 @@ static int is_ciso(SceUID fd)
 
 			if((u32)g_ciso_block_buf & 63)
 				g_ciso_block_buf = (void*)(((u32)g_ciso_block_buf & (~63)) + 64);
+		}
+		
+		if (g_cso_idx_cache == NULL) {
+			g_cso_idx_cache = oe_malloc((CISO_IDX_MAX_ENTRIES * 4) + 64);
+			if (g_cso_idx_cache == NULL) {
+				ret = -3;
+				printk("%s: -> %d\n", __func__, ret);
+				goto exit;
+			}
+
+			if((u32)g_ciso_block_buf & 63)
+				g_cso_idx_cache = (void*)(((u32)g_cso_idx_cache & (~63)) + 64);
+
 		}
 
 		ret = 0;
@@ -371,7 +398,15 @@ static int read_cso_sector(u8 *addr, int sector)
 		g_ciso_dec_buf_size = ret;
 	}
 
-	ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
+	if(!lz4_compressed) {
+		ret = sceKernelDeflateDecompress(addr, ISO_SECTOR_SIZE, g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, 0);
+	} else {
+		ret = LZ4_decompress_fast(g_ciso_dec_buf + offset - g_ciso_dec_buf_offset, (char *)addr, ISO_SECTOR_SIZE);
+		if(ret < 0) {
+			ret = -20;
+			printk("%s: -> %d\n", __func__, ret);
+		}
+	}
 
 	return ret < 0 ? ret : ISO_SECTOR_SIZE;
 }
@@ -410,11 +445,236 @@ static int read_cso_data(u8* addr, u32 size, u32 offset)
 	return offset - o_offset;
 }
 
+/**
+ * decompress (if necessary) a compressed block and copy it to the destination
+ * If offset_shift is nonzero then the decompressed data will by used from this offset.
+ * The block_num is used to know if it needs to be decompressed
+ */
+static int decompress_block(u8 *dst, u8 *src, int size, int block_num, int offset_shift)
+{
+	int ret;
+
+	if(g_cso_idx_cache[block_num] & 0x80000000) {
+		// do not copy if the block is already in place
+		if(offset_shift > 0 || src != dst) {
+			// no decompression is needed, copy the data from the end of the buffer to the start
+			memmove(dst, src + offset_shift, size);
+		}
+		ret = size;
+	} else {
+		if(!lz4_compressed) {
+			// gzip decompress
+			ret = sceKernelDeflateDecompress(g_ciso_dec_buf, ISO_SECTOR_SIZE, src, 0);
+		} else {
+			// LZ4 decompress
+			ret = LZ4_decompress_fast((char *)src, (char *)g_ciso_dec_buf, ISO_SECTOR_SIZE);
+		}
+		if(ret < 0) {
+			ret = -20;
+			printk("%s: -> %d\n", __func__, ret);
+			return ret;
+		}
+		// copy the decompressed data to the destination buffer
+		memcpy(dst, g_ciso_dec_buf + offset_shift, size);
+	}
+
+	return ret;
+}
+
+static int refresh_cso_index(u32 size, u32 offset) {
+	// seek the first block offset
+	u32 starting_block = offset / ISO_SECTOR_SIZE;
+
+	// calculate the last needed block and read the index
+	u32 ending_block = (offset + size) / ISO_SECTOR_SIZE + 1;
+
+	u32 idx_size = (ending_block - starting_block + 1) * 4;
+
+	if (idx_size > CISO_IDX_MAX_ENTRIES * 4) {
+		// the requested index size is too big
+		return -1;
+	}
+
+	// out of scope, read cso index table again
+	if (starting_block < g_cso_idx_start_block|| ending_block >= g_cso_idx_start_block + CISO_IDX_MAX_ENTRIES) {
+
+		u32 total_blocks = g_CISO_hdr.total_bytes / g_CISO_hdr.block_size;
+
+		if (starting_block > total_blocks) {
+			// the requested block goes beyond the max block number
+			return -1;
+		}
+
+		if (starting_block + 4096 > total_blocks) {
+			idx_size = (total_blocks - starting_block + 1) * 4;
+		} else {
+			idx_size = CISO_IDX_MAX_ENTRIES * 4;
+		}
+
+		int ret = read_raw_data(g_cso_idx_cache, idx_size, starting_block * 4 + 24);
+		if(ret < 0) {
+		    return ret;
+		}
+
+		g_cso_idx_start_block = starting_block;
+		return 0;
+	}
+
+	return starting_block - g_cso_idx_start_block;
+}
+
+static int read_cso_data_ng(u8 *addr, u32 size, u32 offset)
+{
+	u32 cso_block;
+
+	u32 start_blk = 0;
+	u32 first_block_size = 0;
+	u32 last_block_size = 0;
+
+	u32 cso_read_offset, cso_read_size;
+
+	if(offset > g_CISO_hdr.total_bytes) {
+		// return if the offset goes beyond the iso size
+		return 0;
+	} else if(offset + size > g_CISO_hdr.total_bytes) {
+		// adjust size if it tries to read beyond the game data
+		size = g_CISO_hdr.total_bytes - offset;
+	}
+
+	if ((start_blk = refresh_cso_index(size, offset)) < 0) {
+		//FIXME: fallback to slower read, try to get a bigger block instead
+		// a game shouldn't request more than 8MiB in a single read so this
+		// isn't executed in normal cases
+		printk("Index for read of size %i is greater that allowed maximum\n", size);
+		return read_cso_data(addr, size, offset);
+	}
+
+	// check if the first read is in the middle of a compressed block or if there is only one block
+	if(!IS_DIVISIBLE(offset, ISO_SECTOR_SIZE) || size <= ISO_SECTOR_SIZE) {
+		// calculate the offset and size of the compressed data
+		cso_read_offset = GET_CSO_OFFSET(start_blk);
+		cso_read_size = GET_CSO_OFFSET(start_blk + 1) - cso_read_offset;
+
+		// READ #2 (only if the first block is a partial one)
+		read_raw_data(g_ciso_block_buf, cso_read_size, cso_read_offset);
+
+		u32 offset_shift = REMAINDER(offset, ISO_SECTOR_SIZE);
+
+		// calculate the real size needed from the decompressed block
+		if(offset_shift + size <= ISO_SECTOR_SIZE) {
+			// if the size + offset shift is less than the sector size then
+			// use the value directly for the first block size
+			first_block_size = size;
+		} else {
+			// else use the remainder
+			first_block_size = ISO_SECTOR_SIZE - offset_shift;
+		}
+
+		// decompress (if required)
+		if(decompress_block(addr, g_ciso_block_buf, first_block_size, start_blk, offset_shift) < 0) {
+			return -2;
+		}
+
+		// update size
+		size -= first_block_size;
+
+		// only one block to read, return early
+		if(size == 0) {
+			return first_block_size;
+		}
+
+		// update offset and addr
+		offset += first_block_size;
+		addr += first_block_size;
+
+		start_blk++;
+	}
+
+	{
+		// calculate the last block (or the remaining one)
+		cso_block = size / 2048 + start_blk;
+
+		// don't go over the next block if the read size occupies all of it
+		if(IS_DIVISIBLE(size, ISO_SECTOR_SIZE)) {
+			cso_block--;
+		}
+
+		cso_read_offset = GET_CSO_OFFSET(cso_block);
+
+		// get the compressed block size
+		cso_read_size = GET_CSO_OFFSET(cso_block + 1) - cso_read_offset;
+
+		// READ #3 (only if the last block is a partial one)
+		read_raw_data(g_ciso_block_buf, cso_read_size, cso_read_offset);
+
+		// calculate the partial decompressed block size
+		last_block_size = size % 2048;
+
+		// update size
+		size -= last_block_size;
+
+		// calculate the offset to place the last decompressed block
+		void *last_offset = addr + ((size / ISO_SECTOR_SIZE) * ISO_SECTOR_SIZE);
+
+		if(decompress_block(last_offset, g_ciso_block_buf, last_block_size, cso_block, 0) < 0) {
+			return -3;
+		}
+
+		// no more blocks
+		if(size == 0) {
+			return first_block_size +last_block_size;
+		}
+	}
+
+	// calculate the needed blocks
+	if(IS_DIVISIBLE(size, 2048)) {
+		cso_block = size / 2048;
+	} else {
+		cso_block = size / 2048 + 1;
+	}
+
+	cso_read_offset = GET_CSO_OFFSET(start_blk);
+	cso_read_size = GET_CSO_OFFSET(start_blk + cso_block) - cso_read_offset;
+
+	// place the compressed blocks at the end of the provided buffer
+	// so it can be reused in the decompression without overlap
+	u32 shifted_offset = cso_block * 2048 - cso_read_size;
+
+	// READ #4 (main section of compressed blocks)
+	read_raw_data(addr + shifted_offset, cso_read_size, cso_read_offset);
+
+	int i;
+	u32 read_size = 0;
+
+	// process every compressed block
+	for(i = 0; i < cso_block ; i++) {
+		// shift the source with the size of the last read
+		void *src = addr + shifted_offset + read_size;
+
+		// shift the destination, block by block
+		void *dst = addr + i * ISO_SECTOR_SIZE;
+
+		// calculate a size in case last block is a partial one and its
+		// size is less that the sector size
+		int dec_size = size < ISO_SECTOR_SIZE ? size : ISO_SECTOR_SIZE;
+
+		if(decompress_block(dst, src, dec_size, i + start_blk, 0) < 0) {
+			return -4;
+		}
+
+		cso_read_offset = GET_CSO_OFFSET(start_blk + i);
+		u32 decompressed_size = GET_CSO_OFFSET(start_blk + i + 1) - cso_read_offset;
+		read_size += decompressed_size;
+	}
+
+	return size + first_block_size + last_block_size;
+}
+
 // 0x00000C7C
 int iso_read(struct IoReadArg *args)
 {
 	if(g_is_ciso != 0) {
-		return read_cso_data(args->address, args->size, args->offset);
+		return read_cso_data_ng(args->address, args->size, args->offset);
 	}
 
 	return read_raw_data(args->address, args->size, args->offset);

@@ -20,6 +20,7 @@
 
 typedef unsigned int uint;
 
+#define FW_661 0x06060110
 #define FW_660 0x06060010
 #define FW_639 0x06030910
 #define FW_635 0x06030510

@@ -18,13 +18,19 @@
 #include <pspsdk.h>
 #include "vshctrl_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660) && !defined(CONFIG_661)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660 or CONFIG_661
 #endif
 
+#if defined(CONFIG_660) || defined(CONFIG_661)
 #ifdef CONFIG_660
 PatchOffset g_660_offsets = {
 	.fw_version = FW_660,
+#endif
+#ifdef CONFIG_661
+PatchOffset g_661_offsets = {
+	.fw_version = FW_661,
+#endif
 	.vshbridge_patch = {
 		.sceDisplaySetHoldMode = 0x00005630,
 		.sceDisplaySetHoldModeCall = 0x00001A34,
@@ -33,7 +39,12 @@ PatchOffset g_660_offsets = {
 	},
 	.sysconf_plugin_patch = {
 		.SystemVersionStr = 0x0002A62C,
+#ifdef CONFIG_660
 		.SystemVersionMessage = "6.60 PRO-%c",
+#endif
+#ifdef CONFIG_661
+		.SystemVersionMessage = "6.61 PRO-%c",
+#endif
 		.SystemVersion = 0x000192E0,
 		.MacAddressStr = 0x0002E9A0,
 		.SlimColor = 0x000076EC,
@@ -374,6 +385,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_661
+	if(fw_version == g_661_offsets.fw_version) {
+		g_offs = &g_661_offsets;
+	}
+#endif
+
 #ifdef CONFIG_660
 	if(fw_version == g_660_offsets.fw_version) {
 		g_offs = &g_660_offsets;

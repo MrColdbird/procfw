@@ -51,8 +51,8 @@ int get_max_len(char **str_list,int nums)
 			len = scePaf_strlen_620(str_list[i]);
 #endif
 	
-#ifdef CONFIG_660
-		if(psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+		if((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 			len = scePaf_strlen_660(str_list[i]);
 #endif
 	

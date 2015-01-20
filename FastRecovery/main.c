@@ -262,7 +262,7 @@ void recovery_sysmem_635(void)
 }
 #endif
 
-#ifdef CONFIG_660
+#if defined(CONFIG_660) || defined(CONFIG_661)
 void recovery_sysmem_660()
 {
 	_sw(0x3C058801, SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelPowerLockForUser); // lui $a1, 0x8801
@@ -284,8 +284,8 @@ int kernel_permission_call(void)
 	void (* _sceKernelIcacheInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelIcacheInvalidateAll);
 	void (* _sceKernelDcacheWritebackInvalidateAll)(void) = (void *)(SYSMEM_TEXT_ADDR + g_offs->sysmem_patch.sceKernelDcacheWritebackInvalidateAll);
 
-#ifdef CONFIG_660
-	if(psp_fw_version == FW_660) {
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if((psp_fw_version == FW_660) || (psp_fw_version == FW_661)) {
 		recovery_sysmem_660();
 	}
 #endif
@@ -545,7 +545,7 @@ int main(int argc, char * argv[])
 	}
 #endif
 
-#ifdef CONFIG_660
+#if defined(CONFIG_660) || defined(CONFIG_661)
 	{
 		do_exploit_660();
 	}

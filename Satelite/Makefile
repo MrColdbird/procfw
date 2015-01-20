@@ -33,6 +33,11 @@ CFLAGS += -DCONFIG_660=1
 PSP_FW_VERSION = 660
 endif
 
+ifeq ($(CONFIG_661), 1)
+CFLAGS += -DCONFIG_661=1
+PSP_FW_VERSION = 661
+endif
+
 PRX_EXPORTS = exports.exp
 
 LIBS = -lpspsystemctrl_user -lpspkubridge

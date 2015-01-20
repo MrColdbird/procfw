@@ -21,8 +21,8 @@
 #include <pspsdk.h>
 #include "utils.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660) && !defined(CONFIG_661)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660 or CONFIG_661
 #endif
 
 struct RebootexPatch {
@@ -64,15 +64,28 @@ typedef struct _PatchOffset {
 
 extern PatchOffset *g_offs;
 
+#if defined(CONFIG_660) || defined(CONFIG_661)
 #ifdef CONFIG_660
 PatchOffset g_660_offsets = {
 	.fw_version = FW_660,
+#endif
+#ifdef CONFIG_661
+PatchOffset g_661_offsets = {
+	.fw_version = FW_661,
+#endif
 	.iCacheFlushAll = 0x0000013C,
 	.dCacheFlushAll = 0x00000890,
 	.rebootex_patch_01g = {
+#ifdef CONFIG_660
 		.sceBootLfatOpen = 0x0000822C,
 		.sceBootLfatRead = 0x000083A0,
 		.sceBootLfatClose = 0x00008344,
+#endif
+#ifdef CONFIG_661
+		.sceBootLfatOpen = 0x0000B6C0,
+		.sceBootLfatRead = 0x0000AD58,
+		.sceBootLfatClose = 0x00009C78,
+#endif
 		.UnpackBootConfig = 0x0000574C,
 		.sceBootLfatOpenCall = 0x000027C4,
 		.sceBootLfatReadCall = 0x00002834,
@@ -87,9 +100,16 @@ PatchOffset g_660_offsets = {
 		.UnpackBootConfigBufferAddress = 0x000070D4,
 	},
 	.rebootex_patch_other = {
+#ifdef CONFIG_660
 		.sceBootLfatOpen = 0x000082EC,
 		.sceBootLfatRead = 0x00008460,
 		.sceBootLfatClose = 0x00008404,
+#endif
+#ifdef CONFIG_661
+		.sceBootLfatOpen = 0x0000B780,
+		.sceBootLfatRead = 0x0000AE18,
+		.sceBootLfatClose = 0x00009D38,
+#endif
 		.UnpackBootConfig = 0x0000580C,
 		.sceBootLfatOpenCall = 0x0000288C,
 		.sceBootLfatReadCall = 0x000028FC,
@@ -272,6 +292,12 @@ PatchOffset *g_offs = NULL;
 
 static inline void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_661
+	if(fw_version == g_661_offsets.fw_version) {
+		g_offs = &g_661_offsets;
+	}
+#endif
+
 #ifdef CONFIG_660
 	if(fw_version == g_660_offsets.fw_version) {
 		g_offs = &g_660_offsets;

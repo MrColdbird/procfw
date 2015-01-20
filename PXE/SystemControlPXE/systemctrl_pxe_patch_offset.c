@@ -18,13 +18,19 @@
 #include <pspsdk.h>
 #include "systemctrl_pxe_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660) && !defined(CONFIG_661)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660 or CONFIG_661
 #endif
 
+#if defined(CONFIG_660) || defined(CONFIG_661)
 #ifdef CONFIG_660
 PXEPatchOffset g_pxe_660_offsets = {
 	.fw_version = FW_660,
+#endif
+#ifdef CONFIG_661
+PXEPatchOffset g_pxe_661_offsets = {
+	.fw_version = FW_661,
+#endif
 	.vsh_module_patch = {
 		.module_start = 0x0000F5F0,
 	},
@@ -62,6 +68,12 @@ PXEPatchOffset *g_pxe_offs = NULL;
 
 void setup_pxe_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_661
+	if(fw_version == g_pxe_661_offsets.fw_version) {
+		g_pxe_offs = &g_pxe_661_offsets;
+	}
+#endif
+
 #ifdef CONFIG_660
 	if(fw_version == g_pxe_660_offsets.fw_version) {
 		g_pxe_offs = &g_pxe_660_offsets;

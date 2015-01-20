@@ -28,7 +28,7 @@
 #include "galaxy.h"
 #include "inferno.h"
 
-#ifdef CONFIG_660
+#if defined(CONFIG_660) || defined(CONFIG_661)
 #include "march33_660.h"
 #endif
 
@@ -238,8 +238,8 @@ int install_cfw(void)
 		sceIoRemove(g_old_cfw_files[i]);
 	}
 
-#ifdef CONFIG_660
-	if(psp_fw_version == FW_660) {
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if((psp_fw_version == FW_660) || (psp_fw_version == FW_661)) {
 		g_file_lists[4].buf = march33_660;
 		g_file_lists[4].size = &size_march33_660;
 	}
@@ -576,8 +576,8 @@ int main(int argc, char *argv[])
 	}
 #endif
 	
-#ifdef CONFIG_660
-	if(psp_fw_version == FW_660) {
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if((psp_fw_version == FW_660) || (psp_fw_version == FW_661)) {
 		goto version_OK;
 	}
 #endif

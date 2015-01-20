@@ -187,8 +187,8 @@ int menu_setup(void)
 			scePaf_sprintf_620(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
 #endif
 		
-#ifdef CONFIG_660
-		if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+		if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 			scePaf_sprintf_660(freq_buf, "%d/%d", cnf.vshcpuspeed, cnf.vshbusspeed);
 #endif
 		
@@ -216,8 +216,8 @@ int menu_setup(void)
 			scePaf_sprintf_620(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
 #endif
 		
-#ifdef CONFIG_660
-		if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+		if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 			scePaf_sprintf_660(freq2_buf, "%d/%d", cnf.umdisocpuspeed, cnf.umdisobusspeed);
 #endif
 		
@@ -245,8 +245,8 @@ int menu_setup(void)
 			scePaf_sprintf_620(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 
-#ifdef CONFIG_660
-		if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+		if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 			scePaf_sprintf_660(device_buf, "%s %d", g_messages[MSG_FLASH], cnf.usbdevice-1);	
 #endif
 

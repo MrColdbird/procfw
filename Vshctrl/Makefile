@@ -37,6 +37,11 @@ CFLAGS += -DCONFIG_660=1
 PSP_FW_VERSION = 660
 endif
 
+ifeq ($(CONFIG_661), 1)
+CFLAGS += -DCONFIG_661=1
+PSP_FW_VERSION = 661
+endif
+
 OBJS += $(IMPORTS)
 
 CXXFLAGS = $(CFLAGS) -fno-exceptions -fno-rtti

@@ -24,6 +24,9 @@ PSP_MAIN_THREAD_ATTR(PSP_THREAD_ATTR_VSH);
 #elif _PSP_FW_VERSION == 660
 #define DEVKIT_VER	0x06060010
 #define VERSION_STR	"6.60"
+#elif _PSP_FW_VERSION == 661
+#define DEVKIT_VER	0x06060110
+#define VERSION_STR	"6.61"
 #endif
 
 #define printf pspDebugScreenPrintf

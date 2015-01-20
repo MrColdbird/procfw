@@ -593,8 +593,8 @@ int main(int argc, char * argv[])
 
 	psp_fw_version = sceKernelDevkitVersion();
 
-#ifdef CONFIG_660
-	if(psp_fw_version == FW_660) {
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if((psp_fw_version == FW_660) || (psp_fw_version == FW_661)) {
 		goto version_OK;
 	}
 #endif
@@ -642,8 +642,8 @@ version_OK:
 		return 0;
 	}
 
-#ifdef CONFIG_660
-	if(psp_fw_version == FW_660) {
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if((psp_fw_version == FW_660) || (psp_fw_version == FW_661)) {
 		do_exploit_660();
 	}
 #endif

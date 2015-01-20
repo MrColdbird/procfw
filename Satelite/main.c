@@ -120,8 +120,8 @@ int EatKey(SceCtrlData *pad_data, int count)
 		scePaf_memcpy_620(&ctrl_pad, pad_data, sizeof(SceCtrlData));
 #endif
 
-#ifdef CONFIG_660
-	if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 		scePaf_memcpy_660(&ctrl_pad, pad_data, sizeof(SceCtrlData));
 #endif
 
@@ -225,8 +225,8 @@ static int get_umdvideo(UmdVideoList *list, char *path)
 				scePaf_sprintf_620(fullpath, "%s/%s", path, dir.d_name);
 #endif
 
-#ifdef CONFIG_660
-			if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+			if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 				scePaf_sprintf_660(fullpath, "%s/%s", path, dir.d_name);
 #endif
 
@@ -448,8 +448,8 @@ int TSRThread(SceSize args, void *argp)
 		scePaf_memcpy_620(&cnf_old, &cnf, sizeof(SEConfig));
 #endif
 
-#ifdef CONFIG_660
-	if (psp_fw_version == FW_660)
+#if defined(CONFIG_660) || defined(CONFIG_661)
+	if ((psp_fw_version == FW_660) || (psp_fw_version == FW_661))
 		scePaf_memcpy_660(&cnf_old, &cnf, sizeof(SEConfig));
 #endif
 

@@ -86,6 +86,8 @@ int (* memlmd_3F2AC9C6)(void *a0,void *a1) = NULL;
 #define DEVKIT_VER	0x06030910
 #elif _PSP_FW_VERSION == 660
 #define DEVKIT_VER	0x06060010
+#elif _PSP_FW_VERSION == 661
+#define DEVKIT_VER	0x06060110
 #endif
 
 void ClearCaches()

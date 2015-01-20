@@ -39,6 +39,10 @@ ifeq ($(CONFIG_660), 1)
 OPT_FLAGS+=CONFIG_660=1
 endif
 
+ifeq ($(CONFIG_661), 1)
+OPT_FLAGS+=CONFIG_661=1
+endif
+
 ifeq ($(PSID_CHECK), 1)
 RELEASE_OPTION=PSID_CHECK=1
 endif
@@ -68,6 +72,9 @@ ifeq ($(CONFIG_639), 1)
 	@mkdir $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher || true
 endif
 ifeq ($(CONFIG_660), 1)
+	@mkdir $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher || true
+endif
+ifeq ($(CONFIG_661), 1)
 	@mkdir $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher || true
 endif
 	@rm -f ./Common/*.o
@@ -124,6 +131,14 @@ ifeq ($(CONFIG_660), 1)
 	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
 	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
 endif
+ifeq ($(CONFIG_661), 1)
+	@cd $(CIPL); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER); make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cp $(CIPL_INSTALLER)/ipl_update.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/EBOOT.PBP $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+	@cp $(CIPL_INSTALLER)/kpspident/kpspident.prx $(DISTRIBUTE)/PSP/GAME/CIPL_Flasher
+endif
 
 clean:
 	@cd $(REBOOTEXBIN); make clean $(DEBUG_OPTION)
@@ -146,6 +161,11 @@ ifeq ($(CONFIG_639), 1)
 	@cd $(CIPL_INSTALLER)/kpspident; make clean $(OPT_FLAGS) $(DEBUG_OPTION)
 endif
 ifeq ($(CONFIG_660), 1)
+	@cd $(CIPL); make clean $(OPT_FLAGS) $(DEBUG_OPTION) 
+	@cd $(CIPL_INSTALLER); make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+	@cd $(CIPL_INSTALLER)/kpspident; make clean $(OPT_FLAGS) $(DEBUG_OPTION)
+endif
+ifeq ($(CONFIG_661), 1)
 	@cd $(CIPL); make clean $(OPT_FLAGS) $(DEBUG_OPTION) 
 	@cd $(CIPL_INSTALLER); make clean $(OPT_FLAGS) $(DEBUG_OPTION)
 	@cd $(CIPL_INSTALLER)/kpspident; make clean $(OPT_FLAGS) $(DEBUG_OPTION)

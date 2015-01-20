@@ -46,6 +46,28 @@ const unsigned int seed_key[] = {
 	0x00000000,
 	0x00000000
 };
+#elif _PSP_FW_VERSION == 661
+const unsigned int seed_key[] = {
+	0x830D9389,
+	0xF2027F71,
+	0x2D060DC5,
+	0xBA78A905,
+
+	0x26C9824D,
+	0x3335A7A5,
+	0xD5CD6368,
+	0xD136A11D,
+
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000,
+
+	0x00000000,
+	0x00000000,
+	0x00000000,
+	0x00000000
+};
 #else
 #error seedkey.h
 #endif

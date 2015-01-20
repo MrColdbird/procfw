@@ -18,13 +18,19 @@
 #include <pspsdk.h>
 #include "galaxy_patch_offset.h"
 
-#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660)
-#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660
+#if !defined(CONFIG_635) && !defined(CONFIG_620) && !defined(CONFIG_639) && !defined(CONFIG_660) && !defined(CONFIG_661)
+#error You have to define CONFIG_620 or CONFIG_635 or CONFIG_639 or CONFIG_660 or CONFIG_661
 #endif
 
+#if defined(CONFIG_660) || defined(CONFIG_661)
 #ifdef CONFIG_660
 PatchOffset g_660_offsets = {
 	.fw_version = FW_660,
+#endif
+#ifdef CONFIG_661
+PatchOffset g_661_offsets = {
+	.fw_version = FW_661,
+#endif
 	.StoreFd = 0x00000188 + 0x00008900, /* See 0x00004D98 */
 	.Data1 = 0x00005BB4 - 0x00005BA4 + 0x00000188 + 0x00008900,
 	.Data2 = 0x00005BBC - 0x00005BA4 + 0x00000188 + 0x00008900,
@@ -114,6 +120,12 @@ PatchOffset *g_offs = NULL;
 
 void setup_patch_offset_table(u32 fw_version)
 {
+#ifdef CONFIG_661
+	if(fw_version == g_661_offsets.fw_version) {
+		g_offs = &g_661_offsets;
+	}
+#endif
+
 #ifdef CONFIG_660
 	if(fw_version == g_660_offsets.fw_version) {
 		g_offs = &g_660_offsets;

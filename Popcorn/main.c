@@ -254,7 +254,7 @@ static int is_eboot_pbp_path(const char *path)
 
 static int check_file_is_decrypted(const char *filename)
 {
-	SceUID fd = -1;
+	SceUID fd;
 	u32 k1;
 	int result = 0, ret;
 	u8 p[16 + 64], *buf;
@@ -263,7 +263,7 @@ static int check_file_is_decrypted(const char *filename)
 	buf = (u8*)((((u32)p) & ~(64-1)) + 64);
 
 	if(!g_is_custom_ps1 && is_eboot_pbp_path(filename)) {
-		goto exit;
+		return 0;
 	}
 
 	k1 = pspSdkSetK1(0);
